@@ -234,20 +234,23 @@ export function FormCard({ children, title }) {
   );
 }
 
-export function Field({ label, required, hint, children }) {
+export function Field({ label, required, hint, error, children }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', display: 'flex', gap: 4 }}>
+      <label style={{ fontSize: 13, fontWeight: 600, color: error ? '#DC2626' : '#374151', display: 'flex', gap: 4 }}>
         {label}
-        {required && <span style={{ color: 'var(--foul-red)' }}>*</span>}
+        {required && <span style={{ color: '#DC2626' }}>*</span>}
       </label>
       {children}
-      {hint && <div style={{ fontSize: 12, color: '#9CA3AF' }}>{hint}</div>}
+      {error && <div style={{ fontSize: 12, color: '#DC2626', fontWeight: 500 }}>{error}</div>}
+      {hint && !error && <div style={{ fontSize: 12, color: '#9CA3AF' }}>{hint}</div>}
     </div>
   );
 }
 
-export function Input({ value, onChange, placeholder, type = 'text', ...rest }) {
+export function Input({ value, onChange, placeholder, type = 'text', error, ...rest }) {
+  const baseBorder = error ? '#DC2626' : '#E2E5EA';
+  const focusBorder = error ? '#DC2626' : 'var(--court-navy)';
   return (
     <input
       type={type}
@@ -256,27 +259,31 @@ export function Input({ value, onChange, placeholder, type = 'text', ...rest }) 
       placeholder={placeholder}
       style={{
         padding: '10px 14px', borderRadius: 8,
-        border: '1.5px solid #E2E5EA', fontSize: 14, fontFamily: 'var(--font-body)',
-        color: '#111827', background: '#fff', outline: 'none',
+        border: `1.5px solid ${baseBorder}`,
+        fontSize: 14, fontFamily: 'var(--font-body)',
+        color: '#111827', background: error ? '#FFF5F5' : '#fff', outline: 'none',
         transition: 'border-color 160ms',
         width: '100%', boxSizing: 'border-box',
       }}
-      onFocus={e => e.target.style.borderColor = 'var(--court-navy)'}
-      onBlur={e => e.target.style.borderColor = '#E2E5EA'}
+      onFocus={e => e.target.style.borderColor = focusBorder}
+      onBlur={e => e.target.style.borderColor = baseBorder}
       {...rest}
     />
   );
 }
 
-export function Select({ value, onChange, children, ...rest }) {
+export function Select({ value, onChange, children, error, ...rest }) {
+  const baseBorder = error ? '#DC2626' : '#E2E5EA';
   return (
     <select
       value={value || ''}
       onChange={e => onChange(e.target.value)}
       style={{
         padding: '10px 14px', borderRadius: 8,
-        border: '1.5px solid #E2E5EA', fontSize: 14, fontFamily: 'var(--font-body)',
-        color: '#111827', background: '#fff', outline: 'none', cursor: 'pointer',
+        border: `1.5px solid ${baseBorder}`,
+        fontSize: 14, fontFamily: 'var(--font-body)',
+        color: value ? '#111827' : '#9CA3AF', background: error ? '#FFF5F5' : '#fff',
+        outline: 'none', cursor: 'pointer',
         width: '100%', boxSizing: 'border-box',
         appearance: 'none',
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,

@@ -1,27 +1,52 @@
 import { useState } from 'react';
 import { BackBtn } from './StepProgram.jsx';
 
-const PROGRAM_PRICES = { house: 195, clinic: 95, travel: 425 };
-const PROGRAM_LABELS = { house: 'House League', clinic: 'Skills Clinic', travel: 'Travel Select' };
+const PROGRAM_PRICES  = { house: 195, clinic: 95, travel: 425 };
+const PROGRAM_LABELS  = { house: 'House League', clinic: 'Skills Clinic', travel: 'Travel Select' };
+
+function formatCardNumber(val) {
+  const digits = val.replace(/\D/g, '').slice(0, 16);
+  return digits.replace(/(.{4})(?=.)/g, '$1 ');
+}
+
+function formatExpiry(val) {
+  const digits = val.replace(/\D/g, '').slice(0, 4);
+  if (digits.length >= 3) return digits.slice(0, 2) + '/' + digits.slice(2);
+  return digits;
+}
 
 export default function StepReview({ data, back }) {
   const [payMethod, setPayMethod] = useState('visa');
   const [card, setCard] = useState({ number: '', expiry: '', cvv: '', name: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [confirmNum] = useState(() => 'FPYC-' + Math.random().toString(36).slice(2, 8).toUpperCase());
 
-  const prog = data.program;
+  const prog   = data.program;
   const player = data.player;
-  const p1 = data.parents?.p1 || {};
+  const p1     = data.parents?.p1 || {};
   const donation = data.donation;
 
-  const basePrice = prog ? PROGRAM_PRICES[prog.id] : 0;
+  const basePrice     = prog ? PROGRAM_PRICES[prog.id] : 0;
   const siblingDiscount = player.sibling ? -(basePrice * 0.1) : 0;
-  const donationAmt = donation?.amount || 0;
-  const total = basePrice + siblingDiscount + donationAmt;
+  const donationAmt   = donation?.amount || 0;
+  const total         = basePrice + siblingDiscount + donationAmt;
 
   const setCardField = (k, v) => setCard(c => ({ ...c, [k]: v }));
 
-  if (submitted) return <SuccessScreen player={player} prog={prog} email={p1.email} />;
+  const cardValid =
+    card.name.trim().length > 1 &&
+    card.number.replace(/\s/g, '').length >= 15 &&
+    /^\d{2}\/\d{2}$/.test(card.expiry) &&
+    card.cvv.length >= 3;
+
+  function handlePay() {
+    if (!cardValid) return;
+    setProcessing(true);
+    setTimeout(() => { setProcessing(false); setSubmitted(true); }, 2200);
+  }
+
+  if (submitted) return <SuccessScreen player={player} prog={prog} email={p1.email} confirmNum={confirmNum} />;
 
   return (
     <div>
@@ -33,7 +58,6 @@ export default function StepReview({ data, back }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20, alignItems: 'start' }}>
         {/* Left: summary */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* Player + program */}
           <SummaryCard title="Registration summary">
             <div style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '2px 0 14px', borderBottom: '1px solid #F3F4F6' }}>
               <div style={{
@@ -55,21 +79,19 @@ export default function StepReview({ data, back }) {
             </div>
           </SummaryCard>
 
-          {/* Parents */}
           <SummaryCard title="Parent / guardian">
-            <Row label="Parent 1" value={`${p1.firstName} ${p1.lastName}`} />
+            <Row label="Parent 1" value={`${p1.firstName || ''} ${p1.lastName || ''}`} />
             <Row label="Email" value={p1.email} mono />
             <Row label="Phone" value={p1.phone} mono />
             <Row label="Relationship" value={p1.relationship} />
           </SummaryCard>
 
-          {/* Fee breakdown */}
           <SummaryCard title="Fee breakdown">
             <Row label={`${prog ? PROGRAM_LABELS[prog.id] : 'Program'} registration`} value={`$${basePrice.toFixed(2)}`} mono />
             {siblingDiscount < 0 && <Row label="Sibling discount (10%)" value={`-$${Math.abs(siblingDiscount).toFixed(2)}`} mono green />}
             {player.scholarship && (
-              <div style={{ ...rowStyle, color: '#6B7280', fontStyle: 'italic', fontSize: 12 }}>
-                <span>Scholarship application</span><span>Pending commissioner review</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', fontSize: 13, color: '#6B7280', fontStyle: 'italic' }}>
+                <span>Scholarship application</span><span>Pending review</span>
               </div>
             )}
             {donationAmt > 0 && <Row label={`Donation (${donation.tier} tier)`} value={`$${donationAmt.toFixed(2)}`} mono />}
@@ -90,7 +112,6 @@ export default function StepReview({ data, back }) {
               Payment method
             </div>
             <div style={{ padding: '20px' }}>
-              {/* Method toggle */}
               <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
                 {[
                   { id: 'visa', label: 'Visa / MC / Disc' },
@@ -118,37 +139,61 @@ export default function StepReview({ data, back }) {
                 ))}
               </div>
 
-              {/* Card fields */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <CardField label="Cardholder name" placeholder="Full name on card"
-                  value={card.name} onChange={v => setCardField('name', v)} />
+                  value={card.name}
+                  onChange={v => setCardField('name', v)} />
                 <CardField label="Card number" placeholder="0000 0000 0000 0000"
-                  value={card.number} onChange={v => setCardField('number', v)} />
+                  value={card.number}
+                  onChange={v => setCardField('number', formatCardNumber(v))} />
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <CardField label="Expiry" placeholder="MM / YY"
-                    value={card.expiry} onChange={v => setCardField('expiry', v)} />
+                  <CardField label="Expiry" placeholder="MM/YY"
+                    value={card.expiry}
+                    onChange={v => setCardField('expiry', formatExpiry(v))} />
                   <CardField label="CVV" placeholder="•••"
-                    value={card.cvv} onChange={v => setCardField('cvv', v)} />
+                    value={card.cvv}
+                    onChange={v => setCardField('cvv', v.replace(/\D/g, '').slice(0, payMethod === 'amex' ? 4 : 3))} />
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: 6, alignItems: 'center', margin: '14px 0', fontSize: 12, color: '#9CA3AF' }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 Payments are processed securely by OttoSport
               </div>
 
               <button
-                onClick={() => setSubmitted(true)}
+                onClick={handlePay}
+                disabled={!cardValid || processing}
                 style={{
                   width: '100%', padding: '15px', borderRadius: 10, border: 'none',
-                  background: 'var(--court-navy)', color: '#fff', cursor: 'pointer',
+                  background: (!cardValid || processing) ? '#E2E5EA' : 'var(--court-navy)',
+                  color: (!cardValid || processing) ? '#9CA3AF' : '#fff',
+                  cursor: (!cardValid || processing) ? 'not-allowed' : 'pointer',
                   fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 16,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                  transition: 'background 200ms',
                 }}
               >
-                Pay ${total.toFixed(2)} & complete registration
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                {processing ? (
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ animation: 'spin 1s linear infinite' }}>
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                    </svg>
+                    Processing…
+                  </>
+                ) : (
+                  <>
+                    Pay ${total.toFixed(2)} & complete registration
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  </>
+                )}
               </button>
+
+              {!cardValid && (
+                <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: '#9CA3AF' }}>
+                  Fill in your card details above to enable payment
+                </div>
+              )}
             </div>
           </div>
 
@@ -157,36 +202,137 @@ export default function StepReview({ data, back }) {
           </div>
         </div>
       </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
 
-function SuccessScreen({ player, prog, email }) {
+function SuccessScreen({ player, prog, email, confirmNum }) {
+  const programLabel = prog ? PROGRAM_LABELS[prog.id] : 'FPYC Basketball';
   return (
-    <div style={{ textAlign: 'center', padding: '60px 24px' }}>
-      <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(5,150,105,0.10)', border: '2px solid #059669', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '20px 0 60px' }}>
+      {/* Hero */}
+      <div style={{ textAlign: 'center', marginBottom: 40 }}>
+        <div style={{
+          width: 88, height: 88, borderRadius: '50%',
+          background: 'rgba(5,150,105,0.10)', border: '2px solid #059669',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 20px',
+        }}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 44, textTransform: 'uppercase', color: 'var(--court-navy)', lineHeight: 1, marginBottom: 14 }}>
+          You&apos;re in!
+        </div>
+        <p style={{ fontSize: 17, color: '#374151', lineHeight: 1.55, margin: '0 0 8px' }}>
+          <strong>{player.firstName} {player.lastName}</strong> is registered for{' '}
+          <strong style={{ color: 'var(--court-navy)' }}>{programLabel}</strong> — Season 2025–26.
+        </p>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: 999, background: '#F4F5F7', border: '1px solid #E2E5EA', marginTop: 8 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#374151', fontFamily: 'var(--font-mono)' }}>{confirmNum}</span>
+        </div>
+        <div style={{ fontSize: 13, color: '#9CA3AF', marginTop: 10 }}>
+          Confirmation sent to <strong style={{ color: '#6B7280' }}>{email}</strong>
+        </div>
       </div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 40, textTransform: 'uppercase', color: 'var(--court-navy)', lineHeight: 1, marginBottom: 12 }}>
-        You&apos;re registered!
+
+      {/* What happens next */}
+      <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 16, overflow: 'hidden', marginBottom: 24 }}>
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid #F3F4F6', fontWeight: 700, fontSize: 15, color: 'var(--court-navy)' }}>
+          What happens next
+        </div>
+        <div style={{ padding: '8px 0' }}>
+          {[
+            {
+              icon: 'mail',
+              title: 'Check your inbox',
+              body: `A receipt and registration confirmation will arrive at ${email} within a few minutes.`,
+              timing: 'Right now',
+              color: '#2563EB',
+            },
+            {
+              icon: 'users',
+              title: 'Team placement',
+              body: 'The commissioner will assign your player to a team. Expect an email by early November with your team name and coach contact.',
+              timing: 'Early November',
+              color: 'var(--basketball-orange)',
+            },
+            {
+              icon: 'calendar',
+              title: 'First practice',
+              body: 'Your volunteer coach will reach out with practice location, time, and what to bring before the season kicks off in December.',
+              timing: 'Late November',
+              color: 'var(--court-navy)',
+            },
+          ].map((step, i) => (
+            <div key={i} style={{
+              display: 'flex', gap: 16, padding: '16px 24px',
+              borderBottom: i < 2 ? '1px solid #F9FAFB' : 'none',
+            }}>
+              <div style={{
+                width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                background: `${step.color}15`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <SuccessIcon name={step.icon} color={step.color} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: '#111827' }}>{step.title}</div>
+                <div style={{ fontSize: 13, color: '#6B7280', marginTop: 3, lineHeight: 1.5 }}>{step.body}</div>
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: step.color, flexShrink: 0, whiteSpace: 'nowrap', marginTop: 2 }}>{step.timing}</div>
+            </div>
+          ))}
+        </div>
       </div>
-      <p style={{ fontSize: 16, color: '#6B7280', lineHeight: 1.6, maxWidth: 480, margin: '0 auto 8px' }}>
-        <strong style={{ color: '#111827' }}>{player.firstName} {player.lastName}</strong> has been registered for <strong style={{ color: '#111827' }}>{prog ? { house: 'House League', clinic: 'Skills Clinic', travel: 'Travel Select' }[prog.id] : 'FPYC Basketball'}</strong>.
-      </p>
-      <p style={{ fontSize: 14, color: '#9CA3AF', marginBottom: 40 }}>A confirmation email has been sent to <strong style={{ color: '#6B7280' }}>{email}</strong></p>
-      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-        <a href="/" style={{
+
+      {/* Buttons */}
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <a href="/family" style={{
+          flex: 1, minWidth: 160,
           background: 'var(--court-navy)', color: '#fff',
-          padding: '12px 24px', borderRadius: 10, textDecoration: 'none',
+          padding: '14px 20px', borderRadius: 10, textDecoration: 'none',
           fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
-        }}>Back to FPYC Basketball</a>
-        <button onClick={() => window.location.reload()} style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        }}>
+          <SuccessIcon name="layout" color="#fff" size={15} />
+          View family portal
+        </a>
+        <a href="/" style={{
+          flex: 1, minWidth: 160,
           background: '#fff', color: 'var(--court-navy)',
-          border: '1px solid #E2E5EA', padding: '12px 24px', borderRadius: 10, cursor: 'pointer',
+          border: '1.5px solid #E2E5EA',
+          padding: '14px 20px', borderRadius: 10, textDecoration: 'none',
           fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        }}>
+          Back to FPYC Basketball
+        </a>
+      </div>
+      <div style={{ textAlign: 'center', marginTop: 16 }}>
+        <button onClick={() => window.location.reload()} style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          fontSize: 13, color: '#9CA3AF', fontFamily: 'var(--font-body)',
+          textDecoration: 'underline',
         }}>Register another player</button>
       </div>
     </div>
+  );
+}
+
+function SuccessIcon({ name, color, size = 18 }) {
+  const paths = {
+    mail: <><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,4 12,13 2,4"/></>,
+    users: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>,
+    calendar: <><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>,
+    layout: <><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></>,
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {paths[name]}
+    </svg>
   );
 }
 

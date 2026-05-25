@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { StepHeader, ContinueBtn, BackBtn, FormCard, Field, Input, Select } from './StepProgram.jsx';
 
 const GRADES = ['Kindergarten','1st Grade','2nd Grade','3rd Grade','4th Grade','5th Grade','6th Grade','7th Grade','8th Grade'];
@@ -7,8 +8,22 @@ const SCHOOLS = ['Daniels Run ES','Providence ES','Lanier MS','Mosby Woods ES','
 export default function StepPlayer({ data, update, next, back }) {
   const p = data.player;
   const set = (k, v) => update('player', { ...p, [k]: v });
+  const [showErrors, setShowErrors] = useState(false);
 
-  const valid = p.firstName && p.lastName && p.dob && p.gender && p.grade;
+  const validate = () => ({
+    firstName: !p.firstName?.trim() ? 'First name is required' : null,
+    lastName:  !p.lastName?.trim()  ? 'Last name is required'  : null,
+    dob:       !p.dob               ? 'Date of birth is required' : null,
+    gender:    !p.gender            ? 'Please select a gender'    : null,
+    grade:     !p.grade             ? 'Please select a grade'     : null,
+  });
+
+  const errs = showErrors ? validate() : {};
+
+  function handleContinue() {
+    setShowErrors(true);
+    if (!Object.values(validate()).some(Boolean)) next();
+  }
 
   return (
     <div>
@@ -19,7 +34,6 @@ export default function StepPlayer({ data, update, next, back }) {
       />
 
       <FormCard>
-        {/* Photo placeholder */}
         <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
           <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
             <div style={{
@@ -35,23 +49,23 @@ export default function StepPlayer({ data, update, next, back }) {
           </div>
 
           <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <Field label="First name" required>
-              <Input value={p.firstName} onChange={v => set('firstName', v)} placeholder="First name" />
+            <Field label="First name" required error={errs.firstName}>
+              <Input value={p.firstName} onChange={v => set('firstName', v)} placeholder="First name" error={!!errs.firstName} />
             </Field>
-            <Field label="Last name" required>
-              <Input value={p.lastName} onChange={v => set('lastName', v)} placeholder="Last name" />
+            <Field label="Last name" required error={errs.lastName}>
+              <Input value={p.lastName} onChange={v => set('lastName', v)} placeholder="Last name" error={!!errs.lastName} />
             </Field>
-            <Field label="Date of birth" required hint="Used for age-division placement">
-              <Input type="date" value={p.dob} onChange={v => set('dob', v)} />
+            <Field label="Date of birth" required hint="Used for age-division placement" error={errs.dob}>
+              <Input type="date" value={p.dob} onChange={v => set('dob', v)} error={!!errs.dob} />
             </Field>
-            <Field label="Gender" required>
-              <Select value={p.gender} onChange={v => set('gender', v)}>
+            <Field label="Gender" required error={errs.gender}>
+              <Select value={p.gender} onChange={v => set('gender', v)} error={!!errs.gender}>
                 <option value="">Select…</option>
                 {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
               </Select>
             </Field>
-            <Field label="School grade" required>
-              <Select value={p.grade} onChange={v => set('grade', v)}>
+            <Field label="School grade" required error={errs.grade}>
+              <Select value={p.grade} onChange={v => set('grade', v)} error={!!errs.grade}>
                 <option value="">Select grade…</option>
                 {GRADES.map(g => <option key={g} value={g}>{g}</option>)}
               </Select>
@@ -66,7 +80,6 @@ export default function StepPlayer({ data, update, next, back }) {
         </div>
       </FormCard>
 
-      {/* Scholarship / discount */}
       <div style={{
         background: '#fff', border: '1px solid #E2E5EA', borderRadius: 14,
         padding: '20px 24px', marginBottom: 24,
@@ -94,14 +107,14 @@ export default function StepPlayer({ data, update, next, back }) {
         </div>
         <div style={{ marginTop: 16, borderTop: '1px solid #F3F4F6', paddingTop: 16 }}>
           <Field label="Discount code" hint="Enter a promo or discount code if you have one">
-            <Input value={p.discountCode} onChange={v => set('discountCode', v)} placeholder="e.g. COACH2025" style={{ maxWidth: 280 }} />
+            <Input value={p.discountCode} onChange={v => set('discountCode', v)} placeholder="e.g. COACH2025" />
           </Field>
         </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <BackBtn onClick={back} />
-        <ContinueBtn disabled={!valid} onClick={next} label="Continue to parent info" />
+        <ContinueBtn onClick={handleContinue} label="Continue to parent info" />
       </div>
     </div>
   );
