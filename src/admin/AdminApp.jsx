@@ -11,6 +11,7 @@ import EvaluationsView from './EvaluationsView.jsx';
 import DraftBoardView from './DraftBoardView.jsx';
 import SeasonView from './SeasonView.jsx';
 import SettingsView from './SettingsView.jsx';
+import OfficialsView from './OfficialsView.jsx';
 import { Button } from '../shared/index.js';
 
 const TEAM = { name: 'Fairfax Hawks', division: 'Boys 5–6 House', number: 12 };
@@ -50,6 +51,7 @@ export default function AdminApp() {
     attendance:  { title: 'Attendance',      breadcrumb: `${TEAM.name} · Season 2025–26` },
     messages:    { title: 'Messages',        breadcrumb: '3 unread' },
     evaluations: { title: 'Evaluations',     breadcrumb: `${TEAM.name} · ${TEAM.division}` },
+    officials:   { title: 'Officials',       breadcrumb: 'Refs & game assignments' },
     draftboard:  { title: 'Draft Board',     breadcrumb: 'Boys 5–6 House · Season 2025–26' },
     season:      { title: 'Season',          breadcrumb: 'Boys 5–6 House · Season 2025–26' },
     settings:    { title: 'Settings',        breadcrumb: 'FPYC Basketball · Coach console' },
@@ -57,16 +59,18 @@ export default function AdminApp() {
   const t = titleMap[view] || titleMap.dashboard;
 
   const topAction = view === 'dashboard'
-    ? <Button kind="gold" icon="plus">Quick note</Button>
+    ? <Button kind="gold" icon="plus" onClick={() => setView('messages')}>Quick note</Button>
     : view === 'schedule'
       ? <Button kind="gold" icon="calendar-plus">New game</Button>
       : view === 'lineup'
         ? <Button kind="primary" icon="save">Save lineup</Button>
         : view === 'messages'
           ? <Button kind="gold" icon="edit-3">Compose</Button>
-          : view === 'draftboard'
-            ? <Button kind="gold" icon="save">Finalize teams</Button>
-            : null;
+          : view === 'officials'
+            ? <Button kind="gold" icon="user-plus">Add official</Button>
+            : view === 'draftboard'
+              ? <Button kind="gold" icon="save">Finalize teams</Button>
+              : null;
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bone)' }}>
@@ -75,12 +79,13 @@ export default function AdminApp() {
         <TopBar title={t.title} breadcrumb={t.breadcrumb} action={topAction} />
         <div style={{ padding: '24px 28px 64px', flex: 1 }}>
           {view === 'dashboard'   && <DashboardView team={TEAM} players={PLAYERS} games={GAMES} onGo={setView} />}
-          {view === 'roster'      && <RosterView team={TEAM} players={PLAYERS} onAdd={() => alert('Add player flow')} />}
-          {view === 'schedule'    && <ScheduleView games={GAMES} />}
+          {view === 'roster'      && <RosterView team={TEAM} players={PLAYERS} onAdd={() => setView('settings')} />}
+          {view === 'schedule'    && <ScheduleView games={GAMES} onGo={setView} />}
           {view === 'lineup'      && <LineupView players={PLAYERS.filter(p => p.status === 'active')} game={GAMES[0]} />}
           {view === 'attendance'  && <AttendanceView players={PLAYERS} />}
           {view === 'messages'    && <MessagesView />}
           {view === 'evaluations' && <EvaluationsView players={PLAYERS.filter(p => p.status !== 'inactive')} />}
+          {view === 'officials'   && <OfficialsView />}
           {view === 'draftboard'  && <DraftBoardView />}
           {view === 'season'      && <SeasonView />}
           {view === 'settings'    && <SettingsView />}

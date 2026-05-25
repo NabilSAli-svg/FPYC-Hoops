@@ -66,7 +66,7 @@ function ProgramCard({ tag, title, grades, price, desc, bullets, featured }) {
             </li>
           ))}
         </ul>
-        <a href="#register" style={{
+        <a href="/register" style={{
           marginTop: 'auto',
           background: featured ? 'var(--varsity-gold)' : 'transparent',
           color: 'var(--court-navy)',

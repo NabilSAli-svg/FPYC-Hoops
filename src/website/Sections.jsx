@@ -16,7 +16,7 @@ export function Announcements() {
         <div style={{ fontSize: 14, color: 'var(--fg)', fontWeight: 500, flex: 1, minWidth: 280 }}>
           <strong>Late fees begin November 15.</strong> Walk-in registration this Saturday at the FPYC office, 10am–12pm.
         </div>
-        <a href="#register" style={{ color: 'var(--court-navy)', fontWeight: 700, fontSize: 13, textDecoration: 'underline', textDecorationThickness: 2 }}>
+        <a href="/register" style={{ color: 'var(--court-navy)', fontWeight: 700, fontSize: 13, textDecoration: 'underline', textDecorationThickness: 2 }}>
           Register now →
         </a>
       </div>
@@ -39,41 +39,57 @@ export function Schedule() {
         <SectionHead eyebrow="This weekend" title="On the schedule" />
         <div style={{ display: 'flex', gap: 8 }}>
           <Btn kind="ghost"><Icon name="filter" size={14} /> All teams</Btn>
-          <Btn kind="gold">Full schedule <Icon name="arrow-right" size={14} /></Btn>
+          <Btn kind="gold" onClick={() => document.getElementById('schedule')?.scrollIntoView({ behavior: 'smooth' })}>Full schedule <Icon name="arrow-right" size={14} /></Btn>
         </div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 28 }}>
-        {games.map((g, i) => (
-          <div key={i} style={{
-            background: '#fff', border: '1px solid var(--border)', borderRadius: 8,
-            display: 'grid', gridTemplateColumns: '88px 1fr auto auto', alignItems: 'center', gap: 18, padding: '14px 18px',
-          }}>
-            <div style={{ textAlign: 'center', borderRight: '1px solid var(--border)', paddingRight: 16 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', color: 'var(--fg-muted)' }}>{g.day} · {g.month}</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, color: 'var(--court-navy)', lineHeight: 1, margin: '2px 0' }}>{g.date}</div>
-              <div style={{ fontSize: 11, color: 'var(--fg-soft)', fontWeight: 500 }}>{g.time}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 12, color: 'var(--fg-muted)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{g.team}</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--court-navy)', lineHeight: 1.1, marginTop: 4 }}>{g.opp}</div>
-              <div style={{ fontSize: 12, color: 'var(--fg-soft)', marginTop: 4, display: 'inline-flex', gap: 4, alignItems: 'center' }}>
-                <Icon name="map-pin" size={12} />{g.loc}
-              </div>
-            </div>
-            <span style={{
-              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase',
-              padding: '4px 10px', borderRadius: 999,
-              background: g.home ? 'var(--court-navy)' : '#fff',
-              color: g.home ? '#fff' : 'var(--court-navy)',
-              border: g.home ? 'none' : '1px solid var(--border)',
-            }}>{g.home ? 'Home' : 'Away'}</span>
-            <a href="#" style={{ color: 'var(--court-navy)', fontSize: 13, fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              Details <Icon name="arrow-right" size={14} />
-            </a>
-          </div>
-        ))}
+        {games.map((g, i) => <GameRow key={i} g={g} />)}
       </div>
     </section>
+  );
+}
+
+function GameRow({ g }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+      <div style={{
+        display: 'grid', gridTemplateColumns: '88px 1fr auto auto', alignItems: 'center', gap: 18, padding: '14px 18px',
+      }}>
+        <div style={{ textAlign: 'center', borderRight: '1px solid var(--border)', paddingRight: 16 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', color: 'var(--fg-muted)' }}>{g.day} · {g.month}</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, color: 'var(--court-navy)', lineHeight: 1, margin: '2px 0' }}>{g.date}</div>
+          <div style={{ fontSize: 11, color: 'var(--fg-soft)', fontWeight: 500 }}>{g.time}</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 12, color: 'var(--fg-muted)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{g.team}</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--court-navy)', lineHeight: 1.1, marginTop: 4 }}>{g.opp}</div>
+          <div style={{ fontSize: 12, color: 'var(--fg-soft)', marginTop: 4, display: 'inline-flex', gap: 4, alignItems: 'center' }}>
+            <Icon name="map-pin" size={12} />{g.loc}
+          </div>
+        </div>
+        <span style={{
+          fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase',
+          padding: '4px 10px', borderRadius: 999,
+          background: g.home ? 'var(--court-navy)' : '#fff',
+          color: g.home ? '#fff' : 'var(--court-navy)',
+          border: g.home ? 'none' : '1px solid var(--border)',
+        }}>{g.home ? 'Home' : 'Away'}</span>
+        <button onClick={() => setExpanded(o => !o)} style={{
+          all: 'unset', cursor: 'pointer', color: 'var(--court-navy)', fontSize: 13, fontWeight: 700,
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+        }}>
+          Details <Icon name={expanded ? 'minus' : 'arrow-right'} size={14} />
+        </button>
+      </div>
+      {expanded && (
+        <div style={{ borderTop: '1px solid var(--border)', padding: '12px 18px 14px', background: 'var(--bone)', display: 'flex', gap: 24, flexWrap: 'wrap', fontSize: 13, color: 'var(--fg)' }}>
+          <span><strong>Location:</strong> {g.loc}</span>
+          <span><strong>Tip-off:</strong> {g.time}</span>
+          <span><strong>Type:</strong> {g.home ? 'Home game' : 'Away game'}</span>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -148,7 +164,7 @@ export function FaqContact() {
             <ContactItem icon="mail"    label="Email"                      value="basketball@fpycsports.com" />
             <ContactItem icon="map-pin" label="Office"                     value="3955 Pickett Rd, Fairfax VA" />
           </div>
-          <a href="#" style={{
+          <a href="#volunteer" style={{
             background: 'var(--varsity-gold)', color: 'var(--court-navy)',
             padding: '12px 18px', borderRadius: 8, textDecoration: 'none',
             fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
@@ -189,13 +205,13 @@ function ContactItem({ icon, label, value }) {
   );
 }
 
-function Btn({ kind, children }) {
+function Btn({ kind, children, onClick }) {
   const styles = {
     ghost: { background: 'transparent', color: 'var(--court-navy)', border: '1px solid var(--court-navy)' },
     gold:  { background: 'var(--varsity-gold)', color: 'var(--court-navy)', border: '1px solid transparent' },
   };
   return (
-    <button style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13, padding: '10px 14px', borderRadius: 8, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, ...styles[kind] }}>
+    <button onClick={onClick} style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13, padding: '10px 14px', borderRadius: 8, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, ...styles[kind] }}>
       {children}
     </button>
   );
