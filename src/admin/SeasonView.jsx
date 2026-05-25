@@ -1,4 +1,35 @@
-import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
+import { Card, Display, Eyebrow, Pill } from '../shared/index.js';
+
+function computeStats(games) {
+  const final = games.filter(g => g.status === 'final');
+  const scheduled = games.filter(g => g.status === 'scheduled');
+  const wins = final.filter(g => g.us > g.them).length;
+  const losses = final.length - wins;
+  const pf = final.reduce((s, g) => s + g.us, 0);
+  const pa = final.reduce((s, g) => s + g.them, 0);
+  const homeGames = final.filter(g => g.home);
+  const homeW = homeGames.filter(g => g.us > g.them).length;
+  const awayGames = final.filter(g => !g.home);
+  const awayW = awayGames.filter(g => g.us > g.them).length;
+  const margin = final.length ? ((pf - pa) / final.length).toFixed(1) : '0.0';
+  const ppg = final.length ? (pf / final.length).toFixed(1) : '0.0';
+  const papg = final.length ? (pa / final.length).toFixed(1) : '0.0';
+  let streak = 0, streakType = '';
+  for (let i = final.length - 1; i >= 0; i--) {
+    const w = final[i].us > final[i].them;
+    if (i === final.length - 1) { streakType = w ? 'W' : 'L'; streak = 1; }
+    else if ((w && streakType === 'W') || (!w && streakType === 'L')) streak++;
+    else break;
+  }
+  return {
+    wins, losses, pf, pa, ppg, papg, margin,
+    homeRecord: `${homeW}–${homeGames.length - homeW}`,
+    awayRecord: `${awayW}–${awayGames.length - awayW}`,
+    streak: streak ? `${streakType}${streak}` : '—',
+    gamesLeft: scheduled.length,
+    record: `${wins}–${losses}`,
+  };
+}
 
 const STANDINGS = [
   { rank: 1, team: 'Centreville Eagles', w: 8, l: 1, pf: 524, pa: 398, streak: 'W3', home: true },
@@ -17,7 +48,8 @@ const LEADERS = [
   { stat: 'Assists', leaders: [{ name: 'Maya Chen', value: '6.3', team: 'Fairfax Hawks' }, { name: 'Alex Romero', value: '5.1', team: 'Fairfax Hawks' }, { name: 'Jordan Reeves', value: '4.7', team: 'Fairfax Hawks' }] },
 ];
 
-export default function SeasonView() {
+export default function SeasonView({ games = [] }) {
+  const s = computeStats(games);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Season summary banner */}
@@ -36,19 +68,19 @@ export default function SeasonView() {
             <Display size={28} color="#fff" style={{ marginTop: 6 }}>2025–26</Display>
             <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 4 }}>Boys 5–6 House</div>
           </div>
-          <StatCell label="Record" value="6–3" sub="2nd in division" gold />
-          <StatCell label="Points for" value="487" sub="54.1 per game" />
-          <StatCell label="Points against" value="423" sub="47.0 per game" />
-          <StatCell label="Games left" value="4" sub="Dec 7 – Jan 11" />
+          <StatCell label="Record" value={s.record} sub="2nd in division" gold />
+          <StatCell label="Points for" value={s.pf} sub={`${s.ppg} per game`} />
+          <StatCell label="Points against" value={s.pa} sub={`${s.papg} per game`} />
+          <StatCell label="Games left" value={s.gamesLeft} sub="remaining this season" />
         </div>
         <div style={{ padding: '12px 28px', background: 'var(--bone)', borderTop: '1px solid var(--border)', display: 'flex', gap: 20, fontSize: 13 }}>
-          <span><strong>Current streak:</strong> W2</span>
+          <span><strong>Current streak:</strong> {s.streak}</span>
           <span>·</span>
-          <span><strong>Home record:</strong> 4–1</span>
+          <span><strong>Home record:</strong> {s.homeRecord}</span>
           <span>·</span>
-          <span><strong>Away record:</strong> 2–2</span>
+          <span><strong>Away record:</strong> {s.awayRecord}</span>
           <span>·</span>
-          <span><strong>Margin of victory:</strong> +7.1 avg</span>
+          <span><strong>Avg margin:</strong> {Number(s.margin) >= 0 ? '+' : ''}{s.margin}</span>
         </div>
       </Card>
 
@@ -70,7 +102,10 @@ export default function SeasonView() {
             <tbody>
               {STANDINGS.map((row, i) => {
                 const isUs = row.team === 'Fairfax Hawks';
-                const pct = (row.w / (row.w + row.l)).toFixed(3).replace(/^0/, '');
+                const displayRow = isUs ? { ...row, w: s.wins, l: s.losses, pf: s.pf, pa: s.pa, streak: s.streak } : row;
+                const pct = displayRow.w + displayRow.l > 0
+                  ? (displayRow.w / (displayRow.w + displayRow.l)).toFixed(3).replace(/^0/, '')
+                  : '.000';
                 return (
                   <tr key={i} style={{ background: isUs ? 'rgba(255,199,44,0.08)' : '#fff', borderBottom: i < STANDINGS.length - 1 ? '1px solid var(--border)' : 'none', fontWeight: isUs ? 700 : 400 }}>
                     <td style={{ padding: '11px 14px', textAlign: 'center', fontSize: 13, color: isUs ? 'var(--court-navy)' : 'var(--fg-muted)', fontWeight: 700 }}>{row.rank}</td>
@@ -80,11 +115,11 @@ export default function SeasonView() {
                         <span style={{ color: isUs ? 'var(--court-navy)' : 'var(--fg)' }}>{row.team}</span>
                       </div>
                     </td>
-                    {[row.w, row.l, pct, row.pf, row.pa].map((v, j) => (
+                    {[displayRow.w, displayRow.l, pct, displayRow.pf, displayRow.pa].map((v, j) => (
                       <td key={j} style={{ padding: '11px 14px', textAlign: 'center', fontSize: 13, fontFamily: j >= 2 ? 'var(--font-mono)' : 'inherit', color: 'var(--fg)' }}>{v}</td>
                     ))}
                     <td style={{ padding: '11px 14px', textAlign: 'center' }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: row.streak.startsWith('W') ? 'rgba(31,138,91,0.12)' : 'rgba(200,16,46,0.10)', color: row.streak.startsWith('W') ? 'var(--status-win)' : 'var(--foul-red)' }}>{row.streak}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: displayRow.streak.startsWith('W') ? 'rgba(31,138,91,0.12)' : 'rgba(200,16,46,0.10)', color: displayRow.streak.startsWith('W') ? 'var(--status-win)' : 'var(--foul-red)' }}>{displayRow.streak}</span>
                     </td>
                   </tr>
                 );
@@ -120,16 +155,16 @@ export default function SeasonView() {
             <Display size={26} color="#fff" style={{ marginTop: 6, marginBottom: 10 }}>Top 4 advance</Display>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'rgba(255,255,255,0.82)' }}>
-                <span>Magic number to clinch</span>
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--varsity-gold)' }}>3</span>
+                <span>Current record</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--varsity-gold)' }}>{s.record}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'rgba(255,255,255,0.82)' }}>
-                <span>Games behind 1st seed</span>
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--varsity-gold)' }}>2</span>
+                <span>Games remaining</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--varsity-gold)' }}>{s.gamesLeft}</span>
               </div>
               <div style={{ height: 1, background: 'rgba(255,255,255,0.12)', margin: '4px 0' }} />
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
-                Win 2 of remaining 4 games to clinch a playoff spot. Current projected seed: <strong style={{ color: '#fff' }}>2nd</strong>.
+                Top 4 teams advance. Currently 2nd in division — clinch a spot by winning 2 of the remaining {s.gamesLeft} games.
               </div>
             </div>
           </Card>
