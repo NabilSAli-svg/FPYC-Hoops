@@ -1,0 +1,34 @@
+import Header from './Header.jsx';
+import Footer from './Footer.jsx';
+import Hero from './Hero.jsx';
+import Programs from './Programs.jsx';
+import { Announcements, Schedule, News, FaqContact } from './Sections.jsx';
+
+function scrollTo(id) {
+  if (id === 'top') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+  const el = document.getElementById(id);
+  if (el) {
+    const top = el.getBoundingClientRect().top + window.scrollY - 72;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+}
+
+export default function WebsiteApp() {
+  return (
+    <>
+      <Header onJump={scrollTo} />
+      <main id="top" style={{ scrollBehavior: 'smooth' }}>
+        <Hero onRegister={() => scrollTo('programs')} />
+        <Announcements />
+        <Programs />
+        <Schedule />
+        <News />
+        <FaqContact />
+      </main>
+      <Footer />
+    </>
+  );
+}
