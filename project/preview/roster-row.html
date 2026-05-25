@@ -1,0 +1,17 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.row-item { display: grid; grid-template-columns: 36px 1fr 80px 80px 80px; align-items: center; gap: 12px; padding: 10px 14px; background: #fff; border: 1px solid var(--border); border-radius: 8px; }
+.num { font-family: var(--font-display); font-size: 22px; line-height: 1; text-align: center; color: var(--court-navy); font-variant-numeric: tabular-nums; }
+.name { font-weight: 500; font-size: 14px; }
+.cell { font-family: var(--font-mono); font-size: 13px; text-align: right; color: var(--fg-soft); font-variant-numeric: tabular-nums; }
+.head { display: grid; grid-template-columns: 36px 1fr 80px 80px 80px; gap: 12px; padding: 0 14px; font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--fg-muted); font-weight: 700; }
+.head > div:nth-child(3), .head > div:nth-child(4), .head > div:nth-child(5) { text-align: right; }
+</style></head>
+<body>
+<div class="card" style="gap:8px;">
+  <div class="head"><div>#</div><div>Player</div><div>PPG</div><div>RPG</div><div>APG</div></div>
+  <div class="row-item"><div class="num">23</div><div class="name">Jordan Reeves</div><div class="cell">12.4</div><div class="cell">5.1</div><div class="cell">3.2</div></div>
+  <div class="row-item"><div class="num">07</div><div class="name">Maya Chen</div><div class="cell">9.8</div><div class="cell">2.6</div><div class="cell">4.7</div></div>
+  <div class="row-item"><div class="num">14</div><div class="name">Devon Brooks</div><div class="cell">8.1</div><div class="cell">7.3</div><div class="cell">1.4</div></div>
+</div>
+</body></html>

@@ -1,0 +1,20 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.pill { font-family: var(--font-body); font-weight: 700; font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pulse { animation: p 1.6s var(--ease-out) infinite; }
+@keyframes p { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); opacity:0.7;} }
+</style></head>
+<body>
+<div class="card">
+  <div class="row" style="gap:10px;">
+    <span class="pill" style="background:var(--basketball-orange); color:#fff;"><span class="dot pulse"></span>Live · Q3 4:21</span>
+    <span class="pill" style="background:#1F8A5B; color:#fff;">Final · W 64–58</span>
+    <span class="pill" style="background:var(--foul-red); color:#fff;">Final · L 42–47</span>
+    <span class="pill" style="background:var(--court-navy); color:#fff;">Scheduled · 10:00 AM</span>
+    <span class="pill" style="background:var(--varsity-gold); color:var(--court-navy);">Roster pending</span>
+    <span class="pill" style="background:#fff; color:var(--court-navy); border:1px solid var(--border);">Practice only</span>
+  </div>
+  <div class="meta">Status pills · Anton-free, uppercase tracked body</div>
+</div>
+</body></html>

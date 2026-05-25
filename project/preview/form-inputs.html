@@ -1,0 +1,22 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.field { display:flex; flex-direction:column; gap:6px; flex:1; }
+.field label { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted); }
+.field input, .field select { font-family: var(--font-body); font-size: 14px; padding: 10px 12px; background: #fff; border: 1px solid var(--border); border-radius: 6px; color: var(--fg); outline: none; transition: all 160ms var(--ease-out); }
+.field input:focus, .field select:focus { border-color: var(--court-navy); box-shadow: 0 0 0 3px rgba(255,199,44,0.30); }
+.checkbox { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.checkbox input { width: 18px; height: 18px; accent-color: var(--court-navy); }
+</style></head>
+<body>
+<div class="card" style="gap:14px;">
+  <div class="row" style="gap:14px; align-items:flex-end;">
+    <div class="field"><label>Player name</label><input value="Jordan Reeves"/></div>
+    <div class="field"><label>Grade</label><select><option>5th</option><option>6th</option><option>7th</option></select></div>
+    <div class="field"><label>Jersey #</label><input value="23" style="font-family:var(--font-mono);"/></div>
+  </div>
+  <div class="row" style="gap:18px;">
+    <label class="checkbox"><input type="checkbox" checked/> Medical waiver on file</label>
+    <label class="checkbox"><input type="checkbox"/> Scholarship requested</label>
+  </div>
+</div>
+</body></html>

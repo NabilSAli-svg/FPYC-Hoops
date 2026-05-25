@@ -1,0 +1,26 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.tabs { display: flex; gap: 4px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 4px; width: max-content; }
+.tab { font-family: var(--font-body); font-weight: 700; font-size: 13px; letter-spacing: 0.02em; padding: 8px 14px; border-radius: 6px; color: var(--fg-soft); cursor: pointer; }
+.tab.active { background: var(--court-navy); color: #fff; }
+.subnav { display: flex; gap: 24px; border-bottom: 1px solid var(--border); }
+.subnav a { font-family: var(--font-body); font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg-muted); padding: 10px 0; text-decoration: none; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.subnav a.active { color: var(--court-navy); border-color: var(--varsity-gold); }
+</style></head>
+<body>
+<div class="card" style="gap:14px;">
+  <div class="tabs">
+    <div class="tab active">Roster</div>
+    <div class="tab">Schedule</div>
+    <div class="tab">Stats</div>
+    <div class="tab">Files</div>
+  </div>
+  <div class="subnav">
+    <a class="active">Overview</a>
+    <a>Practice</a>
+    <a>Games</a>
+    <a>Standings</a>
+    <a>Notices</a>
+  </div>
+</div>
+</body></html>

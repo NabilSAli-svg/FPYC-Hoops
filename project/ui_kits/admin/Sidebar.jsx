@@ -1,0 +1,106 @@
+/* global React */
+const { useState } = React;
+
+window.Sidebar = function Sidebar({ active, onNav, team, onTeamClick }) {
+  const items = [
+    { id: 'dashboard', icon: 'layout-dashboard', label: 'Dashboard' },
+    { id: 'roster', icon: 'users', label: 'Roster' },
+    { id: 'schedule', icon: 'calendar', label: 'Schedule' },
+    { id: 'lineup', icon: 'clipboard-list', label: 'Lineup' },
+    { id: 'attendance', icon: 'check-square', label: 'Attendance', disabled: true },
+    { id: 'messages', icon: 'message-square', label: 'Messages', disabled: true },
+    { id: 'evaluations', icon: 'star', label: 'Evaluations', disabled: true },
+  ];
+  const secondary = [
+    { id: 'season', icon: 'trophy', label: 'Season' },
+    { id: 'settings', icon: 'settings', label: 'Settings' },
+  ];
+  return (
+    <aside style={{
+      width: 248,
+      background: 'var(--court-navy)',
+      color: '#fff',
+      display: 'flex',
+      flexDirection: 'column',
+      borderRight: '1px solid rgba(0,0,0,0.2)',
+      flexShrink: 0,
+    }}>
+      {/* Brand */}
+      <div style={{ padding: '18px 18px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <img src="../../assets/logo-fpyc-basketball.png" alt="FPYC" style={{ width: 36, height: 36, objectFit: 'contain' }}/>
+        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: '0.04em', textTransform: 'uppercase' }}>FPYC Basketball</span>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>Coach console</span>
+        </div>
+      </div>
+
+      {/* Team switcher */}
+      <button onClick={onTeamClick} style={{
+        margin: '14px 12px 6px',
+        padding: '10px 12px',
+        background: 'rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.10)',
+        borderRadius: 8,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        cursor: 'pointer',
+        color: '#fff',
+        textAlign: 'left',
+      }}>
+        <Jersey number={team.number} size={32} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: 13 }}>{team.name}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>{team.division}</div>
+        </div>
+        <Icon name="chevrons-up-down" size={16} color="rgba(255,255,255,0.6)" />
+      </button>
+
+      <nav style={{ padding: '6px 8px', flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {items.map(it => (
+          <NavItem key={it.id} {...it} active={active === it.id} onClick={() => !it.disabled && onNav(it.id)} />
+        ))}
+        <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '10px 8px' }} />
+        {secondary.map(it => (
+          <NavItem key={it.id} {...it} onClick={() => {}} disabled />
+        ))}
+      </nav>
+
+      {/* Footer status */}
+      <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Avatar name="Coach Davis" size={32} color="var(--varsity-gold)" />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: 13 }}>Coach M. Davis</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Volunteer · 5–6 House</div>
+        </div>
+        <Icon name="log-out" size={16} color="rgba(255,255,255,0.5)" />
+      </div>
+    </aside>
+  );
+};
+
+function NavItem({ icon, label, active, disabled, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      background: active ? 'rgba(255,199,44,0.12)' : 'transparent',
+      border: 'none',
+      borderLeft: `3px solid ${active ? 'var(--varsity-gold)' : 'transparent'}`,
+      color: disabled ? 'rgba(255,255,255,0.32)' : active ? '#fff' : 'rgba(255,255,255,0.78)',
+      padding: '9px 12px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      cursor: disabled ? 'default' : 'pointer',
+      fontFamily: 'var(--font-body)',
+      fontWeight: active ? 700 : 500,
+      fontSize: 14,
+      textAlign: 'left',
+      borderRadius: 6,
+      transition: 'all 160ms cubic-bezier(0.2,0.8,0.2,1)',
+    }}>
+      <Icon name={icon} size={18}/>
+      <span>{label}</span>
+      {disabled ? <span style={{ marginLeft: 'auto', fontSize: 10, color: 'rgba(255,255,255,0.32)' }}>SOON</span> : null}
+    </button>
+  );
+}

@@ -1,0 +1,31 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><style>
+.btn { font-family: var(--font-body); font-weight: 700; font-size: 14px; line-height: 1; padding: 12px 18px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 160ms var(--ease-out); }
+.btn-primary { background: var(--court-navy); color: #fff; }
+.btn-primary:hover { background: var(--court-navy-700); }
+.btn-gold { background: var(--varsity-gold); color: var(--court-navy); }
+.btn-gold:hover { background: var(--varsity-gold-400); }
+.btn-ghost { background: transparent; color: var(--court-navy); border-color: var(--court-navy); }
+.btn-ghost:hover { background: var(--court-navy); color: #fff; }
+.btn-quiet { background: transparent; color: var(--court-navy); padding: 12px 14px; }
+.btn-quiet:hover { background: rgba(10,31,61,0.06); }
+.btn-danger { background: var(--foul-red); color: #fff; }
+.btn-sm { font-size: 13px; padding: 8px 12px; }
+</style></head>
+<body>
+<div class="card" style="gap:12px;">
+  <div class="row">
+    <button class="btn btn-primary">Save Roster</button>
+    <button class="btn btn-gold">Register Now</button>
+    <button class="btn btn-ghost">Cancel</button>
+    <button class="btn btn-quiet">Skip</button>
+    <button class="btn btn-danger">Remove Player</button>
+  </div>
+  <div class="row">
+    <button class="btn btn-primary btn-sm">Save</button>
+    <button class="btn btn-gold btn-sm">Sign Up</button>
+    <button class="btn btn-ghost btn-sm">Cancel</button>
+  </div>
+  <div class="meta">primary · gold · ghost · quiet · danger</div>
+</div>
+</body></html>
