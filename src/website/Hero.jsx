@@ -41,17 +41,22 @@ export default function Hero({ onRegister }) {
           </p>
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
-            <a href="#programs" onClick={(e) => { e.preventDefault(); onRegister(); }} style={{
-              background: 'var(--varsity-gold)', color: 'var(--court-navy)', padding: '14px 22px', borderRadius: 8,
-              textDecoration: 'none', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15,
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-            }}>Register for 2025–26 <Icon name="arrow-right" size={16} /></a>
-            <a href="#programs" style={{
+            <a
+              href="https://fpycsports.ottosport.ai/sports/basketball"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                background: 'var(--varsity-gold)', color: 'var(--court-navy)', padding: '14px 22px', borderRadius: 8,
+                textDecoration: 'none', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15,
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+              }}
+            >Register for 2025–26 <Icon name="arrow-right" size={16} /></a>
+            <a href="#register" onClick={(e) => { e.preventDefault(); onRegister(); }} style={{
               background: 'rgba(255,255,255,0.08)', color: '#fff', padding: '14px 22px', borderRadius: 8,
               border: '1px solid rgba(255,255,255,0.18)', textDecoration: 'none',
               fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15,
               display: 'inline-flex', alignItems: 'center', gap: 8,
-            }}><Icon name="play-circle" size={16} /> See programs</a>
+            }}><Icon name="info" size={16} /> How it works</a>
           </div>
 
           <div style={{ display: 'flex', gap: 32, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.10)' }}>
@@ -82,10 +87,26 @@ export default function Hero({ onRegister }) {
             </div>
             <div style={{ fontSize: 13, color: 'var(--fg-soft)' }}>Begin November 15. Register early.</div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, marginBottom: 20 }}>
             <CheckLine text="Scholarships available — apply during registration" />
             <CheckLine text="Sibling discount: 10% off second child" />
             <CheckLine text="Volunteer credit reduces next-season fee" />
+          </div>
+          <a
+            href="https://fpycsports.ottosport.ai/sports/basketball"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              background: 'var(--court-navy)', color: '#fff',
+              padding: '13px 16px', borderRadius: 8, textDecoration: 'none',
+              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
+            }}
+          >
+            Begin registration <Icon name="external-link" size={14} />
+          </a>
+          <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: 'var(--fg-muted)' }}>
+            Powered by OttoSport · Secure payment
           </div>
         </div>
       </div>

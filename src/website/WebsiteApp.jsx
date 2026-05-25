@@ -1,7 +1,9 @@
 import Header from './Header.jsx';
 import Footer from './Footer.jsx';
 import Hero from './Hero.jsx';
+import WhyFPYC from './WhyFPYC.jsx';
 import Programs from './Programs.jsx';
+import HowToRegister from './HowToRegister.jsx';
 import { Announcements, Schedule, News, FaqContact } from './Sections.jsx';
 
 function scrollTo(id) {
@@ -21,9 +23,11 @@ export default function WebsiteApp() {
     <>
       <Header onJump={scrollTo} />
       <main id="top" style={{ scrollBehavior: 'smooth' }}>
-        <Hero onRegister={() => scrollTo('programs')} />
+        <Hero onRegister={() => scrollTo('register')} />
         <Announcements />
+        <WhyFPYC />
         <Programs />
+        <HowToRegister />
         <Schedule />
         <News />
         <FaqContact />
