@@ -31,7 +31,7 @@ const PLAYERS = [
   { id: 'p12', number:  8, name: 'Chloe Adebayo',    grade: '5th', school: 'Daniels Run ES', guardian: 'O. Adebayo',  phone: '(703) 555-0145', position: 'Guard',   status: 'inactive', waiver: true  },
 ];
 
-const GAMES = [
+const GAMES_INITIAL = [
   { id: 'g1', status: 'scheduled', month: 'Dec', date: 7,  weekday: 'Sat', day: 'Sat, Dec 7',  time: '10:00 AM', opponent: 'Vienna Storm',       location: 'Robinson Secondary · Gym B', home: true,  refs: 'J. Park, M. Lee', countdown: 4, confirmed: 11, note: 'Carpool sheet posted — 3 families volunteered to drive.' },
   { id: 'g2', status: 'scheduled', month: 'Dec', date: 14, weekday: 'Sat', day: 'Sat, Dec 14', time: '11:30 AM', opponent: 'Reston Wolves',       location: 'South Lakes HS · Gym A',      home: false, countdown: 11, confirmed: 9 },
   { id: 'g3', status: 'scheduled', month: 'Dec', date: 21, weekday: 'Sat', day: 'Sat, Dec 21', time: '9:00 AM',  opponent: 'Burke Lakers',         location: 'Lake Braddock HS · Main',     home: false, countdown: 18, confirmed: 8 },
@@ -45,6 +45,10 @@ export default function AdminApp() {
   const [scheduleInitialTab, setScheduleInitialTab] = useState('games');
   const [openNewGame, setOpenNewGame] = useState(false);
   const [messagesAutoCompose, setMessagesAutoCompose] = useState(false);
+  const [games, setGames] = useState(GAMES_INITIAL);
+
+  const saveScore = (id, result) =>
+    setGames(gs => gs.map(g => g.id === id ? { ...g, ...result, status: 'final' } : g));
 
   function handleGo(target) {
     if (target === 'schedule:practices') {
@@ -93,10 +97,10 @@ export default function AdminApp() {
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <TopBar title={t.title} breadcrumb={t.breadcrumb} action={topAction} />
         <div style={{ padding: '24px 28px 64px', flex: 1 }}>
-          {view === 'dashboard'   && <DashboardView team={TEAM} players={PLAYERS} games={GAMES} onGo={handleGo} />}
+          {view === 'dashboard'   && <DashboardView team={TEAM} players={PLAYERS} games={games} onGo={handleGo} />}
           {view === 'roster'      && <RosterView team={TEAM} players={PLAYERS} />}
-          {view === 'schedule'    && <ScheduleView games={GAMES} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} />}
-          {view === 'lineup'      && <LineupView players={PLAYERS.filter(p => p.status === 'active')} game={GAMES[0]} />}
+          {view === 'schedule'    && <ScheduleView games={games} onScoreSave={saveScore} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} />}
+          {view === 'lineup'      && <LineupView players={PLAYERS.filter(p => p.status === 'active')} game={games[0]} />}
           {view === 'attendance'  && <AttendanceView players={PLAYERS} />}
           {view === 'messages'    && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} />}
           {view === 'evaluations' && <EvaluationsView players={PLAYERS.filter(p => p.status !== 'inactive')} />}

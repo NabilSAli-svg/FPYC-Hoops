@@ -16,13 +16,32 @@ const PRACTICE_TYPE_COLOR = {
   Conditioning: { bg: 'rgba(232,119,34,0.12)',     text: 'var(--basketball-orange)' },
 };
 
-export default function ScheduleView({ games, onGo, initialTab = 'games', openNewGame = false, onNewGameClose }) {
+export default function ScheduleView({ games, onScoreSave, onGo, initialTab = 'games', openNewGame = false, onNewGameClose }) {
   const [tab, setTab] = useState(initialTab);
   const [showNewPractice, setShowNewPractice] = useState(false);
   const [showNewGame, setShowNewGame] = useState(false);
   const [scoreGame, setScoreGame] = useState(null);
+  const [scoreUs, setScoreUs] = useState('');
+  const [scoreThem, setScoreThem] = useState('');
+  const [scoreNote, setScoreNote] = useState('');
   const [newPractice, setNewPractice] = useState({ date: '', time: '', gym: '', type: 'Regular', notes: '' });
   const [newGame, setNewGame] = useState({ date: '', time: '', opponent: '', location: '', home: true, notes: '' });
+
+  function openScore(g) {
+    setScoreGame(g);
+    setScoreUs(g.us != null ? String(g.us) : '');
+    setScoreThem(g.them != null ? String(g.them) : '');
+    setScoreNote(g.note || '');
+  }
+
+  function handleSaveScore() {
+    const us = parseInt(scoreUs, 10);
+    const them = parseInt(scoreThem, 10);
+    if (!isNaN(us) && !isNaN(them) && scoreGame) {
+      onScoreSave(scoreGame.id, { us, them, note: scoreNote || undefined });
+    }
+    setScoreGame(null);
+  }
 
   useEffect(() => {
     if (openNewGame) {
@@ -106,10 +125,10 @@ export default function ScheduleView({ games, onGo, initialTab = 'games', openNe
 
                   <div style={{ display: 'flex', gap: 8 }}>
                     {isFinal ? (
-                      <Button kind="ghost" size="sm" icon="edit-3" onClick={() => setScoreGame(g)}>Edit score</Button>
+                      <Button kind="ghost" size="sm" icon="edit-3" onClick={() => openScore(g)}>Edit score</Button>
                     ) : (
                       <>
-                        <Button kind="ghost" size="sm" icon="check-square">RSVP</Button>
+                        <Button kind="ghost" size="sm" icon="flag" onClick={() => openScore(g)}>Log result</Button>
                         <Button kind="primary" size="sm" icon="clipboard-list" onClick={() => onGo && onGo('lineup')}>Lineup</Button>
                       </>
                     )}
@@ -126,7 +145,7 @@ export default function ScheduleView({ games, onGo, initialTab = 'games', openNe
 
           {/* Add result for upcoming */}
           <button
-            onClick={() => setScoreGame({ id: 'new', opponent: '', status: 'final', us: '', them: '', month: '', date: '', weekday: '', time: '', location: '', home: true })}
+            onClick={() => openScore({ id: 'new', opponent: '', status: 'final', us: null, them: null, month: '', date: '', weekday: '', time: '', location: '', home: true })}
             style={{ all: 'unset', cursor: 'pointer', border: '2px dashed var(--border)', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 10, color: 'var(--fg-muted)', fontSize: 14, fontWeight: 600, transition: 'border-color 160ms' }}
             onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--court-navy)'}
             onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
@@ -283,22 +302,27 @@ export default function ScheduleView({ games, onGo, initialTab = 'games', openNe
           <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 16, alignItems: 'center', marginBottom: 20 }}>
             <div style={{ textAlign: 'center' }}>
               <Eyebrow style={{ marginBottom: 8 }}>Fairfax Hawks</Eyebrow>
-              <input type="number" defaultValue={scoreGame.us} placeholder="0"
+              <input type="number" value={scoreUs} onChange={e => setScoreUs(e.target.value)} placeholder="0" min="0"
                 style={{ ...inputStyle, textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: 48, padding: '12px', width: '100%', boxSizing: 'border-box' }} />
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--fg-muted)', textAlign: 'center' }}>–</div>
             <div style={{ textAlign: 'center' }}>
               <Eyebrow style={{ marginBottom: 8 }}>{scoreGame.opponent || 'Opponent'}</Eyebrow>
-              <input type="number" defaultValue={scoreGame.them} placeholder="0"
+              <input type="number" value={scoreThem} onChange={e => setScoreThem(e.target.value)} placeholder="0" min="0"
                 style={{ ...inputStyle, textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: 48, padding: '12px', width: '100%', boxSizing: 'border-box' }} />
             </div>
           </div>
+          {scoreUs !== '' && scoreThem !== '' && (
+            <div style={{ textAlign: 'center', marginBottom: 16, fontFamily: 'var(--font-display)', fontSize: 18, color: parseInt(scoreUs) > parseInt(scoreThem) ? 'var(--status-win)' : 'var(--foul-red)' }}>
+              {parseInt(scoreUs) > parseInt(scoreThem) ? 'Win' : parseInt(scoreUs) < parseInt(scoreThem) ? 'Loss' : 'Tie'}
+            </div>
+          )}
           <FormField label="Game notes (optional)">
-            <textarea rows={2} placeholder="e.g. Great defensive effort in the 4th quarter…" style={{ ...inputStyle, resize: 'vertical', width: '100%', boxSizing: 'border-box' }} />
+            <textarea rows={2} value={scoreNote} onChange={e => setScoreNote(e.target.value)} placeholder="e.g. Great defensive effort in the 4th quarter…" style={{ ...inputStyle, resize: 'vertical', width: '100%', boxSizing: 'border-box' }} />
           </FormField>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
             <Button kind="ghost" onClick={() => setScoreGame(null)}>Cancel</Button>
-            <Button kind="gold" icon="check" onClick={() => setScoreGame(null)}>Save result</Button>
+            <Button kind="gold" icon="check" onClick={handleSaveScore} disabled={scoreUs === '' || scoreThem === ''}>Save result</Button>
           </div>
         </ModalOverlay>
       )}
