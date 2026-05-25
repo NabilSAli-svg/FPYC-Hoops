@@ -58,11 +58,16 @@ const NOTIF_COLORS = {
   success: { color: 'var(--status-win)',     bg: 'rgba(31,138,91,0.08)' },
 };
 
-export default function MessagesView() {
+export default function MessagesView({ autoCompose = false, onAutoComposeUsed }) {
   const [tab, setTab] = useState('inbox');
   const [selected, setSelected] = useState(THREADS[0].id);
-  const [showCompose, setShowCompose] = useState(false);
+  const [showCompose, setShowCompose] = useState(autoCompose);
   const [composeChannel, setComposeChannel] = useState('email');
+
+  function handleCloseCompose() {
+    setShowCompose(false);
+    onAutoComposeUsed?.();
+  }
 
   const thread = THREADS.find(t => t.id === selected);
   const filtered = tab === 'inbox' ? THREADS : THREADS.filter(t => t.channel === tab);
@@ -169,7 +174,7 @@ export default function MessagesView() {
         </div>
       )}
 
-      {showCompose && <ComposeModal channel={composeChannel} onClose={() => setShowCompose(false)} />}
+      {showCompose && <ComposeModal channel={composeChannel} onClose={handleCloseCompose} />}
     </div>
   );
 }

@@ -42,6 +42,21 @@ const GAMES = [
 
 export default function AdminApp() {
   const [view, setView] = useState('dashboard');
+  const [scheduleInitialTab, setScheduleInitialTab] = useState('games');
+  const [openNewGame, setOpenNewGame] = useState(false);
+  const [messagesAutoCompose, setMessagesAutoCompose] = useState(false);
+
+  function handleGo(target) {
+    if (target === 'schedule:practices') {
+      setScheduleInitialTab('practices');
+      setView('schedule');
+    } else if (target === 'messages:compose') {
+      setMessagesAutoCompose(true);
+      setView('messages');
+    } else {
+      setView(target);
+    }
+  }
 
   const titleMap = {
     dashboard:   { title: TEAM.name,         breadcrumb: `${TEAM.division} · Season 2025–26` },
@@ -59,13 +74,13 @@ export default function AdminApp() {
   const t = titleMap[view] || titleMap.dashboard;
 
   const topAction = view === 'dashboard'
-    ? <Button kind="gold" icon="plus" onClick={() => setView('messages')}>Quick note</Button>
+    ? <Button kind="gold" icon="edit-3" onClick={() => handleGo('messages:compose')}>Quick note</Button>
     : view === 'schedule'
-      ? <Button kind="gold" icon="calendar-plus">New game</Button>
+      ? <Button kind="gold" icon="calendar-plus" onClick={() => setOpenNewGame(true)}>New game</Button>
       : view === 'lineup'
         ? <Button kind="primary" icon="save">Save lineup</Button>
         : view === 'messages'
-          ? <Button kind="gold" icon="edit-3">Compose</Button>
+          ? <Button kind="gold" icon="edit-3" onClick={() => setMessagesAutoCompose(true)}>Compose</Button>
           : view === 'officials'
             ? <Button kind="gold" icon="user-plus">Add official</Button>
             : view === 'draftboard'
@@ -74,16 +89,16 @@ export default function AdminApp() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bone)' }}>
-      <Sidebar active={view} onNav={setView} team={TEAM} />
+      <Sidebar active={view} onNav={v => { setView(v); setScheduleInitialTab('games'); }} team={TEAM} />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <TopBar title={t.title} breadcrumb={t.breadcrumb} action={topAction} />
         <div style={{ padding: '24px 28px 64px', flex: 1 }}>
-          {view === 'dashboard'   && <DashboardView team={TEAM} players={PLAYERS} games={GAMES} onGo={setView} />}
-          {view === 'roster'      && <RosterView team={TEAM} players={PLAYERS} onAdd={() => setView('settings')} />}
-          {view === 'schedule'    && <ScheduleView games={GAMES} onGo={setView} />}
+          {view === 'dashboard'   && <DashboardView team={TEAM} players={PLAYERS} games={GAMES} onGo={handleGo} />}
+          {view === 'roster'      && <RosterView team={TEAM} players={PLAYERS} />}
+          {view === 'schedule'    && <ScheduleView games={GAMES} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} />}
           {view === 'lineup'      && <LineupView players={PLAYERS.filter(p => p.status === 'active')} game={GAMES[0]} />}
           {view === 'attendance'  && <AttendanceView players={PLAYERS} />}
-          {view === 'messages'    && <MessagesView />}
+          {view === 'messages'    && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} />}
           {view === 'evaluations' && <EvaluationsView players={PLAYERS.filter(p => p.status !== 'inactive')} />}
           {view === 'officials'   && <OfficialsView />}
           {view === 'draftboard'  && <DraftBoardView />}

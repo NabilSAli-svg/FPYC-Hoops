@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, Pill, Button, Icon, Display, Eyebrow } from '../shared/index.js';
 
 const PRACTICES = [
@@ -16,11 +16,20 @@ const PRACTICE_TYPE_COLOR = {
   Conditioning: { bg: 'rgba(232,119,34,0.12)',     text: 'var(--basketball-orange)' },
 };
 
-export default function ScheduleView({ games, onGo }) {
-  const [tab, setTab] = useState('games');
+export default function ScheduleView({ games, onGo, initialTab = 'games', openNewGame = false, onNewGameClose }) {
+  const [tab, setTab] = useState(initialTab);
   const [showNewPractice, setShowNewPractice] = useState(false);
+  const [showNewGame, setShowNewGame] = useState(false);
   const [scoreGame, setScoreGame] = useState(null);
   const [newPractice, setNewPractice] = useState({ date: '', time: '', gym: '', type: 'Regular', notes: '' });
+  const [newGame, setNewGame] = useState({ date: '', time: '', opponent: '', location: '', home: true, notes: '' });
+
+  useEffect(() => {
+    if (openNewGame) {
+      setShowNewGame(true);
+      onNewGameClose?.();
+    }
+  }, [openNewGame]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -226,6 +235,40 @@ export default function ScheduleView({ games, onGo }) {
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
             <Button kind="ghost" onClick={() => setShowNewPractice(false)}>Cancel</Button>
             <Button kind="gold" icon="check" onClick={() => setShowNewPractice(false)}>Add practice</Button>
+          </div>
+        </ModalOverlay>
+      )}
+
+      {/* New Game Modal */}
+      {showNewGame && (
+        <ModalOverlay onClose={() => setShowNewGame(false)}>
+          <Display size={24} style={{ marginBottom: 20 }}>Add game</Display>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <FormField label="Date">
+              <input type="date" value={newGame.date} onChange={e => setNewGame(g => ({ ...g, date: e.target.value }))} style={inputStyle} />
+            </FormField>
+            <FormField label="Tip-off time">
+              <input type="time" value={newGame.time} onChange={e => setNewGame(g => ({ ...g, time: e.target.value }))} style={inputStyle} />
+            </FormField>
+            <FormField label="Opponent" style={{ gridColumn: '1 / -1' }}>
+              <input placeholder="e.g. Vienna Storm" value={newGame.opponent} onChange={e => setNewGame(g => ({ ...g, opponent: e.target.value }))} style={inputStyle} />
+            </FormField>
+            <FormField label="Location" style={{ gridColumn: '1 / -1' }}>
+              <input placeholder="e.g. Robinson Secondary · Gym B" value={newGame.location} onChange={e => setNewGame(g => ({ ...g, location: e.target.value }))} style={inputStyle} />
+            </FormField>
+            <FormField label="Home or away">
+              <select value={newGame.home ? 'home' : 'away'} onChange={e => setNewGame(g => ({ ...g, home: e.target.value === 'home' }))} style={inputStyle}>
+                <option value="home">Home</option>
+                <option value="away">Away</option>
+              </select>
+            </FormField>
+            <FormField label="Notes (optional)">
+              <input placeholder="Carpool, jersey color, etc." value={newGame.notes} onChange={e => setNewGame(g => ({ ...g, notes: e.target.value }))} style={inputStyle} />
+            </FormField>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
+            <Button kind="ghost" onClick={() => setShowNewGame(false)}>Cancel</Button>
+            <Button kind="gold" icon="check" onClick={() => setShowNewGame(false)}>Add game</Button>
           </div>
         </ModalOverlay>
       )}

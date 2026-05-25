@@ -47,7 +47,7 @@ export default function DashboardView({ team, players, games, onGo }) {
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <Button kind="gold" icon="clipboard-list" onClick={() => onGo('lineup')}>Set lineup</Button>
-              <Button kind="onDark" icon="send">Notify team</Button>
+              <Button kind="onDark" icon="send" onClick={() => onGo('messages:compose')}>Notify team</Button>
             </div>
           </div>
         </div>
@@ -96,7 +96,7 @@ export default function DashboardView({ team, players, games, onGo }) {
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
           <span style={{ fontSize: 13, color: 'var(--fg-soft)' }}>Avg 87% · {players.length} roster</span>
-          <Button kind="ghost" size="sm" icon="plus">Log practice</Button>
+          <Button kind="ghost" size="sm" icon="plus" onClick={() => onGo('schedule:practices')}>Log practice</Button>
         </div>
       </Card>
 
