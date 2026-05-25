@@ -2,7 +2,9 @@ import Header from './Header.jsx';
 import Footer from './Footer.jsx';
 import Hero from './Hero.jsx';
 import WhyFPYC from './WhyFPYC.jsx';
+import Testimonials from './Testimonials.jsx';
 import Programs from './Programs.jsx';
+import SeasonCalendar from './SeasonCalendar.jsx';
 import HowToRegister from './HowToRegister.jsx';
 import { Announcements, Schedule, News, FaqContact } from './Sections.jsx';
 
@@ -26,7 +28,9 @@ export default function WebsiteApp() {
         <Hero onRegister={() => scrollTo('register')} />
         <Announcements />
         <WhyFPYC />
+        <Testimonials />
         <Programs />
+        <SeasonCalendar />
         <HowToRegister />
         <Schedule />
         <News />

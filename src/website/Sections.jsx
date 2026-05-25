@@ -95,9 +95,30 @@ function GameRow({ g }) {
 
 export function News() {
   const posts = [
-    { eyebrow: 'Championship', title: 'Boys 7–8 Select wins state',          date: 'Mar 22', read: '3 min', img: 'gold' },
-    { eyebrow: 'Volunteer',    title: 'Scorekeepers needed for Dec 7–8',      date: 'Nov 18', read: '1 min', img: 'navy' },
-    { eyebrow: 'Tryouts',      title: 'Select 2025–26 tryout results posted', date: 'Sep 12', read: '2 min', img: 'orange' },
+    {
+      eyebrow: 'Championship',
+      title: 'Hawks Boys 7–8 win back-to-back FPYC titles',
+      summary: 'The Hawks defeated the Reston Wolves 54–47 in a thrilling championship final, capping an undefeated home record.',
+      date: 'Mar 22',
+      read: '3 min',
+      img: 'gold',
+    },
+    {
+      eyebrow: 'Volunteer',
+      title: 'Scorekeepers needed for Dec 7–8 weekend',
+      summary: 'We need volunteers for scorekeeping this weekend. One game equals one volunteer credit toward your next-season fee.',
+      date: 'Nov 18',
+      read: '1 min',
+      img: 'navy',
+    },
+    {
+      eyebrow: 'Season',
+      title: '2025–26 Select Travel tryout results now posted',
+      summary: 'Coaches have notified all participants. Check your email for placement info. The season kicks off in October.',
+      date: 'Sep 12',
+      read: '2 min',
+      img: 'orange',
+    },
   ];
 
   return (
@@ -105,9 +126,9 @@ export function News() {
       <SectionHead eyebrow="News" title="From around the league" />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginTop: 32 }}>
         {posts.map((p, i) => (
-          <article key={i} style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', boxShadow: 'var(--shadow-1)' }}>
+          <article key={i} style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', boxShadow: 'var(--shadow-1)', display: 'flex', flexDirection: 'column' }}>
             <div style={{
-              height: 180,
+              height: 160,
               background: p.img === 'gold'   ? 'linear-gradient(135deg, #FFC72C 0%, #E5B324 100%)'
                         : p.img === 'orange' ? 'linear-gradient(135deg, #E87722 0%, #B85A12 100%)'
                         : 'var(--court-navy)',
@@ -118,15 +139,16 @@ export function News() {
               <div style={{ position: 'absolute', right: -20, top: -20, opacity: 0.18 }}>
                 <img src="/assets/basketball-glyph.svg" alt="" style={{ width: 180 }} />
               </div>
-              <span style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: 999, background: 'rgba(0,0,0,0.18)' }}>
+              <span style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: 999, background: 'rgba(0,0,0,0.20)', position: 'relative' }}>
                 {p.eyebrow}
               </span>
             </div>
-            <div style={{ padding: '18px 20px 22px' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, lineHeight: 1.1, color: 'var(--court-navy)', textTransform: 'uppercase' }}>{p.title}</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 14, fontSize: 12, color: 'var(--fg-muted)' }}>
+            <div style={{ padding: '18px 20px 22px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, lineHeight: 1.15, color: 'var(--court-navy)', textTransform: 'uppercase', marginBottom: 8 }}>{p.title}</div>
+              <p style={{ fontSize: 13, color: 'var(--fg-soft)', lineHeight: 1.55, margin: '0 0 14px', flex: 1 }}>{p.summary}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid var(--border)', fontSize: 12, color: 'var(--fg-muted)' }}>
                 <span>{p.date}</span>
-                <span>{p.read} read</span>
+                <span style={{ color: 'var(--court-navy)', fontWeight: 700, cursor: 'pointer' }}>{p.read} read →</span>
               </div>
             </div>
           </article>
