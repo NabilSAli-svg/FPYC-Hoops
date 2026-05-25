@@ -78,7 +78,7 @@ export default function HowToRegister() {
           sub="Eight steps, about 10 minutes. All registration is handled through the FPYC OttoSport portal."
         />
         <a
-          href="https://fpycsports.ottosport.ai/sports/basketball"
+          href="/register"
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -194,9 +194,8 @@ export default function HowToRegister() {
         </div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <a
-            href="https://fpycsports.ottosport.ai/sports/basketball"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/register"
+            
             style={{
               background: 'var(--varsity-gold)', color: 'var(--court-navy)',
               padding: '12px 20px', borderRadius: 8, textDecoration: 'none',

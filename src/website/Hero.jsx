@@ -42,9 +42,7 @@ export default function Hero({ onRegister }) {
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
             <a
-              href="https://fpycsports.ottosport.ai/sports/basketball"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/register"
               style={{
                 background: 'var(--varsity-gold)', color: 'var(--court-navy)', padding: '14px 22px', borderRadius: 8,
                 textDecoration: 'none', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15,
@@ -93,9 +91,7 @@ export default function Hero({ onRegister }) {
             <CheckLine text="Volunteer credit reduces next-season fee" />
           </div>
           <a
-            href="https://fpycsports.ottosport.ai/sports/basketball"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/register"
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               background: 'var(--court-navy)', color: '#fff',
@@ -103,7 +99,7 @@ export default function Hero({ onRegister }) {
               fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
             }}
           >
-            Begin registration <Icon name="external-link" size={14} />
+            Begin registration <Icon name="arrow-right" size={14} />
           </a>
           <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: 'var(--fg-muted)' }}>
             Powered by OttoSport · Secure payment
