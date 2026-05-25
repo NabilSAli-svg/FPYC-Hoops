@@ -5,6 +5,7 @@ import HomeTab from './HomeTab.jsx';
 import ScheduleTab from './ScheduleTab.jsx';
 import RosterTab from './RosterTab.jsx';
 import MessagesTab from './MessagesTab.jsx';
+import PaymentsTab from './PaymentsTab.jsx';
 import { FAMILIES, MESSAGES } from './data.js';
 
 const TABS = [
@@ -12,15 +13,19 @@ const TABS = [
   { id: 'schedule', label: 'Schedule', icon: 'calendar' },
   { id: 'roster',   label: 'Team',     icon: 'users' },
   { id: 'messages', label: 'Messages', icon: 'message-square' },
+  { id: 'payments', label: 'Payments', icon: 'credit-card' },
 ];
 
 export default function FamilyApp() {
   const [user, setUser] = useState(null);
   const [tab, setTab] = useState('home');
 
+  const [readIds, setReadIds] = useState(new Set());
+  const markRead = (id) => setReadIds(s => new Set([...s, id]));
+
   if (!user) return <FamilyLogin onLogin={who => setUser(FAMILIES[who])} />;
 
-  const unread = MESSAGES.filter(m => m.unread).length;
+  const unread = MESSAGES.filter(m => m.unread && !readIds.has(m.id)).length;
   const family = user;
 
   return (
@@ -59,7 +64,8 @@ export default function FamilyApp() {
         {tab === 'home'     && <HomeTab family={family} onTabChange={setTab} />}
         {tab === 'schedule' && <ScheduleTab />}
         {tab === 'roster'   && <RosterTab family={family} />}
-        {tab === 'messages' && <MessagesTab />}
+        {tab === 'messages' && <MessagesTab readIds={readIds} onMarkRead={markRead} />}
+        {tab === 'payments' && <PaymentsTab family={family} />}
       </div>
 
       {/* Bottom nav */}

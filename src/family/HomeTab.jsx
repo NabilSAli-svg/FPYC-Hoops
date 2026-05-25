@@ -89,6 +89,28 @@ export default function HomeTab({ family, onTabChange }) {
         </Section>
       )}
 
+      {/* Quick info strip */}
+      <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ padding: '12px 16px', borderBottom: '1px solid #F3F4F6', fontWeight: 700, fontSize: 12, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--court-navy)' }}>
+          Game day checklist
+        </div>
+        <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[
+            { icon: 'shirt',       text: 'Navy jersey (home game)',          done: true  },
+            { icon: 'droplets',    text: 'Water bottle',                     done: false },
+            { icon: 'clock',       text: 'Arrive by 9:30 AM for warm-ups',   done: false },
+            { icon: 'map-pin',     text: 'Robinson Secondary · Gym B',       done: false },
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
+              <div style={{ width: 22, height: 22, borderRadius: 6, background: item.done ? 'rgba(5,150,105,0.12)' : '#F4F5F7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Icon name={item.done ? 'check' : item.icon} size={12} color={item.done ? '#059669' : '#9CA3AF'} />
+              </div>
+              <span style={{ color: item.done ? '#059669' : '#374151', fontWeight: item.done ? 600 : 400, textDecoration: item.done ? 'none' : 'none' }}>{item.text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Next practice */}
       {nextPractice && (
         <Section title="Next practice">

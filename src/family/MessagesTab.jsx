@@ -2,8 +2,9 @@ import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
 import { MESSAGES } from './data.js';
 
-export default function MessagesTab() {
-  const [open, setOpen] = useState(MESSAGES[0]);
+export default function MessagesTab({ readIds = new Set(), onMarkRead }) {
+  const [open, setOpen] = useState(null);
+  const messages = MESSAGES.map(m => ({ ...m, unread: m.unread && !readIds.has(m.id) }));
 
   if (open) return <ThreadView msg={open} onBack={() => setOpen(null)} />;
 
@@ -12,8 +13,8 @@ export default function MessagesTab() {
       <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: '#9CA3AF', marginBottom: 12 }}>
         From your coaching staff
       </div>
-      {MESSAGES.map((m, i) => (
-        <button key={m.id} onClick={() => setOpen(m)} style={{
+      {messages.map((m, i) => (
+        <button key={m.id} onClick={() => { setOpen(m); if (m.unread) onMarkRead(m.id); }} style={{
           all: 'unset', cursor: 'pointer', width: '100%', boxSizing: 'border-box',
           background: m.unread ? '#fff' : '#FAFAFA',
           border: '1px solid #E2E5EA',
