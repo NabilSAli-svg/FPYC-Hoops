@@ -86,19 +86,29 @@ export default function SettingsView() {
 }
 
 function TeamsTab() {
+  const [teams, setTeams] = useState(TEAMS_LIST);
   const [showAdd, setShowAdd] = useState(false);
+  const [newTeam, setNewTeam] = useState({ name: '', division: 'Boys 5–6 House', coach: '', email: '', phone: '' });
+
+  function addTeam() {
+    if (!newTeam.name.trim() || !newTeam.coach.trim()) return;
+    setTeams(ts => [...ts, { id: `t${Date.now()}`, name: newTeam.name, division: newTeam.division, coach: newTeam.coach, players: 0 }]);
+    setNewTeam({ name: '', division: 'Boys 5–6 House', coach: '', email: '', phone: '' });
+    setShowAdd(false);
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <Display size={22}>My teams</Display>
-          <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>Season 2025–26 · {TEAMS_LIST.length} teams registered</div>
+          <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>Season 2025–26 · {teams.length} teams registered</div>
         </div>
         <Button kind="gold" icon="plus" onClick={() => setShowAdd(true)}>Add team</Button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
-        {TEAMS_LIST.map(team => (
+        {teams.map(team => (
           <Card key={team.id} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
@@ -137,7 +147,7 @@ function TeamsTab() {
         </button>
       </div>
 
-      {showAdd && <AddTeamModal onClose={() => setShowAdd(false)} />}
+      {showAdd && <AddTeamModal value={newTeam} onChange={setNewTeam} onSave={addTeam} onClose={() => setShowAdd(false)} />}
     </div>
   );
 }
@@ -145,12 +155,21 @@ function TeamsTab() {
 function CoachesTab() {
   const [coaches, setCoaches] = useState(COACHES);
   const [showAdd, setShowAdd] = useState(false);
+  const [newCoach, setNewCoach] = useState({ name: '', email: '', phone: '', role: 'Asst. Coach' });
 
   const togglePerm = (cid, perm) => {
     setCoaches(prev => prev.map(c =>
       c.id === cid ? { ...c, perms: { ...c.perms, [perm]: !c.perms[perm] } } : c
     ));
   };
+
+  function inviteCoach() {
+    if (!newCoach.name.trim() || !newCoach.email.trim()) return;
+    const defaultPerms = { roster: true, lineup: false, schedule: true, evaluations: false, messages: false, settings: false };
+    setCoaches(cs => [...cs, { id: `c${Date.now()}`, name: newCoach.name, role: newCoach.role, email: newCoach.email, phone: newCoach.phone, perms: defaultPerms }]);
+    setNewCoach({ name: '', email: '', phone: '', role: 'Asst. Coach' });
+    setShowAdd(false);
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -225,28 +244,29 @@ function CoachesTab() {
       </Card>
 
       {showAdd && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}
+          onClick={e => e.target === e.currentTarget && setShowAdd(false)}>
           <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 440, boxShadow: 'var(--shadow-3)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <Display size={22}>Invite coach</Display>
               <button onClick={() => setShowAdd(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><Icon name="x" size={20} color="var(--fg-muted)" /></button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <InputField label="Full name" placeholder="Coach name" />
-              <InputField label="Email address" placeholder="coach@example.com" type="email" />
-              <InputField label="Phone (for SMS)" placeholder="(703) 555-0000" type="tel" />
+              <InputField label="Full name" placeholder="Coach name" value={newCoach.name} onChange={e => setNewCoach(c => ({ ...c, name: e.target.value }))} />
+              <InputField label="Email address" placeholder="coach@example.com" type="email" value={newCoach.email} onChange={e => setNewCoach(c => ({ ...c, email: e.target.value }))} />
+              <InputField label="Phone (for SMS)" placeholder="(703) 555-0000" type="tel" value={newCoach.phone} onChange={e => setNewCoach(c => ({ ...c, phone: e.target.value }))} />
               <div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Role</div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {['Head Coach', 'Asst. Coach', 'Team Manager', 'Scorekeeper'].map(r => (
-                    <button key={r} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid var(--border)', background: r === 'Asst. Coach' ? 'var(--court-navy)' : 'transparent', color: r === 'Asst. Coach' ? '#fff' : 'var(--fg)', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>{r}</button>
+                    <button key={r} onClick={() => setNewCoach(c => ({ ...c, role: r }))} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid var(--border)', background: newCoach.role === r ? 'var(--court-navy)' : 'transparent', color: newCoach.role === r ? '#fff' : 'var(--fg)', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>{r}</button>
                   ))}
                 </div>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 24, justifyContent: 'flex-end' }}>
               <Button kind="ghost" onClick={() => setShowAdd(false)}>Cancel</Button>
-              <Button kind="gold" icon="send">Send invite</Button>
+              <Button kind="gold" icon="send" onClick={inviteCoach} disabled={!newCoach.name.trim() || !newCoach.email.trim()}>Send invite</Button>
             </div>
           </div>
         </div>
@@ -382,40 +402,42 @@ function Toggle({ label, on, onToggle, orange }) {
   );
 }
 
-function InputField({ label, value, placeholder, type = 'text' }) {
+function InputField({ label, value, placeholder, type = 'text', onChange }) {
   return (
     <div>
       <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
-      <input type={type} defaultValue={value} placeholder={placeholder} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--fg)', outline: 'none', background: 'var(--bone)', boxSizing: 'border-box' }} />
+      <input type={type} value={value ?? ''} placeholder={placeholder} onChange={onChange}
+        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--fg)', outline: 'none', background: 'var(--bone)', boxSizing: 'border-box' }} />
     </div>
   );
 }
 
-function AddTeamModal({ onClose }) {
+const DIVISIONS = ['Boys K–2 House', 'Girls K–2 House', 'Boys 3–4 House', 'Girls 3–4 House', 'Boys 5–6 House', 'Girls 5–6 House', 'Boys 7–8 House', 'Girls 7–8 House', 'Boys 3–4 Select', 'Boys 5–6 Select', 'Boys 7–8 Select', 'Girls 5–6 Select', 'Girls 7–8 Select'];
+
+function AddTeamModal({ value, onChange, onSave, onClose }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 480, boxShadow: 'var(--shadow-3)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <Display size={22}>Add team</Display>
           <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><Icon name="x" size={20} color="var(--fg-muted)" /></button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <InputField label="Team name" placeholder="e.g. Fairfax Hawks" />
+          <InputField label="Team name" placeholder="e.g. Fairfax Hawks" value={value.name} onChange={e => onChange(v => ({ ...v, name: e.target.value }))} />
           <div>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Division</div>
-            <select style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, background: 'var(--bone)', color: 'var(--fg)', outline: 'none' }}>
-              {['Boys K–2 House', 'Girls K–2 House', 'Boys 3–4 House', 'Girls 3–4 House', 'Boys 5–6 House', 'Girls 5–6 House', 'Boys 7–8 House', 'Girls 7–8 House', 'Boys 3–4 Select', 'Boys 5–6 Select', 'Boys 7–8 Select', 'Girls 5–6 Select', 'Girls 7–8 Select'].map(d => (
-                <option key={d}>{d}</option>
-              ))}
+            <select value={value.division} onChange={e => onChange(v => ({ ...v, division: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, background: 'var(--bone)', color: 'var(--fg)', outline: 'none' }}>
+              {DIVISIONS.map(d => <option key={d}>{d}</option>)}
             </select>
           </div>
-          <InputField label="Head coach name" placeholder="Coach name" />
-          <InputField label="Head coach email" placeholder="coach@example.com" type="email" />
-          <InputField label="Head coach phone" placeholder="(703) 555-0000" type="tel" />
+          <InputField label="Head coach name" placeholder="Coach name" value={value.coach} onChange={e => onChange(v => ({ ...v, coach: e.target.value }))} />
+          <InputField label="Head coach email" placeholder="coach@example.com" type="email" value={value.email} onChange={e => onChange(v => ({ ...v, email: e.target.value }))} />
+          <InputField label="Head coach phone" placeholder="(703) 555-0000" type="tel" value={value.phone} onChange={e => onChange(v => ({ ...v, phone: e.target.value }))} />
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 24, justifyContent: 'flex-end' }}>
           <Button kind="ghost" onClick={onClose}>Cancel</Button>
-          <Button kind="gold" icon="shield">Create team</Button>
+          <Button kind="gold" icon="shield" onClick={onSave} disabled={!value.name.trim() || !value.coach.trim()}>Create team</Button>
         </div>
       </div>
     </div>
