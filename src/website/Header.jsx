@@ -39,6 +39,11 @@ export default function Header({ onJump }) {
 
         <div style={{ flex: 1 }} />
 
+        <a href="/family" style={{
+          fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13, color: 'rgba(255,255,255,0.75)',
+          textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap',
+        }}>Family portal</a>
+
         <a href="/admin" style={{
           fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13, color: '#fff',
           textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap',
