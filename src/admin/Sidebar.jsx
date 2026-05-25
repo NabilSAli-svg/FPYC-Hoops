@@ -4,7 +4,6 @@ const NAV_ITEMS = [
   { id: 'dashboard',   icon: 'layout-dashboard', label: 'Dashboard' },
   { id: 'roster',      icon: 'users',             label: 'Roster' },
   { id: 'schedule',    icon: 'calendar',          label: 'Schedule' },
-  { id: 'officials',   icon: 'user-check',        label: 'Officials' },
   { id: 'lineup',      icon: 'clipboard-list',    label: 'Lineup' },
   { id: 'attendance',  icon: 'check-square',      label: 'Attendance' },
   { id: 'messages',    icon: 'message-square',    label: 'Messages', badge: 3 },
