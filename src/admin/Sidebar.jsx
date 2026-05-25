@@ -3,16 +3,17 @@ import { Icon, Avatar, Jersey } from '../shared/index.js';
 const NAV_ITEMS = [
   { id: 'dashboard',   icon: 'layout-dashboard', label: 'Dashboard' },
   { id: 'roster',      icon: 'users',             label: 'Roster' },
-  { id: 'schedule',    icon: 'calendar',           label: 'Schedule' },
-  { id: 'lineup',      icon: 'clipboard-list',     label: 'Lineup' },
-  { id: 'attendance',  icon: 'check-square',       label: 'Attendance', disabled: true },
-  { id: 'messages',    icon: 'message-square',     label: 'Messages',   disabled: true },
-  { id: 'evaluations', icon: 'star',               label: 'Evaluations',disabled: true },
+  { id: 'schedule',    icon: 'calendar',          label: 'Schedule' },
+  { id: 'lineup',      icon: 'clipboard-list',    label: 'Lineup' },
+  { id: 'attendance',  icon: 'check-square',      label: 'Attendance' },
+  { id: 'messages',    icon: 'message-square',    label: 'Messages', badge: 3 },
+  { id: 'evaluations', icon: 'star',              label: 'Evaluations' },
 ];
 
 const SECONDARY = [
-  { id: 'season',   icon: 'trophy',   label: 'Season' },
-  { id: 'settings', icon: 'settings', label: 'Settings' },
+  { id: 'draftboard', icon: 'shuffle', label: 'Draft Board' },
+  { id: 'season',     icon: 'trophy',  label: 'Season' },
+  { id: 'settings',   icon: 'settings',label: 'Settings' },
 ];
 
 export default function Sidebar({ active, onNav, team }) {
@@ -60,11 +61,11 @@ export default function Sidebar({ active, onNav, team }) {
 
       <nav style={{ padding: '6px 8px', flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
         {NAV_ITEMS.map(it => (
-          <NavItem key={it.id} {...it} active={active === it.id} onClick={() => !it.disabled && onNav(it.id)} />
+          <NavItem key={it.id} {...it} active={active === it.id} onClick={() => onNav(it.id)} />
         ))}
         <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '10px 8px' }} />
         {SECONDARY.map(it => (
-          <NavItem key={it.id} {...it} onClick={() => {}} disabled />
+          <NavItem key={it.id} {...it} active={active === it.id} onClick={() => onNav(it.id)} />
         ))}
       </nav>
 
@@ -81,18 +82,18 @@ export default function Sidebar({ active, onNav, team }) {
   );
 }
 
-function NavItem({ icon, label, active, disabled, onClick }) {
+function NavItem({ icon, label, active, onClick, badge }) {
   return (
     <button onClick={onClick} style={{
       background: active ? 'rgba(255,199,44,0.12)' : 'transparent',
       border: 'none',
       borderLeft: `3px solid ${active ? 'var(--varsity-gold)' : 'transparent'}`,
-      color: disabled ? 'rgba(255,255,255,0.32)' : active ? '#fff' : 'rgba(255,255,255,0.78)',
+      color: active ? '#fff' : 'rgba(255,255,255,0.78)',
       padding: '9px 12px',
       display: 'flex',
       alignItems: 'center',
       gap: 12,
-      cursor: disabled ? 'default' : 'pointer',
+      cursor: 'pointer',
       fontFamily: 'var(--font-body)',
       fontWeight: active ? 700 : 500,
       fontSize: 14,
@@ -102,8 +103,12 @@ function NavItem({ icon, label, active, disabled, onClick }) {
       width: '100%',
     }}>
       <Icon name={icon} size={18} />
-      <span>{label}</span>
-      {disabled && <span style={{ marginLeft: 'auto', fontSize: 10, color: 'rgba(255,255,255,0.32)' }}>SOON</span>}
+      <span style={{ flex: 1 }}>{label}</span>
+      {badge > 0 && (
+        <span style={{ background: 'var(--basketball-orange)', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: 999, padding: '2px 6px', minWidth: 18, textAlign: 'center' }}>
+          {badge}
+        </span>
+      )}
     </button>
   );
 }

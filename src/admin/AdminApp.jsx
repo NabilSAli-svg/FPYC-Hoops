@@ -5,6 +5,12 @@ import DashboardView from './DashboardView.jsx';
 import RosterView from './RosterView.jsx';
 import ScheduleView from './ScheduleView.jsx';
 import LineupView from './LineupView.jsx';
+import AttendanceView from './AttendanceView.jsx';
+import MessagesView from './MessagesView.jsx';
+import EvaluationsView from './EvaluationsView.jsx';
+import DraftBoardView from './DraftBoardView.jsx';
+import SeasonView from './SeasonView.jsx';
+import SettingsView from './SettingsView.jsx';
 import { Button } from '../shared/index.js';
 
 const TEAM = { name: 'Fairfax Hawks', division: 'Boys 5–6 House', number: 12 };
@@ -37,10 +43,16 @@ export default function AdminApp() {
   const [view, setView] = useState('dashboard');
 
   const titleMap = {
-    dashboard: { title: TEAM.name,         breadcrumb: `${TEAM.division} · Season 2025–26` },
-    roster:    { title: 'Roster',          breadcrumb: `${TEAM.name} · ${TEAM.division}` },
-    schedule:  { title: 'Schedule',        breadcrumb: `${TEAM.name} · ${TEAM.division}` },
-    lineup:    { title: 'Lineup Builder',  breadcrumb: 'Sat, Dec 7 · vs. Vienna Storm' },
+    dashboard:   { title: TEAM.name,         breadcrumb: `${TEAM.division} · Season 2025–26` },
+    roster:      { title: 'Roster',          breadcrumb: `${TEAM.name} · ${TEAM.division}` },
+    schedule:    { title: 'Schedule',        breadcrumb: `${TEAM.name} · ${TEAM.division}` },
+    lineup:      { title: 'Lineup Builder',  breadcrumb: 'Sat, Dec 7 · vs. Vienna Storm' },
+    attendance:  { title: 'Attendance',      breadcrumb: `${TEAM.name} · Season 2025–26` },
+    messages:    { title: 'Messages',        breadcrumb: '3 unread' },
+    evaluations: { title: 'Evaluations',     breadcrumb: `${TEAM.name} · ${TEAM.division}` },
+    draftboard:  { title: 'Draft Board',     breadcrumb: 'Boys 5–6 House · Season 2025–26' },
+    season:      { title: 'Season',          breadcrumb: 'Boys 5–6 House · Season 2025–26' },
+    settings:    { title: 'Settings',        breadcrumb: 'FPYC Basketball · Coach console' },
   };
   const t = titleMap[view] || titleMap.dashboard;
 
@@ -50,7 +62,11 @@ export default function AdminApp() {
       ? <Button kind="gold" icon="calendar-plus">New game</Button>
       : view === 'lineup'
         ? <Button kind="primary" icon="save">Save lineup</Button>
-        : null;
+        : view === 'messages'
+          ? <Button kind="gold" icon="edit-3">Compose</Button>
+          : view === 'draftboard'
+            ? <Button kind="gold" icon="save">Finalize teams</Button>
+            : null;
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bone)' }}>
@@ -58,10 +74,16 @@ export default function AdminApp() {
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <TopBar title={t.title} breadcrumb={t.breadcrumb} action={topAction} />
         <div style={{ padding: '24px 28px 64px', flex: 1 }}>
-          {view === 'dashboard' && <DashboardView team={TEAM} players={PLAYERS} games={GAMES} onGo={setView} />}
-          {view === 'roster'    && <RosterView team={TEAM} players={PLAYERS} onAdd={() => alert('Add player flow')} />}
-          {view === 'schedule'  && <ScheduleView games={GAMES} />}
-          {view === 'lineup'    && <LineupView players={PLAYERS.filter(p => p.status === 'active')} game={GAMES[0]} />}
+          {view === 'dashboard'   && <DashboardView team={TEAM} players={PLAYERS} games={GAMES} onGo={setView} />}
+          {view === 'roster'      && <RosterView team={TEAM} players={PLAYERS} onAdd={() => alert('Add player flow')} />}
+          {view === 'schedule'    && <ScheduleView games={GAMES} />}
+          {view === 'lineup'      && <LineupView players={PLAYERS.filter(p => p.status === 'active')} game={GAMES[0]} />}
+          {view === 'attendance'  && <AttendanceView players={PLAYERS} />}
+          {view === 'messages'    && <MessagesView />}
+          {view === 'evaluations' && <EvaluationsView players={PLAYERS.filter(p => p.status !== 'inactive')} />}
+          {view === 'draftboard'  && <DraftBoardView />}
+          {view === 'season'      && <SeasonView />}
+          {view === 'settings'    && <SettingsView />}
         </div>
       </div>
     </div>
