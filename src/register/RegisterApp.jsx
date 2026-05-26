@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
+import { useIsMobile } from '../shared/useIsMobile.js';
 import StepProgram from './StepProgram.jsx';
 import StepPlayer from './StepPlayer.jsx';
 import StepParents from './StepParents.jsx';
@@ -18,6 +19,7 @@ const STEPS = [
 
 export default function RegisterApp() {
   const [step, setStep] = useState(0);
+  const isMobile = useIsMobile();
   const [data, setData] = useState({
     program: null,
     player: {},
@@ -30,7 +32,7 @@ export default function RegisterApp() {
   const next = () => setStep(s => Math.min(s + 1, STEPS.length - 1));
   const back = () => setStep(s => Math.max(s - 1, 0));
 
-  const stepProps = { data, update, next, back };
+  const stepProps = { data, update, next, back, isMobile };
 
   return (
     <div style={{ minHeight: '100vh', background: '#F4F5F7', fontFamily: 'var(--font-body)' }}>
@@ -55,67 +57,94 @@ export default function RegisterApp() {
         </div>
       </header>
 
-      {/* Step progress */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #E2E5EA' }}>
-        <div style={{ maxWidth: 880, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', alignItems: 'stretch' }}>
-            {STEPS.map((s, i) => {
-              const done = i < step;
-              const active = i === step;
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => done && setStep(i)}
-                  disabled={!done}
-                  style={{
-                    flex: 1, padding: '14px 8px', background: 'none', border: 'none',
-                    cursor: done ? 'pointer' : 'default',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                    borderBottom: active ? '3px solid var(--varsity-gold)' : done ? '3px solid var(--court-navy)' : '3px solid transparent',
-                    transition: 'border-color 200ms',
-                    position: 'relative',
-                  }}
-                >
-                  {/* Connector */}
-                  {i > 0 && (
+      {/* Step progress — desktop */}
+      {!isMobile && (
+        <div style={{ background: '#fff', borderBottom: '1px solid #E2E5EA' }}>
+          <div style={{ maxWidth: 880, margin: '0 auto', padding: '0 24px' }}>
+            <div style={{ display: 'flex', alignItems: 'stretch' }}>
+              {STEPS.map((s, i) => {
+                const done = i < step;
+                const active = i === step;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => done && setStep(i)}
+                    disabled={!done}
+                    style={{
+                      flex: 1, padding: '14px 8px', background: 'none', border: 'none',
+                      cursor: done ? 'pointer' : 'default',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                      borderBottom: active ? '3px solid var(--varsity-gold)' : done ? '3px solid var(--court-navy)' : '3px solid transparent',
+                      transition: 'border-color 200ms',
+                      position: 'relative',
+                    }}
+                  >
+                    {i > 0 && (
+                      <div style={{
+                        position: 'absolute', left: 0, top: 29, width: '50%', height: 1,
+                        background: i <= step ? 'var(--court-navy)' : '#E2E5EA',
+                      }} />
+                    )}
+                    {i < STEPS.length - 1 && (
+                      <div style={{
+                        position: 'absolute', right: 0, top: 29, width: '50%', height: 1,
+                        background: i < step ? 'var(--court-navy)' : '#E2E5EA',
+                      }} />
+                    )}
                     <div style={{
-                      position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
-                      width: '50%', height: 1,
-                      background: i <= step ? 'var(--court-navy)' : '#E2E5EA',
-                    }} />
-                  )}
-                  {i < STEPS.length - 1 && (
-                    <div style={{
-                      position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
-                      width: '50%', height: 1,
-                      background: i < step ? 'var(--court-navy)' : '#E2E5EA',
-                    }} />
-                  )}
-                  <div style={{
-                    width: 30, height: 30, borderRadius: '50%', zIndex: 1,
-                    background: active ? 'var(--court-navy)' : done ? 'var(--court-navy)' : '#E2E5EA',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    transition: 'background 200ms',
-                  }}>
-                    {done
-                      ? <Icon name="check" size={14} color="#fff" />
-                      : <Icon name={s.icon} size={14} color={active ? '#fff' : '#9CA3AF'} />
-                    }
-                  </div>
-                  <span style={{
-                    fontSize: 11, fontWeight: 600, letterSpacing: '0.04em',
-                    color: active ? 'var(--court-navy)' : done ? 'var(--court-navy)' : '#9CA3AF',
-                    textTransform: 'uppercase',
-                  }}>{s.label}</span>
-                </button>
-              );
-            })}
+                      width: 30, height: 30, borderRadius: '50%', zIndex: 1,
+                      background: active ? 'var(--court-navy)' : done ? 'var(--court-navy)' : '#E2E5EA',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      transition: 'background 200ms',
+                    }}>
+                      {done
+                        ? <Icon name="check" size={14} color="#fff" />
+                        : <Icon name={s.icon} size={14} color={active ? '#fff' : '#9CA3AF'} />
+                      }
+                    </div>
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, letterSpacing: '0.04em',
+                      color: active ? 'var(--court-navy)' : done ? 'var(--court-navy)' : '#9CA3AF',
+                      textTransform: 'uppercase',
+                    }}>{s.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Step progress — mobile */}
+      {isMobile && (
+        <div style={{ background: '#fff', borderBottom: '1px solid #E2E5EA', padding: '12px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Icon name={STEPS[step].icon} size={15} color="#fff" />
+            </div>
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--basketball-orange)' }}>
+                Step {step + 1} of {STEPS.length}
+              </div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--court-navy)', lineHeight: 1.1 }}>
+                {STEPS[step].label === 'Pay' ? 'Review & Pay' : STEPS[step].label}
+              </div>
+            </div>
+            <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+              {STEPS.map((_, i) => (
+                <div key={i} style={{
+                  width: i === step ? 20 : 6, height: 6, borderRadius: 999,
+                  background: i < step ? 'var(--court-navy)' : i === step ? 'var(--varsity-gold)' : '#E2E5EA',
+                  transition: 'all 300ms',
+                }} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Step content */}
-      <div style={{ maxWidth: 880, margin: '0 auto', padding: '40px 24px 80px' }}>
+      <div style={{ maxWidth: 880, margin: '0 auto', padding: isMobile ? '24px 16px 60px' : '40px 24px 80px' }}>
         {step === 0 && <StepProgram {...stepProps} />}
         {step === 1 && <StepPlayer {...stepProps} />}
         {step === 2 && <StepParents {...stepProps} />}

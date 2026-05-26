@@ -53,7 +53,7 @@ const PROGRAMS = [
   },
 ];
 
-export default function StepProgram({ data, update, next }) {
+export default function StepProgram({ data, update, next, isMobile }) {
   const selected = data.program;
 
   return (
@@ -64,7 +64,7 @@ export default function StepProgram({ data, update, next }) {
         sub="All three programs are run by volunteer coaches and follow FPYC's sportsmanship values."
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
         {PROGRAMS.map(p => {
           const isSelected = selected?.id === p.id;
           return (
@@ -72,78 +72,100 @@ export default function StepProgram({ data, update, next }) {
               key={p.id}
               onClick={() => update('program', p)}
               style={{
-                all: 'unset', cursor: 'pointer', display: 'flex', flexDirection: 'column',
+                all: 'unset', cursor: 'pointer', display: 'flex', flexDirection: isMobile ? 'row' : 'column',
                 background: isSelected ? 'var(--court-navy)' : '#fff',
                 border: isSelected ? '2px solid var(--court-navy)' : '2px solid #E2E5EA',
                 borderRadius: 14,
                 overflow: 'hidden',
                 boxShadow: isSelected ? '0 8px 32px rgba(10,31,61,0.18)' : '0 1px 4px rgba(0,0,0,0.06)',
                 transition: 'all 160ms ease',
-                transform: isSelected ? 'translateY(-2px)' : 'none',
+                transform: isSelected ? (isMobile ? 'none' : 'translateY(-2px)') : 'none',
               }}
             >
-              {/* Color bar + tag */}
-              <div style={{ height: 6, background: isSelected ? 'var(--varsity-gold)' : p.color }} />
-              <div style={{ padding: '20px 20px 0' }}>
+              {/* Color bar */}
+              <div style={isMobile
+                ? { width: 6, flexShrink: 0, background: isSelected ? 'var(--varsity-gold)' : p.color }
+                : { height: 6, background: isSelected ? 'var(--varsity-gold)' : p.color }
+              } />
+              <div style={{ padding: isMobile ? '14px 14px' : '20px 20px 0', flex: isMobile ? 1 : undefined }}>
                 {p.tag && (
                   <div style={{
                     display: 'inline-flex', alignItems: 'center', gap: 5,
                     fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase',
                     color: isSelected ? 'var(--varsity-gold)' : p.color,
-                    marginBottom: 10,
+                    marginBottom: isMobile ? 6 : 10,
                   }}>
                     <Icon name="star" size={10} /> {p.tag}
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{
-                    fontFamily: 'var(--font-display)', fontSize: 28, textTransform: 'uppercase',
+                    fontFamily: 'var(--font-display)', fontSize: isMobile ? 22 : 28, textTransform: 'uppercase',
                     lineHeight: 1, color: isSelected ? '#fff' : 'var(--court-navy)',
                   }}>{p.title}</div>
                   <div style={{
-                    fontFamily: 'var(--font-display)', fontSize: 28,
+                    fontFamily: 'var(--font-display)', fontSize: isMobile ? 22 : 28,
                     color: isSelected ? 'var(--varsity-gold)' : p.color,
                     lineHeight: 1,
                   }}>${p.price}</div>
                 </div>
                 <div style={{
-                  fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase',
+                  fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase',
                   color: isSelected ? 'rgba(255,255,255,0.6)' : '#6B7280',
-                  marginTop: 4, marginBottom: 14,
+                  marginTop: 4, marginBottom: isMobile ? 0 : 14,
                 }}>{p.grades}</div>
-                <p style={{
-                  fontSize: 13, lineHeight: 1.6,
-                  color: isSelected ? 'rgba(255,255,255,0.82)' : '#4B5563',
-                  margin: '0 0 16px',
-                }}>{p.desc}</p>
+                {!isMobile && (
+                  <p style={{
+                    fontSize: 13, lineHeight: 1.6,
+                    color: isSelected ? 'rgba(255,255,255,0.82)' : '#4B5563',
+                    margin: '0 0 16px',
+                  }}>{p.desc}</p>
+                )}
               </div>
 
-              <div style={{ padding: '0 20px 20px', flex: 1 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {p.details.map((d, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <Icon name={d.icon} size={13} color={isSelected ? 'rgba(255,255,255,0.55)' : '#9CA3AF'} />
-                      <span style={{ fontSize: 13, color: isSelected ? 'rgba(255,255,255,0.82)' : '#374151' }}>{d.text}</span>
-                    </div>
-                  ))}
+              {!isMobile && (
+                <div style={{ padding: '0 20px 20px', flex: 1 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {p.details.map((d, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <Icon name={d.icon} size={13} color={isSelected ? 'rgba(255,255,255,0.55)' : '#9CA3AF'} />
+                        <span style={{ fontSize: 13, color: isSelected ? 'rgba(255,255,255,0.82)' : '#374151' }}>{d.text}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div style={{
-                margin: '0 20px 20px',
-                padding: '10px 16px',
-                borderRadius: 8,
-                background: isSelected ? 'rgba(255,199,44,0.15)' : '#F4F5F7',
-                border: isSelected ? '1px solid rgba(255,199,44,0.30)' : '1px solid #E2E5EA',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                fontSize: 13, fontWeight: 700,
-                color: isSelected ? 'var(--varsity-gold)' : 'var(--court-navy)',
-              }}>
-                {isSelected
-                  ? <><Icon name="check-circle" size={15} color="var(--varsity-gold)" /> Selected</>
-                  : <>Select {p.title}</>
-                }
-              </div>
+              {isMobile ? (
+                <div style={{ padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                    background: isSelected ? 'var(--varsity-gold)' : '#E2E5EA',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {isSelected
+                      ? <Icon name="check" size={13} color="var(--court-navy)" />
+                      : <Icon name="arrow-right" size={13} color="#9CA3AF" />
+                    }
+                  </div>
+                </div>
+              ) : (
+                <div style={{
+                  margin: '0 20px 20px',
+                  padding: '10px 16px',
+                  borderRadius: 8,
+                  background: isSelected ? 'rgba(255,199,44,0.15)' : '#F4F5F7',
+                  border: isSelected ? '1px solid rgba(255,199,44,0.30)' : '1px solid #E2E5EA',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  fontSize: 13, fontWeight: 700,
+                  color: isSelected ? 'var(--varsity-gold)' : 'var(--court-navy)',
+                }}>
+                  {isSelected
+                    ? <><Icon name="check-circle" size={15} color="var(--varsity-gold)" /> Selected</>
+                    : <>Select {p.title}</>
+                  }
+                </div>
+              )}
             </button>
           );
         })}
@@ -175,10 +197,10 @@ export default function StepProgram({ data, update, next }) {
 
 export function StepHeader({ eyebrow, title, sub }) {
   return (
-    <div style={{ marginBottom: 28 }}>
+    <div style={{ marginBottom: 24 }}>
       <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--basketball-orange)', marginBottom: 6 }}>{eyebrow}</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, textTransform: 'uppercase', color: 'var(--court-navy)', lineHeight: 1, marginBottom: 10 }}>{title}</div>
-      {sub && <p style={{ fontSize: 15, color: '#6B7280', lineHeight: 1.55, margin: 0 }}>{sub}</p>}
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(26px, 5vw, 36px)', textTransform: 'uppercase', color: 'var(--court-navy)', lineHeight: 1, marginBottom: 10 }}>{title}</div>
+      {sub && <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.55, margin: 0 }}>{sub}</p>}
     </div>
   );
 }

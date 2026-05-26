@@ -1,6 +1,6 @@
 import { StepHeader, ContinueBtn, BackBtn } from './StepProgram.jsx';
 
-export default function StepWaivers({ data, update, next, back }) {
+export default function StepWaivers({ data, update, next, back, isMobile: _isMobile }) {
   const w = data.waivers;
   const set = (k, v) => update('waivers', { ...w, [k]: v });
   const bothSigned = w.concussion && w.seasonal;

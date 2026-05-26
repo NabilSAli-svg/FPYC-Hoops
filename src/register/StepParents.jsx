@@ -13,7 +13,7 @@ function validateParent(p) {
   };
 }
 
-function ParentForm({ title, data, onChange, required, showErrors }) {
+function ParentForm({ title, data, onChange, required, showErrors, isMobile }) {
   const set = (k, v) => onChange({ ...data, [k]: v });
   const errs = (required && showErrors) ? validateParent(data) : {};
 
@@ -42,7 +42,7 @@ function ParentForm({ title, data, onChange, required, showErrors }) {
         >Create new member</button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
         <Field label="First name" required={required} error={errs.firstName}>
           <Input value={data.firstName} onChange={v => set('firstName', v)} placeholder="First name" error={!!errs.firstName} />
         </Field>
@@ -66,7 +66,7 @@ function ParentForm({ title, data, onChange, required, showErrors }) {
   );
 }
 
-export default function StepParents({ data, update, next, back }) {
+export default function StepParents({ data, update, next, back, isMobile }) {
   const [hasP2, setHasP2] = useState(!!(data.parents.p2?.firstName));
   const [showErrors, setShowErrors] = useState(false);
   const parents = data.parents;
@@ -101,7 +101,7 @@ export default function StepParents({ data, update, next, back }) {
         <span><strong>Parent 1 and Parent 2</strong> will each be given admin login access to this household with a valid email address.</span>
       </div>
 
-      <ParentForm title="Parent 1" data={p1} onChange={setP1} required showErrors={showErrors} />
+      <ParentForm title="Parent 1" data={p1} onChange={setP1} required showErrors={showErrors} isMobile={isMobile} />
 
       {!hasP2 ? (
         <button
@@ -121,7 +121,7 @@ export default function StepParents({ data, update, next, back }) {
         </button>
       ) : (
         <div style={{ position: 'relative' }}>
-          <ParentForm title="Parent 2 (optional)" data={parents.p2 || {}} onChange={setP2} required={false} showErrors={false} />
+          <ParentForm title="Parent 2 (optional)" data={parents.p2 || {}} onChange={setP2} required={false} showErrors={false} isMobile={isMobile} />
           <button
             onClick={() => { setHasP2(false); setP2({}); }}
             style={{

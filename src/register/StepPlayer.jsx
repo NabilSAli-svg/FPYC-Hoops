@@ -5,7 +5,7 @@ const GRADES = ['Kindergarten','1st Grade','2nd Grade','3rd Grade','4th Grade','
 const GENDERS = ['Male','Female','Prefer not to say'];
 const SCHOOLS = ['Daniels Run ES','Providence ES','Lanier MS','Mosby Woods ES','Robinson Secondary','Fairfax HS','Other'];
 
-export default function StepPlayer({ data, update, next, back }) {
+export default function StepPlayer({ data, update, next, back, isMobile }) {
   const p = data.player;
   const set = (k, v) => update('player', { ...p, [k]: v });
   const [showErrors, setShowErrors] = useState(false);
@@ -34,21 +34,23 @@ export default function StepPlayer({ data, update, next, back }) {
       />
 
       <FormCard>
-        <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
-          <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 88, height: 88, borderRadius: 14,
-              background: '#F4F5F7', border: '2px dashed #D1D5DB',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', gap: 6,
-            }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-              <span style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 600 }}>Photo</span>
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 16 : 32, alignItems: 'flex-start' }}>
+          {!isMobile && (
+            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 88, height: 88, borderRadius: 14,
+                background: '#F4F5F7', border: '2px dashed #D1D5DB',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', gap: 6,
+              }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                <span style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 600 }}>Photo</span>
+              </div>
+              <span style={{ fontSize: 11, color: '#9CA3AF' }}>Optional</span>
             </div>
-            <span style={{ fontSize: 11, color: '#9CA3AF' }}>Optional</span>
-          </div>
+          )}
 
-          <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div style={{ flex: 1, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
             <Field label="First name" required error={errs.firstName}>
               <Input value={p.firstName} onChange={v => set('firstName', v)} placeholder="First name" error={!!errs.firstName} />
             </Field>

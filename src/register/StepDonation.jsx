@@ -44,7 +44,7 @@ const TIERS = [
   },
 ];
 
-export default function StepDonation({ data, update, next, back }) {
+export default function StepDonation({ data, update, next, back, isMobile }) {
   const donation = data.donation || {};
   const [customAmt, setCustomAmt] = useState('');
   const [remarks, setRemarks] = useState('');
@@ -78,7 +78,7 @@ export default function StepDonation({ data, update, next, back }) {
       </div>
 
       {/* Tier cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 14, marginBottom: 20 }}>
         {TIERS.map(tier => {
           const isSelected = donation.tier === tier.id;
           return (

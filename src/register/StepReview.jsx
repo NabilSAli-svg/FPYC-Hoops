@@ -15,7 +15,7 @@ function formatExpiry(val) {
   return digits;
 }
 
-export default function StepReview({ data, back }) {
+export default function StepReview({ data, back, isMobile }) {
   const [payMethod, setPayMethod] = useState('visa');
   const [card, setCard] = useState({ number: '', expiry: '', cvv: '', name: '' });
   const [submitted, setSubmitted] = useState(false);
@@ -46,7 +46,7 @@ export default function StepReview({ data, back }) {
     setTimeout(() => { setProcessing(false); setSubmitted(true); }, 2200);
   }
 
-  if (submitted) return <SuccessScreen player={player} prog={prog} email={p1.email} confirmNum={confirmNum} />;
+  if (submitted) return <SuccessScreen player={player} prog={prog} email={p1.email} confirmNum={confirmNum} isMobile={isMobile} />;
 
   return (
     <div>
@@ -55,7 +55,7 @@ export default function StepReview({ data, back }) {
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, textTransform: 'uppercase', color: 'var(--court-navy)', lineHeight: 1, marginBottom: 10 }}>Review & pay</div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr', gap: 20, alignItems: 'start' }}>
         {/* Left: summary */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <SummaryCard title="Registration summary">
@@ -106,7 +106,7 @@ export default function StepReview({ data, back }) {
         </div>
 
         {/* Right: payment */}
-        <div style={{ position: 'sticky', top: 100 }}>
+        <div style={{ position: isMobile ? 'static' : 'sticky', top: 100 }}>
           <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 14, overflow: 'hidden' }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #E2E5EA', fontWeight: 700, fontSize: 15, color: 'var(--court-navy)' }}>
               Payment method
@@ -208,10 +208,10 @@ export default function StepReview({ data, back }) {
   );
 }
 
-function SuccessScreen({ player, prog, email, confirmNum }) {
+function SuccessScreen({ player, prog, email, confirmNum, isMobile }) {
   const programLabel = prog ? PROGRAM_LABELS[prog.id] : 'FPYC Basketball';
   return (
-    <div style={{ maxWidth: 600, margin: '0 auto', padding: '20px 0 60px' }}>
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: isMobile ? '0 0 40px' : '20px 0 60px' }}>
       {/* Hero */}
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
         <div style={{
@@ -222,7 +222,7 @@ function SuccessScreen({ player, prog, email, confirmNum }) {
         }}>
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 44, textTransform: 'uppercase', color: 'var(--court-navy)', lineHeight: 1, marginBottom: 14 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 36 : 44, textTransform: 'uppercase', color: 'var(--court-navy)', lineHeight: 1, marginBottom: 14 }}>
           You&apos;re in!
         </div>
         <p style={{ fontSize: 17, color: '#374151', lineHeight: 1.55, margin: '0 0 8px' }}>
