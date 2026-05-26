@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
-import { TEAM, EVENTS, MESSAGES } from './data.js';
+import { useGames, usePractices, deriveEvents, TEAM_INFO } from '../shared/store.js';
 
-export default function HomeTab({ family, onTabChange }) {
+export default function HomeTab({ family, messages, onTabChange }) {
+  const [games] = useGames();
+  const [practices] = usePractices();
+  const EVENTS = deriveEvents(games, practices);
+  const TEAM = TEAM_INFO;
+
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 650);
@@ -17,7 +22,7 @@ export default function HomeTab({ family, onTabChange }) {
   const nextPractice = EVENTS.find(e => e.type === 'practice' && e.status === 'upcoming');
   const lastGame = EVENTS.find(e => e.type === 'game' && e.status === 'final');
   const lastWin = lastGame && lastGame.us > lastGame.them;
-  const unread = MESSAGES.filter(m => m.unread).length;
+  const unread = (messages || []).filter(m => m.unread).length;
 
   return (
     <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

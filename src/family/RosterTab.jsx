@@ -1,5 +1,5 @@
 import Icon from '../shared/Icon.jsx';
-import { TEAM, PLAYERS } from './data.js';
+import { usePlayers, TEAM_INFO } from '../shared/store.js';
 
 const POS_COLOR = {
   Guard:   { bg: 'rgba(10,31,61,0.08)',     text: 'var(--court-navy)' },
@@ -8,6 +8,9 @@ const POS_COLOR = {
 };
 
 export default function RosterTab({ family }) {
+  const [players] = usePlayers();
+  const PLAYERS = players.filter(p => p.status !== 'inactive');
+  const TEAM = TEAM_INFO;
   const myNumber = family.child.number;
 
   return (

@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Pill, Button, Icon, Display, Eyebrow, EmptyState, Skeleton } from '../shared/index.js';
-
-const PRACTICES = [
-  { id: 'pr1', date: 'Mon, Dec 2',  time: '6:00–7:30 PM', gym: 'Daniels Run ES · Gym', type: 'Regular',      rsvp: 10, notes: 'Focus: ball handling and pick-and-roll defense' },
-  { id: 'pr2', date: 'Wed, Dec 4',  time: '6:00–7:30 PM', gym: 'Providence ES · Main',  type: 'Regular',      rsvp: 11, notes: '' },
-  { id: 'pr3', date: 'Mon, Dec 9',  time: '6:00–7:30 PM', gym: 'Daniels Run ES · Gym', type: 'Scrimmage',    rsvp: 12, notes: 'Scrimmage vs. Hawks 7–8 team' },
-  { id: 'pr4', date: 'Wed, Dec 11', time: '6:00–7:30 PM', gym: 'Providence ES · Main',  type: 'Regular',      rsvp: 9,  notes: '' },
-  { id: 'pr5', date: 'Mon, Dec 16', time: '6:00–7:30 PM', gym: 'Daniels Run ES · Gym', type: 'Conditioning', rsvp: 8,  notes: 'Film review first 20 min' },
-  { id: 'pr6', date: 'Wed, Dec 18', time: '6:00–7:30 PM', gym: 'TBD',                  type: 'Regular',      rsvp: 0,  notes: 'Gym TBD — check back Dec 10' },
-];
+import { usePractices } from '../shared/store.js';
 
 const PRACTICE_TYPE_COLOR = {
   Regular:      { bg: 'rgba(10,31,61,0.08)',       text: 'var(--court-navy)' },
@@ -16,7 +8,8 @@ const PRACTICE_TYPE_COLOR = {
   Conditioning: { bg: 'rgba(232,119,34,0.12)',     text: 'var(--basketball-orange)' },
 };
 
-export default function ScheduleView({ games, onScoreSave, onGo, initialTab = 'games', openNewGame = false, onNewGameClose }) {
+export default function ScheduleView({ games, onScoreSave, onGameAdd, onGo, initialTab = 'games', openNewGame = false, onNewGameClose }) {
+  const [practices, setPractices] = usePractices();
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 700);
@@ -63,7 +56,7 @@ export default function ScheduleView({ games, onScoreSave, onGo, initialTab = 'g
       <div style={{ display: 'flex', alignItems: 'center', gap: 0, borderBottom: '1px solid var(--border)' }}>
         {[
           { id: 'games',     label: 'Games',     count: games.length },
-          { id: 'practices', label: 'Practices', count: PRACTICES.length },
+          { id: 'practices', label: 'Practices', count: practices.length },
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             background: 'none', border: 'none', cursor: 'pointer',
@@ -170,12 +163,12 @@ export default function ScheduleView({ games, onScoreSave, onGo, initialTab = 'g
       {/* PRACTICES TAB */}
       {tab === 'practices' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {PRACTICES.length === 0 && (
+          {practices.length === 0 && (
             <Card padding={0}>
               <EmptyState icon="clipboard-list" title="No practices" message="Schedule your first practice session." onAction={() => setShowNewPractice(true)} actionLabel="Add practice" />
             </Card>
           )}
-          {PRACTICES.map((p, i) => {
+          {practices.map((p, i) => {
             const colors = PRACTICE_TYPE_COLOR[p.type] || PRACTICE_TYPE_COLOR.Regular;
             const isPast = i < 2;
             return (
@@ -270,7 +263,28 @@ export default function ScheduleView({ games, onScoreSave, onGo, initialTab = 'g
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
             <Button kind="ghost" onClick={() => setShowNewPractice(false)}>Cancel</Button>
-            <Button kind="gold" icon="check" onClick={() => setShowNewPractice(false)}>Add practice</Button>
+            <Button kind="gold" icon="check" onClick={() => {
+              if (!newPractice.date || !newPractice.time || !newPractice.gym) return;
+              const d = new Date(newPractice.date + 'T12:00:00');
+              const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+              const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+              const label = `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+              const [h, m] = newPractice.time.split(':');
+              const hour = parseInt(h, 10);
+              const ampm = hour >= 12 ? 'PM' : 'AM';
+              const display = `${hour > 12 ? hour - 12 : hour || 12}:${m} ${ampm}`;
+              setPractices(ps => [...ps, {
+                id: 'pr' + Date.now(),
+                date: label,
+                time: `${display}–${parseInt(h)+1 > 12 ? parseInt(h)+1-12 : parseInt(h)+1}:${m} PM`,
+                gym: newPractice.gym,
+                type: newPractice.type,
+                rsvp: 0,
+                notes: newPractice.notes,
+              }]);
+              setNewPractice({ date: '', time: '', gym: '', type: 'Regular', notes: '' });
+              setShowNewPractice(false);
+            }}>Add practice</Button>
           </div>
         </ModalOverlay>
       )}
@@ -304,7 +318,33 @@ export default function ScheduleView({ games, onScoreSave, onGo, initialTab = 'g
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
             <Button kind="ghost" onClick={() => setShowNewGame(false)}>Cancel</Button>
-            <Button kind="gold" icon="check" onClick={() => setShowNewGame(false)}>Add game</Button>
+            <Button kind="gold" icon="check" onClick={() => {
+              if (!newGame.date || !newGame.opponent) return;
+              const d = new Date(newGame.date + 'T12:00:00');
+              const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+              const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+              const label = `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`;
+              const [h, m] = (newGame.time || '10:00').split(':');
+              const hour = parseInt(h, 10);
+              const ampm = hour >= 12 ? 'PM' : 'AM';
+              const timeDisplay = `${hour > 12 ? hour - 12 : hour || 12}:${m} ${ampm}`;
+              onGameAdd?.({
+                id: 'g' + Date.now(),
+                status: 'scheduled',
+                month: months[d.getMonth()],
+                date: d.getDate(),
+                weekday: days[d.getDay()],
+                day: label,
+                time: timeDisplay,
+                opponent: newGame.opponent,
+                location: newGame.location,
+                home: newGame.home,
+                note: newGame.notes || undefined,
+                confirmed: 0,
+              });
+              setNewGame({ date: '', time: '', opponent: '', location: '', home: true, notes: '' });
+              setShowNewGame(false);
+            }}>Add game</Button>
           </div>
         </ModalOverlay>
       )}
@@ -379,7 +419,7 @@ function ScheduleSkeleton({ tab, setTab, games }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 0, borderBottom: '1px solid var(--border)' }}>
         {[
           { id: 'games',     label: 'Games',     count: games.length },
-          { id: 'practices', label: 'Practices', count: PRACTICES.length },
+          { id: 'practices', label: 'Practices', count: practices.length },
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             background: 'none', border: 'none', cursor: 'pointer',

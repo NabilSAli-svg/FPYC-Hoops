@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
-import { EVENTS } from './data.js';
+import { useGames, usePractices, deriveEvents } from '../shared/store.js';
 
 export default function ScheduleTab() {
+  const [games] = useGames();
+  const [practices] = usePractices();
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [rsvps, setRsvps] = useLocalStorage('fpyc-rsvps', {});
@@ -16,6 +18,7 @@ export default function ScheduleTab() {
 
   if (loading) return <ScheduleSkeleton filter={filter} setFilter={setFilter} />;
 
+  const EVENTS = deriveEvents(games, practices);
   const filtered = EVENTS.filter(e => filter === 'all' || e.type === filter);
 
   const upcoming = filtered.filter(e => e.status === 'upcoming');

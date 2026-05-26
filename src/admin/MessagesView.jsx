@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Button, Icon, Display, Pill, Avatar, EmptyState, Skeleton } from '../shared/index.js';
+import { useMessages, TEAM_INFO } from '../shared/store.js';
 
 const THREADS = [
   {
@@ -65,14 +66,30 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed })
     return () => clearTimeout(t);
   }, []);
 
+  const [, setMessages] = useMessages();
   const [tab, setTab] = useState('inbox');
   const [selected, setSelected] = useState(THREADS[0].id);
   const [showCompose, setShowCompose] = useState(autoCompose);
   const [composeChannel, setComposeChannel] = useState('email');
+  const [sentToast, setSentToast] = useState('');
 
   function handleCloseCompose() {
     setShowCompose(false);
     onAutoComposeUsed?.();
+  }
+
+  function handleSend(subject, body, channel) {
+    setMessages(ms => [{
+      id: 'm' + Date.now(),
+      from: TEAM_INFO.coach,
+      time: 'Just now',
+      unread: true,
+      subject: subject || '(No subject)',
+      body: body || '',
+    }, ...ms]);
+    setSentToast(channel === 'email' ? 'Email sent to team!' : 'Text sent to team!');
+    setTimeout(() => setSentToast(''), 3000);
+    handleCloseCompose();
   }
 
   const thread = THREADS.find(t => t.id === selected);
@@ -184,7 +201,13 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed })
         </div>
       )}
 
-      {showCompose && <ComposeModal channel={composeChannel} onClose={handleCloseCompose} />}
+      {showCompose && <ComposeModal channel={composeChannel} onClose={handleCloseCompose} onSend={handleSend} />}
+
+      {sentToast && (
+        <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', background: 'var(--court-navy)', color: '#fff', padding: '12px 24px', borderRadius: 999, fontWeight: 700, fontSize: 14, boxShadow: '0 8px 24px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: 8, zIndex: 300 }}>
+          <Icon name="check-circle" size={16} color="var(--varsity-gold)" /> {sentToast}
+        </div>
+      )}
     </div>
   );
 }
@@ -213,8 +236,10 @@ function NotificationsPanel() {
   );
 }
 
-function ComposeModal({ channel, onClose }) {
+function ComposeModal({ channel, onClose, onSend }) {
   const isEmail = channel === 'email';
+  const [subject, setSubject] = useState('');
+  const [body, setBody] = useState('');
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
       <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 560, boxShadow: 'var(--shadow-3)' }}>
@@ -229,16 +254,18 @@ function ComposeModal({ channel, onClose }) {
           <RecipientField />
           {isEmail && <div>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subject</div>
-            <input placeholder="Subject line…" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, outline: 'none', background: 'var(--bone)', boxSizing: 'border-box' }} />
+            <input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Subject line…" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, outline: 'none', background: 'var(--bone)', boxSizing: 'border-box' }} />
           </div>}
           <div>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Message</div>
-            <textarea placeholder={isEmail ? 'Write your email…' : 'Write your SMS (160 chars per segment)…'} style={{ width: '100%', minHeight: isEmail ? 160 : 100, padding: '12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, resize: 'vertical', outline: 'none', background: 'var(--bone)', boxSizing: 'border-box', lineHeight: 1.6 }} />
+            <textarea value={body} onChange={e => setBody(e.target.value)} placeholder={isEmail ? 'Write your email…' : 'Write your SMS (160 chars per segment)…'} style={{ width: '100%', minHeight: isEmail ? 160 : 100, padding: '12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, resize: 'vertical', outline: 'none', background: 'var(--bone)', boxSizing: 'border-box', lineHeight: 1.6 }} />
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 20, justifyContent: 'flex-end' }}>
           <Button kind="ghost" onClick={onClose}>Cancel</Button>
-          <Button kind={isEmail ? 'primary' : 'gold'} icon="send">Send {isEmail ? 'email' : 'text'}</Button>
+          <Button kind={isEmail ? 'primary' : 'gold'} icon="send" onClick={() => onSend(isEmail ? subject : `[Text] ${subject}`, body, channel)} disabled={!body.trim()}>
+            Send {isEmail ? 'email' : 'text'}
+          </Button>
         </div>
       </div>
     </div>

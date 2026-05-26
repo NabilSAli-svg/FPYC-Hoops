@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
+import { useMessages } from '../shared/store.js';
 import Icon from '../shared/Icon.jsx';
 import FamilyLogin from './FamilyLogin.jsx';
 import HomeTab from './HomeTab.jsx';
@@ -7,7 +8,7 @@ import ScheduleTab from './ScheduleTab.jsx';
 import RosterTab from './RosterTab.jsx';
 import MessagesTab from './MessagesTab.jsx';
 import PaymentsTab from './PaymentsTab.jsx';
-import { FAMILIES, MESSAGES } from './data.js';
+import { FAMILIES } from './data.js';
 
 const TABS = [
   { id: 'home',     label: 'Home',     icon: 'home' },
@@ -22,12 +23,13 @@ export default function FamilyApp() {
   const [tab, setTab] = useState('home');
 
   const [readIdsArr, setReadIdsArr] = useLocalStorage('fpyc-read-msgs', []);
+  const [messages] = useMessages();
   const readIds = new Set(readIdsArr);
   const markRead = (id) => setReadIdsArr(arr => arr.includes(id) ? arr : [...arr, id]);
 
   if (!user) return <FamilyLogin onLogin={who => setUser(FAMILIES[who])} />;
 
-  const unread = MESSAGES.filter(m => m.unread && !readIds.has(m.id)).length;
+  const unread = messages.filter(m => m.unread && !readIds.has(m.id)).length;
   const family = user;
 
   return (
@@ -64,10 +66,10 @@ export default function FamilyApp() {
 
       {/* Content */}
       <div style={{ flex: 1, maxWidth: 640, width: '100%', margin: '0 auto', padding: '20px 16px', paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))' }}>
-        {tab === 'home'     && <HomeTab family={family} onTabChange={setTab} />}
+        {tab === 'home'     && <HomeTab family={family} messages={messages} onTabChange={setTab} />}
         {tab === 'schedule' && <ScheduleTab />}
         {tab === 'roster'   && <RosterTab family={family} />}
-        {tab === 'messages' && <MessagesTab readIds={readIds} onMarkRead={markRead} />}
+        {tab === 'messages' && <MessagesTab messages={messages} readIds={readIds} onMarkRead={markRead} />}
         {tab === 'payments' && <PaymentsTab family={family} />}
       </div>
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocalStorage } from '../shared/useLocalStorage.js';
+import { useGames, usePlayers, TEAM_INFO } from '../shared/store.js';
 import Sidebar from './Sidebar.jsx';
 import TopBar from './TopBar.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
@@ -15,31 +15,7 @@ import SeasonView from './SeasonView.jsx';
 import SettingsView from './SettingsView.jsx';
 import { Button } from '../shared/index.js';
 
-const TEAM = { name: 'Fairfax Hawks', division: 'Boys 5–6 House', number: 12 };
-
-const PLAYERS = [
-  { id: 'p1',  number: 23, name: 'Jordan Reeves',   grade: '6th', school: 'Daniels Run ES', guardian: 'A. Reeves',   phone: '(703) 555-0123', position: 'Guard',   status: 'active',   waiver: true  },
-  { id: 'p2',  number:  7, name: 'Maya Chen',        grade: '5th', school: 'Providence ES',  guardian: 'L. Chen',     phone: '(703) 555-0144', position: 'Guard',   status: 'active',   waiver: true  },
-  { id: 'p3',  number: 14, name: 'Devon Brooks',     grade: '6th', school: 'Lanier MS',      guardian: 'K. Brooks',   phone: '(703) 555-0192', position: 'Forward', status: 'active',   waiver: true  },
-  { id: 'p4',  number:  3, name: 'Sam Whitaker',     grade: '5th', school: 'Daniels Run ES', guardian: 'P. Whitaker', phone: '(703) 555-0118', position: 'Forward', status: 'active',   waiver: true  },
-  { id: 'p5',  number: 32, name: 'Tariq Singh',      grade: '6th', school: 'Providence ES',  guardian: 'R. Singh',    phone: '(703) 555-0177', position: 'Center',  status: 'active',   waiver: true  },
-  { id: 'p6',  number: 11, name: 'Alex Romero',      grade: '5th', school: 'Mosby Woods ES', guardian: 'M. Romero',   phone: '(703) 555-0166', position: 'Guard',   status: 'active',   waiver: true  },
-  { id: 'p7',  number:  4, name: "Riley O'Connor",   grade: '6th', school: 'Lanier MS',      guardian: "S. O'Connor", phone: '(703) 555-0102', position: 'Guard',   status: 'active',   waiver: true  },
-  { id: 'p8',  number: 21, name: 'Imani Walker',     grade: '5th', school: 'Daniels Run ES', guardian: 'B. Walker',   phone: '(703) 555-0151', position: 'Forward', status: 'active',   waiver: true  },
-  { id: 'p9',  number: 15, name: 'Ethan Park',       grade: '6th', school: 'Lanier MS',      guardian: 'H. Park',     phone: '(703) 555-0189', position: 'Guard',   status: 'pending',  waiver: false },
-  { id: 'p10', number:  9, name: 'Noah Patel',       grade: '5th', school: 'Providence ES',  guardian: 'V. Patel',    phone: '(703) 555-0173', position: 'Forward', status: 'active',   waiver: true  },
-  { id: 'p11', number: 25, name: 'Luca Bianchi',     grade: '6th', school: 'Mosby Woods ES', guardian: 'G. Bianchi',  phone: '(703) 555-0128', position: 'Center',  status: 'active',   waiver: true  },
-  { id: 'p12', number:  8, name: 'Chloe Adebayo',    grade: '5th', school: 'Daniels Run ES', guardian: 'O. Adebayo',  phone: '(703) 555-0145', position: 'Guard',   status: 'inactive', waiver: true  },
-];
-
-const GAMES_INITIAL = [
-  { id: 'g1', status: 'scheduled', month: 'Dec', date: 7,  weekday: 'Sat', day: 'Sat, Dec 7',  time: '10:00 AM', opponent: 'Vienna Storm',       location: 'Robinson Secondary · Gym B', home: true,  refs: 'J. Park, M. Lee', countdown: 4, confirmed: 11, note: 'Carpool sheet posted — 3 families volunteered to drive.' },
-  { id: 'g2', status: 'scheduled', month: 'Dec', date: 14, weekday: 'Sat', day: 'Sat, Dec 14', time: '11:30 AM', opponent: 'Reston Wolves',       location: 'South Lakes HS · Gym A',      home: false, countdown: 11, confirmed: 9 },
-  { id: 'g3', status: 'scheduled', month: 'Dec', date: 21, weekday: 'Sat', day: 'Sat, Dec 21', time: '9:00 AM',  opponent: 'Burke Lakers',         location: 'Lake Braddock HS · Main',     home: false, countdown: 18, confirmed: 8 },
-  { id: 'g4', status: 'final',     month: 'Nov', date: 30, weekday: 'Sat', day: 'Sat, Nov 30', time: '10:00 AM', opponent: 'Oakton Patriots',      location: 'Robinson Secondary · Gym B',  home: true,  us: 48, them: 39 },
-  { id: 'g5', status: 'final',     month: 'Nov', date: 23, weekday: 'Sat', day: 'Sat, Nov 23', time: '10:00 AM', opponent: 'McLean Mustangs',      location: 'Cooper MS · Main',            home: false, us: 42, them: 47 },
-  { id: 'g6', status: 'final',     month: 'Nov', date: 16, weekday: 'Sat', day: 'Sat, Nov 16', time: '11:30 AM', opponent: 'Centreville Eagles',   location: 'Robinson Secondary · Gym B',  home: true,  us: 55, them: 50 },
-];
+const TEAM = { name: TEAM_INFO.name, division: TEAM_INFO.division, number: 12 };
 
 export default function AdminApp() {
   const isMobile = useIsMobile();
@@ -48,10 +24,13 @@ export default function AdminApp() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openNewGame, setOpenNewGame] = useState(false);
   const [messagesAutoCompose, setMessagesAutoCompose] = useState(false);
-  const [games, setGames] = useLocalStorage('fpyc-games', GAMES_INITIAL);
+  const [players, setPlayers] = usePlayers();
+  const [games, setGames] = useGames();
 
   const saveScore = (id, result) =>
     setGames(gs => gs.map(g => g.id === id ? { ...g, ...result, status: 'final' } : g));
+
+  const addGame = (game) => setGames(gs => [...gs, game]);
 
   function handleGo(target) {
     if (target === 'schedule:practices') {
@@ -104,13 +83,13 @@ export default function AdminApp() {
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <TopBar title={t.title} breadcrumb={t.breadcrumb} action={topAction} onMenuToggle={() => setSidebarOpen(o => !o)} />
         <div style={{ padding: '24px 28px 64px', flex: 1 }}>
-          {view === 'dashboard'   && <DashboardView team={TEAM} players={PLAYERS} games={games} onGo={handleGo} />}
-          {view === 'roster'      && <RosterView team={TEAM} players={PLAYERS} />}
-          {view === 'schedule'    && <ScheduleView games={games} onScoreSave={saveScore} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} />}
-          {view === 'lineup'      && <LineupView players={PLAYERS.filter(p => p.status === 'active')} game={games[0]} />}
-          {view === 'attendance'  && <AttendanceView players={PLAYERS} />}
+          {view === 'dashboard'   && <DashboardView team={TEAM} players={players} games={games} onGo={handleGo} />}
+          {view === 'roster'      && <RosterView team={TEAM} players={players} setPlayers={setPlayers} />}
+          {view === 'schedule'    && <ScheduleView games={games} onScoreSave={saveScore} onGameAdd={addGame} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} />}
+          {view === 'lineup'      && <LineupView players={players.filter(p => p.status === 'active')} game={games[0]} />}
+          {view === 'attendance'  && <AttendanceView players={players} />}
           {view === 'messages'    && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} />}
-          {view === 'evaluations' && <EvaluationsView players={PLAYERS.filter(p => p.status !== 'inactive')} />}
+          {view === 'evaluations' && <EvaluationsView players={players.filter(p => p.status !== 'inactive')} />}
           {view === 'draftboard'  && <DraftBoardView />}
           {view === 'season'      && <SeasonView games={games} />}
           {view === 'settings'    && <SettingsView />}

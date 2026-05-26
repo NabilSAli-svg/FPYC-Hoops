@@ -1,5 +1,6 @@
 import Icon from '../shared/Icon.jsx';
-import { PAYMENTS, BALANCE, TEAM } from './data.js';
+import { PAYMENTS, BALANCE } from './data.js';
+import { TEAM_INFO as TEAM } from '../shared/store.js';
 
 export default function PaymentsTab({ family }) {
   const allPaid = BALANCE.due === 0;

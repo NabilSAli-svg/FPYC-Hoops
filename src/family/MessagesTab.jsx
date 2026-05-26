@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
-import { MESSAGES } from './data.js';
 
-export default function MessagesTab({ readIds = new Set(), onMarkRead }) {
+export default function MessagesTab({ messages: rawMessages = [], readIds = new Set(), onMarkRead }) {
   const [open, setOpen] = useState(null);
-  const messages = MESSAGES.map(m => ({ ...m, unread: m.unread && !readIds.has(m.id) }));
+  const messages = rawMessages.map(m => ({ ...m, unread: m.unread && !readIds.has(m.id) }));
 
   if (open) return <ThreadView msg={open} onBack={() => setOpen(null)} />;
 
