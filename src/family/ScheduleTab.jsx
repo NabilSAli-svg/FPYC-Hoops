@@ -16,13 +16,22 @@ export default function ScheduleTab() {
     return () => clearTimeout(t);
   }, []);
 
+  // Poll every 5s to pick up live score changes from admin on same device
+  useEffect(() => {
+    const id = setInterval(() => {
+      window.dispatchEvent(new StorageEvent('storage', { key: 'fpyc-games' }));
+    }, 5000);
+    return () => clearInterval(id);
+  }, []);
+
   if (loading) return <ScheduleSkeleton filter={filter} setFilter={setFilter} />;
 
   const EVENTS = deriveEvents(games, practices);
   const filtered = EVENTS.filter(e => filter === 'all' || e.type === filter);
 
+  const live     = filtered.filter(e => e.status === 'live');
   const upcoming = filtered.filter(e => e.status === 'upcoming');
-  const past = filtered.filter(e => e.status === 'final');
+  const past     = filtered.filter(e => e.status === 'final');
 
   return (
     <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -42,6 +51,21 @@ export default function ScheduleTab() {
           }}>{f.label}</button>
         ))}
       </div>
+
+      {/* Live games */}
+      {live.length > 0 && (
+        <div>
+          <SectionLabel>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <span className="pulse-dot" style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--foul-red)', display: 'inline-block' }} />
+              Live now
+            </span>
+          </SectionLabel>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {live.map(e => <EventCard key={e.id} event={e} />)}
+          </div>
+        </div>
+      )}
 
       {/* Upcoming */}
       {upcoming.length > 0 && (
@@ -88,29 +112,32 @@ function SectionLabel({ children }) {
 }
 
 function EventCard({ event: e, rsvp, onRsvp }) {
-  const isGame = e.type === 'game';
+  const isGame  = e.type === 'game';
   const isFinal = e.status === 'final';
+  const isLive  = e.status === 'live';
   const win = isFinal && e.us > e.them;
 
   return (
     <div style={{
-      background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12,
-      overflow: 'hidden', opacity: isFinal ? 0.75 : 1,
+      background: '#fff',
+      border: isLive ? '1.5px solid #DC2626' : '1px solid #E2E5EA',
+      borderRadius: 12, overflow: 'hidden', opacity: isFinal ? 0.75 : 1,
     }}>
       <div style={{ display: 'flex', gap: 0 }}>
         {/* Date tile */}
         <div style={{
-          width: 64, flexShrink: 0, background: isFinal ? '#F9FAFB' : isGame ? 'var(--court-navy)' : '#F0F4FF',
+          width: 64, flexShrink: 0,
+          background: isLive ? '#DC2626' : isFinal ? '#F9FAFB' : isGame ? 'var(--court-navy)' : '#F0F4FF',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '14px 8px',
           borderRight: '1px solid #E2E5EA',
         }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: isFinal ? '#9CA3AF' : isGame ? 'rgba(255,255,255,0.6)' : '#6B7280' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: isLive ? 'rgba(255,255,255,0.75)' : isFinal ? '#9CA3AF' : isGame ? 'rgba(255,255,255,0.6)' : '#6B7280' }}>
             {e.date.split(',')[0]}
           </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, lineHeight: 1, marginTop: 2, color: isFinal ? '#9CA3AF' : isGame ? '#fff' : 'var(--court-navy)' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, lineHeight: 1, marginTop: 2, color: (isLive || isGame) && !isFinal ? '#fff' : isFinal ? '#9CA3AF' : 'var(--court-navy)' }}>
             {e.date.split(' ').slice(-1)[0]}
           </div>
-          <div style={{ fontSize: 10, color: isFinal ? '#9CA3AF' : isGame ? 'rgba(255,255,255,0.55)' : '#9CA3AF', marginTop: 2 }}>
+          <div style={{ fontSize: 10, color: isLive ? 'rgba(255,255,255,0.65)' : isFinal ? '#9CA3AF' : isGame ? 'rgba(255,255,255,0.55)' : '#9CA3AF', marginTop: 2 }}>
             {e.date.split(' ').slice(1, 2)[0]}
           </div>
         </div>
@@ -125,6 +152,12 @@ function EventCard({ event: e, rsvp, onRsvp }) {
             }}>
               {isGame ? (e.home ? 'Home game' : 'Away game') : 'Practice'}
             </span>
+            {isLive && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 999, background: '#DC2626', color: '#fff', letterSpacing: '0.06em' }}>
+                <span className="pulse-dot" style={{ width: 5, height: 5, borderRadius: '50%', background: '#fff', display: 'inline-block' }} />
+                LIVE {e.quarter ? `· Q${e.quarter}` : ''}
+              </span>
+            )}
             {isFinal && (
               <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: win ? 'rgba(5,150,105,0.10)' : 'rgba(220,38,38,0.08)', color: win ? '#059669' : '#DC2626' }}>
                 {win ? 'Win' : 'Loss'}
@@ -141,7 +174,14 @@ function EventCard({ event: e, rsvp, onRsvp }) {
 
         {/* Score or RSVP */}
         <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', minWidth: 70 }}>
-          {isFinal && isGame ? (
+          {isLive && isGame ? (
+            <div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: 1, color: '#DC2626', textAlign: 'right' }}>
+                {e.us ?? 0}–{e.them ?? 0}
+              </div>
+              <div style={{ fontSize: 11, color: '#DC2626', textAlign: 'right', marginTop: 2, fontWeight: 700 }}>Live</div>
+            </div>
+          ) : isFinal && isGame ? (
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, lineHeight: 1, color: win ? 'var(--court-navy)' : '#9CA3AF', textAlign: 'right' }}>
                 {e.us}–{e.them}

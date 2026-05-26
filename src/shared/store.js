@@ -91,9 +91,10 @@ export function deriveEvents(games, practices) {
     label: g.home ? `vs. ${g.opponent}` : `@ ${g.opponent}`,
     location: g.location,
     home: g.home,
-    status: g.status === 'final' ? 'final' : 'upcoming',
+    status: g.status === 'final' ? 'final' : g.status === 'live' ? 'live' : 'upcoming',
     us: g.us,
     them: g.them,
+    quarter: g.quarter,
   }));
 
   const practiceEvents = practices.map(p => ({

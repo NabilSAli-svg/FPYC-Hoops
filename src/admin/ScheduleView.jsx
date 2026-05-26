@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, Pill, Button, Icon, Display, Eyebrow, EmptyState, Skeleton } from '../shared/index.js';
 import { usePractices } from '../shared/store.js';
+
+const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4', 'OT'];
 
 const PRACTICE_TYPE_COLOR = {
   Regular:      { bg: 'rgba(10,31,61,0.08)',       text: 'var(--court-navy)' },
@@ -8,7 +10,7 @@ const PRACTICE_TYPE_COLOR = {
   Conditioning: { bg: 'rgba(232,119,34,0.12)',     text: 'var(--basketball-orange)' },
 };
 
-export default function ScheduleView({ games, onScoreSave, onGameAdd, onGo, initialTab = 'games', openNewGame = false, onNewGameClose }) {
+export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameAdd, onGo, initialTab = 'games', openNewGame = false, onNewGameClose }) {
   const [practices, setPractices] = usePractices();
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -19,10 +21,20 @@ export default function ScheduleView({ games, onScoreSave, onGameAdd, onGo, init
   const [tab, setTab] = useState(initialTab);
   const [showNewPractice, setShowNewPractice] = useState(false);
   const [showNewGame, setShowNewGame] = useState(false);
+
+  // Simple score edit modal (for final games)
   const [scoreGame, setScoreGame] = useState(null);
   const [scoreUs, setScoreUs] = useState('');
   const [scoreThem, setScoreThem] = useState('');
   const [scoreNote, setScoreNote] = useState('');
+
+  // Live scorer state
+  const [liveGame, setLiveGame] = useState(null);
+  const [liveUs, setLiveUs] = useState(0);
+  const [liveThem, setLiveThem] = useState(0);
+  const [liveQuarter, setLiveQuarter] = useState(1);
+  const [liveHistory, setLiveHistory] = useState([]); // [{us, them}]
+
   const [newPractice, setNewPractice] = useState({ date: '', time: '', gym: '', type: 'Regular', notes: '' });
   const [newGame, setNewGame] = useState({ date: '', time: '', opponent: '', location: '', home: true, notes: '' });
 
@@ -40,6 +52,43 @@ export default function ScheduleView({ games, onScoreSave, onGameAdd, onGo, init
       onScoreSave(scoreGame.id, { us, them, note: scoreNote || undefined });
     }
     setScoreGame(null);
+  }
+
+  function startLiveScorer(g) {
+    setLiveGame(g);
+    setLiveUs(g.us ?? 0);
+    setLiveThem(g.them ?? 0);
+    setLiveQuarter(g.quarter ?? 1);
+    setLiveHistory([]);
+    onGameUpdate?.(g.id, { status: 'live', us: g.us ?? 0, them: g.them ?? 0, quarter: g.quarter ?? 1 });
+  }
+
+  function addPoints(side, pts) {
+    setLiveHistory(h => [...h.slice(-29), { us: liveUs, them: liveThem }]);
+    const newUs   = side === 'us'   ? liveUs + pts   : liveUs;
+    const newThem = side === 'them' ? liveThem + pts  : liveThem;
+    setLiveUs(newUs);
+    setLiveThem(newThem);
+    onGameUpdate?.(liveGame.id, { status: 'live', us: newUs, them: newThem, quarter: liveQuarter });
+  }
+
+  function handleUndo() {
+    if (liveHistory.length === 0) return;
+    const prev = liveHistory[liveHistory.length - 1];
+    setLiveHistory(h => h.slice(0, -1));
+    setLiveUs(prev.us);
+    setLiveThem(prev.them);
+    onGameUpdate?.(liveGame.id, { status: 'live', us: prev.us, them: prev.them, quarter: liveQuarter });
+  }
+
+  function changeQuarter(q) {
+    setLiveQuarter(q);
+    onGameUpdate?.(liveGame.id, { status: 'live', us: liveUs, them: liveThem, quarter: q });
+  }
+
+  function handleEndGame() {
+    onScoreSave?.(liveGame.id, { us: liveUs, them: liveThem, quarter: liveQuarter, note: liveGame.note });
+    setLiveGame(null);
   }
 
   useEffect(() => {
@@ -89,11 +138,12 @@ export default function ScheduleView({ games, onScoreSave, onGameAdd, onGo, init
           )}
           {games.map(g => {
             const isFinal = g.status === 'final';
+            const isLive  = g.status === 'live';
             const win = isFinal && g.us > g.them;
             return (
-              <Card key={g.id} padding={0} style={{ overflow: 'hidden' }}>
+              <Card key={g.id} padding={0} style={{ overflow: 'hidden', outline: isLive ? '2px solid var(--foul-red)' : 'none' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr auto auto', gap: 18, alignItems: 'center', padding: '16px 20px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'var(--bone)', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: isLive ? 'rgba(200,16,46,0.06)' : 'var(--bone)', border: `1px solid ${isLive ? 'rgba(200,16,46,0.25)' : 'var(--border)'}`, borderRadius: 8, padding: '10px 12px' }}>
                     <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)' }}>{g.month}</div>
                     <Display size={32}>{g.date}</Display>
                     <div style={{ fontSize: 11, color: 'var(--fg-soft)', fontWeight: 500 }}>{g.weekday} · {g.time}</div>
@@ -103,38 +153,45 @@ export default function ScheduleView({ games, onScoreSave, onGameAdd, onGo, init
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       {isFinal
                         ? <Pill kind={win ? 'win' : 'loss'}>{win ? 'Win' : 'Loss'}</Pill>
-                        : <Pill kind="neutral">{g.home ? 'Home' : 'Away'}</Pill>
+                        : isLive
+                          ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 9px', borderRadius: 999, background: 'var(--foul-red)', color: '#fff', fontSize: 11, fontWeight: 800, letterSpacing: '0.08em' }}>
+                              <span className="pulse-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'inline-block' }} />
+                              LIVE · {QUARTERS[(g.quarter ?? 1) - 1]}
+                            </span>
+                          : <Pill kind="neutral">{g.home ? 'Home' : 'Away'}</Pill>
                       }
                     </div>
                     <Display size={22}>{g.opponent}</Display>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 6, fontSize: 12, color: 'var(--fg-soft)' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="map-pin" size={12} />{g.location}</span>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="user-check" size={12} />{g.refs || 'Refs TBD'}</span>
-                      {!isFinal && g.confirmed && (
+                      {!isFinal && !isLive && g.confirmed && (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="check-circle" size={12} color="var(--status-win)" />{g.confirmed} confirmed</span>
                       )}
                     </div>
                   </div>
 
                   <div style={{ textAlign: 'center', minWidth: 100 }}>
-                    {isFinal ? (
+                    {(isFinal || isLive) ? (
                       <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
-                        <Display size={40} color={!win ? 'var(--fg-muted)' : 'var(--court-navy)'}>{g.us}</Display>
+                        <Display size={40} color={isFinal && !win ? 'var(--fg-muted)' : 'var(--court-navy)'}>{g.us ?? 0}</Display>
                         <span style={{ fontSize: 14, color: 'var(--fg-muted)' }}>–</span>
-                        <Display size={40} color={win ? 'var(--fg-muted)' : 'var(--court-navy)'}>{g.them}</Display>
+                        <Display size={40} color={isFinal && win ? 'var(--fg-muted)' : 'var(--court-navy)'}>{g.them ?? 0}</Display>
                       </div>
                     ) : (
                       <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--fg-muted)', textTransform: 'uppercase' }}>vs.</div>
                     )}
                   </div>
 
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     {isFinal ? (
                       <Button kind="ghost" size="sm" icon="edit-3" onClick={() => openScore(g)}>Edit score</Button>
+                    ) : isLive ? (
+                      <Button kind="danger" size="sm" icon="activity" onClick={() => startLiveScorer(g)}>Resume</Button>
                     ) : (
                       <>
+                        <Button kind="gold" size="sm" icon="activity" onClick={() => startLiveScorer(g)}>Score live</Button>
                         <Button kind="ghost" size="sm" icon="flag" onClick={() => openScore(g)}>Log result</Button>
-                        <Button kind="primary" size="sm" icon="clipboard-list" onClick={() => onGo && onGo('lineup')}>Lineup</Button>
                       </>
                     )}
                   </div>
@@ -347,6 +404,84 @@ export default function ScheduleView({ games, onScoreSave, onGameAdd, onGo, init
             }}>Add game</Button>
           </div>
         </ModalOverlay>
+      )}
+
+      {/* Live Scorer Overlay */}
+      {liveGame && (
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--court-navy)', zIndex: 300, display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-body)' }}>
+          {/* Top bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', borderBottom: '1px solid rgba(255,255,255,0.10)' }}>
+            <div>
+              <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                {liveGame.weekday}, {liveGame.month} {liveGame.date} · {liveGame.location}
+              </div>
+              <div style={{ color: '#fff', fontFamily: 'var(--font-display)', fontSize: 18, textTransform: 'uppercase', marginTop: 2 }}>
+                Fairfax Hawks vs. {liveGame.opponent}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <button onClick={handleUndo} disabled={liveHistory.length === 0} style={{ all: 'unset', cursor: liveHistory.length ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.10)', color: liveHistory.length ? '#fff' : 'rgba(255,255,255,0.3)', fontSize: 13, fontWeight: 700, transition: 'all 120ms' }}>
+                <Icon name="rotate-ccw" size={14} color="currentColor" /> Undo
+              </button>
+              <button onClick={handleEndGame} style={{ all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, background: 'var(--foul-red)', color: '#fff', fontSize: 13, fontWeight: 700 }}>
+                <Icon name="flag" size={14} color="#fff" /> End Game
+              </button>
+              <button onClick={() => setLiveGame(null)} style={{ all: 'unset', cursor: 'pointer', padding: '8px', borderRadius: 8, background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center' }}>
+                <Icon name="x" size={18} color="rgba(255,255,255,0.6)" />
+              </button>
+            </div>
+          </div>
+
+          {/* Quarter selector */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, padding: '18px 24px 0' }}>
+            {QUARTERS.map((q, i) => (
+              <button key={q} onClick={() => changeQuarter(i + 1)} style={{ all: 'unset', cursor: 'pointer', padding: '8px 18px', borderRadius: 8, fontWeight: 800, fontSize: 14, letterSpacing: '0.06em', transition: 'all 120ms', background: liveQuarter === i + 1 ? 'var(--varsity-gold)' : 'rgba(255,255,255,0.10)', color: liveQuarter === i + 1 ? 'var(--court-navy)' : 'rgba(255,255,255,0.55)' }}>
+                {q}
+              </button>
+            ))}
+          </div>
+
+          {/* Scoreboard */}
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 60, padding: '0 40px' }}>
+            {/* Home — Hawks */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--varsity-gold)', marginBottom: 12 }}>Fairfax Hawks</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(80px, 15vw, 140px)', color: '#fff', lineHeight: 1 }}>{liveUs}</div>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 28 }}>
+                {[1, 2, 3].map(pts => (
+                  <button key={pts} onClick={() => addPoints('us', pts)} style={{ all: 'unset', cursor: 'pointer', width: 'clamp(52px, 8vw, 72px)', height: 'clamp(52px, 8vw, 72px)', borderRadius: 12, background: 'var(--varsity-gold)', color: 'var(--court-navy)', fontFamily: 'var(--font-display)', fontSize: 'clamp(18px, 3vw, 26px)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 80ms', boxShadow: '0 4px 16px rgba(255,199,44,0.30)' }}
+                    onMouseDown={e => e.currentTarget.style.transform = 'scale(0.94)'}
+                    onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                  >+{pts}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 6vw, 72px)', color: 'rgba(255,255,255,0.20)' }}>—</div>
+
+            {/* Away — Opponent */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 12 }}>{liveGame.opponent}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(80px, 15vw, 140px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1 }}>{liveThem}</div>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 28 }}>
+                {[1, 2, 3].map(pts => (
+                  <button key={pts} onClick={() => addPoints('them', pts)} style={{ all: 'unset', cursor: 'pointer', width: 'clamp(52px, 8vw, 72px)', height: 'clamp(52px, 8vw, 72px)', borderRadius: 12, background: 'rgba(255,255,255,0.12)', border: '1.5px solid rgba(255,255,255,0.22)', color: '#fff', fontFamily: 'var(--font-display)', fontSize: 'clamp(18px, 3vw, 26px)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 80ms' }}
+                    onMouseDown={e => e.currentTarget.style.transform = 'scale(0.94)'}
+                    onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                  >+{pts}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer hint */}
+          <div style={{ padding: '14px 24px', textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.30)', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            Score updates live for families viewing on the same device · Tap "End Game" to save as final
+          </div>
+        </div>
       )}
 
       {/* Score Entry Modal */}

@@ -30,6 +30,9 @@ export default function AdminApp() {
   const saveScore = (id, result) =>
     setGames(gs => gs.map(g => g.id === id ? { ...g, ...result, status: 'final' } : g));
 
+  const updateGame = (id, update) =>
+    setGames(gs => gs.map(g => g.id === id ? { ...g, ...update } : g));
+
   const addGame = (game) => setGames(gs => [...gs, game]);
 
   function handleGo(target) {
@@ -85,7 +88,7 @@ export default function AdminApp() {
         <div style={{ padding: '24px 28px 64px', flex: 1 }}>
           {view === 'dashboard'   && <DashboardView team={TEAM} players={players} games={games} onGo={handleGo} />}
           {view === 'roster'      && <RosterView team={TEAM} players={players} setPlayers={setPlayers} />}
-          {view === 'schedule'    && <ScheduleView games={games} onScoreSave={saveScore} onGameAdd={addGame} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} />}
+          {view === 'schedule'    && <ScheduleView games={games} onScoreSave={saveScore} onGameUpdate={updateGame} onGameAdd={addGame} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} />}
           {view === 'lineup'      && <LineupView players={players.filter(p => p.status === 'active')} game={games[0]} />}
           {view === 'attendance'  && <AttendanceView players={players} />}
           {view === 'messages'    && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} />}
