@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Pill, Button, Icon, Display, Eyebrow } from '../shared/index.js';
+import { Card, Pill, Button, Icon, Display, Eyebrow, EmptyState } from '../shared/index.js';
 
 const PRACTICES = [
   { id: 'pr1', date: 'Mon, Dec 2',  time: '6:00–7:30 PM', gym: 'Daniels Run ES · Gym', type: 'Regular',      rsvp: 10, notes: 'Focus: ball handling and pick-and-roll defense' },
@@ -82,6 +82,11 @@ export default function ScheduleView({ games, onScoreSave, onGo, initialTab = 'g
       {/* GAMES TAB */}
       {tab === 'games' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {games.length === 0 && (
+            <Card padding={0}>
+              <EmptyState icon="calendar" title="No games yet" message="Add your first game to start building the season schedule." onAction={() => setShowNewGame(true)} actionLabel="Add game" />
+            </Card>
+          )}
           {games.map(g => {
             const isFinal = g.status === 'final';
             const win = isFinal && g.us > g.them;
@@ -158,6 +163,11 @@ export default function ScheduleView({ games, onScoreSave, onGo, initialTab = 'g
       {/* PRACTICES TAB */}
       {tab === 'practices' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {PRACTICES.length === 0 && (
+            <Card padding={0}>
+              <EmptyState icon="clipboard-list" title="No practices" message="Schedule your first practice session." onAction={() => setShowNewPractice(true)} actionLabel="Add practice" />
+            </Card>
+          )}
           {PRACTICES.map((p, i) => {
             const colors = PRACTICE_TYPE_COLOR[p.type] || PRACTICE_TYPE_COLOR.Regular;
             const isPast = i < 2;

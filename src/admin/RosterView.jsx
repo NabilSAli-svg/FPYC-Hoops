@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, Pill, Button, Icon, Jersey } from '../shared/index.js';
+import { Card, Pill, Button, Icon, Jersey, EmptyState } from '../shared/index.js';
 
 const inputStyle = { padding: '9px 12px', borderRadius: 7, border: '1.5px solid var(--border)', fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none', width: '100%', boxSizing: 'border-box', color: 'var(--fg)' };
 
@@ -44,6 +44,9 @@ export default function RosterView({ team, players }) {
           <div>#</div><div>Player</div><div>Grade</div><div>School</div>
           <div>Guardian</div><div>Waiver</div><div>Status</div><div />
         </div>
+        {filtered.length === 0 && (
+          <EmptyState icon="users" title="No players" message={filter === 'all' ? 'Add your first player to get started.' : `No ${filter} players on this roster.`} onAction={() => setShowAdd(true)} actionLabel="Add player" />
+        )}
         {filtered.map((p, i) => (
           <div key={p.id} style={{
             display: 'grid',

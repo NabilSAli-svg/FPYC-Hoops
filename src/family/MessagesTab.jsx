@@ -13,6 +13,15 @@ export default function MessagesTab({ readIds = new Set(), onMarkRead }) {
       <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: '#9CA3AF', marginBottom: 12 }}>
         From your coaching staff
       </div>
+      {messages.length === 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 24px', textAlign: 'center', gap: 12 }}>
+          <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="inbox" size={24} color="#9CA3AF" />
+          </div>
+          <div style={{ fontWeight: 700, fontSize: 15, color: '#111827' }}>No messages yet</div>
+          <div style={{ fontSize: 13, color: '#9CA3AF', maxWidth: 260, lineHeight: 1.5 }}>Your coaching staff hasn't sent any messages yet. Check back closer to the season.</div>
+        </div>
+      )}
       {messages.map((m, i) => (
         <button key={m.id} onClick={() => { setOpen(m); if (m.unread) onMarkRead(m.id); }} style={{
           all: 'unset', cursor: 'pointer', width: '100%', boxSizing: 'border-box',

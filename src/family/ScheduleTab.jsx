@@ -43,6 +43,16 @@ export default function ScheduleTab() {
         </div>
       )}
 
+      {upcoming.length === 0 && past.length === 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 24px', textAlign: 'center', gap: 12 }}>
+          <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="calendar" size={24} color="#9CA3AF" />
+          </div>
+          <div style={{ fontWeight: 700, fontSize: 15, color: '#111827' }}>No {filter !== 'all' ? filter + 's' : 'events'} scheduled</div>
+          <div style={{ fontSize: 13, color: '#9CA3AF', maxWidth: 260, lineHeight: 1.5 }}>Check back once the schedule is posted by your coach.</div>
+        </div>
+      )}
+
       {/* Past */}
       {past.length > 0 && (
         <div>

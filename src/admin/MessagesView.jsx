@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, Button, Icon, Display, Pill, Avatar } from '../shared/index.js';
+import { Card, Button, Icon, Display, Pill, Avatar, EmptyState } from '../shared/index.js';
 
 const THREADS = [
   {
@@ -107,6 +107,9 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed })
         <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 16, flex: 1, minHeight: 0 }}>
           {/* Thread list */}
           <Card padding={0} style={{ overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+            {filtered.length === 0 && (
+              <EmptyState icon="mail" title="No messages" message="Your inbox is empty for this filter." />
+            )}
             {filtered.map((t, i) => (
               <button key={t.id} onClick={() => setSelected(t.id)} style={{
                 display: 'block', textAlign: 'left', width: '100%',
