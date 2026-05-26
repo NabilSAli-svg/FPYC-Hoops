@@ -4,7 +4,7 @@ export default function Programs() {
   return (
     <section id="programs" style={{ maxWidth: 1200, margin: '0 auto', padding: '96px 24px 24px' }}>
       <SectionHead eyebrow="Programs" title="Three ways to play" />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginTop: 32 }}>
+      <div className="mob-grid-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginTop: 32 }}>
         <ProgramCard
           tag="Rec"
           title="House League"

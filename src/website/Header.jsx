@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
 
 const NAV_ITEMS = [
@@ -9,6 +10,10 @@ const NAV_ITEMS = [
 ];
 
 export default function Header({ onJump }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const closeMenu = () => setMenuOpen(false);
+
   return (
     <header style={{
       background: 'rgba(10,31,61,0.94)',
@@ -19,7 +24,7 @@ export default function Header({ onJump }) {
       borderBottom: '1px solid rgba(255,255,255,0.08)',
     }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 72, display: 'flex', alignItems: 'center', gap: 24 }}>
-        <a href="#top" onClick={(e) => { e.preventDefault(); onJump('top'); }} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#fff', textDecoration: 'none', flexShrink: 0 }}>
+        <a href="#top" onClick={(e) => { e.preventDefault(); onJump('top'); closeMenu(); }} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#fff', textDecoration: 'none', flexShrink: 0 }}>
           <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 44, objectFit: 'contain' }} />
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1, whiteSpace: 'nowrap' }}>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: '0.04em', textTransform: 'uppercase' }}>FPYC Basketball</span>
@@ -27,7 +32,7 @@ export default function Header({ onJump }) {
           </div>
         </a>
 
-        <nav style={{ display: 'flex', gap: 4, marginLeft: 24 }}>
+        <nav className="desk-hide" style={{ display: 'flex', gap: 4, marginLeft: 24 }}>
           {NAV_ITEMS.map(it => (
             <a key={it.id} href={`#${it.id}`} onClick={(e) => { e.preventDefault(); onJump(it.id); }} style={{
               color: 'rgba(255,255,255,0.85)', textDecoration: 'none',
@@ -39,12 +44,12 @@ export default function Header({ onJump }) {
 
         <div style={{ flex: 1 }} />
 
-        <a href="/family" style={{
+        <a href="/family" className="desk-hide" style={{
           fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13, color: 'rgba(255,255,255,0.75)',
           textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap',
         }}>Family portal</a>
 
-        <a href="/admin" style={{
+        <a href="/admin" className="desk-hide" style={{
           fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13, color: '#fff',
           textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap',
         }}>Coach login</a>
@@ -55,7 +60,55 @@ export default function Header({ onJump }) {
           fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
           display: 'inline-flex', alignItems: 'center', gap: 6,
         }}>Register <Icon name="arrow-right" size={14} /></a>
+
+        <button
+          className="mob-show"
+          onClick={() => setMenuOpen(o => !o)}
+          style={{
+            all: 'unset', cursor: 'pointer', color: '#fff',
+            display: 'none', alignItems: 'center', justifyContent: 'center',
+            width: 40, height: 40, borderRadius: 8,
+            background: menuOpen ? 'rgba(255,255,255,0.12)' : 'transparent',
+          }}
+          aria-label="Toggle menu"
+        >
+          <Icon name={menuOpen ? 'x' : 'menu'} size={22} />
+        </button>
       </div>
+
+      {menuOpen && (
+        <div style={{
+          position: 'absolute', top: 72, left: 0, right: 0, zIndex: 49,
+          background: '#fff', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+          display: 'flex', flexDirection: 'column',
+        }}>
+          {NAV_ITEMS.map(it => (
+            <a key={it.id} href={`#${it.id}`} onClick={(e) => { e.preventDefault(); onJump(it.id); closeMenu(); }} style={{
+              color: 'var(--court-navy)', textDecoration: 'none',
+              fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 15,
+              padding: '16px 24px', borderBottom: '1px solid var(--border)',
+            }}>{it.label}</a>
+          ))}
+          <a href="/family" onClick={closeMenu} style={{
+            color: 'var(--court-navy)', textDecoration: 'none',
+            fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 15,
+            padding: '16px 24px', borderBottom: '1px solid var(--border)',
+          }}>Family portal</a>
+          <a href="/admin" onClick={closeMenu} style={{
+            color: 'var(--court-navy)', textDecoration: 'none',
+            fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 15,
+            padding: '16px 24px', borderBottom: '1px solid var(--border)',
+          }}>Coach login</a>
+          <div style={{ padding: '16px 24px' }}>
+            <a href="/register" onClick={closeMenu} style={{
+              background: 'var(--varsity-gold)', color: 'var(--court-navy)',
+              padding: '12px 20px', borderRadius: 8, textDecoration: 'none',
+              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15,
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+            }}>Register <Icon name="arrow-right" size={15} /></a>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Sidebar from './Sidebar.jsx';
 import TopBar from './TopBar.jsx';
+import { useIsMobile } from '../shared/useIsMobile.js';
 import DashboardView from './DashboardView.jsx';
 import RosterView from './RosterView.jsx';
 import ScheduleView from './ScheduleView.jsx';
@@ -40,8 +41,10 @@ const GAMES_INITIAL = [
 ];
 
 export default function AdminApp() {
+  const isMobile = useIsMobile();
   const [view, setView] = useState('dashboard');
   const [scheduleInitialTab, setScheduleInitialTab] = useState('games');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openNewGame, setOpenNewGame] = useState(false);
   const [messagesAutoCompose, setMessagesAutoCompose] = useState(false);
   const [games, setGames] = useState(GAMES_INITIAL);
@@ -89,9 +92,16 @@ export default function AdminApp() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bone)' }}>
-      <Sidebar active={view} onNav={v => { setView(v); setScheduleInitialTab('games'); }} team={TEAM} />
+      <Sidebar
+        active={view}
+        onNav={v => { setView(v); setScheduleInitialTab('games'); if (isMobile) setSidebarOpen(false); }}
+        team={TEAM}
+        isMobile={isMobile}
+        sidebarOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-        <TopBar title={t.title} breadcrumb={t.breadcrumb} action={topAction} />
+        <TopBar title={t.title} breadcrumb={t.breadcrumb} action={topAction} onMenuToggle={() => setSidebarOpen(o => !o)} />
         <div style={{ padding: '24px 28px 64px', flex: 1 }}>
           {view === 'dashboard'   && <DashboardView team={TEAM} players={PLAYERS} games={games} onGo={handleGo} />}
           {view === 'roster'      && <RosterView team={TEAM} players={PLAYERS} />}

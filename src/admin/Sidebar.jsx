@@ -16,18 +16,47 @@ const SECONDARY = [
   { id: 'settings',   icon: 'settings',label: 'Settings' },
 ];
 
-export default function Sidebar({ active, onNav, team }) {
+export default function Sidebar({ active, onNav, team, isMobile, sidebarOpen, onClose }) {
+  const asideStyle = isMobile ? {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    zIndex: 200,
+    width: 280,
+    background: 'var(--court-navy)',
+    color: '#fff',
+    display: 'flex',
+    flexDirection: 'column',
+    borderRight: '1px solid rgba(0,0,0,0.2)',
+    transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+    boxShadow: sidebarOpen ? '4px 0 24px rgba(0,0,0,0.35)' : 'none',
+    transition: 'transform 240ms cubic-bezier(0.2,0.8,0.2,1)',
+  } : {
+    width: 248,
+    background: 'var(--court-navy)',
+    color: '#fff',
+    display: 'flex',
+    flexDirection: 'column',
+    borderRight: '1px solid rgba(0,0,0,0.2)',
+    flexShrink: 0,
+    minHeight: '100vh',
+  };
+
   return (
-    <aside style={{
-      width: 248,
-      background: 'var(--court-navy)',
-      color: '#fff',
-      display: 'flex',
-      flexDirection: 'column',
-      borderRight: '1px solid rgba(0,0,0,0.2)',
-      flexShrink: 0,
-      minHeight: '100vh',
-    }}>
+    <>
+      {isMobile && sidebarOpen && (
+        <div
+          onClick={onClose}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.5)',
+            zIndex: 199,
+          }}
+        />
+      )}
+      <aside style={asideStyle}>
       {/* Brand */}
       <div style={{ padding: '18px 18px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ width: 36, height: 36, objectFit: 'contain' }} />
@@ -78,7 +107,8 @@ export default function Sidebar({ active, onNav, team }) {
         </div>
         <Icon name="log-out" size={16} color="rgba(255,255,255,0.5)" />
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 

@@ -131,3 +131,28 @@ html, body {
   50% { transform: scale(1.6); opacity: 0.5; }
 }
 .pulse-dot { animation: pulse 1.6s cubic-bezier(0.2,0.8,0.2,1) infinite; }
+
+/* Responsive grid utilities */
+@media (max-width: 768px) {
+  .mob-grid-1 { grid-template-columns: 1fr !important; }
+  .mob-hide   { display: none !important; }
+  .mob-show   { display: flex !important; }
+  .mob-stack  { flex-direction: column !important; }
+  .mob-p-sm   { padding: 16px !important; }
+}
+@media (min-width: 769px) {
+  .desk-hide { display: none !important; }
+}
+@media (max-width: 1024px) {
+  .tab-grid-2 { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* Sidebar drawer animation */
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

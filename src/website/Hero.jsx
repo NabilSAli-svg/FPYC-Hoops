@@ -1,6 +1,9 @@
 import Icon from '../shared/Icon.jsx';
+import { useIsMobile } from '../shared/useIsMobile.js';
 
 export default function Hero({ onRegister }) {
+  const isMobile = useIsMobile();
+
   return (
     <section id="hero" style={{ background: 'var(--court-navy)', color: '#fff', position: 'relative', overflow: 'hidden' }}>
       <div style={{
@@ -13,8 +16,11 @@ export default function Hero({ onRegister }) {
       </div>
 
       <div style={{
-        maxWidth: 1200, margin: '0 auto', padding: '80px 24px 96px',
-        display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 40, alignItems: 'center', position: 'relative',
+        maxWidth: 1200, margin: '0 auto',
+        padding: isMobile ? '40px 24px 48px' : '80px 24px 96px',
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr',
+        gap: 40, alignItems: 'center', position: 'relative',
       }}>
         <div>
           <div style={{
@@ -57,15 +63,14 @@ export default function Hero({ onRegister }) {
             }}><Icon name="info" size={16} /> How it works</a>
           </div>
 
-          <div style={{ display: 'flex', gap: 32, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.10)' }}>
-            <Fact value="K–8" label="Grades" />
-            <Fact value="$195" label="Reg fee" />
-            <Fact value="10+" label="Games / season" />
-            <Fact value="62" label="Years in Fairfax" />
+          <div style={{ display: 'flex', gap: isMobile ? 16 : 32, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.10)' }}>
+            <Fact value="K–8" label="Grades" isMobile={isMobile} />
+            <Fact value="$195" label="Reg fee" isMobile={isMobile} />
+            <Fact value="10+" label="Games / season" isMobile={isMobile} />
+            <Fact value="62" label="Years in Fairfax" isMobile={isMobile} />
           </div>
         </div>
 
-        {/* Registration card */}
         <div style={{ background: '#fff', color: 'var(--fg)', borderRadius: 14, padding: 28, boxShadow: '0 24px 60px rgba(0,0,0,0.30)', position: 'relative' }}>
           <div style={{ position: 'absolute', top: -1, left: 24, right: 24, height: 4, background: 'var(--varsity-gold)', borderRadius: '0 0 4px 4px' }} />
           <div style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--basketball-orange)' }}>
@@ -110,10 +115,10 @@ export default function Hero({ onRegister }) {
   );
 }
 
-function Fact({ value, label }) {
+function Fact({ value, label, isMobile }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, lineHeight: 1, color: 'var(--varsity-gold)' }}>{value}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 28 : 36, lineHeight: 1, color: 'var(--varsity-gold)' }}>{value}</div>
       <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>{label}</div>
     </div>
   );

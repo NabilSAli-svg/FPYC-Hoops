@@ -46,7 +46,7 @@ export default function Testimonials() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+        <div className="mob-grid-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
           {TESTIMONIALS.map((t, i) => (
             <div key={i} style={{
               background: 'rgba(255,255,255,0.06)',

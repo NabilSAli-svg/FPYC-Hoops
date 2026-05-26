@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
 import { SectionHead } from './Programs.jsx';
+import { useIsMobile } from '../shared/useIsMobile.js';
 
 export function Announcements() {
   return (
@@ -51,37 +52,69 @@ export function Schedule() {
 
 function GameRow({ g }) {
   const [expanded, setExpanded] = useState(false);
+  const isMobile = useIsMobile();
   return (
     <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-      <div style={{
-        display: 'grid', gridTemplateColumns: '88px 1fr auto auto', alignItems: 'center', gap: 18, padding: '14px 18px',
-      }}>
-        <div style={{ textAlign: 'center', borderRight: '1px solid var(--border)', paddingRight: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', color: 'var(--fg-muted)' }}>{g.day} · {g.month}</div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, color: 'var(--court-navy)', lineHeight: 1, margin: '2px 0' }}>{g.date}</div>
-          <div style={{ fontSize: 11, color: 'var(--fg-soft)', fontWeight: 500 }}>{g.time}</div>
-        </div>
-        <div>
-          <div style={{ fontSize: 12, color: 'var(--fg-muted)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{g.team}</div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--court-navy)', lineHeight: 1.1, marginTop: 4 }}>{g.opp}</div>
-          <div style={{ fontSize: 12, color: 'var(--fg-soft)', marginTop: 4, display: 'inline-flex', gap: 4, alignItems: 'center' }}>
-            <Icon name="map-pin" size={12} />{g.loc}
+      {isMobile ? (
+        <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', color: 'var(--fg-muted)', textTransform: 'uppercase' }}>{g.day} · {g.month} {g.date}</span>
+            <span style={{ fontSize: 11, color: 'var(--fg-soft)', fontWeight: 500 }}>{g.time}</span>
+          </div>
+          <div>
+            <div style={{ fontSize: 12, color: 'var(--fg-muted)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{g.team}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--court-navy)', lineHeight: 1.1, marginTop: 4 }}>{g.opp}</div>
+            <div style={{ fontSize: 12, color: 'var(--fg-soft)', marginTop: 4, display: 'inline-flex', gap: 4, alignItems: 'center' }}>
+              <Icon name="map-pin" size={12} />{g.loc}
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{
+              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase',
+              padding: '4px 10px', borderRadius: 999,
+              background: g.home ? 'var(--court-navy)' : '#fff',
+              color: g.home ? '#fff' : 'var(--court-navy)',
+              border: g.home ? 'none' : '1px solid var(--border)',
+            }}>{g.home ? 'Home' : 'Away'}</span>
+            <button onClick={() => setExpanded(o => !o)} style={{
+              all: 'unset', cursor: 'pointer', color: 'var(--court-navy)', fontSize: 13, fontWeight: 700,
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+            }}>
+              Details <Icon name={expanded ? 'minus' : 'arrow-right'} size={14} />
+            </button>
           </div>
         </div>
-        <span style={{
-          fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase',
-          padding: '4px 10px', borderRadius: 999,
-          background: g.home ? 'var(--court-navy)' : '#fff',
-          color: g.home ? '#fff' : 'var(--court-navy)',
-          border: g.home ? 'none' : '1px solid var(--border)',
-        }}>{g.home ? 'Home' : 'Away'}</span>
-        <button onClick={() => setExpanded(o => !o)} style={{
-          all: 'unset', cursor: 'pointer', color: 'var(--court-navy)', fontSize: 13, fontWeight: 700,
-          display: 'inline-flex', alignItems: 'center', gap: 4,
+      ) : (
+        <div style={{
+          display: 'grid', gridTemplateColumns: '88px 1fr auto auto', alignItems: 'center', gap: 18, padding: '14px 18px',
         }}>
-          Details <Icon name={expanded ? 'minus' : 'arrow-right'} size={14} />
-        </button>
-      </div>
+          <div style={{ textAlign: 'center', borderRight: '1px solid var(--border)', paddingRight: 16 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', color: 'var(--fg-muted)' }}>{g.day} · {g.month}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, color: 'var(--court-navy)', lineHeight: 1, margin: '2px 0' }}>{g.date}</div>
+            <div style={{ fontSize: 11, color: 'var(--fg-soft)', fontWeight: 500 }}>{g.time}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 12, color: 'var(--fg-muted)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{g.team}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--court-navy)', lineHeight: 1.1, marginTop: 4 }}>{g.opp}</div>
+            <div style={{ fontSize: 12, color: 'var(--fg-soft)', marginTop: 4, display: 'inline-flex', gap: 4, alignItems: 'center' }}>
+              <Icon name="map-pin" size={12} />{g.loc}
+            </div>
+          </div>
+          <span style={{
+            fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase',
+            padding: '4px 10px', borderRadius: 999,
+            background: g.home ? 'var(--court-navy)' : '#fff',
+            color: g.home ? '#fff' : 'var(--court-navy)',
+            border: g.home ? 'none' : '1px solid var(--border)',
+          }}>{g.home ? 'Home' : 'Away'}</span>
+          <button onClick={() => setExpanded(o => !o)} style={{
+            all: 'unset', cursor: 'pointer', color: 'var(--court-navy)', fontSize: 13, fontWeight: 700,
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}>
+            Details <Icon name={expanded ? 'minus' : 'arrow-right'} size={14} />
+          </button>
+        </div>
+      )}
       {expanded && (
         <div style={{ borderTop: '1px solid var(--border)', padding: '12px 18px 14px', background: 'var(--bone)', display: 'flex', gap: 24, flexWrap: 'wrap', fontSize: 13, color: 'var(--fg)' }}>
           <span><strong>Location:</strong> {g.loc}</span>
@@ -124,7 +157,7 @@ export function News() {
   return (
     <section id="news" style={{ maxWidth: 1200, margin: '0 auto', padding: '88px 24px 0' }}>
       <SectionHead eyebrow="News" title="From around the league" />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginTop: 32 }}>
+      <div className="mob-grid-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginTop: 32 }}>
         {posts.map((p, i) => (
           <article key={i} style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', boxShadow: 'var(--shadow-1)', display: 'flex', flexDirection: 'column' }}>
             <div style={{
@@ -159,9 +192,10 @@ export function News() {
 }
 
 export function FaqContact() {
+  const isMobile = useIsMobile();
   return (
     <section id="contact" style={{ maxWidth: 1200, margin: '0 auto', padding: '88px 24px 0' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 56 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr', gap: isMobile ? 32 : 56 }}>
         <div>
           <SectionHead eyebrow="FAQ" title="Common questions" />
           <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -175,7 +209,7 @@ export function FaqContact() {
           </div>
         </div>
 
-        <aside id="volunteer" style={{ background: 'var(--court-navy)', color: '#fff', borderRadius: 14, padding: 32, alignSelf: 'start', position: 'sticky', top: 92 }}>
+        <aside id="volunteer" style={{ background: 'var(--court-navy)', color: '#fff', borderRadius: 14, padding: 32, alignSelf: 'start', ...(isMobile ? {} : { position: 'sticky', top: 92 }) }}>
           <div style={{ height: 4, background: 'var(--varsity-gold)', borderRadius: 2, width: 48, marginBottom: 18 }} />
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, lineHeight: 1, textTransform: 'uppercase', marginBottom: 10 }}>Volunteer with us</div>
           <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.78)', lineHeight: 1.55, marginBottom: 22 }}>
