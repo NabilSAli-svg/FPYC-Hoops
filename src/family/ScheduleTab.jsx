@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocalStorage } from '../shared/useLocalStorage.js';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
 import { EVENTS } from './data.js';
@@ -6,7 +7,7 @@ import { EVENTS } from './data.js';
 export default function ScheduleTab() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
-  const [rsvps, setRsvps] = useState({});
+  const [rsvps, setRsvps] = useLocalStorage('fpyc-rsvps', {});
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 650);

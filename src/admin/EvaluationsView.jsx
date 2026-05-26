@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocalStorage } from '../shared/useLocalStorage.js';
 import { Card, Button, Icon, Display, Eyebrow, Jersey } from '../shared/index.js';
 
 const SKILLS = [
@@ -92,10 +93,10 @@ function RadarChart({ evals, size = 220 }) {
 
 export default function EvaluationsView({ players }) {
   const [selected, setSelected] = useState(players[0]?.id);
-  const [evals, setEvals] = useState(() => initEvals(players));
-  const [savedEvals, setSavedEvals] = useState(() => initEvals(players));
-  const [notes, setNotes] = useState({});
-  const [savedNotes, setSavedNotes] = useState({});
+  const [evals, setEvals] = useLocalStorage('fpyc-evals', () => initEvals(players));
+  const [savedEvals, setSavedEvals] = useState(evals);
+  const [notes, setNotes] = useLocalStorage('fpyc-notes', {});
+  const [savedNotes, setSavedNotes] = useState(notes);
   const [justSaved, setJustSaved] = useState(false);
 
   const player = players.find(p => p.id === selected);

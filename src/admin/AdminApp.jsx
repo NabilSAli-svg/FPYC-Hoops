@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocalStorage } from '../shared/useLocalStorage.js';
 import Sidebar from './Sidebar.jsx';
 import TopBar from './TopBar.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
@@ -47,7 +48,7 @@ export default function AdminApp() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openNewGame, setOpenNewGame] = useState(false);
   const [messagesAutoCompose, setMessagesAutoCompose] = useState(false);
-  const [games, setGames] = useState(GAMES_INITIAL);
+  const [games, setGames] = useLocalStorage('fpyc-games', GAMES_INITIAL);
 
   const saveScore = (id, result) =>
     setGames(gs => gs.map(g => g.id === id ? { ...g, ...result, status: 'final' } : g));

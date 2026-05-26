@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { useLocalStorage } from '../shared/useLocalStorage.js';
 import { Card, Pill, Button, Jersey, Eyebrow, Display } from '../shared/index.js';
 
 const POSITIONS = ['PG', 'SG', 'SF', 'PF', 'C'];
 
 export default function LineupView({ players, game }) {
-  const [starters, setStarters] = useState(players.slice(0, 5).map(p => p.id));
-  const [posMap, setPosMap] = useState(() => {
+  const [starters, setStarters] = useLocalStorage('fpyc-lineup-starters', () => players.slice(0, 5).map(p => p.id));
+  const [posMap, setPosMap] = useLocalStorage('fpyc-lineup-pos', () => {
     const m = {};
     players.slice(0, 5).forEach((p, i) => { m[p.id] = POSITIONS[i]; });
     return m;

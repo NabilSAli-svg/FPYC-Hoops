@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocalStorage } from '../shared/useLocalStorage.js';
 import Icon from '../shared/Icon.jsx';
 import FamilyLogin from './FamilyLogin.jsx';
 import HomeTab from './HomeTab.jsx';
@@ -20,8 +21,9 @@ export default function FamilyApp() {
   const [user, setUser] = useState(null);
   const [tab, setTab] = useState('home');
 
-  const [readIds, setReadIds] = useState(new Set());
-  const markRead = (id) => setReadIds(s => new Set([...s, id]));
+  const [readIdsArr, setReadIdsArr] = useLocalStorage('fpyc-read-msgs', []);
+  const readIds = new Set(readIdsArr);
+  const markRead = (id) => setReadIdsArr(arr => arr.includes(id) ? arr : [...arr, id]);
 
   if (!user) return <FamilyLogin onLogin={who => setUser(FAMILIES[who])} />;
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocalStorage } from '../shared/useLocalStorage.js';
 import { Card, Button, Pill, Icon, Display, Eyebrow, Jersey } from '../shared/index.js';
 
 const SESSIONS_INITIAL = [
@@ -58,8 +59,8 @@ const CYCLE = ['present', 'absent', 'excused', 'none'];
 
 export default function AttendanceView({ players }) {
   const [filter, setFilter] = useState('all');
-  const [allSessions, setAllSessions] = useState(SESSIONS_INITIAL);
-  const [attendance, setAttendance] = useState(() => initAttendance(players));
+  const [allSessions, setAllSessions] = useLocalStorage('fpyc-sessions', SESSIONS_INITIAL);
+  const [attendance, setAttendance] = useLocalStorage('fpyc-attendance', () => initAttendance(players));
   const [showAdd, setShowAdd] = useState(false);
   const [newSession, setNewSession] = useState({ date: '', type: 'Practice', location: '' });
 

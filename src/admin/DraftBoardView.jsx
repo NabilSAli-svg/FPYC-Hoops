@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocalStorage } from '../shared/useLocalStorage.js';
 import { Card, Button, Icon, Display, Eyebrow, Jersey, Pill } from '../shared/index.js';
 
 const ALL_PLAYERS = [
@@ -38,7 +39,7 @@ function posBreakdown(pids) {
 }
 
 export default function DraftBoardView() {
-  const [roster, setRoster] = useState({});
+  const [roster, setRoster] = useLocalStorage('fpyc-draft-roster', {});
   const [selected, setSelected] = useState(null);
   const [sortBy, setSortBy] = useState('skill');
   const [confirmReset, setConfirmReset] = useState(false);
