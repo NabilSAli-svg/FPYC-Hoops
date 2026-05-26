@@ -40,6 +40,7 @@ export default function FamilyApp() {
         background: 'var(--court-navy)', color: '#fff',
         borderBottom: '3px solid var(--varsity-gold)',
         position: 'sticky', top: 0, zIndex: 50,
+        paddingTop: 'env(safe-area-inset-top, 0px)',
       }}>
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -62,7 +63,7 @@ export default function FamilyApp() {
       </header>
 
       {/* Content */}
-      <div style={{ flex: 1, maxWidth: 640, width: '100%', margin: '0 auto', padding: '20px 16px 88px' }}>
+      <div style={{ flex: 1, maxWidth: 640, width: '100%', margin: '0 auto', padding: '20px 16px', paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))' }}>
         {tab === 'home'     && <HomeTab family={family} onTabChange={setTab} />}
         {tab === 'schedule' && <ScheduleTab />}
         {tab === 'roster'   && <RosterTab family={family} />}
@@ -76,6 +77,7 @@ export default function FamilyApp() {
         background: '#fff', borderTop: '1px solid #E2E5EA',
         display: 'flex', zIndex: 50,
         boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}>
         {TABS.map(t => {
           const active = tab === t.id;
