@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
-import { useMessages } from '../shared/store.js';
+import { useMessages, useGames } from '../shared/store.js';
 import Icon from '../shared/Icon.jsx';
 import FamilyLogin from './FamilyLogin.jsx';
 import HomeTab from './HomeTab.jsx';
@@ -9,6 +9,28 @@ import RosterTab from './RosterTab.jsx';
 import MessagesTab from './MessagesTab.jsx';
 import PaymentsTab from './PaymentsTab.jsx';
 import { FAMILIES } from './data.js';
+
+async function requestAndNotify(games) {
+  if (!('Notification' in window)) return 'unsupported';
+  let perm = Notification.permission;
+  if (perm === 'default') perm = await Notification.requestPermission();
+  if (perm !== 'granted') return perm;
+
+  const next = games.find(g => g.status === 'scheduled');
+  const sw = await navigator.serviceWorker?.ready.catch(() => null);
+  if (sw) {
+    sw.showNotification('🏀 FPYC Hawks', {
+      body: next
+        ? `Next game: ${next.day} at ${next.time} · ${next.opponent}`
+        : 'Notifications are on — you\'ll be the first to know!',
+      icon: '/assets/logo-fpyc-basketball.png',
+      badge: '/assets/logo-fpyc-basketball.png',
+      tag: 'fpyc-test',
+      data: { url: '/family' },
+    });
+  }
+  return 'granted';
+}
 
 const TABS = [
   { id: 'home',     label: 'Home',     icon: 'home' },
@@ -21,11 +43,24 @@ const TABS = [
 export default function FamilyApp() {
   const [user, setUser] = useState(null);
   const [tab, setTab] = useState('home');
+  const [notifPerm, setNotifPerm] = useState(() =>
+    'Notification' in window ? Notification.permission : 'unsupported'
+  );
+  const [notifBusy, setNotifBusy] = useState(false);
 
   const [readIdsArr, setReadIdsArr] = useLocalStorage('fpyc-read-msgs', []);
   const [messages] = useMessages();
+  const [games]    = useGames();
   const readIds = new Set(readIdsArr);
   const markRead = (id) => setReadIdsArr(arr => arr.includes(id) ? arr : [...arr, id]);
+
+  const handleBell = useCallback(async () => {
+    if (notifBusy || notifPerm === 'denied' || notifPerm === 'unsupported') return;
+    setNotifBusy(true);
+    const result = await requestAndNotify(games);
+    setNotifPerm(result);
+    setNotifBusy(false);
+  }, [notifBusy, notifPerm, games]);
 
   if (!user) return <FamilyLogin onLogin={who => setUser(FAMILIES[who])} />;
 
@@ -57,6 +92,22 @@ export default function FamilyApp() {
               <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{family.parent}</div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)' }}>{family.child.name}</div>
             </div>
+            {notifPerm !== 'unsupported' && (
+              <button
+                onClick={handleBell}
+                title={notifPerm === 'granted' ? 'Notifications on' : notifPerm === 'denied' ? 'Notifications blocked in browser settings' : 'Enable game notifications'}
+                style={{ all: 'unset', cursor: notifPerm === 'denied' ? 'not-allowed' : 'pointer', opacity: notifPerm === 'denied' ? 0.4 : 1, position: 'relative' }}
+              >
+                <Icon
+                  name={notifPerm === 'granted' ? 'bell' : 'bell-off'}
+                  size={18}
+                  color={notifPerm === 'granted' ? 'var(--varsity-gold)' : 'rgba(255,255,255,0.45)'}
+                />
+                {notifPerm === 'granted' && (
+                  <span style={{ position: 'absolute', top: -2, right: -2, width: 7, height: 7, borderRadius: '50%', background: 'var(--varsity-gold)', border: '1.5px solid var(--court-navy)' }} />
+                )}
+              </button>
+            )}
             <button onClick={() => setUser(null)} style={{ all: 'unset', cursor: 'pointer' }}>
               <Icon name="log-out" size={16} color="rgba(255,255,255,0.5)" />
             </button>

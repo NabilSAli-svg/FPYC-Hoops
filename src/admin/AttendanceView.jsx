@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
 import { Card, Button, Icon, Display, Jersey } from '../shared/index.js';
 import { usePractices, useGames } from '../shared/store.js';
+import { csvDownload } from '../shared/csvDownload.js';
 
 const STATUS = {
   present: { label: 'P', color: 'var(--status-win)',     bg: 'rgba(31,138,91,0.10)'  },
@@ -58,6 +59,16 @@ function hasConsecutiveAbsences(pid, sessions, attendance, n = 2) {
     else streak = 0;
   }
   return false;
+}
+
+function exportAttendanceCSV(players, sessions, attendance) {
+  const headers = ['Player', '#', 'Rate', ...sessions.map(s => `${s.label} (${s.type})`)];
+  const rows = players.map(p => {
+    const present = sessions.filter(s => (attendance[p.id]?.[s.id] ?? 'none') === 'present').length;
+    const pct = sessions.length > 0 ? `${Math.round(present / sessions.length * 100)}%` : '0%';
+    return [p.name, p.number, pct, ...sessions.map(s => attendance[p.id]?.[s.id] ?? 'none')];
+  });
+  csvDownload('fpyc-attendance.csv', [headers, ...rows]);
 }
 
 export default function AttendanceView({ players }) {
@@ -138,7 +149,7 @@ export default function AttendanceView({ players }) {
             }}>{t.label}</button>
           ))}
         </div>
-        <Button kind="ghost" icon="download" size="sm">Export</Button>
+        <Button kind="ghost" icon="download" size="sm" onClick={() => exportAttendanceCSV(players, allSessions, attendance)}>Export</Button>
       </div>
 
       {/* Legend */}

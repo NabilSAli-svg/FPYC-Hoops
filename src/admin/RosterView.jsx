@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Pill, Button, Icon, Jersey, EmptyState, Skeleton } from '../shared/index.js';
+import { csvDownload } from '../shared/csvDownload.js';
 
 const GRADES    = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
 const POSITIONS = ['Guard', 'Forward', 'Center'];
@@ -25,6 +26,16 @@ const STATUS_KIND = { active: 'navy', pending: 'warn', neutral: 'neutral' };
 
 function emptyForm() {
   return { firstName: '', lastName: '', number: '', grade: '5th', position: 'Guard', school: '', guardian: '', phone: '', status: 'active', waiver: false, program: 'House League', division: 'Boys 5–6 House', team: 'Unassigned' };
+}
+
+function exportRosterCSV(players) {
+  const headers = ['#', 'Name', 'Grade', 'School', 'Position', 'Guardian', 'Phone', 'Status', 'Waiver', 'Program', 'Division', 'Team'];
+  const rows = players.map(p => [
+    p.number, p.name, p.grade, p.school || '', p.position,
+    p.guardian || '', p.phone || '', p.status,
+    p.waiver ? 'Yes' : 'No', p.program || '', p.division || '', p.team || '',
+  ]);
+  csvDownload('fpyc-roster.csv', [headers, ...rows]);
 }
 
 export default function RosterView({ team, players, setPlayers }) {
@@ -159,7 +170,7 @@ export default function RosterView({ team, players, setPlayers }) {
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Button kind="ghost" icon="download" size="sm">Export CSV</Button>
+          <Button kind="ghost" icon="download" size="sm" onClick={() => exportRosterCSV(players)}>Export CSV</Button>
           <Button kind="gold" icon="user-plus" onClick={openAdd}>Add player</Button>
         </div>
       </div>

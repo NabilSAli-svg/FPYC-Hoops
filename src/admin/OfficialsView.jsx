@@ -1,6 +1,16 @@
 import { useState } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
+import { csvDownload } from '../shared/csvDownload.js';
+
+function exportPaymentsCSV(refs) {
+  const headers = ['Name', 'Certification', 'Phone', 'Email', 'Games', 'Rate/Game', 'Total Owed', 'Paid'];
+  const rows = refs.map(r => [
+    r.name, r.cert, r.phone, r.email, r.games,
+    `$${r.rate}`, r.paid ? '$0' : `$${r.games * r.rate}`, r.paid ? 'Yes' : 'No',
+  ]);
+  csvDownload('fpyc-officials-payments.csv', [headers, ...rows]);
+}
 
 const REFS_INITIAL = [
   { id: 'r1', name: 'James Park',    cert: 'VBOS Level 2', phone: '(703) 555-0210', email: 'j.park@email.com',     games: 8,  rate: 35, paid: true,  available: true  },
@@ -262,7 +272,7 @@ export default function OfficialsView() {
           <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
             <Display size={20}>Payment tracker</Display>
             <div style={{ display: 'flex', gap: 8 }}>
-              <Button kind="ghost" size="sm" icon="download">Export CSV</Button>
+              <Button kind="ghost" size="sm" icon="download" onClick={() => exportPaymentsCSV(refs)}>Export CSV</Button>
               <Button kind="gold" size="sm" icon="check" onClick={markAllPaid}>Mark all paid</Button>
             </div>
           </div>
