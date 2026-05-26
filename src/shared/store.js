@@ -10,18 +10,18 @@ export const TEAM_INFO = {
 };
 
 export const INITIAL_PLAYERS = [
-  { id: 'p1',  number: 23, name: 'Jordan Reeves',   grade: '6th', school: 'Daniels Run ES', guardian: 'A. Reeves',   phone: '(703) 555-0123', position: 'Guard',   status: 'active',   waiver: true  },
-  { id: 'p2',  number:  7, name: 'Maya Chen',        grade: '5th', school: 'Providence ES',  guardian: 'L. Chen',     phone: '(703) 555-0144', position: 'Guard',   status: 'active',   waiver: true  },
-  { id: 'p3',  number: 14, name: 'Devon Brooks',     grade: '6th', school: 'Lanier MS',      guardian: 'K. Brooks',   phone: '(703) 555-0192', position: 'Forward', status: 'active',   waiver: true  },
-  { id: 'p4',  number:  3, name: 'Sam Whitaker',     grade: '5th', school: 'Daniels Run ES', guardian: 'P. Whitaker', phone: '(703) 555-0118', position: 'Forward', status: 'active',   waiver: true  },
-  { id: 'p5',  number: 32, name: 'Tariq Singh',      grade: '6th', school: 'Providence ES',  guardian: 'R. Singh',    phone: '(703) 555-0177', position: 'Center',  status: 'active',   waiver: true  },
-  { id: 'p6',  number: 11, name: 'Alex Romero',      grade: '5th', school: 'Mosby Woods ES', guardian: 'M. Romero',   phone: '(703) 555-0166', position: 'Guard',   status: 'active',   waiver: true  },
-  { id: 'p7',  number:  4, name: "Riley O'Connor",   grade: '6th', school: 'Lanier MS',      guardian: "S. O'Connor", phone: '(703) 555-0102', position: 'Guard',   status: 'active',   waiver: true  },
-  { id: 'p8',  number: 21, name: 'Imani Walker',     grade: '5th', school: 'Daniels Run ES', guardian: 'B. Walker',   phone: '(703) 555-0151', position: 'Forward', status: 'active',   waiver: true  },
-  { id: 'p9',  number: 15, name: 'Ethan Park',       grade: '6th', school: 'Lanier MS',      guardian: 'H. Park',     phone: '(703) 555-0189', position: 'Guard',   status: 'pending',  waiver: false },
-  { id: 'p10', number:  9, name: 'Noah Patel',       grade: '5th', school: 'Providence ES',  guardian: 'V. Patel',    phone: '(703) 555-0173', position: 'Forward', status: 'active',   waiver: true  },
-  { id: 'p11', number: 25, name: 'Luca Bianchi',     grade: '6th', school: 'Mosby Woods ES', guardian: 'G. Bianchi',  phone: '(703) 555-0128', position: 'Center',  status: 'active',   waiver: true  },
-  { id: 'p12', number:  8, name: 'Chloe Adebayo',    grade: '5th', school: 'Daniels Run ES', guardian: 'O. Adebayo',  phone: '(703) 555-0145', position: 'Guard',   status: 'inactive', waiver: true  },
+  { id: 'p1',  number: 23, name: 'Jordan Reeves',   grade: '6th', school: 'Daniels Run ES', guardian: 'A. Reeves',   phone: '(703) 555-0123', position: 'Guard',   status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
+  { id: 'p2',  number:  7, name: 'Maya Chen',        grade: '5th', school: 'Providence ES',  guardian: 'L. Chen',     phone: '(703) 555-0144', position: 'Guard',   status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
+  { id: 'p3',  number: 14, name: 'Devon Brooks',     grade: '6th', school: 'Lanier MS',      guardian: 'K. Brooks',   phone: '(703) 555-0192', position: 'Forward', status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
+  { id: 'p4',  number:  3, name: 'Sam Whitaker',     grade: '5th', school: 'Daniels Run ES', guardian: 'P. Whitaker', phone: '(703) 555-0118', position: 'Forward', status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
+  { id: 'p5',  number: 32, name: 'Tariq Singh',      grade: '6th', school: 'Providence ES',  guardian: 'R. Singh',    phone: '(703) 555-0177', position: 'Center',  status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
+  { id: 'p6',  number: 11, name: 'Alex Romero',      grade: '5th', school: 'Mosby Woods ES', guardian: 'M. Romero',   phone: '(703) 555-0166', position: 'Guard',   status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
+  { id: 'p7',  number:  4, name: "Riley O'Connor",   grade: '6th', school: 'Lanier MS',      guardian: "S. O'Connor", phone: '(703) 555-0102', position: 'Guard',   status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
+  { id: 'p8',  number: 21, name: 'Imani Walker',     grade: '5th', school: 'Daniels Run ES', guardian: 'B. Walker',   phone: '(703) 555-0151', position: 'Forward', status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
+  { id: 'p9',  number: 15, name: 'Ethan Park',       grade: '6th', school: 'Lanier MS',      guardian: 'H. Park',     phone: '(703) 555-0189', position: 'Guard',   status: 'pending',  waiver: false, program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
+  { id: 'p10', number:  9, name: 'Noah Patel',       grade: '5th', school: 'Providence ES',  guardian: 'V. Patel',    phone: '(703) 555-0173', position: 'Forward', status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
+  { id: 'p11', number: 25, name: 'Luca Bianchi',     grade: '6th', school: 'Mosby Woods ES', guardian: 'G. Bianchi',  phone: '(703) 555-0128', position: 'Center',  status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
+  { id: 'p12', number:  8, name: 'Chloe Adebayo',    grade: '5th', school: 'Daniels Run ES', guardian: 'O. Adebayo',  phone: '(703) 555-0145', position: 'Guard',   status: 'inactive', waiver: true,  program: 'House League',  division: 'Girls 5–6 House', team: 'Fairfax Wolves'  },
 ];
 
 export const INITIAL_GAMES = [

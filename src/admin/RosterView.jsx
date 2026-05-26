@@ -1,15 +1,30 @@
 import { useState, useEffect } from 'react';
 import { Card, Pill, Button, Icon, Jersey, EmptyState, Skeleton } from '../shared/index.js';
 
-const GRADES = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
+const GRADES    = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
 const POSITIONS = ['Guard', 'Forward', 'Center'];
-const SCHOOLS = ['Daniels Run ES', 'Providence ES', 'Lanier MS', 'Mosby Woods ES', 'Robinson Secondary', 'Fairfax HS', 'Other'];
-const STATUSES = ['active', 'pending', 'inactive'];
+const SCHOOLS   = ['Daniels Run ES', 'Providence ES', 'Lanier MS', 'Mosby Woods ES', 'Robinson Secondary', 'Fairfax HS', 'Other'];
+const STATUSES  = ['active', 'pending', 'inactive'];
+
+const PROGRAMS = ['House League', 'Select Travel', 'Summer League', 'Summer Training', 'Unassigned'];
+
+const DIVISIONS_BY_PROGRAM = {
+  'House League':    ['Boys 3–4 House', 'Girls 3–4 House', 'Boys 5–6 House', 'Girls 5–6 House', 'Boys 7–8 House', 'Girls 7–8 House'],
+  'Select Travel':   ['Boys 7–8 Select', 'Girls 7–8 Select', 'Boys 9–10 Select', 'Girls 9–10 Select'],
+  'Summer League':   ['Boys 5–6 Summer', 'Girls 5–6 Summer', 'Boys 7–8 Summer', 'Girls 7–8 Summer'],
+  'Summer Training': ['All divisions'],
+  'Unassigned':      ['—'],
+};
+
+const TEAMS = [
+  'Fairfax Hawks', 'Fairfax Wolves', 'Fairfax Eagles', 'Fairfax Cougars',
+  'Fairfax Thunder', 'Fairfax Storm', 'Fairfax Lightning', 'Unassigned',
+];
 
 const STATUS_KIND = { active: 'navy', pending: 'warn', neutral: 'neutral' };
 
 function emptyForm() {
-  return { firstName: '', lastName: '', number: '', grade: '5th', position: 'Guard', school: '', guardian: '', phone: '', status: 'active', waiver: false };
+  return { firstName: '', lastName: '', number: '', grade: '5th', position: 'Guard', school: '', guardian: '', phone: '', status: 'active', waiver: false, program: 'House League', division: 'Boys 5–6 House', team: 'Unassigned' };
 }
 
 export default function RosterView({ team, players, setPlayers }) {
@@ -53,6 +68,9 @@ export default function RosterView({ team, players, setPlayers }) {
       phone: p.phone || '',
       status: p.status,
       waiver: p.waiver,
+      program: p.program || 'House League',
+      division: p.division || 'Boys 5–6 House',
+      team: p.team || 'Unassigned',
     });
     setErrors({});
     setConfirmRemove(false);
@@ -90,6 +108,9 @@ export default function RosterView({ team, players, setPlayers }) {
       phone: form.phone,
       status: form.status,
       waiver: form.waiver,
+      program: form.program,
+      division: form.division,
+      team: form.team,
     };
 
     if (modal.mode === 'add') {
@@ -176,7 +197,7 @@ export default function RosterView({ team, players, setPlayers }) {
             <Jersey number={p.number} size={32} />
             <div>
               <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
-              <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 2 }}>{p.position}</div>
+              <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 2 }}>{p.position}{p.team && p.team !== 'Unassigned' ? ` · ${p.team}` : ''}</div>
             </div>
             <div style={{ fontSize: 14 }}>{p.grade}</div>
             <div style={{ fontSize: 13, color: 'var(--fg-soft)' }}>{p.school || '—'}</div>
@@ -276,6 +297,36 @@ export default function RosterView({ team, players, setPlayers }) {
                   {form.waiver ? 'Waiver on file' : 'Waiver missing'}
                 </button>
               </F>
+            </div>
+
+            {/* Transfer section */}
+            <div style={{ marginTop: 20, paddingTop: 18, borderTop: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                <Icon name="arrow-right-left" size={14} color="var(--basketball-orange)" />
+                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--basketball-orange)' }}>Team Assignment</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+                <F label="Program">
+                  <select value={form.program} onChange={e => {
+                    const prog = e.target.value;
+                    const divs = DIVISIONS_BY_PROGRAM[prog] || [];
+                    set('program', prog);
+                    setForm(f => ({ ...f, program: prog, division: divs[0] || '—' }));
+                  }} style={inputStyle()}>
+                    {PROGRAMS.map(p => <option key={p}>{p}</option>)}
+                  </select>
+                </F>
+                <F label="Division">
+                  <select value={form.division} onChange={e => set('division', e.target.value)} style={inputStyle()}>
+                    {(DIVISIONS_BY_PROGRAM[form.program] || []).map(d => <option key={d}>{d}</option>)}
+                  </select>
+                </F>
+                <F label="Team">
+                  <select value={form.team} onChange={e => set('team', e.target.value)} style={inputStyle()}>
+                    {TEAMS.map(t => <option key={t}>{t}</option>)}
+                  </select>
+                </F>
+              </div>
             </div>
 
             {/* Footer */}
