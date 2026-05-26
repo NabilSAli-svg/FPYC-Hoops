@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
-import { useGames, usePractices, deriveEvents, TEAM_INFO } from '../shared/store.js';
+import { useGames, usePractices, usePlayers, deriveEvents, TEAM_INFO } from '../shared/store.js';
+import { useLocalStorage } from '../shared/useLocalStorage.js';
 
 export default function HomeTab({ family, messages, onTabChange }) {
-  const [games] = useGames();
+  const [games]     = useGames();
   const [practices] = usePractices();
+  const [players]   = usePlayers();
   const EVENTS = deriveEvents(games, practices);
   const TEAM = TEAM_INFO;
+
+  const [attendance] = useLocalStorage('fpyc-attendance', {});
 
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -23,6 +27,18 @@ export default function HomeTab({ family, messages, onTabChange }) {
   const lastGame = EVENTS.find(e => e.type === 'game' && e.status === 'final');
   const lastWin = lastGame && lastGame.us > lastGame.them;
   const unread = (messages || []).filter(m => m.unread).length;
+
+  // Derive attendance stats for this child
+  const allSessions = [
+    ...games.filter(g => g.status === 'final').map(g => ({ id: g.id, type: 'game', label: `${g.month} ${g.date}` })),
+    ...practices.map(p => ({ id: p.id, type: 'practice', label: p.date.split(', ')[1] || p.date })),
+  ];
+  const player = players.find(p => p.number === child.number);
+  const pid = player?.id;
+  const attended = pid ? allSessions.filter(s => (attendance[pid]?.[s.id] ?? 'none') === 'present').length : 0;
+  const attTotal  = allSessions.length;
+  const attPct    = attTotal > 0 ? Math.round((attended / attTotal) * 100) : 0;
+  const recentSix = allSessions.slice(-6);
 
   return (
     <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -157,6 +173,62 @@ export default function HomeTab({ family, messages, onTabChange }) {
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: lastWin ? 'var(--court-navy)' : '#9CA3AF', lineHeight: 1 }}>
               {lastGame.us}–{lastGame.them}
             </div>
+          </div>
+        </Section>
+      )}
+
+      {/* Attendance */}
+      {attTotal > 0 && pid && (
+        <Section title="Attendance">
+          <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '16px 18px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 14 }}>
+              <div style={{ textAlign: 'center', minWidth: 56 }}>
+                <div style={{
+                  fontFamily: 'var(--font-display)', fontSize: 36, lineHeight: 1,
+                  color: attPct >= 80 ? '#059669' : attPct >= 60 ? '#D97706' : '#DC2626',
+                }}>{attPct}%</div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3, fontWeight: 600 }}>
+                  {attended}/{attTotal} sessions
+                </div>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 8 }}>Recent sessions</div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {recentSix.map(s => {
+                    const st = pid ? (attendance[pid]?.[s.id] ?? 'none') : 'none';
+                    const dotColor = st === 'present' ? '#059669' : st === 'absent' ? '#DC2626' : st === 'excused' ? '#D97706' : '#E2E5EA';
+                    const label = st === 'present' ? 'P' : st === 'absent' ? 'A' : st === 'excused' ? 'E' : '—';
+                    return (
+                      <div key={s.id} title={`${s.label} · ${st}`} style={{
+                        width: 28, height: 28, borderRadius: 6,
+                        background: st === 'none' ? '#F4F5F7' : `${dotColor}18`,
+                        border: `1.5px solid ${st === 'none' ? '#E2E5EA' : dotColor}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 11, fontWeight: 800, color: st === 'none' ? '#CBD5E1' : dotColor,
+                      }}>
+                        {s.type === 'game'
+                          ? <Icon name="flag" size={10} color={st === 'none' ? '#CBD5E1' : dotColor} />
+                          : label}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                  {[
+                    { label: 'P  Present', color: '#059669' },
+                    { label: 'A  Absent',  color: '#DC2626' },
+                    { label: 'E  Excused', color: '#D97706' },
+                  ].map(l => (
+                    <span key={l.label} style={{ fontSize: 10, color: l.color, fontWeight: 700 }}>{l.label}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {attPct < 80 && (
+              <div style={{ background: 'rgba(217,119,6,0.07)', border: '1px solid rgba(217,119,6,0.2)', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#92400E' }}>
+                Attendance below 80% — reach out to your coach if you have scheduling concerns.
+              </div>
+            )}
           </div>
         </Section>
       )}
