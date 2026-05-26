@@ -245,6 +245,63 @@ function ComposeModal({ channel, onClose }) {
   );
 }
 
+function MessagesSkeleton({ tab, setTab }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0, height: 'calc(100vh - 130px)', minHeight: 600 }}>
+      {/* Toolbar — shown as-is */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 4, background: '#fff', border: '1px solid var(--border)', borderRadius: 8, padding: 4 }}>
+          {[
+            { id: 'inbox',         label: 'All',        count: THREADS.filter(t => t.unread).length },
+            { id: 'email',         label: 'Email',      icon: 'mail' },
+            { id: 'text',          label: 'Text / SMS', icon: 'message-circle' },
+            { id: 'notifications', label: 'Alerts',     icon: 'bell', count: NOTIFICATIONS.filter(n => !n.read).length },
+          ].map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)} style={{
+              padding: '8px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
+              background: tab === t.id ? 'var(--court-navy)' : 'transparent',
+              color: tab === t.id ? '#fff' : 'var(--fg-soft)',
+              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13,
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+            }}>
+              {t.label}
+              {t.count > 0 && <span style={{ background: 'var(--basketball-orange)', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: 999, padding: '1px 6px' }}>{t.count}</span>}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button kind="ghost" size="sm" icon="mail">Email team</Button>
+          <Button kind="gold" size="sm" icon="message-circle">Text team</Button>
+        </div>
+      </div>
+
+      {/* Main layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 16 }}>
+        {/* Left: thread list skeleton */}
+        <Card padding={0}>
+          {[0, 1, 2, 3, 4].map(i => (
+            <div key={i} style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <Skeleton width={34} height={34} style={{ borderRadius: '50%', flexShrink: 0 }} />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <Skeleton width="60%" height={13} style={{ marginBottom: 6 }} />
+                <Skeleton width="85%" height={12} style={{ marginBottom: 5 }} />
+                <Skeleton width="70%" height={11} />
+              </div>
+            </div>
+          ))}
+        </Card>
+
+        {/* Right: empty state skeleton */}
+        <Card style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Skeleton width={48} height={48} style={{ borderRadius: '50%', margin: '64px auto 16px' }} />
+          <Skeleton width={180} height={16} style={{ margin: '0 auto 8px' }} />
+          <Skeleton width={120} height={13} style={{ margin: '0 auto' }} />
+        </Card>
+      </div>
+    </div>
+  );
+}
+
 function RecipientField() {
   const options = ['Entire team (12)', 'Parents only', 'Active players only', 'Custom…'];
   const [val, setVal] = useState('Entire team (12)');
