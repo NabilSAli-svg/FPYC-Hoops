@@ -650,6 +650,7 @@ export default function CommissionerApp() {
   const [authed, setAuthed] = useState(false);
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [activeTab, setActiveTab] = useState('Dashboard');
 
   function handleLogin(e) {
@@ -689,14 +690,19 @@ export default function CommissionerApp() {
               />
             </LoginField>
             <LoginField label="Password">
-              <input
-                type="password"
-                value={form.password}
-                onChange={e => { setForm(f => ({ ...f, password: e.target.value })); setError(''); }}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                style={inputStyle}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPw ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={e => { setForm(f => ({ ...f, password: e.target.value })); setError(''); }}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  style={{ ...inputStyle, paddingRight: 44 }}
+                />
+                <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                  <Icon name={showPw ? 'eye-off' : 'eye'} size={17} color="var(--fg-muted)" />
+                </button>
+              </div>
             </LoginField>
             {error && (
               <div style={{ fontSize: 13, color: 'var(--foul-red)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -711,6 +717,11 @@ export default function CommissionerApp() {
               Sign in
             </button>
           </form>
+
+          <div style={{ marginTop: 20, padding: '12px 16px', borderRadius: 8, background: 'rgba(10,31,61,0.05)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Demo credentials</div>
+            <div style={{ fontSize: 12, color: 'var(--fg)', fontFamily: 'var(--font-mono)' }}>commissioner / fpyc2025</div>
+          </div>
         </div>
       </div>
     );
