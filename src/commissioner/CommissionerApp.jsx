@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
+import { useIsMobile } from '../shared/useIsMobile.js';
 
 const CREDENTIALS = { username: 'commissioner', password: 'fpyc2025' };
 
@@ -73,7 +74,7 @@ function StatusPill({ status }) {
 
 // ─── Dashboard Tab ────────────────────────────────────────────────────────────
 
-function DashboardTab() {
+function DashboardTab({ isMobile }) {
   const stats = [
     { label: 'Total Registered Kids', value: '47', icon: 'users' },
     { label: 'Season Revenue',        value: '$8,227', icon: 'dollar-sign' },
@@ -99,14 +100,14 @@ function DashboardTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
       {/* Stats strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 16 }}>
         {stats.map(s => (
-          <Card key={s.label} padding={20}>
+          <Card key={s.label} padding={isMobile ? '14px 16px' : 20}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
               <Eyebrow>{s.label}</Eyebrow>
               <Icon name={s.icon} size={16} color="var(--fg-muted)" />
             </div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--court-navy)', lineHeight: 1 }}>{s.value}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 24 : 32, color: 'var(--court-navy)', lineHeight: 1 }}>{s.value}</div>
           </Card>
         ))}
       </div>
@@ -138,7 +139,7 @@ function DashboardTab() {
       {/* Teams at a glance */}
       <div>
         <Eyebrow style={{ marginBottom: 14 }}>Teams at a Glance</Eyebrow>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
           {glance.map(t => (
             <Card key={t.name} padding={18}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -284,7 +285,7 @@ function TeamsTab() {
 
 // ─── Registrations Tab ───────────────────────────────────────────────────────
 
-function RegistrationsTab() {
+function RegistrationsTab({ isMobile }) {
   const [regs, setRegs] = useState(INITIAL_REGS);
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterDivision, setFilterDivision] = useState('All');
@@ -342,39 +343,151 @@ function RegistrationsTab() {
         </select>
       </div>
 
-      {/* Table */}
-      <Card padding={0} style={{ overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 780 }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bone)' }}>
-                {['Parent', 'Player', 'Grade', 'Division', 'Registered', 'Paid', 'Waiver', 'Status', 'Actions'].map(h => (
-                  <th key={h} style={{
-                    padding: '10px 14px', textAlign: 'left', fontSize: 11,
-                    fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
-                    color: 'var(--fg-muted)', whiteSpace: 'nowrap',
-                  }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((r, i) => (
-                <tr
-                  key={r.id}
-                  style={{ borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none', verticalAlign: 'middle' }}
-                >
-                  <td style={{ padding: '11px 14px', fontSize: 13, color: 'var(--fg-muted)' }}>{r.parent}</td>
-                  <td style={{ padding: '11px 14px', fontSize: 14, fontWeight: 600, color: 'var(--fg)', whiteSpace: 'nowrap' }}>{r.player}</td>
-                  <td style={{ padding: '11px 14px', fontSize: 13, color: 'var(--fg-muted)' }}>{r.grade}</td>
-                  <td style={{ padding: '11px 14px', fontSize: 13, color: 'var(--fg-muted)', whiteSpace: 'nowrap' }}>{r.division}</td>
-                  <td style={{ padding: '11px 14px', fontSize: 13, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>{r.date}</td>
-                  <td style={{ padding: '11px 14px', textAlign: 'center' }}><BoolIcon yes={r.paid} /></td>
-                  <td style={{ padding: '11px 14px', textAlign: 'center' }}><BoolIcon yes={r.waiver} /></td>
-                  <td style={{ padding: '11px 14px' }}><StatusPill status={r.status} /></td>
-                  <td style={{ padding: '11px 14px' }}>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap' }}>
-                      {r.status === 'pending' && (
-                        <>
+      {/* Table / Cards */}
+      {isMobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {filtered.length === 0 ? (
+            <Card padding={20}>
+              <div style={{ textAlign: 'center', fontSize: 14, color: 'var(--fg-muted)' }}>
+                No registrations match the current filters.
+              </div>
+            </Card>
+          ) : (
+            filtered.map(r => (
+              <Card key={r.id} padding={16}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--fg)', lineHeight: 1.2 }}>{r.player}</div>
+                    <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 2 }}>{r.parent}</div>
+                  </div>
+                  <StatusPill status={r.status} />
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 10 }}>
+                  {r.division} · Grade {r.grade} · {r.date}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: r.status === 'pending' || r.status === 'waitlisted' ? 10 : 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--fg-muted)' }}>
+                    <BoolIcon yes={r.paid} /> Paid
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--fg-muted)' }}>
+                    <BoolIcon yes={r.waiver} /> Waiver
+                  </span>
+                </div>
+                {(r.status === 'pending' || r.status === 'waitlisted' || r.status === 'approved') && (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {r.status === 'pending' && (
+                      <>
+                        <button
+                          onClick={() => updateStatus(r.id, 'approved')}
+                          style={{
+                            all: 'unset', cursor: 'pointer', padding: '7px 14px',
+                            borderRadius: 6, fontSize: 12, fontWeight: 700,
+                            background: 'var(--status-win)', color: '#fff',
+                          }}
+                        >Approve</button>
+                        <button
+                          onClick={() => updateStatus(r.id, 'waitlisted')}
+                          style={{
+                            all: 'unset', cursor: 'pointer', padding: '7px 14px',
+                            borderRadius: 6, fontSize: 12, fontWeight: 700,
+                            border: '1px solid var(--border)', color: 'var(--fg)',
+                            background: '#fff',
+                          }}
+                        >Waitlist</button>
+                      </>
+                    )}
+                    {r.status === 'approved' && (
+                      <button
+                        onClick={() => {}}
+                        style={{
+                          all: 'unset', cursor: 'pointer', padding: '7px 14px',
+                          borderRadius: 6, fontSize: 12, fontWeight: 700,
+                          border: '1px solid var(--border)', color: 'var(--fg)',
+                          background: '#fff',
+                        }}
+                      >Contact</button>
+                    )}
+                    {r.status === 'waitlisted' && (
+                      <button
+                        onClick={() => updateStatus(r.id, 'approved')}
+                        style={{
+                          all: 'unset', cursor: 'pointer', padding: '7px 14px',
+                          borderRadius: 6, fontSize: 12, fontWeight: 700,
+                          background: 'var(--status-win)', color: '#fff',
+                        }}
+                      >Approve</button>
+                    )}
+                  </div>
+                )}
+              </Card>
+            ))
+          )}
+        </div>
+      ) : (
+        <Card padding={0} style={{ overflow: 'hidden' }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 780 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bone)' }}>
+                  {['Parent', 'Player', 'Grade', 'Division', 'Registered', 'Paid', 'Waiver', 'Status', 'Actions'].map(h => (
+                    <th key={h} style={{
+                      padding: '10px 14px', textAlign: 'left', fontSize: 11,
+                      fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+                      color: 'var(--fg-muted)', whiteSpace: 'nowrap',
+                    }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((r, i) => (
+                  <tr
+                    key={r.id}
+                    style={{ borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none', verticalAlign: 'middle' }}
+                  >
+                    <td style={{ padding: '11px 14px', fontSize: 13, color: 'var(--fg-muted)' }}>{r.parent}</td>
+                    <td style={{ padding: '11px 14px', fontSize: 14, fontWeight: 600, color: 'var(--fg)', whiteSpace: 'nowrap' }}>{r.player}</td>
+                    <td style={{ padding: '11px 14px', fontSize: 13, color: 'var(--fg-muted)' }}>{r.grade}</td>
+                    <td style={{ padding: '11px 14px', fontSize: 13, color: 'var(--fg-muted)', whiteSpace: 'nowrap' }}>{r.division}</td>
+                    <td style={{ padding: '11px 14px', fontSize: 13, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>{r.date}</td>
+                    <td style={{ padding: '11px 14px', textAlign: 'center' }}><BoolIcon yes={r.paid} /></td>
+                    <td style={{ padding: '11px 14px', textAlign: 'center' }}><BoolIcon yes={r.waiver} /></td>
+                    <td style={{ padding: '11px 14px' }}><StatusPill status={r.status} /></td>
+                    <td style={{ padding: '11px 14px' }}>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap' }}>
+                        {r.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={() => updateStatus(r.id, 'approved')}
+                              style={{
+                                all: 'unset', cursor: 'pointer', padding: '5px 11px',
+                                borderRadius: 6, fontSize: 12, fontWeight: 700,
+                                background: 'var(--status-win)', color: '#fff',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >Approve</button>
+                            <button
+                              onClick={() => updateStatus(r.id, 'waitlisted')}
+                              style={{
+                                all: 'unset', cursor: 'pointer', padding: '5px 11px',
+                                borderRadius: 6, fontSize: 12, fontWeight: 700,
+                                border: '1px solid var(--border)', color: 'var(--fg)',
+                                background: '#fff', whiteSpace: 'nowrap',
+                              }}
+                            >Waitlist</button>
+                          </>
+                        )}
+                        {r.status === 'approved' && (
+                          <button
+                            onClick={() => {}}
+                            style={{
+                              all: 'unset', cursor: 'pointer', padding: '5px 11px',
+                              borderRadius: 6, fontSize: 12, fontWeight: 700,
+                              border: '1px solid var(--border)', color: 'var(--fg)',
+                              background: '#fff', whiteSpace: 'nowrap',
+                            }}
+                          >Contact</button>
+                        )}
+                        {r.status === 'waitlisted' && (
                           <button
                             onClick={() => updateStatus(r.id, 'approved')}
                             style={{
@@ -384,54 +497,23 @@ function RegistrationsTab() {
                               whiteSpace: 'nowrap',
                             }}
                           >Approve</button>
-                          <button
-                            onClick={() => updateStatus(r.id, 'waitlisted')}
-                            style={{
-                              all: 'unset', cursor: 'pointer', padding: '5px 11px',
-                              borderRadius: 6, fontSize: 12, fontWeight: 700,
-                              border: '1px solid var(--border)', color: 'var(--fg)',
-                              background: '#fff', whiteSpace: 'nowrap',
-                            }}
-                          >Waitlist</button>
-                        </>
-                      )}
-                      {r.status === 'approved' && (
-                        <button
-                          onClick={() => {}}
-                          style={{
-                            all: 'unset', cursor: 'pointer', padding: '5px 11px',
-                            borderRadius: 6, fontSize: 12, fontWeight: 700,
-                            border: '1px solid var(--border)', color: 'var(--fg)',
-                            background: '#fff', whiteSpace: 'nowrap',
-                          }}
-                        >Contact</button>
-                      )}
-                      {r.status === 'waitlisted' && (
-                        <button
-                          onClick={() => updateStatus(r.id, 'approved')}
-                          style={{
-                            all: 'unset', cursor: 'pointer', padding: '5px 11px',
-                            borderRadius: 6, fontSize: 12, fontWeight: 700,
-                            background: 'var(--status-win)', color: '#fff',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >Approve</button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={9} style={{ padding: '28px', textAlign: 'center', fontSize: 14, color: 'var(--fg-muted)' }}>
-                    No registrations match the current filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={9} style={{ padding: '28px', textAlign: 'center', fontSize: 14, color: 'var(--fg-muted)' }}>
+                      No registrations match the current filters.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
 
       {/* Summary row */}
       <div style={{ display: 'flex', gap: 18, padding: '10px 0', borderTop: '1px solid var(--border)' }}>
@@ -564,6 +646,7 @@ function AnnouncementsTab() {
 const TABS = ['Dashboard', 'Teams', 'Registrations', 'Announcements'];
 
 export default function CommissionerApp() {
+  const isMobile = useIsMobile();
   const [authed, setAuthed] = useState(false);
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
@@ -662,15 +745,21 @@ export default function CommissionerApp() {
         </div>
 
         {/* Tab row */}
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'flex', gap: 4 }}>
+        <div style={{
+          maxWidth: 1200, margin: '0 auto', padding: '0 24px',
+          display: 'flex', gap: 4,
+          overflowX: isMobile ? 'auto' : undefined,
+          WebkitOverflowScrolling: isMobile ? 'touch' : undefined,
+        }}>
           {TABS.map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               style={{
                 all: 'unset', cursor: 'pointer',
-                padding: '10px 18px',
+                padding: isMobile ? '10px 14px' : '10px 18px',
                 fontSize: 13, fontWeight: 700,
+                flexShrink: isMobile ? 0 : undefined,
                 color: activeTab === tab ? 'var(--varsity-gold)' : 'rgba(255,255,255,0.60)',
                 borderBottom: activeTab === tab ? '3px solid var(--varsity-gold)' : '3px solid transparent',
                 transition: 'color 120ms, border-color 120ms',
@@ -684,10 +773,10 @@ export default function CommissionerApp() {
       </header>
 
       {/* Content */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '28px 24px 64px' }}>
-        {activeTab === 'Dashboard'      && <DashboardTab />}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: isMobile ? '16px 16px 64px' : '28px 24px 64px' }}>
+        {activeTab === 'Dashboard'      && <DashboardTab isMobile={isMobile} />}
         {activeTab === 'Teams'          && <TeamsTab />}
-        {activeTab === 'Registrations'  && <RegistrationsTab />}
+        {activeTab === 'Registrations'  && <RegistrationsTab isMobile={isMobile} />}
         {activeTab === 'Announcements'  && <AnnouncementsTab />}
       </div>
     </div>
