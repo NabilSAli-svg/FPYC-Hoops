@@ -1,9 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Card, Pill, Button, Icon, Jersey, EmptyState, Skeleton } from '../shared/index.js';
 
-const inputStyle = { padding: '9px 12px', borderRadius: 7, border: '1.5px solid var(--border)', fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none', width: '100%', boxSizing: 'border-box', color: 'var(--fg)' };
+const GRADES = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
+const POSITIONS = ['Guard', 'Forward', 'Center'];
+const SCHOOLS = ['Daniels Run ES', 'Providence ES', 'Lanier MS', 'Mosby Woods ES', 'Robinson Secondary', 'Fairfax HS', 'Other'];
+const STATUSES = ['active', 'pending', 'inactive'];
 
-export default function RosterView({ team, players }) {
+const STATUS_KIND = { active: 'navy', pending: 'warn', neutral: 'neutral' };
+
+function emptyForm() {
+  return { firstName: '', lastName: '', number: '', grade: '5th', position: 'Guard', school: '', guardian: '', phone: '', status: 'active', waiver: false };
+}
+
+export default function RosterView({ team, players, setPlayers }) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 700);
@@ -11,17 +20,112 @@ export default function RosterView({ team, players }) {
   }, []);
 
   const [filter, setFilter] = useState('all');
-  const [showAdd, setShowAdd] = useState(false);
+  const [modal, setModal] = useState(null); // null | { mode: 'add' } | { mode: 'edit', player }
+  const [form, setForm] = useState(emptyForm());
+  const [errors, setErrors] = useState({});
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const [toast, setToast] = useState('');
+
   const filtered = filter === 'all' ? players : players.filter(p => p.status === filter);
 
+  function showToast(msg) {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2500);
+  }
+
+  function openAdd() {
+    setForm(emptyForm());
+    setErrors({});
+    setConfirmRemove(false);
+    setModal({ mode: 'add' });
+  }
+
+  function openEdit(p) {
+    const [firstName, ...rest] = p.name.split(' ');
+    setForm({
+      firstName,
+      lastName: rest.join(' '),
+      number: String(p.number),
+      grade: p.grade,
+      position: p.position,
+      school: p.school || '',
+      guardian: p.guardian || '',
+      phone: p.phone || '',
+      status: p.status,
+      waiver: p.waiver,
+    });
+    setErrors({});
+    setConfirmRemove(false);
+    setModal({ mode: 'edit', player: p });
+  }
+
+  function closeModal() {
+    setModal(null);
+    setConfirmRemove(false);
+  }
+
+  function validate() {
+    const e = {};
+    if (!form.firstName.trim()) e.firstName = 'Required';
+    if (!form.lastName.trim()) e.lastName = 'Required';
+    if (!form.number || isNaN(parseInt(form.number))) e.number = 'Required';
+    const num = parseInt(form.number, 10);
+    const taken = players.find(p => p.number === num && (!modal?.player || p.id !== modal.player.id));
+    if (taken) e.number = `#${num} is already taken by ${taken.name}`;
+    return e;
+  }
+
+  function handleSave() {
+    const e = validate();
+    if (Object.keys(e).length > 0) { setErrors(e); return; }
+
+    const updated = {
+      id: modal.mode === 'edit' ? modal.player.id : 'p' + Date.now(),
+      number: parseInt(form.number, 10),
+      name: `${form.firstName.trim()} ${form.lastName.trim()}`,
+      grade: form.grade,
+      position: form.position,
+      school: form.school,
+      guardian: form.guardian,
+      phone: form.phone,
+      status: form.status,
+      waiver: form.waiver,
+    };
+
+    if (modal.mode === 'add') {
+      setPlayers(ps => [...ps, updated]);
+      showToast(`${updated.name} added to roster`);
+    } else {
+      setPlayers(ps => ps.map(p => p.id === updated.id ? updated : p));
+      showToast(`${updated.name} updated`);
+    }
+    closeModal();
+  }
+
+  function handleRemove() {
+    if (!confirmRemove) { setConfirmRemove(true); return; }
+    setPlayers(ps => ps.filter(p => p.id !== modal.player.id));
+    showToast(`${modal.player.name} removed from roster`);
+    closeModal();
+  }
+
+  function cycleStatus(player) {
+    const next = STATUSES[(STATUSES.indexOf(player.status) + 1) % STATUSES.length];
+    setPlayers(ps => ps.map(p => p.id === player.id ? { ...p, status: next } : p));
+  }
+
+  const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setErrors(e => ({ ...e, [k]: undefined })); };
+
   if (loading) return <RosterSkeleton players={players} filter={filter} setFilter={setFilter} />;
+
   return (
     <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}>
+      {/* Toolbar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: 4, background: '#fff', border: '1px solid var(--border)', borderRadius: 8, padding: 4 }}>
           {[
             { id: 'all',      label: `All · ${players.length}` },
-            { id: 'active',   label: 'Active' },
+            { id: 'active',   label: `Active · ${players.filter(p => p.status === 'active').length}` },
             { id: 'inactive', label: 'Inactive' },
             { id: 'pending',  label: 'Pending' },
           ].map(t => (
@@ -35,44 +139,50 @@ export default function RosterView({ team, players }) {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <Button kind="ghost" icon="download" size="sm">Export CSV</Button>
-          <Button kind="gold" icon="user-plus" onClick={() => setShowAdd(true)}>Add player</Button>
+          <Button kind="gold" icon="user-plus" onClick={openAdd}>Add player</Button>
         </div>
       </div>
 
+      {/* Table */}
       <Card padding={0}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.6fr 0.4fr',
+          gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.7fr auto',
           padding: '12px 18px',
-          background: 'var(--bone)',
-          borderBottom: '1px solid var(--border)',
+          background: 'var(--bone)', borderBottom: '1px solid var(--border)',
           fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700,
         }}>
           <div>#</div><div>Player</div><div>Grade</div><div>School</div>
           <div>Guardian</div><div>Waiver</div><div>Status</div><div />
         </div>
+
         {filtered.length === 0 && (
-          <EmptyState icon="users" title="No players" message={filter === 'all' ? 'Add your first player to get started.' : `No ${filter} players on this roster.`} onAction={() => setShowAdd(true)} actionLabel="Add player" />
+          <EmptyState icon="users" title="No players"
+            message={filter === 'all' ? 'Add your first player to get started.' : `No ${filter} players.`}
+            onAction={openAdd} actionLabel="Add player" />
         )}
+
         {filtered.map((p, i) => (
           <div key={p.id} style={{
             display: 'grid',
-            gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.6fr 0.4fr',
-            padding: '12px 18px',
-            alignItems: 'center',
+            gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.7fr auto',
+            padding: '12px 18px', alignItems: 'center', gap: 4,
             borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
-            gap: 4,
-          }}>
+            transition: 'background 120ms',
+          }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(10,31,61,0.02)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
             <Jersey number={p.number} size={32} />
             <div>
               <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
               <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 2 }}>{p.position}</div>
             </div>
             <div style={{ fontSize: 14 }}>{p.grade}</div>
-            <div style={{ fontSize: 13, color: 'var(--fg-soft)' }}>{p.school}</div>
+            <div style={{ fontSize: 13, color: 'var(--fg-soft)' }}>{p.school || '—'}</div>
             <div style={{ fontSize: 13, color: 'var(--fg-soft)' }}>
-              <div>{p.guardian}</div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>{p.phone}</div>
+              <div>{p.guardian || '—'}</div>
+              {p.phone && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>{p.phone}</div>}
             </div>
             <div>
               {p.waiver
@@ -80,87 +190,170 @@ export default function RosterView({ team, players }) {
                 : <span style={{ color: 'var(--foul-red)', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700 }}><Icon name="alert-circle" size={14} />Missing</span>
               }
             </div>
-            <div>
+            {/* Clickable status pill cycles through statuses */}
+            <button onClick={() => cycleStatus(p)} title="Click to cycle status" style={{ all: 'unset', cursor: 'pointer' }}>
               <Pill kind={p.status === 'active' ? 'navy' : p.status === 'pending' ? 'warn' : 'neutral'}>
                 {p.status}
               </Pill>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <Icon name="more-horizontal" size={18} color="var(--fg-muted)" />
+            </button>
+            <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+              <button onClick={() => openEdit(p)} style={{
+                all: 'unset', cursor: 'pointer', padding: '6px 8px', borderRadius: 6,
+                color: 'var(--fg-muted)', transition: 'all 120ms',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--bone)'; e.currentTarget.style.color = 'var(--court-navy)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--fg-muted)'; }}
+              >
+                <Icon name="edit-2" size={15} color="currentColor" />
+              </button>
             </div>
           </div>
         ))}
       </Card>
 
-      {showAdd && (
+      {/* Add / Edit Modal */}
+      {modal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
-          onClick={e => e.target === e.currentTarget && setShowAdd(false)}>
-          <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: '100%', maxWidth: 560, boxShadow: 'var(--shadow-3)', position: 'relative' }}>
+          onClick={e => e.target === e.currentTarget && closeModal()}>
+          <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: '100%', maxWidth: 560, boxShadow: 'var(--shadow-3)', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
+
+            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--court-navy)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Add player</div>
-              <button onClick={() => setShowAdd(false)} style={{ all: 'unset', cursor: 'pointer' }}><Icon name="x" size={20} color="var(--fg-muted)" /></button>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--court-navy)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {modal.mode === 'add' ? 'Add player' : `Edit — ${modal.player.name}`}
+              </div>
+              <button onClick={closeModal} style={{ all: 'unset', cursor: 'pointer' }}><Icon name="x" size={20} color="var(--fg-muted)" /></button>
             </div>
+
+            {/* Form */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-              {[
-                { label: 'First name', placeholder: 'First name' },
-                { label: 'Last name',  placeholder: 'Last name' },
-              ].map(f => (
-                <div key={f.label}>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>{f.label}</label>
-                  <input placeholder={f.placeholder} style={inputStyle} />
-                </div>
-              ))}
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Jersey #</label>
-                <input type="number" placeholder="e.g. 23" style={inputStyle} />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Grade</label>
-                <select style={inputStyle}>
-                  <option>5th</option><option>6th</option><option>7th</option><option>8th</option>
+              <F label="First name" required error={errors.firstName}>
+                <input value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="First name" style={inputStyle(errors.firstName)} />
+              </F>
+              <F label="Last name" required error={errors.lastName}>
+                <input value={form.lastName} onChange={e => set('lastName', e.target.value)} placeholder="Last name" style={inputStyle(errors.lastName)} />
+              </F>
+              <F label="Jersey #" required error={errors.number}>
+                <input type="number" min="0" max="99" value={form.number} onChange={e => set('number', e.target.value)} placeholder="e.g. 23" style={inputStyle(errors.number)} />
+              </F>
+              <F label="Grade">
+                <select value={form.grade} onChange={e => set('grade', e.target.value)} style={inputStyle()}>
+                  {GRADES.map(g => <option key={g} value={g}>{g} grade</option>)}
                 </select>
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Position</label>
-                <select style={inputStyle}>
-                  <option>Guard</option><option>Forward</option><option>Center</option>
+              </F>
+              <F label="Position">
+                <select value={form.position} onChange={e => set('position', e.target.value)} style={inputStyle()}>
+                  {POSITIONS.map(p => <option key={p}>{p}</option>)}
                 </select>
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>School</label>
-                <input placeholder="e.g. Daniels Run ES" style={inputStyle} />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Guardian name</label>
-                <input placeholder="e.g. A. Reeves" style={inputStyle} />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Guardian phone</label>
-                <input placeholder="(703) 555-0000" style={inputStyle} />
-              </div>
+              </F>
+              <F label="School">
+                <select value={form.school} onChange={e => set('school', e.target.value)} style={inputStyle()}>
+                  <option value="">Select school…</option>
+                  {SCHOOLS.map(s => <option key={s}>{s}</option>)}
+                </select>
+              </F>
+              <F label="Guardian name">
+                <input value={form.guardian} onChange={e => set('guardian', e.target.value)} placeholder="e.g. A. Reeves" style={inputStyle()} />
+              </F>
+              <F label="Guardian phone">
+                <input value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="(703) 555-0000" style={inputStyle()} />
+              </F>
+              <F label="Status">
+                <select value={form.status} onChange={e => set('status', e.target.value)} style={inputStyle()}>
+                  {STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+                </select>
+              </F>
+              <F label="Waiver">
+                <button onClick={() => set('waiver', !form.waiver)} style={{
+                  width: '100%', padding: '9px 14px', borderRadius: 7, cursor: 'pointer',
+                  border: `1.5px solid ${form.waiver ? 'var(--status-win)' : 'var(--border)'}`,
+                  background: form.waiver ? 'rgba(31,138,91,0.06)' : '#fff',
+                  fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13,
+                  color: form.waiver ? 'var(--status-win)' : 'var(--fg-muted)',
+                  display: 'flex', alignItems: 'center', gap: 8, transition: 'all 160ms',
+                }}>
+                  <Icon name={form.waiver ? 'check-circle-2' : 'circle'} size={15} color={form.waiver ? 'var(--status-win)' : 'var(--fg-muted)'} />
+                  {form.waiver ? 'Waiver on file' : 'Waiver missing'}
+                </button>
+              </F>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-              <Button kind="ghost" onClick={() => setShowAdd(false)}>Cancel</Button>
-              <Button kind="gold" icon="user-plus" onClick={() => setShowAdd(false)}>Add to roster</Button>
+
+            {/* Footer */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, gap: 8 }}>
+              <div>
+                {modal.mode === 'edit' && (
+                  confirmRemove ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 13, color: 'var(--foul-red)', fontWeight: 600 }}>Remove {modal.player.name}?</span>
+                      <Button kind="danger" size="sm" onClick={handleRemove}>Confirm</Button>
+                      <Button kind="ghost" size="sm" onClick={() => setConfirmRemove(false)}>Cancel</Button>
+                    </div>
+                  ) : (
+                    <button onClick={handleRemove} style={{
+                      all: 'unset', cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                      color: 'var(--foul-red)', display: 'flex', alignItems: 'center', gap: 6,
+                    }}>
+                      <Icon name="trash-2" size={14} color="var(--foul-red)" /> Remove player
+                    </button>
+                  )
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <Button kind="ghost" onClick={closeModal}>Cancel</Button>
+                <Button kind="gold" icon={modal.mode === 'add' ? 'user-plus' : 'check'} onClick={handleSave}>
+                  {modal.mode === 'add' ? 'Add to roster' : 'Save changes'}
+                </Button>
+              </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div style={{
+          position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+          background: 'var(--court-navy)', color: '#fff',
+          padding: '12px 24px', borderRadius: 999, fontWeight: 700, fontSize: 14,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: 8, zIndex: 300,
+        }}>
+          <Icon name="check-circle" size={16} color="var(--varsity-gold)" /> {toast}
         </div>
       )}
     </div>
   );
 }
 
+function F({ label, required, error, children }) {
+  return (
+    <div>
+      <label style={{ fontSize: 12, fontWeight: 700, color: error ? 'var(--foul-red)' : 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+        {label}{required && <span style={{ color: 'var(--foul-red)', marginLeft: 3 }}>*</span>}
+      </label>
+      {children}
+      {error && <div style={{ fontSize: 12, color: 'var(--foul-red)', marginTop: 4, fontWeight: 500 }}>{error}</div>}
+    </div>
+  );
+}
+
+const inputStyle = (error) => ({
+  padding: '9px 12px', borderRadius: 7,
+  border: `1.5px solid ${error ? 'var(--foul-red)' : 'var(--border)'}`,
+  background: error ? '#FFF5F5' : '#fff',
+  fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none',
+  width: '100%', boxSizing: 'border-box', color: 'var(--fg)',
+});
+
 function RosterSkeleton({ players, filter, setFilter }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Filter tab bar and action buttons — shown as-is */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', gap: 4, background: '#fff', border: '1px solid var(--border)', borderRadius: 8, padding: 4 }}>
           {[
-            { id: 'all',      label: `All · ${players.length}` },
-            { id: 'active',   label: 'Active' },
+            { id: 'all', label: `All · ${players.length}` },
+            { id: 'active', label: 'Active' },
             { id: 'inactive', label: 'Inactive' },
-            { id: 'pending',  label: 'Pending' },
+            { id: 'pending', label: 'Pending' },
           ].map(t => (
             <button key={t.id} onClick={() => setFilter(t.id)} style={{
               padding: '8px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
@@ -175,34 +368,22 @@ function RosterSkeleton({ players, filter, setFilter }) {
           <Button kind="gold" icon="user-plus">Add player</Button>
         </div>
       </div>
-
-      {/* Table with skeleton rows */}
       <Card padding={0}>
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.6fr 0.4fr',
-          padding: '12px 18px',
-          background: 'var(--bone)',
-          borderBottom: '1px solid var(--border)',
+          display: 'grid', gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.7fr auto',
+          padding: '12px 18px', background: 'var(--bone)', borderBottom: '1px solid var(--border)',
           fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700,
         }}>
           <div>#</div><div>Player</div><div>Grade</div><div>School</div>
           <div>Guardian</div><div>Waiver</div><div>Status</div><div />
         </div>
-        {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
+        {[0,1,2,3,4,5,6,7].map(i => (
           <div key={i} style={{
-            display: 'grid',
-            gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.6fr 0.4fr',
-            padding: '13px 18px',
-            alignItems: 'center',
-            borderBottom: '1px solid var(--border)',
-            gap: 4,
+            display: 'grid', gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.7fr auto',
+            padding: '13px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', gap: 4,
           }}>
             <Skeleton width={28} height={28} style={{ borderRadius: 4, margin: '0 auto' }} />
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <Skeleton width="75%" height={14} style={{ marginBottom: 5 }} />
-              <Skeleton width="55%" height={11} />
-            </div>
+            <div><Skeleton width="75%" height={14} style={{ marginBottom: 5 }} /><Skeleton width="55%" height={11} /></div>
             <Skeleton width="60%" height={13} />
             <Skeleton width="70%" height={13} />
             <Skeleton width="80%" height={13} />
