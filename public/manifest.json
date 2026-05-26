@@ -1,0 +1,42 @@
+{
+  "name": "FPYC Basketball",
+  "short_name": "FPYC",
+  "description": "Fairfax Police Youth Club Basketball — schedules, rosters, and team communications.",
+  "start_url": "/family",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A1F3D",
+  "theme_color": "#0A1F3D",
+  "icons": [
+    {
+      "src": "/assets/logo-fpyc-basketball.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/logo-fpyc-basketball.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Schedule",
+      "short_name": "Schedule",
+      "description": "View upcoming games and practices",
+      "url": "/family",
+      "icons": [{ "src": "/assets/logo-fpyc-basketball.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Register",
+      "short_name": "Register",
+      "description": "Register your player for the season",
+      "url": "/register",
+      "icons": [{ "src": "/assets/logo-fpyc-basketball.png", "sizes": "96x96" }]
+    }
+  ]
+}
