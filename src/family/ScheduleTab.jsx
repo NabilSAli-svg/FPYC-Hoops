@@ -1,10 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Icon from '../shared/Icon.jsx';
+import Skeleton from '../shared/Skeleton.jsx';
 import { EVENTS } from './data.js';
 
 export default function ScheduleTab() {
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [rsvps, setRsvps] = useState({});
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 650);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (loading) return <ScheduleSkeleton filter={filter} setFilter={setFilter} />;
 
   const filtered = EVENTS.filter(e => filter === 'all' || e.type === filter);
 
@@ -12,7 +21,7 @@ export default function ScheduleTab() {
   const past = filtered.filter(e => e.status === 'final');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Filter chips */}
       <div style={{ display: 'flex', gap: 8 }}>
         {[
@@ -154,6 +163,54 @@ function EventCard({ event: e, rsvp, onRsvp }) {
           ) : null}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ScheduleSkeleton({ filter, setFilter }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Filter chips — show real chips */}
+      <div style={{ display: 'flex', gap: 8 }}>
+        {[
+          { id: 'all', label: 'All events' },
+          { id: 'game', label: 'Games' },
+          { id: 'practice', label: 'Practices' },
+        ].map(f => (
+          <button key={f.id} onClick={() => setFilter(f.id)} style={{
+            padding: '7px 14px', borderRadius: 999, border: 'none', cursor: 'pointer',
+            background: filter === f.id ? 'var(--court-navy)' : '#E2E5EA',
+            color: filter === f.id ? '#fff' : '#6B7280',
+            fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13,
+            transition: 'all 160ms',
+          }}>{f.label}</button>
+        ))}
+      </div>
+
+      {/* Section label */}
+      <Skeleton width={80} height={11} style={{ marginBottom: 8 }} />
+
+      {/* 3 event card skeletons */}
+      {[0, 1, 2].map(i => (
+        <div key={i} style={{
+          background: '#fff', border: '1px solid #E2E5EA', borderRadius: 14,
+          padding: '16px 18px', marginBottom: 10,
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Skeleton width={50} height={22} style={{ borderRadius: 999 }} />
+            <Skeleton width={70} height={22} style={{ borderRadius: 999 }} />
+          </div>
+          <Skeleton width="70%" height={20} style={{ margin: '10px 0 4px' }} />
+          <div style={{ display: 'flex', gap: 16 }}>
+            <Skeleton width={100} height={13} />
+            <Skeleton width={80} height={13} />
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            <Skeleton width={70} height={32} style={{ borderRadius: 8 }} />
+            <Skeleton width={70} height={32} style={{ borderRadius: 8 }} />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

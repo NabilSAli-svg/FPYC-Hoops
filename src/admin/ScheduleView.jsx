@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Pill, Button, Icon, Display, Eyebrow, EmptyState } from '../shared/index.js';
+import { Card, Pill, Button, Icon, Display, Eyebrow, EmptyState, Skeleton } from '../shared/index.js';
 
 const PRACTICES = [
   { id: 'pr1', date: 'Mon, Dec 2',  time: '6:00–7:30 PM', gym: 'Daniels Run ES · Gym', type: 'Regular',      rsvp: 10, notes: 'Focus: ball handling and pick-and-roll defense' },
@@ -17,6 +17,12 @@ const PRACTICE_TYPE_COLOR = {
 };
 
 export default function ScheduleView({ games, onScoreSave, onGo, initialTab = 'games', openNewGame = false, onNewGameClose }) {
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 700);
+    return () => clearTimeout(t);
+  }, []);
+
   const [tab, setTab] = useState(initialTab);
   const [showNewPractice, setShowNewPractice] = useState(false);
   const [showNewGame, setShowNewGame] = useState(false);
@@ -50,8 +56,9 @@ export default function ScheduleView({ games, onScoreSave, onGo, initialTab = 'g
     }
   }, [openNewGame]);
 
+  if (loading) return <ScheduleSkeleton tab={tab} setTab={setTab} games={games} />;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Tab bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 0, borderBottom: '1px solid var(--border)' }}>
         {[
@@ -364,3 +371,59 @@ function FormField({ label, children, style }) {
 }
 
 const inputStyle = { padding: '9px 12px', borderRadius: 7, border: '1.5px solid var(--border)', fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none', width: '100%', boxSizing: 'border-box', color: 'var(--fg)' };
+
+function ScheduleSkeleton({ tab, setTab, games }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Tab bar — shown as-is */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 0, borderBottom: '1px solid var(--border)' }}>
+        {[
+          { id: 'games',     label: 'Games',     count: games.length },
+          { id: 'practices', label: 'Practices', count: PRACTICES.length },
+        ].map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: '10px 18px', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
+            color: tab === t.id ? 'var(--court-navy)' : 'var(--fg-muted)',
+            borderBottom: `2px solid ${tab === t.id ? 'var(--varsity-gold)' : 'transparent'}`,
+            marginBottom: -1, display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            {t.label}
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: tab === t.id ? 'var(--court-navy)' : 'var(--border)', color: tab === t.id ? '#fff' : 'var(--fg-muted)' }}>
+              {t.count}
+            </span>
+          </button>
+        ))}
+        <div style={{ flex: 1 }} />
+        <div style={{ display: 'flex', gap: 8, paddingBottom: 8 }}>
+          <Button kind="ghost" icon="filter" size="sm">Filter</Button>
+          <Button kind="ghost" icon="calendar-plus" size="sm">Subscribe (.ics)</Button>
+        </div>
+      </div>
+
+      {/* 3 card skeletons */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {[0, 1, 2].map(i => (
+          <Card key={i} padding={0} style={{ overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr auto', gap: 18, alignItems: 'center', padding: '16px 20px' }}>
+              {/* Date block */}
+              <div style={{ background: 'var(--bone)', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                <Skeleton width={40} height={11} />
+                <Skeleton width={48} height={32} />
+                <Skeleton width={60} height={11} />
+              </div>
+              {/* Middle */}
+              <div>
+                <Skeleton width={60} height={22} style={{ borderRadius: 999, marginBottom: 8 }} />
+                <Skeleton width="70%" height={22} />
+                <Skeleton width="55%" height={13} style={{ marginTop: 6 }} />
+              </div>
+              {/* Right */}
+              <Skeleton width={80} height={34} style={{ borderRadius: 8 }} />
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -7,3 +7,4 @@ export { default as Jersey } from './Jersey.jsx';
 export { default as Eyebrow } from './Eyebrow.jsx';
 export { default as Display } from './Display.jsx';
 export { default as EmptyState } from './EmptyState.jsx';
+export { default as Skeleton } from './Skeleton.jsx';

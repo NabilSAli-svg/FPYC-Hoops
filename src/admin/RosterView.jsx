@@ -1,15 +1,22 @@
-import { useState } from 'react';
-import { Card, Pill, Button, Icon, Jersey, EmptyState } from '../shared/index.js';
+import { useState, useEffect } from 'react';
+import { Card, Pill, Button, Icon, Jersey, EmptyState, Skeleton } from '../shared/index.js';
 
 const inputStyle = { padding: '9px 12px', borderRadius: 7, border: '1.5px solid var(--border)', fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none', width: '100%', boxSizing: 'border-box', color: 'var(--fg)' };
 
 export default function RosterView({ team, players }) {
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 700);
+    return () => clearTimeout(t);
+  }, []);
+
   const [filter, setFilter] = useState('all');
   const [showAdd, setShowAdd] = useState(false);
   const filtered = filter === 'all' ? players : players.filter(p => p.status === filter);
 
+  if (loading) return <RosterSkeleton players={players} filter={filter} setFilter={setFilter} />;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', gap: 4, background: '#fff', border: '1px solid var(--border)', borderRadius: 8, padding: 4 }}>
           {[
@@ -139,6 +146,72 @@ export default function RosterView({ team, players }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function RosterSkeleton({ players, filter, setFilter }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Filter tab bar and action buttons — shown as-is */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', gap: 4, background: '#fff', border: '1px solid var(--border)', borderRadius: 8, padding: 4 }}>
+          {[
+            { id: 'all',      label: `All · ${players.length}` },
+            { id: 'active',   label: 'Active' },
+            { id: 'inactive', label: 'Inactive' },
+            { id: 'pending',  label: 'Pending' },
+          ].map(t => (
+            <button key={t.id} onClick={() => setFilter(t.id)} style={{
+              padding: '8px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
+              background: filter === t.id ? 'var(--court-navy)' : 'transparent',
+              color: filter === t.id ? '#fff' : 'var(--fg-soft)',
+              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13,
+            }}>{t.label}</button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button kind="ghost" icon="download" size="sm">Export CSV</Button>
+          <Button kind="gold" icon="user-plus">Add player</Button>
+        </div>
+      </div>
+
+      {/* Table with skeleton rows */}
+      <Card padding={0}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.6fr 0.4fr',
+          padding: '12px 18px',
+          background: 'var(--bone)',
+          borderBottom: '1px solid var(--border)',
+          fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700,
+        }}>
+          <div>#</div><div>Player</div><div>Grade</div><div>School</div>
+          <div>Guardian</div><div>Waiver</div><div>Status</div><div />
+        </div>
+        {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
+          <div key={i} style={{
+            display: 'grid',
+            gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.6fr 0.4fr',
+            padding: '13px 18px',
+            alignItems: 'center',
+            borderBottom: '1px solid var(--border)',
+            gap: 4,
+          }}>
+            <Skeleton width={28} height={28} style={{ borderRadius: 4, margin: '0 auto' }} />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <Skeleton width="75%" height={14} style={{ marginBottom: 5 }} />
+              <Skeleton width="55%" height={11} />
+            </div>
+            <Skeleton width="60%" height={13} />
+            <Skeleton width="70%" height={13} />
+            <Skeleton width="80%" height={13} />
+            <Skeleton width={52} height={20} style={{ borderRadius: 999 }} />
+            <Skeleton width={60} height={20} style={{ borderRadius: 999 }} />
+            <Skeleton width={24} height={24} style={{ borderRadius: 4, marginLeft: 'auto' }} />
+          </div>
+        ))}
+      </Card>
     </div>
   );
 }

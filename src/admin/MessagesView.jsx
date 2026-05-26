@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Card, Button, Icon, Display, Pill, Avatar, EmptyState } from '../shared/index.js';
+import { useState, useEffect } from 'react';
+import { Card, Button, Icon, Display, Pill, Avatar, EmptyState, Skeleton } from '../shared/index.js';
 
 const THREADS = [
   {
@@ -59,6 +59,12 @@ const NOTIF_COLORS = {
 };
 
 export default function MessagesView({ autoCompose = false, onAutoComposeUsed }) {
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 700);
+    return () => clearTimeout(t);
+  }, []);
+
   const [tab, setTab] = useState('inbox');
   const [selected, setSelected] = useState(THREADS[0].id);
   const [showCompose, setShowCompose] = useState(autoCompose);
@@ -72,8 +78,9 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed })
   const thread = THREADS.find(t => t.id === selected);
   const filtered = tab === 'inbox' ? THREADS : THREADS.filter(t => t.channel === tab);
 
+  if (loading) return <MessagesSkeleton tab={tab} setTab={setTab} />;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0, height: 'calc(100vh - 130px)', minHeight: 600 }}>
+    <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 0, height: 'calc(100vh - 130px)', minHeight: 600 }}>
       {/* Toolbar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
         <div style={{ display: 'flex', gap: 4, background: '#fff', border: '1px solid var(--border)', borderRadius: 8, padding: 4 }}>

@@ -1,7 +1,18 @@
-import { useState } from 'react';
-import { Card, Pill, Button, Icon, Eyebrow, Display } from '../shared/index.js';
+import { useState, useEffect } from 'react';
+import { Card, Pill, Button, Icon, Eyebrow, Display, Skeleton } from '../shared/index.js';
 
 export default function DashboardView({ team, players, games, onGo }) {
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 700);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (loading) return <DashboardSkeleton />;
+  return <div className="skel-content"><DashboardContent team={team} players={players} games={games} onGo={onGo} /></div>;
+}
+
+function DashboardContent({ team, players, games, onGo }) {
   const next = games.find(g => g.status === 'scheduled');
   const recent = games.filter(g => g.status === 'final').slice(0, 3);
 
@@ -168,6 +179,94 @@ function Announce({ from, time, title, body, warn }) {
       </div>
       <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>{title}</div>
       <div style={{ fontSize: 13, color: 'var(--fg-soft)', lineHeight: 1.5 }}>{body}</div>
+    </div>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 20 }}>
+      {/* Hero card skeleton */}
+      <Card padding={0} style={{ overflow: 'hidden', gridColumn: '1 / -1' }}>
+        <div style={{
+          background: 'var(--court-navy)',
+          padding: '22px 26px',
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          gap: 28,
+          alignItems: 'center',
+        }}>
+          {/* Left col */}
+          <div>
+            <Skeleton dark width={80} height={11} />
+            <Skeleton dark width={240} height={38} style={{ marginTop: 8 }} />
+            <div style={{ display: 'flex', gap: 12, marginTop: 10 }}>
+              <Skeleton dark width={130} height={13} />
+              <Skeleton dark width={130} height={13} />
+            </div>
+          </div>
+          {/* Center col */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '0 24px', borderLeft: '1px solid rgba(255,255,255,0.10)', borderRight: '1px solid rgba(255,255,255,0.10)' }}>
+            <Skeleton dark width={80} height={11} />
+            <Skeleton dark width={56} height={56} />
+            <Skeleton dark width={40} height={11} />
+          </div>
+          {/* Right col */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-end' }}>
+            <Skeleton dark width={120} height={26} style={{ borderRadius: 999 }} />
+            <Skeleton dark width={170} height={13} />
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Skeleton dark width={120} height={36} style={{ borderRadius: 8 }} />
+              <Skeleton dark width={120} height={36} style={{ borderRadius: 8 }} />
+            </div>
+          </div>
+        </div>
+        {/* Bottom strip */}
+        <div style={{ padding: '14px 26px', display: 'flex', gap: 28, alignItems: 'center', background: 'var(--bone)', borderTop: '1px solid var(--border)' }}>
+          <Skeleton width={150} height={13} />
+          <Skeleton width={150} height={13} />
+          <Skeleton width={150} height={13} />
+        </div>
+      </Card>
+
+      {/* Recent results card skeleton */}
+      <Card>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <Skeleton width={120} height={16} />
+          <Skeleton width={60} height={13} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 12px', background: 'var(--bone)', border: '1px solid var(--border)', borderRadius: 8 }}>
+              <Skeleton width={32} height={32} style={{ borderRadius: 6, flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <Skeleton width="100%" height={14} />
+              </div>
+              <Skeleton width={50} height={22} style={{ borderRadius: 999 }} />
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Practice attendance card skeleton */}
+      <Card>
+        <Skeleton width={160} height={16} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
+          {[0, 1, 2, 3, 4].map(i => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Skeleton width={26} height={26} style={{ borderRadius: '50%', flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <Skeleton height={14} />
+              </div>
+              <div style={{ display: 'flex', gap: 3 }}>
+                {[0, 1, 2, 3, 4, 5].map(j => (
+                  <Skeleton key={j} width={18} height={18} style={{ borderRadius: 3 }} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 }
