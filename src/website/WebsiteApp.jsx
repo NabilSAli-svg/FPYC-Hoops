@@ -7,6 +7,7 @@ import Programs from './Programs.jsx';
 import SeasonCalendar from './SeasonCalendar.jsx';
 import HowToRegister from './HowToRegister.jsx';
 import TeamSpotlight from './TeamSpotlight.jsx';
+import PlayoffBracket from './PlayoffBracket.jsx';
 import { Announcements, Schedule, News, FaqContact } from './Sections.jsx';
 
 function scrollTo(id) {
@@ -29,6 +30,7 @@ export default function WebsiteApp() {
         <Hero onRegister={() => scrollTo('register')} />
         <Announcements />
         <TeamSpotlight />
+        <PlayoffBracket />
         <WhyFPYC />
         <Testimonials />
         <Programs />

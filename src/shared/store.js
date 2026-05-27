@@ -129,6 +129,31 @@ export function useDraftState() {
   return useLocalStorage('fpyc-draft-state', INITIAL_DRAFT);
 }
 
+// ─── Playoff Bracket ──────────────────────────────────────────────────────────
+// 4-team single-elimination. Seeds are indices into the seeds array.
+
+export const INITIAL_BRACKET = {
+  status: 'setup',  // 'setup' | 'semis' | 'finals' | 'complete'
+  division: 'Boys 5–6 House',
+  season: '2025–26',
+  seeds: [
+    { seed: 1, name: 'Centreville Eagles', record: '8–1', fpyc: false },
+    { seed: 2, name: 'Fairfax Hawks',       record: '6–3', fpyc: true  },
+    { seed: 3, name: 'Vienna Storm',        record: '5–4', fpyc: false },
+    { seed: 4, name: 'Reston Wolves',       record: '5–4', fpyc: false },
+  ],
+  semis: [
+    { id: 's1', top: 0, bottom: 3, scoreTop: null, scoreBottom: null, winner: null, date: 'Sat, Jan 11', time: '10:00 AM', location: 'Robinson Secondary · Gym B' },
+    { id: 's2', top: 1, bottom: 2, scoreTop: null, scoreBottom: null, winner: null, date: 'Sat, Jan 11', time: '11:30 AM', location: 'Robinson Secondary · Gym B' },
+  ],
+  final: { top: null, bottom: null, scoreTop: null, scoreBottom: null, winner: null, date: 'Sat, Jan 18', time: '10:00 AM', location: 'Robinson Secondary · Gym A' },
+  champion: null,
+};
+
+export function useBracket() {
+  return useLocalStorage('fpyc-bracket', INITIAL_BRACKET);
+}
+
 // ─── Player Stats ─────────────────────────────────────────────────────────────
 // { [gameId]: { [playerId]: { pts, ast, reb, fls } } }
 

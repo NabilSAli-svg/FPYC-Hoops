@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 import { csvDownload } from '../shared/csvDownload.js';
-import { useDraftState, DRAFT_PLAYERS, DRAFT_TEAMS, buildSnakeOrder, INITIAL_DRAFT } from '../shared/store.js';
+import { useDraftState, DRAFT_PLAYERS, DRAFT_TEAMS, buildSnakeOrder, INITIAL_DRAFT, useBracket, INITIAL_BRACKET } from '../shared/store.js';
 
 const CREDENTIALS = { username: 'commissioner', password: 'fpyc2025' };
 
@@ -799,6 +799,341 @@ function AnnouncementsTab() {
   );
 }
 
+// ─── Bracket Tab ──────────────────────────────────────────────────────────────
+
+function BracketTab({ isMobile }) {
+  const [bracket, setBracket] = useBracket();
+  const [scores, setScores] = useState({});
+
+  const { seeds, semis, final, status } = bracket;
+
+  function setScore(matchId, side, val) {
+    setScores(s => ({ ...s, [`${matchId}_${side}`]: val }));
+  }
+  function getScore(matchId, side) {
+    return scores[`${matchId}_${side}`] ?? '';
+  }
+
+  function publishBracket() {
+    setBracket(b => ({ ...b, status: 'semis' }));
+  }
+
+  function advanceSemis() {
+    const updatedSemis = semis.map(s => {
+      const sT = parseInt(getScore(s.id, 'top'))    || 0;
+      const sB = parseInt(getScore(s.id, 'bottom')) || 0;
+      return { ...s, scoreTop: sT, scoreBottom: sB, winner: sT >= sB ? s.top : s.bottom };
+    });
+    const finalTop    = updatedSemis[0].winner;
+    const finalBottom = updatedSemis[1].winner;
+    setBracket(b => ({ ...b, semis: updatedSemis, final: { ...b.final, top: finalTop, bottom: finalBottom }, status: 'finals' }));
+    setScores({});
+  }
+
+  function crownChampion() {
+    const sT = parseInt(getScore('final', 'top'))    || 0;
+    const sB = parseInt(getScore('final', 'bottom')) || 0;
+    const winnerIdx = sT >= sB ? final.top : final.bottom;
+    setBracket(b => ({
+      ...b,
+      final: { ...b.final, scoreTop: sT, scoreBottom: sB, winner: winnerIdx },
+      champion: winnerIdx,
+      status: 'complete',
+    }));
+  }
+
+  function resetBracket() {
+    setBracket({ ...INITIAL_BRACKET });
+    setScores({});
+  }
+
+  function SeedCard({ idx, score, isWinner, isLoser }) {
+    const team = seeds[idx];
+    if (!team) return <div style={{ padding: '12px 16px', borderRadius: 8, border: '1.5px dashed var(--border)', color: 'var(--fg-muted)', fontSize: 13 }}>TBD</div>;
+    return (
+      <div style={{
+        padding: '11px 16px', borderRadius: 8,
+        background: isWinner ? 'rgba(31,138,91,0.08)' : isLoser ? 'rgba(0,0,0,0.03)' : '#fff',
+        border: `1.5px solid ${isWinner ? 'var(--status-win)' : isLoser ? 'var(--border)' : team.fpyc ? 'var(--varsity-gold)' : 'var(--border)'}`,
+        display: 'flex', alignItems: 'center', gap: 10, opacity: isLoser ? 0.55 : 1,
+        transition: 'all 200ms',
+      }}>
+        <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--fg-muted)', width: 14, flexShrink: 0 }}>#{team.seed}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {team.fpyc && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--varsity-gold)', flexShrink: 0 }} />}
+            <span style={{ fontWeight: 700, fontSize: 13, color: isLoser ? 'var(--fg-muted)' : 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{team.name}</span>
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{team.record}</div>
+        </div>
+        {score != null && (
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: isWinner ? 'var(--status-win)' : 'var(--fg-muted)', fontWeight: 700, flexShrink: 0 }}>{score}</span>
+        )}
+        {isWinner && <Icon name="check-circle" size={15} color="var(--status-win)" />}
+      </div>
+    );
+  }
+
+  function ScoreEntry({ matchId, topIdx, bottomIdx, topScore, bottomScore }) {
+    const topTeam    = seeds[topIdx];
+    const bottomTeam = seeds[bottomIdx];
+    if (!topTeam || !bottomTeam) return null;
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 10, alignItems: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg)', marginBottom: 6 }}>#{topTeam.seed} {topTeam.name.split(' ').slice(-1)[0]}</div>
+          <input type="number" min="0" value={topScore ?? getScore(matchId, 'top')} readOnly={topScore != null}
+            onChange={e => setScore(matchId, 'top', e.target.value)}
+            placeholder="0"
+            style={{ width: '100%', padding: '10px', borderRadius: 8, border: '1.5px solid var(--border)', fontFamily: 'var(--font-display)', fontSize: 28, textAlign: 'center', outline: 'none', color: 'var(--court-navy)', background: topScore != null ? 'var(--bone)' : '#fff', boxSizing: 'border-box' }}
+          />
+        </div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--fg-muted)', textAlign: 'center' }}>–</div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg)', marginBottom: 6 }}>#{bottomTeam.seed} {bottomTeam.name.split(' ').slice(-1)[0]}</div>
+          <input type="number" min="0" value={bottomScore ?? getScore(matchId, 'bottom')} readOnly={bottomScore != null}
+            onChange={e => setScore(matchId, 'bottom', e.target.value)}
+            placeholder="0"
+            style={{ width: '100%', padding: '10px', borderRadius: 8, border: '1.5px solid var(--border)', fontFamily: 'var(--font-display)', fontSize: 28, textAlign: 'center', outline: 'none', color: 'var(--court-navy)', background: bottomScore != null ? 'var(--bone)' : '#fff', boxSizing: 'border-box' }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Setup ──
+  if (status === 'setup') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <Card padding={22}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+            <div>
+              <Display size={22}>Playoff Bracket</Display>
+              <div style={{ marginTop: 4, fontSize: 13, color: 'var(--fg-muted)' }}>{bracket.division} · Season {bracket.season} · 4-team single elimination</div>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 999, background: 'rgba(10,31,61,0.08)', color: 'var(--court-navy)' }}>SETUP</span>
+          </div>
+        </Card>
+
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
+          {semis.map((s, i) => (
+            <Card key={s.id} padding={20}>
+              <Eyebrow style={{ marginBottom: 14 }}>Semifinal {i + 1}</Eyebrow>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+                <SeedCard idx={s.top} />
+                <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--fg-muted)', fontWeight: 700 }}>vs.</div>
+                <SeedCard idx={s.bottom} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Date</label>
+                    <input defaultValue={s.date} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1.5px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Time</label>
+                    <input defaultValue={s.time} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1.5px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                  </div>
+                </div>
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Location</label>
+                  <input defaultValue={s.location} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1.5px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        <Card padding={20}>
+          <Eyebrow style={{ marginBottom: 14 }}>Championship Game</Eyebrow>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: 10 }}>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Date</label>
+              <input defaultValue={final.date} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1.5px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Time</label>
+              <input defaultValue={final.time} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1.5px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Location</label>
+              <input defaultValue={final.location} style={{ width: '100%', padding: '8px 10px', borderRadius: 7, border: '1.5px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+            </div>
+          </div>
+        </Card>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button kind="primary" icon="send" onClick={publishBracket}>Publish Bracket</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Semis ──
+  if (status === 'semis') {
+    const semisComplete = semis.every(s => getScore(s.id, 'top') !== '' && getScore(s.id, 'bottom') !== '');
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ background: 'var(--court-navy)', borderRadius: 12, padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--varsity-gold)', marginBottom: 4 }}>Semifinals</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff' }}>{bracket.division} Playoffs</div>
+          </div>
+          <Button kind="gold" icon="arrow-right" onClick={advanceSemis} disabled={!semisComplete}>Advance winners</Button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
+          {semis.map((s, i) => (
+            <Card key={s.id} padding={20}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <Eyebrow>Semifinal {i + 1}</Eyebrow>
+                <div style={{ fontSize: 12, color: 'var(--fg-muted)' }}>{s.date} · {s.time}</div>
+              </div>
+              <ScoreEntry matchId={s.id} topIdx={s.top} bottomIdx={s.bottom} topScore={s.scoreTop} bottomScore={s.scoreBottom} />
+              <div style={{ marginTop: 12, fontSize: 12, color: 'var(--fg-muted)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <Icon name="map-pin" size={12} color="var(--fg-muted)" /> {s.location}
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {/* Bracket preview */}
+        <BracketPreview bracket={bracket} seeds={seeds} isMobile={isMobile} />
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button kind="ghost" size="sm" onClick={resetBracket}>Reset bracket</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Finals ──
+  if (status === 'finals') {
+    const finalsComplete = getScore('final', 'top') !== '' && getScore('final', 'bottom') !== '';
+    const topTeam    = seeds[final.top];
+    const bottomTeam = seeds[final.bottom];
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ background: 'var(--court-navy)', borderRadius: 12, padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--varsity-gold)', marginBottom: 4 }}>Championship Game</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff' }}>{final.date} · {final.time}</div>
+          </div>
+          <Button kind="gold" icon="trophy" onClick={crownChampion} disabled={!finalsComplete}>Crown champion</Button>
+        </div>
+
+        <Card padding={24}>
+          <Eyebrow style={{ marginBottom: 16 }}>Championship · {final.location}</Eyebrow>
+          <ScoreEntry matchId="final" topIdx={final.top} bottomIdx={final.bottom} topScore={final.scoreTop} bottomScore={final.scoreBottom} />
+        </Card>
+
+        <BracketPreview bracket={bracket} seeds={seeds} isMobile={isMobile} />
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button kind="ghost" size="sm" onClick={resetBracket}>Reset bracket</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Complete ──
+  const champ = seeds[bracket.champion];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ background: 'var(--court-navy)', borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ background: 'var(--varsity-gold)', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Icon name="trophy" size={20} color="var(--court-navy)" />
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, textTransform: 'uppercase', color: 'var(--court-navy)', letterSpacing: '0.04em' }}>Champion Crowned</span>
+        </div>
+        <div style={{ padding: '28px 24px', textAlign: 'center' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 8 }}>{bracket.season} {bracket.division} Champions</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 5vw, 44px)', color: '#fff', lineHeight: 1, marginBottom: 12 }}>{champ?.name}</div>
+          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.65)' }}>{champ?.record} regular season record</div>
+        </div>
+      </div>
+
+      <BracketPreview bracket={bracket} seeds={seeds} isMobile={isMobile} />
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Button kind="ghost" size="sm" onClick={resetBracket}>Reset bracket</Button>
+      </div>
+    </div>
+  );
+}
+
+function BracketPreview({ bracket, seeds, isMobile }) {
+  const { semis, final, status } = bracket;
+
+  function TeamSlot({ idx, score, isWinner, isLoser, label }) {
+    const team = idx != null ? seeds[idx] : null;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderRadius: 7, background: isWinner ? 'rgba(31,138,91,0.10)' : '#fff', border: `1px solid ${isWinner ? 'var(--status-win)' : 'var(--border)'}`, opacity: isLoser ? 0.45 : 1, minWidth: 0 }}>
+        {team ? (
+          <>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--fg-muted)', width: 14, flexShrink: 0 }}>#{team.seed}</span>
+            <span style={{ flex: 1, fontWeight: 700, fontSize: 12, color: 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{team.name}</span>
+            {score != null && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: isWinner ? 'var(--status-win)' : 'var(--fg-muted)', flexShrink: 0 }}>{score}</span>}
+          </>
+        ) : (
+          <span style={{ flex: 1, fontSize: 12, color: 'var(--fg-muted)', fontStyle: 'italic' }}>{label || 'TBD'}</span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <Card padding={20}>
+      <Eyebrow style={{ marginBottom: 16 }}>Bracket</Eyebrow>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 20px 1fr 20px 1fr', gap: isMobile ? 16 : 0, alignItems: 'center' }}>
+        {/* Semis */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {semis.map((s, i) => (
+            <div key={s.id} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Semifinal {i + 1}</div>
+              <TeamSlot idx={s.top}    score={s.scoreTop}    isWinner={s.winner === s.top}    isLoser={s.winner != null && s.winner !== s.top} />
+              <TeamSlot idx={s.bottom} score={s.scoreBottom} isWinner={s.winner === s.bottom} isLoser={s.winner != null && s.winner !== s.bottom} />
+            </div>
+          ))}
+        </div>
+
+        {/* Arrow */}
+        {!isMobile && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="chevron-right" size={16} color="var(--fg-muted)" />
+          </div>
+        )}
+
+        {/* Final */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Championship</div>
+          <TeamSlot idx={final.top}    score={final.scoreTop}    isWinner={final.winner === final.top}    isLoser={final.winner != null && final.winner !== final.top}    label="Winner SF1" />
+          <TeamSlot idx={final.bottom} score={final.scoreBottom} isWinner={final.winner === final.bottom} isLoser={final.winner != null && final.winner !== final.bottom} label="Winner SF2" />
+        </div>
+
+        {/* Arrow */}
+        {!isMobile && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="chevron-right" size={16} color="var(--fg-muted)" />
+          </div>
+        )}
+
+        {/* Champion */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Champion</div>
+          {bracket.champion != null ? (
+            <div style={{ padding: '12px 14px', borderRadius: 8, background: 'var(--court-navy)', border: '1.5px solid var(--varsity-gold)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Icon name="trophy" size={14} color="var(--varsity-gold)" />
+              <span style={{ fontWeight: 800, fontSize: 13, color: '#fff' }}>{seeds[bracket.champion]?.name}</span>
+            </div>
+          ) : (
+            <div style={{ padding: '12px 14px', borderRadius: 8, border: '1.5px dashed var(--border)', color: 'var(--fg-muted)', fontSize: 13, fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Icon name="trophy" size={14} color="var(--fg-muted)" /> TBD
+            </div>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 // ─── Draft Tab ────────────────────────────────────────────────────────────────
 
 function DraftTab({ isMobile }) {
@@ -1202,7 +1537,7 @@ function DraftTab({ isMobile }) {
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
 
-const TABS = ['Dashboard', 'Teams', 'Registrations', 'Standings', 'Draft', 'Announcements'];
+const TABS = ['Dashboard', 'Teams', 'Registrations', 'Standings', 'Bracket', 'Draft', 'Announcements'];
 
 export default function CommissionerApp() {
   const isMobile = useIsMobile();
@@ -1348,6 +1683,7 @@ export default function CommissionerApp() {
         {activeTab === 'Teams'          && <TeamsTab />}
         {activeTab === 'Registrations'  && <RegistrationsTab isMobile={isMobile} />}
         {activeTab === 'Standings'      && <StandingsTab />}
+        {activeTab === 'Bracket'        && <BracketTab isMobile={isMobile} />}
         {activeTab === 'Draft'          && <DraftTab isMobile={isMobile} />}
         {activeTab === 'Announcements'  && <AnnouncementsTab />}
       </div>
