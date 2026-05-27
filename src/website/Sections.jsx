@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
 import { SectionHead } from './Programs.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
+import { useGames } from '../shared/store.js';
 
 export function Announcements() {
   return (
@@ -26,25 +27,36 @@ export function Announcements() {
 }
 
 export function Schedule() {
-  const games = [
-    { day: 'SAT', date: '07', month: 'DEC', time: '10:00 AM', team: 'Hawks · Boys 5–6 House',   opp: 'vs. Vienna Storm',      loc: 'Robinson HS · Gym B', home: true },
-    { day: 'SAT', date: '07', month: 'DEC', time: '11:30 AM', team: 'Wolves · Girls 5–6 House', opp: '@ McLean Mustangs',     loc: 'Cooper MS · Main',    home: false },
-    { day: 'SAT', date: '14', month: 'DEC', time: '10:00 AM', team: 'Eagles · Boys 7–8 Select', opp: '@ Reston Storm',        loc: 'South Lakes HS',      home: false },
-    { day: 'SUN', date: '15', month: 'DEC', time: '12:30 PM', team: 'Cougars · Girls 3–4 House',opp: 'vs. Burke Lakers',      loc: 'Lanier MS · Gym A',   home: true },
-    { day: 'SAT', date: '21', month: 'DEC', time: '9:00 AM',  team: 'Hawks · Boys 5–6 House',   opp: '@ Centreville Eagles',  loc: 'Cub Run Rec',         home: false },
-  ];
+  const [allGames] = useGames();
+  const scheduled = allGames.filter(g => g.status === 'scheduled');
+  const finals    = allGames.filter(g => g.status === 'final').slice(-2).reverse();
+  const display   = [
+    ...scheduled.map(g => ({
+      day: g.weekday, date: String(g.date).padStart(2, '0'), month: g.month.toUpperCase(),
+      time: g.time, team: 'Hawks · Boys 5–6 House',
+      opp: (g.home ? 'vs. ' : '@ ') + g.opponent,
+      loc: g.location, home: g.home,
+      us: g.us, them: g.them, final: false,
+    })),
+    ...finals.map(g => ({
+      day: g.weekday, date: String(g.date).padStart(2, '0'), month: g.month.toUpperCase(),
+      time: g.time, team: 'Hawks · Boys 5–6 House',
+      opp: (g.home ? 'vs. ' : '@ ') + g.opponent,
+      loc: g.location, home: g.home,
+      us: g.us, them: g.them, final: true,
+    })),
+  ].slice(0, 5);
 
   return (
     <section id="schedule" style={{ maxWidth: 1200, margin: '0 auto', padding: '64px 24px 0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
-        <SectionHead eyebrow="This weekend" title="On the schedule" />
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Btn kind="ghost"><Icon name="filter" size={14} /> All teams</Btn>
-          <Btn kind="gold" onClick={() => document.getElementById('schedule')?.scrollIntoView({ behavior: 'smooth' })}>Full schedule <Icon name="arrow-right" size={14} /></Btn>
-        </div>
+        <SectionHead eyebrow="Hawks schedule" title="Upcoming & recent" />
+        <a href="/family" style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13, padding: '10px 14px', borderRadius: 8, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--varsity-gold)', color: 'var(--court-navy)', textDecoration: 'none' }}>
+          Full schedule <Icon name="arrow-right" size={14} />
+        </a>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 28 }}>
-        {games.map((g, i) => <GameRow key={i} g={g} />)}
+        {display.map((g, i) => <GameRow key={i} g={g} />)}
       </div>
     </section>
   );
@@ -53,8 +65,9 @@ export function Schedule() {
 function GameRow({ g }) {
   const [expanded, setExpanded] = useState(false);
   const isMobile = useIsMobile();
+  const win = g.final && g.us > g.them;
   return (
-    <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+    <div style={{ background: '#fff', border: `1px solid ${g.final ? 'var(--border)' : 'var(--court-navy)'}`, borderRadius: 8, overflow: 'hidden', opacity: g.final ? 0.80 : 1 }}>
       {isMobile ? (
         <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -69,13 +82,19 @@ function GameRow({ g }) {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{
-              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase',
-              padding: '4px 10px', borderRadius: 999,
-              background: g.home ? 'var(--court-navy)' : '#fff',
-              color: g.home ? '#fff' : 'var(--court-navy)',
-              border: g.home ? 'none' : '1px solid var(--border)',
-            }}>{g.home ? 'Home' : 'Away'}</span>
+            {g.final ? (
+              <span style={{ fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 999, background: win ? 'rgba(31,138,91,0.10)' : 'rgba(200,16,46,0.08)', color: win ? '#059669' : '#DC2626' }}>
+                {win ? 'W' : 'L'} {g.us}–{g.them} · Final
+              </span>
+            ) : (
+              <span style={{
+                fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase',
+                padding: '4px 10px', borderRadius: 999,
+                background: g.home ? 'var(--court-navy)' : '#fff',
+                color: g.home ? '#fff' : 'var(--court-navy)',
+                border: g.home ? 'none' : '1px solid var(--border)',
+              }}>{g.home ? 'Home' : 'Away'}</span>
+            )}
             <button onClick={() => setExpanded(o => !o)} style={{
               all: 'unset', cursor: 'pointer', color: 'var(--court-navy)', fontSize: 13, fontWeight: 700,
               display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -100,13 +119,19 @@ function GameRow({ g }) {
               <Icon name="map-pin" size={12} />{g.loc}
             </div>
           </div>
-          <span style={{
-            fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase',
-            padding: '4px 10px', borderRadius: 999,
-            background: g.home ? 'var(--court-navy)' : '#fff',
-            color: g.home ? '#fff' : 'var(--court-navy)',
-            border: g.home ? 'none' : '1px solid var(--border)',
-          }}>{g.home ? 'Home' : 'Away'}</span>
+          {g.final ? (
+            <span style={{ fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 999, background: win ? 'rgba(31,138,91,0.10)' : 'rgba(200,16,46,0.08)', color: win ? '#059669' : '#DC2626' }}>
+              {win ? 'W' : 'L'} {g.us}–{g.them} · Final
+            </span>
+          ) : (
+            <span style={{
+              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase',
+              padding: '4px 10px', borderRadius: 999,
+              background: g.home ? 'var(--court-navy)' : '#fff',
+              color: g.home ? '#fff' : 'var(--court-navy)',
+              border: g.home ? 'none' : '1px solid var(--border)',
+            }}>{g.home ? 'Home' : 'Away'}</span>
+          )}
           <button onClick={() => setExpanded(o => !o)} style={{
             all: 'unset', cursor: 'pointer', color: 'var(--court-navy)', fontSize: 13, fontWeight: 700,
             display: 'inline-flex', alignItems: 'center', gap: 4,

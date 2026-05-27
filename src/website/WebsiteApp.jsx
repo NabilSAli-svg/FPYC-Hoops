@@ -6,6 +6,7 @@ import Testimonials from './Testimonials.jsx';
 import Programs from './Programs.jsx';
 import SeasonCalendar from './SeasonCalendar.jsx';
 import HowToRegister from './HowToRegister.jsx';
+import TeamSpotlight from './TeamSpotlight.jsx';
 import { Announcements, Schedule, News, FaqContact } from './Sections.jsx';
 
 function scrollTo(id) {
@@ -27,6 +28,7 @@ export default function WebsiteApp() {
       <main id="top" style={{ scrollBehavior: 'smooth' }}>
         <Hero onRegister={() => scrollTo('register')} />
         <Announcements />
+        <TeamSpotlight />
         <WhyFPYC />
         <Testimonials />
         <Programs />
