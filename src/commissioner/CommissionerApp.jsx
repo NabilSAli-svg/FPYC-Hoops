@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 import { csvDownload } from '../shared/csvDownload.js';
+import { useDraftState, DRAFT_PLAYERS, DRAFT_TEAMS, buildSnakeOrder, INITIAL_DRAFT } from '../shared/store.js';
 
 const CREDENTIALS = { username: 'commissioner', password: 'fpyc2025' };
 
@@ -798,9 +799,410 @@ function AnnouncementsTab() {
   );
 }
 
+// ─── Draft Tab ────────────────────────────────────────────────────────────────
+
+function DraftTab({ isMobile }) {
+  const [draft, setDraft] = useDraftState();
+  const [rounds, setRounds] = useState(draft.totalRounds);
+
+  const pickOrder = buildSnakeOrder(draft.draftOrder, draft.totalRounds);
+  const draftedIds = Object.values(draft.roster).flat().map(p => p.id);
+  const available = DRAFT_PLAYERS.filter(p => !draftedIds.includes(p.id));
+
+  const currentTeamId = pickOrder[draft.currentPick];
+  const currentTeam = DRAFT_TEAMS.find(t => t.id === currentTeamId);
+  const currentRound = Math.floor(draft.currentPick / draft.draftOrder.length) + 1;
+
+  function makePick(player) {
+    setDraft(d => {
+      const order = buildSnakeOrder(d.draftOrder, d.totalRounds);
+      const teamId = order[d.currentPick];
+      const round = Math.floor(d.currentPick / d.draftOrder.length) + 1;
+      const newRoster = { ...d.roster, [teamId]: [...(d.roster[teamId] || []), player] };
+      const newPick = d.currentPick + 1;
+      const newLog = [...d.log, { pick: d.currentPick + 1, round, teamId, player }];
+      const isDone = newPick >= order.length;
+      return { ...d, roster: newRoster, currentPick: newPick, log: newLog, status: isDone ? 'completed' : 'live' };
+    });
+  }
+
+  function autoPick() {
+    if (available.length === 0) return;
+    const best = [...available].sort((a, b) => b.skill - a.skill)[0];
+    makePick(best);
+  }
+
+  function randomizeOrder() {
+    setDraft(d => ({ ...d, draftOrder: [...d.draftOrder].sort(() => Math.random() - 0.5) }));
+  }
+
+  function openDraft() {
+    setDraft(d => ({ ...d, status: 'open', totalRounds: rounds }));
+  }
+
+  function startDraft() {
+    setDraft(d => ({ ...d, status: 'live' }));
+  }
+
+  function resetDraft() {
+    setDraft({ ...INITIAL_DRAFT });
+    setRounds(INITIAL_DRAFT.totalRounds);
+  }
+
+  // ── Setup ──
+  if (draft.status === 'setup') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <Card padding={22}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+            <div>
+              <Display size={22}>Draft Setup</Display>
+              <div style={{ marginTop: 4, fontSize: 13, color: 'var(--fg-muted)' }}>{draft.division} · Season {draft.season}</div>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 999, background: 'rgba(10,31,61,0.08)', color: 'var(--court-navy)' }}>SETUP</span>
+          </div>
+        </Card>
+
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.4fr', gap: 16 }}>
+          <Card padding={20}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <Eyebrow>Draft Order</Eyebrow>
+              <Button kind="ghost" size="sm" icon="shuffle" onClick={randomizeOrder}>Randomize</Button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {draft.draftOrder.map((teamId, i) => {
+                const team = DRAFT_TEAMS.find(t => t.id === teamId);
+                return (
+                  <div key={teamId} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--bone)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', flexShrink: 0 }}>{i + 1}</span>
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: team.color, flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--fg)' }}>{team.name}</div>
+                      <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>Coach {team.coach}</div>
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)' }}>Rnd 1 · Pick {i + 1}</div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Rounds</label>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {[2, 3, 4].map(r => (
+                  <button key={r} onClick={() => setRounds(r)} style={{
+                    all: 'unset', cursor: 'pointer', width: 40, height: 40, borderRadius: 8,
+                    border: rounds === r ? '2px solid var(--court-navy)' : '1.5px solid var(--border)',
+                    background: rounds === r ? 'var(--court-navy)' : '#fff',
+                    color: rounds === r ? '#fff' : 'var(--fg)',
+                    fontWeight: 700, fontSize: 14, textAlign: 'center',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>{r}</button>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          <Card padding={20}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <Eyebrow>Player Pool</Eyebrow>
+              <span style={{ fontSize: 12, color: 'var(--fg-muted)', fontWeight: 600 }}>{DRAFT_PLAYERS.length} players · {rounds} rounds</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {DRAFT_PLAYERS.map(p => (
+                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', borderRadius: 8, background: 'var(--bone)' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', width: 22, textAlign: 'right', flexShrink: 0 }}>#{p.number}</span>
+                  <span style={{ flex: 1, fontWeight: 600, fontSize: 13, color: 'var(--fg)' }}>{p.name}</span>
+                  <span style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.position}</span>
+                  <span style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.grade}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--court-navy)' }}>{p.skill.toFixed(1)}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button kind="primary" icon="play" onClick={openDraft}>Open Draft</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Open ──
+  if (draft.status === 'open') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ background: 'rgba(31,138,91,0.10)', border: '1.5px solid var(--status-win)', borderRadius: 12, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--status-win)', flexShrink: 0, boxShadow: '0 0 0 4px rgba(31,138,91,0.2)' }} />
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--fg)' }}>Draft is Open</div>
+            <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 2 }}>Coaches can review the format. Click "Start Draft" when all coaches are ready.</div>
+          </div>
+        </div>
+
+        <Card padding={20}>
+          <Eyebrow style={{ marginBottom: 14 }}>Pick Schedule · Snake Draft</Eyebrow>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {Array.from({ length: draft.totalRounds }, (_, r) => {
+              const roundTeams = r % 2 === 0 ? draft.draftOrder : [...draft.draftOrder].reverse();
+              return (
+                <div key={r}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>Round {r + 1}</div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {roundTeams.map((teamId, i) => {
+                      const team = DRAFT_TEAMS.find(t => t.id === teamId);
+                      const globalPick = r * draft.draftOrder.length + i + 1;
+                      return (
+                        <div key={teamId + r} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 8, border: '1px solid var(--border)', background: '#fff', minWidth: 120 }}>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', width: 22, flexShrink: 0 }}>#{globalPick}</span>
+                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: team.color, flexShrink: 0 }} />
+                          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--fg)' }}>{team.name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
+        <Card padding={20}>
+          <Eyebrow style={{ marginBottom: 14 }}>Player Pool · {DRAFT_PLAYERS.length} Players</Eyebrow>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: 8 }}>
+            {DRAFT_PLAYERS.map(p => (
+              <div key={p.id} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bone)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', width: 20, flexShrink: 0 }}>#{p.number}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.position} · {p.grade}</div>
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--court-navy)', flexShrink: 0 }}>{p.skill.toFixed(1)}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <Button kind="ghost" size="sm" onClick={() => setDraft(d => ({ ...d, status: 'setup' }))}>Back to Setup</Button>
+          <Button kind="primary" icon="play" onClick={startDraft}>Start Draft</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Live ──
+  if (draft.status === 'live') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ background: currentTeam.color, borderRadius: 12, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>On the clock</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: '#fff', marginTop: 4, lineHeight: 1.1 }}>{currentTeam.name}</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>Pick #{draft.currentPick + 1} · Round {currentRound} · Coach {currentTeam.coach}</div>
+          </div>
+          <Button kind="ghost" size="sm" icon="zap" onClick={autoPick}>Auto-pick</Button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.4fr', gap: 16, alignItems: 'start' }}>
+          <Card padding={20}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <Eyebrow>Available Players</Eyebrow>
+              <span style={{ fontSize: 12, color: 'var(--fg-muted)', fontWeight: 600 }}>{available.length} left</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[...available].sort((a, b) => b.skill - a.skill).map(p => (
+                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: '#fff' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', width: 22, textAlign: 'right', flexShrink: 0 }}>#{p.number}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--fg)' }}>{p.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.position} · {p.grade}</div>
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: 'var(--court-navy)', marginRight: 6 }}>{p.skill.toFixed(1)}</span>
+                  <button
+                    onClick={() => makePick(p)}
+                    style={{
+                      all: 'unset', cursor: 'pointer',
+                      padding: '6px 14px', borderRadius: 6,
+                      fontSize: 12, fontWeight: 700,
+                      background: currentTeam.color, color: '#fff',
+                      flexShrink: 0, whiteSpace: 'nowrap',
+                    }}
+                  >Pick</button>
+                </div>
+              ))}
+              {available.length === 0 && (
+                <div style={{ textAlign: 'center', fontSize: 14, color: 'var(--fg-muted)', padding: '20px 0' }}>All players drafted</div>
+              )}
+            </div>
+          </Card>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {DRAFT_TEAMS.map(team => {
+              const roster = draft.roster[team.id] || [];
+              const isOnClock = team.id === currentTeamId;
+              return (
+                <Card key={team.id} padding={16} style={{ borderLeft: `4px solid ${team.color}`, opacity: isOnClock ? 1 : 0.8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: roster.length > 0 ? 10 : 0 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: team.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, color: '#fff' }}>{team.name[0]}</span>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--fg)' }}>{team.name}</span>
+                        {isOnClock && <span style={{ fontSize: 9, fontWeight: 800, padding: '2px 7px', borderRadius: 999, background: team.color, color: '#fff', letterSpacing: '0.06em' }}>ON CLOCK</span>}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>Coach {team.coach} · {roster.length} picks</div>
+                    </div>
+                  </div>
+                  {roster.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {roster.map((p, i) => (
+                        <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 8px', borderRadius: 6, background: 'var(--bone)' }}>
+                          <span style={{ fontSize: 10, color: 'var(--fg-muted)', width: 14 }}>{i + 1}.</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--fg)', flex: 1 }}>{p.name}</span>
+                          <span style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.position}</span>
+                          <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--court-navy)', fontWeight: 700 }}>{p.skill.toFixed(1)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {draft.log.length > 0 && (
+          <Card padding={20}>
+            <Eyebrow style={{ marginBottom: 12 }}>Pick Log</Eyebrow>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 200, overflowY: 'auto' }}>
+              {[...draft.log].reverse().map(entry => {
+                const team = DRAFT_TEAMS.find(t => t.id === entry.teamId);
+                return (
+                  <div key={entry.pick} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', width: 56, flexShrink: 0 }}>Rnd {entry.round} #{entry.pick}</span>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: team?.color, flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg)', minWidth: 60 }}>{team?.name}</span>
+                    <span style={{ fontSize: 13, color: 'var(--fg)', flex: 1 }}>{entry.player.name}</span>
+                    <span style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{entry.player.position}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        )}
+      </div>
+    );
+  }
+
+  // ── Completed ──
+  function avgSkill(teamId) {
+    const players = draft.roster[teamId] || [];
+    if (players.length === 0) return 0;
+    return players.reduce((s, p) => s + p.skill, 0) / players.length;
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ background: 'var(--court-navy)', borderRadius: 12, padding: '24px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 4 }}>Draft complete</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--varsity-gold)' }}>{draft.division}</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>Season {draft.season} · {draft.log.length} picks · {draft.totalRounds} rounds</div>
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <Button kind="ghost" size="sm" onClick={resetDraft}>Reset</Button>
+          <button
+            onClick={() => {}}
+            style={{ all: 'unset', cursor: 'pointer', padding: '10px 20px', borderRadius: 8, background: 'var(--varsity-gold)', color: 'var(--court-navy)', fontWeight: 800, fontSize: 14, whiteSpace: 'nowrap' }}
+          >Publish Teams</button>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
+        {DRAFT_TEAMS.map(team => {
+          const players = draft.roster[team.id] || [];
+          const avg = avgSkill(team.id);
+          return (
+            <Card key={team.id} padding={0} style={{ overflow: 'hidden', borderTop: `4px solid ${team.color}` }}>
+              <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: team.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: '#fff' }}>{team.name[0]}</span>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--fg)' }}>{team.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>Coach {team.coach} · {players.length} players</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 700, color: 'var(--court-navy)' }}>{avg.toFixed(2)}</div>
+                  <div style={{ fontSize: 10, color: 'var(--fg-muted)', fontWeight: 600 }}>avg skill</div>
+                </div>
+              </div>
+              <div style={{ padding: '8px 0' }}>
+                {players.map((p, i) => (
+                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 18px', borderBottom: i < players.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                    <span style={{ fontSize: 11, color: 'var(--fg-muted)', width: 18, flexShrink: 0 }}>{i + 1}.</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', width: 26, flexShrink: 0 }}>#{p.number}</span>
+                    <span style={{ flex: 1, fontWeight: 600, fontSize: 13, color: 'var(--fg)' }}>{p.name}</span>
+                    <span style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.position}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--court-navy)' }}>{p.skill.toFixed(1)}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      <Card padding={20}>
+        <Eyebrow style={{ marginBottom: 14 }}>Team Balance</Eyebrow>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 12 }}>
+          {DRAFT_TEAMS.map(team => {
+            const avg = avgSkill(team.id);
+            return (
+              <div key={team.id} style={{ padding: 14, borderRadius: 10, border: '1px solid var(--border)', background: '#fff' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: team.color, flexShrink: 0 }} />
+                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--fg)' }}>{team.name}</span>
+                </div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 24, fontWeight: 700, color: 'var(--court-navy)', lineHeight: 1 }}>{avg.toFixed(2)}</div>
+                <div style={{ marginTop: 8, height: 4, borderRadius: 2, background: 'var(--bone)' }}>
+                  <div style={{ height: '100%', borderRadius: 2, background: team.color, width: `${(avg / 5) * 100}%`, transition: 'width 0.4s' }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {draft.log.length > 0 && (
+        <Card padding={20}>
+          <Eyebrow style={{ marginBottom: 12 }}>Complete Pick Log</Eyebrow>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 280, overflowY: 'auto' }}>
+            {draft.log.map(entry => {
+              const team = DRAFT_TEAMS.find(t => t.id === entry.teamId);
+              return (
+                <div key={entry.pick} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', width: 60, flexShrink: 0 }}>Rnd {entry.round} #{entry.pick}</span>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: team?.color, flexShrink: 0 }} />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: team?.color, minWidth: 60 }}>{team?.name}</span>
+                  <span style={{ fontSize: 13, color: 'var(--fg)', flex: 1 }}>{entry.player.name}</span>
+                  <span style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{entry.player.position}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: 'var(--court-navy)' }}>{entry.player.skill.toFixed(1)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 // ─── Main App ─────────────────────────────────────────────────────────────────
 
-const TABS = ['Dashboard', 'Teams', 'Registrations', 'Standings', 'Announcements'];
+const TABS = ['Dashboard', 'Teams', 'Registrations', 'Standings', 'Draft', 'Announcements'];
 
 export default function CommissionerApp() {
   const isMobile = useIsMobile();
@@ -946,6 +1348,7 @@ export default function CommissionerApp() {
         {activeTab === 'Teams'          && <TeamsTab />}
         {activeTab === 'Registrations'  && <RegistrationsTab isMobile={isMobile} />}
         {activeTab === 'Standings'      && <StandingsTab />}
+        {activeTab === 'Draft'          && <DraftTab isMobile={isMobile} />}
         {activeTab === 'Announcements'  && <AnnouncementsTab />}
       </div>
     </div>
