@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
+import { csvDownload } from '../shared/csvDownload.js';
 
 const CREDENTIALS = { username: 'commissioner', password: 'fpyc2025' };
 
@@ -39,6 +40,45 @@ const INITIAL_ANNOUNCEMENTS = [
 ];
 
 const DIVISIONS = ['All families', 'Boys 5–6 House', 'Girls 5–6 House', 'Boys 7–8 Select', 'Girls 3–4 House'];
+
+const STANDINGS_BY_DIVISION = {
+  'Boys 5–6 House': [
+    { rank: 1, team: 'Centreville Eagles', fpyc: false, w: 8, l: 1, pf: 524, pa: 398, streak: 'W3' },
+    { rank: 2, team: 'Fairfax Hawks',       fpyc: true,  w: 6, l: 3, pf: 487, pa: 423, streak: 'W2' },
+    { rank: 3, team: 'Vienna Storm',        fpyc: false, w: 5, l: 4, pf: 461, pa: 448, streak: 'L1' },
+    { rank: 4, team: 'Reston Wolves',       fpyc: false, w: 5, l: 4, pf: 439, pa: 441, streak: 'W1' },
+    { rank: 5, team: 'Oakton Patriots',     fpyc: false, w: 4, l: 5, pf: 412, pa: 459, streak: 'L2' },
+    { rank: 6, team: 'McLean Mustangs',     fpyc: false, w: 3, l: 6, pf: 398, pa: 467, streak: 'L3' },
+    { rank: 7, team: 'Burke Lakers',        fpyc: false, w: 2, l: 7, pf: 374, pa: 492, streak: 'L4' },
+    { rank: 8, team: 'Springfield Bulls',   fpyc: false, w: 1, l: 8, pf: 352, pa: 520, streak: 'L5' },
+  ],
+  'Girls 5–6 House': [
+    { rank: 1, team: 'Arlington Stars',     fpyc: false, w: 7, l: 2, pf: 498, pa: 412, streak: 'W4' },
+    { rank: 2, team: 'McLean Cardinals',    fpyc: false, w: 6, l: 3, pf: 471, pa: 438, streak: 'W1' },
+    { rank: 3, team: 'Vienna Rockets',      fpyc: false, w: 5, l: 4, pf: 449, pa: 441, streak: 'W2' },
+    { rank: 4, team: 'Reston Blaze',        fpyc: false, w: 4, l: 5, pf: 422, pa: 449, streak: 'L1' },
+    { rank: 5, team: 'Fairfax Wolves',      fpyc: true,  w: 4, l: 5, pf: 418, pa: 461, streak: 'L2' },
+    { rank: 6, team: 'Herndon Thunder',     fpyc: false, w: 2, l: 7, pf: 378, pa: 501, streak: 'L3' },
+  ],
+  'Boys 7–8 Select': [
+    { rank: 1, team: 'Fairfax Eagles',      fpyc: true,  w: 8, l: 1, pf: 612, pa: 489, streak: 'W5' },
+    { rank: 2, team: 'McLean Select',       fpyc: false, w: 7, l: 2, pf: 588, pa: 511, streak: 'W2' },
+    { rank: 3, team: 'Reston Select',       fpyc: false, w: 5, l: 4, pf: 562, pa: 534, streak: 'L1' },
+    { rank: 4, team: 'Arlington Gold',      fpyc: false, w: 4, l: 5, pf: 531, pa: 558, streak: 'W1' },
+    { rank: 5, team: 'Vienna Elite',        fpyc: false, w: 3, l: 6, pf: 501, pa: 587, streak: 'L4' },
+    { rank: 6, team: 'Chantilly Force',     fpyc: false, w: 1, l: 8, pf: 467, pa: 612, streak: 'L5' },
+  ],
+  'Girls 3–4 House': [
+    { rank: 1, team: 'Arlington Aces',      fpyc: false, w: 7, l: 2, pf: 312, pa: 278, streak: 'W3' },
+    { rank: 2, team: 'Reston Stars',        fpyc: false, w: 6, l: 3, pf: 301, pa: 289, streak: 'L1' },
+    { rank: 3, team: 'Vienna Flames',       fpyc: false, w: 5, l: 4, pf: 290, pa: 298, streak: 'W2' },
+    { rank: 4, team: 'McLean Gems',         fpyc: false, w: 4, l: 5, pf: 276, pa: 309, streak: 'L2' },
+    { rank: 5, team: 'Fairfax Cougars',     fpyc: true,  w: 3, l: 6, pf: 261, pa: 324, streak: 'L3' },
+    { rank: 6, team: 'Herndon Comets',      fpyc: false, w: 1, l: 8, pf: 234, pa: 342, streak: 'L4' },
+  ],
+};
+
+const PLAYOFF_SPOTS = 4;
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
@@ -308,6 +348,14 @@ function RegistrationsTab({ isMobile }) {
 
   const statusFilters = ['All', 'Pending', 'Approved', 'Waitlisted'];
 
+  function exportRegsCSV() {
+    const rows = [
+      ['Parent', 'Player', 'Grade', 'Division', 'Date', 'Paid', 'Waiver', 'Status'],
+      ...regs.map(r => [r.parent, r.player, r.grade, r.division, r.date, r.paid ? 'Yes' : 'No', r.waiver ? 'Yes' : 'No', r.status]),
+    ];
+    csvDownload('fpyc-registrations.csv', rows);
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       {/* Filter bar */}
@@ -341,6 +389,9 @@ function RegistrationsTab({ isMobile }) {
           <option value="All">All Divisions</option>
           {DIVISIONS.slice(1).map(d => <option key={d} value={d}>{d}</option>)}
         </select>
+        <div style={{ marginLeft: 'auto' }}>
+          <Button kind="ghost" size="sm" icon="download" onClick={exportRegsCSV}>Export CSV</Button>
+        </div>
       </div>
 
       {/* Table / Cards */}
@@ -531,6 +582,112 @@ function RegistrationsTab({ isMobile }) {
   );
 }
 
+// ─── Standings Tab ────────────────────────────────────────────────────────────
+
+function StandingsTab() {
+  const divNames = Object.keys(STANDINGS_BY_DIVISION);
+  const [activeDiv, setActiveDiv] = useState(divNames[0]);
+  const rows = STANDINGS_BY_DIVISION[activeDiv];
+  const leader = rows[0];
+  const fpycRows = rows.filter(r => r.fpyc);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Division pills */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {divNames.map(d => (
+          <button key={d} onClick={() => setActiveDiv(d)} style={{
+            padding: '7px 14px', borderRadius: 999, border: '1px solid var(--border)', cursor: 'pointer',
+            background: activeDiv === d ? 'var(--court-navy)' : '#fff',
+            color: activeDiv === d ? '#fff' : 'var(--fg-soft)',
+            fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12, transition: 'all 120ms',
+          }}>{d}</button>
+        ))}
+      </div>
+
+      {/* Standings table */}
+      <Card padding={0} style={{ overflow: 'hidden' }}>
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Display size={20}>{activeDiv}</Display>
+          <span style={{ fontSize: 12, color: 'var(--fg-muted)', fontWeight: 600 }}>Top {PLAYOFF_SPOTS} advance to playoffs</span>
+        </div>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: 'var(--bone)' }}>
+              {['#', 'Team', 'W', 'L', 'PCT', 'GB', 'PF', 'PA', 'Str'].map(h => (
+                <th key={h} style={{ padding: '9px 14px', textAlign: h === 'Team' ? 'left' : 'center', fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', borderBottom: '1px solid var(--border)' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => {
+              const pct = row.w + row.l > 0 ? (row.w / (row.w + row.l)).toFixed(3).replace(/^0/, '') : '.000';
+              const gbVal = ((leader.w - row.w) + (row.l - leader.l)) / 2;
+              const gb = i === 0 ? '—' : gbVal === 0 ? '—' : gbVal % 1 === 0 ? String(gbVal) : gbVal.toFixed(1);
+              const inPlayoffs = i < PLAYOFF_SPOTS;
+              return (
+                <>
+                  <tr key={row.rank} style={{ background: row.fpyc ? 'rgba(255,199,44,0.08)' : '#fff', borderBottom: '1px solid var(--border)', fontWeight: row.fpyc ? 700 : 400 }}>
+                    <td style={{ padding: '11px 14px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: inPlayoffs ? 'var(--status-win)' : 'var(--fg-muted)' }}>{row.rank}</td>
+                    <td style={{ padding: '11px 14px', fontSize: 13 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {row.fpyc && <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--varsity-gold)', flexShrink: 0 }} />}
+                        <span style={{ color: row.fpyc ? 'var(--court-navy)' : 'var(--fg)' }}>{row.team}</span>
+                        {row.fpyc && <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.04em' }}>FPYC</span>}
+                      </div>
+                    </td>
+                    {[row.w, row.l, pct, gb, row.pf, row.pa].map((v, j) => (
+                      <td key={j} style={{ padding: '11px 14px', textAlign: 'center', fontSize: 13, fontFamily: j >= 2 ? 'var(--font-mono)' : 'inherit', color: 'var(--fg)' }}>{v}</td>
+                    ))}
+                    <td style={{ padding: '11px 14px', textAlign: 'center' }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: row.streak.startsWith('W') ? 'rgba(31,138,91,0.12)' : 'rgba(200,16,46,0.10)', color: row.streak.startsWith('W') ? 'var(--status-win)' : 'var(--foul-red)' }}>{row.streak}</span>
+                    </td>
+                  </tr>
+                  {i === PLAYOFF_SPOTS - 1 && i < rows.length - 1 && (
+                    <tr key="cutoff">
+                      <td colSpan={9} style={{ padding: 0 }}>
+                        <div style={{ borderTop: '2px dashed var(--status-warning)', position: 'relative' }}>
+                          <span style={{ position: 'absolute', right: 14, top: -9, fontSize: 9, background: 'var(--status-warning)', color: '#fff', padding: '1px 7px', borderRadius: 999, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Playoff cutoff</span>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
+              );
+            })}
+          </tbody>
+        </table>
+      </Card>
+
+      {/* FPYC teams summary */}
+      {fpycRows.length > 0 && (
+        <Card>
+          <Eyebrow style={{ marginBottom: 14 }}>FPYC Teams · {activeDiv}</Eyebrow>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {fpycRows.map((r, i) => {
+              const inPlayoffs = r.rank <= PLAYOFF_SPOTS;
+              return (
+                <div key={r.team} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: i < fpycRows.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 14 }}>{r.team}</div>
+                    <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 2 }}>Rank #{r.rank} · {r.w}–{r.l}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--court-navy)', lineHeight: 1 }}>{r.w}–{r.l}</div>
+                    <span style={{ fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: inPlayoffs ? 'rgba(31,138,91,0.12)' : 'rgba(200,16,46,0.10)', color: inPlayoffs ? 'var(--status-win)' : 'var(--foul-red)' }}>
+                      {inPlayoffs ? `In playoffs — #${r.rank}` : `Out — #${r.rank}`}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 // ─── Announcements Tab ───────────────────────────────────────────────────────
 
 function AnnouncementsTab() {
@@ -643,7 +800,7 @@ function AnnouncementsTab() {
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
 
-const TABS = ['Dashboard', 'Teams', 'Registrations', 'Announcements'];
+const TABS = ['Dashboard', 'Teams', 'Registrations', 'Standings', 'Announcements'];
 
 export default function CommissionerApp() {
   const isMobile = useIsMobile();
@@ -788,6 +945,7 @@ export default function CommissionerApp() {
         {activeTab === 'Dashboard'      && <DashboardTab isMobile={isMobile} />}
         {activeTab === 'Teams'          && <TeamsTab />}
         {activeTab === 'Registrations'  && <RegistrationsTab isMobile={isMobile} />}
+        {activeTab === 'Standings'      && <StandingsTab />}
         {activeTab === 'Announcements'  && <AnnouncementsTab />}
       </div>
     </div>
