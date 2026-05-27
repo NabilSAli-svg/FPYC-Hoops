@@ -89,12 +89,17 @@ export function deriveEvents(games, practices) {
     date: g.day,
     time: g.time,
     label: g.home ? `vs. ${g.opponent}` : `@ ${g.opponent}`,
+    opponent: g.opponent,
     location: g.location,
     home: g.home,
     status: g.status === 'final' ? 'final' : g.status === 'live' ? 'live' : 'upcoming',
     us: g.us,
     them: g.them,
     quarter: g.quarter,
+    note: g.note || '',
+    confirmed: g.confirmed || 0,
+    month: g.month,
+    dayNum: g.date,
   }));
 
   const practiceEvents = practices.map(p => ({
@@ -102,10 +107,13 @@ export function deriveEvents(games, practices) {
     type: 'practice',
     date: p.date,
     time: p.time.split('–')[0].trim(),
+    timeRange: p.time,
     label: p.type === 'Scrimmage' ? 'Scrimmage' : 'Practice',
+    practiceType: p.type,
     location: p.gym,
     home: true,
     status: 'upcoming',
+    notes: p.notes || '',
   }));
 
   return [...gameEvents, ...practiceEvents];
