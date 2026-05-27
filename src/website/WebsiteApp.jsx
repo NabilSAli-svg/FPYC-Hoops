@@ -8,6 +8,7 @@ import SeasonCalendar from './SeasonCalendar.jsx';
 import HowToRegister from './HowToRegister.jsx';
 import TeamSpotlight from './TeamSpotlight.jsx';
 import PlayoffBracket from './PlayoffBracket.jsx';
+import Standings from './Standings.jsx';
 import { Announcements, Schedule, News, FaqContact } from './Sections.jsx';
 
 function scrollTo(id) {
@@ -31,6 +32,7 @@ export default function WebsiteApp() {
         <Announcements />
         <TeamSpotlight />
         <PlayoffBracket />
+        <Standings />
         <WhyFPYC />
         <Testimonials />
         <Programs />

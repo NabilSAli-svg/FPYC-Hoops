@@ -3,6 +3,7 @@ import Icon from '../shared/Icon.jsx';
 
 const NAV_ITEMS = [
   { id: 'programs',  label: 'Programs' },
+  { id: 'standings', label: 'Standings' },
   { id: 'schedule',  label: 'Schedule' },
   { id: 'news',      label: 'News' },
   { id: 'volunteer', label: 'Volunteer' },
