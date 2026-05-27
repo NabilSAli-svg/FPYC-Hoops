@@ -194,6 +194,19 @@ export function useStats() {
   return useLocalStorage('fpyc-stats', INITIAL_STATS);
 }
 
+// ─── Announcements ────────────────────────────────────────────────────────────
+
+export const INITIAL_ANNOUNCEMENTS = [
+  { id: 'a1', type: 'urgent', title: 'Late fees begin November 15', body: 'Registration fees increase by $45 after Nov 15. Please complete registration before this date to avoid the surcharge.', target: 'All families', date: 'Nov 1',  pinned: true,  author: 'Commissioner' },
+  { id: 'a3', type: 'info',   title: 'Season opener Dec 7',          body: 'House League season kicks off Saturday December 7. All teams report to your assigned gyms by 9:30 AM.',               target: 'All families', date: 'Nov 15', pinned: false, author: 'Commissioner' },
+  { id: 'a2', type: 'info',   title: 'Walk-in registration — Oct 11', body: 'Final walk-in registration session this Saturday, Oct 11, 10am–12pm at the FPYC office, 3955 Pickett Rd.',          target: 'All families', date: 'Oct 9',  pinned: false, author: 'Commissioner' },
+  { id: 'a4', type: 'general', title: 'Select Travel tryout results posted', body: 'Coaches have notified all participants. Check your email for placement details.',                            target: 'Boys 7–8 Select', date: 'Sep 12', pinned: false, author: 'Commissioner' },
+];
+
+export function useAnnouncements() {
+  return useLocalStorage('fpyc-announcements', INITIAL_ANNOUNCEMENTS);
+}
+
 // Derive family-facing event list from admin games + practices
 export function deriveEvents(games, practices) {
   const gameEvents = games.map(g => ({

@@ -2,25 +2,41 @@ import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
 import { SectionHead } from './Programs.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
-import { useGames } from '../shared/store.js';
+import { useGames, useAnnouncements } from '../shared/store.js';
+
+const TYPE_ICON = { urgent: 'alert-circle', info: 'info', general: 'megaphone' };
+const TYPE_COLOR = { urgent: 'var(--foul-red)', info: 'var(--court-navy)', general: 'var(--basketball-orange)' };
 
 export function Announcements() {
+  const [announcements] = useAnnouncements();
+  const [idx, setIdx] = useState(0);
+
+  const visible = announcements.filter(a => a.target === 'All families');
+  if (!visible.length) return null;
+
+  const sorted = [...visible].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+  const current = sorted[idx % sorted.length];
+  const color = TYPE_COLOR[current.type] || TYPE_COLOR.info;
+
   return (
     <section style={{ background: 'var(--bone)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-        <div style={{
-          background: 'var(--status-warning)', color: 'var(--court-navy)',
-          padding: '4px 10px', borderRadius: 999, fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase',
-          display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0,
-        }}>
-          <Icon name="megaphone" size={12} /> Heads up
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999, background: `${color}18`, flexShrink: 0 }}>
+          <Icon name={TYPE_ICON[current.type] || 'megaphone'} size={12} color={color} />
+          <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color, fontFamily: 'var(--font-body)' }}>
+            {current.type === 'urgent' ? 'Urgent' : current.type === 'info' ? 'Info' : 'News'}
+          </span>
         </div>
-        <div style={{ fontSize: 14, color: 'var(--fg)', fontWeight: 500, flex: 1, minWidth: 280 }}>
-          <strong>Late fees begin November 15.</strong> Walk-in registration this Saturday at the FPYC office, 10am–12pm.
+        <div style={{ fontSize: 14, color: 'var(--fg)', fontWeight: 500, flex: 1, minWidth: 200 }}>
+          <strong>{current.title}.</strong> {current.body.length > 120 ? current.body.slice(0, 117) + '…' : current.body}
         </div>
-        <a href="/register" style={{ color: 'var(--court-navy)', fontWeight: 700, fontSize: 13, textDecoration: 'underline', textDecorationThickness: 2 }}>
-          Register now →
-        </a>
+        {sorted.length > 1 && (
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexShrink: 0 }}>
+            <button onClick={() => setIdx(i => (i - 1 + sorted.length) % sorted.length)} style={{ all: 'unset', cursor: 'pointer', padding: '4px 8px', borderRadius: 6, background: 'rgba(0,0,0,0.06)', fontSize: 14, lineHeight: 1 }}>‹</button>
+            <span style={{ fontSize: 11, color: 'var(--fg-muted)', fontWeight: 600 }}>{(idx % sorted.length) + 1}/{sorted.length}</span>
+            <button onClick={() => setIdx(i => (i + 1) % sorted.length)} style={{ all: 'unset', cursor: 'pointer', padding: '4px 8px', borderRadius: 6, background: 'rgba(0,0,0,0.06)', fontSize: 14, lineHeight: 1 }}>›</button>
+          </div>
+        )}
       </div>
     </section>
   );

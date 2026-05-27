@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
-import { useGames, usePractices, usePlayers, deriveEvents, TEAM_INFO } from '../shared/store.js';
+import { useGames, usePractices, usePlayers, deriveEvents, TEAM_INFO, useAnnouncements } from '../shared/store.js';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
 
 export default function HomeTab({ family, messages, onTabChange }) {
-  const [games]     = useGames();
-  const [practices] = usePractices();
-  const [players]   = usePlayers();
+  const [games]         = useGames();
+  const [practices]     = usePractices();
+  const [players]       = usePlayers();
+  const [announcements] = useAnnouncements();
   const EVENTS = deriveEvents(games, practices);
   const TEAM = TEAM_INFO;
 
@@ -92,6 +93,23 @@ export default function HomeTab({ family, messages, onTabChange }) {
           <Icon name="arrow-right" size={16} color="var(--court-navy)" />
         </button>
       )}
+
+      {/* Commissioner announcements */}
+      {announcements.filter(a => a.target === 'All families').slice(0, 3).map(a => {
+        const color = a.type === 'urgent' ? '#DC2626' : a.type === 'info' ? 'var(--court-navy)' : '#D97706';
+        const bg    = a.type === 'urgent' ? 'rgba(220,38,38,0.06)' : a.type === 'info' ? 'rgba(10,31,61,0.05)' : 'rgba(217,119,6,0.07)';
+        const iconName = a.type === 'urgent' ? 'alert-circle' : a.type === 'info' ? 'info' : 'megaphone';
+        return (
+          <div key={a.id} style={{ background: bg, border: `1px solid ${color}30`, borderLeft: `3px solid ${color}`, borderRadius: '0 10px 10px 0', padding: '11px 14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <Icon name={iconName} size={15} color={color} style={{ flexShrink: 0, marginTop: 1 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 700, fontSize: 13, color: '#111827' }}>{a.title}</div>
+              <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2, lineHeight: 1.5 }}>{a.body}</div>
+              <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4, fontWeight: 600 }}>{a.date} · Commissioner</div>
+            </div>
+          </div>
+        );
+      })}
 
       {/* Next game */}
       {nextGame && (

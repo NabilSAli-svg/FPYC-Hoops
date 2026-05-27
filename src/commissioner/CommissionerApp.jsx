@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 import { csvDownload } from '../shared/csvDownload.js';
-import { useDraftState, DRAFT_PLAYERS, DRAFT_TEAMS, buildSnakeOrder, INITIAL_DRAFT, useBracket, INITIAL_BRACKET } from '../shared/store.js';
+import { useDraftState, DRAFT_PLAYERS, DRAFT_TEAMS, buildSnakeOrder, INITIAL_DRAFT, useBracket, INITIAL_BRACKET, useAnnouncements } from '../shared/store.js';
 
 const CREDENTIALS = { username: 'commissioner', password: 'fpyc2025' };
 
@@ -691,113 +691,198 @@ function StandingsTab() {
 
 // ─── Announcements Tab ───────────────────────────────────────────────────────
 
-function AnnouncementsTab() {
-  const [announcements, setAnnouncements] = useState(INITIAL_ANNOUNCEMENTS);
-  const [form, setForm] = useState({ title: '', body: '', target: 'All families' });
+const TEMPLATES = [
+  { label: 'Practice cancelled',   title: 'Practice cancelled this week', body: 'Due to gym scheduling conflicts, practice this week has been cancelled. We will resume our normal schedule next week. Stay warm!' },
+  { label: 'Game postponed',       title: 'Saturday game postponed',      body: 'This Saturday\'s game has been postponed due to weather/facility issues. A make-up date will be announced shortly.' },
+  { label: 'Photo day',            title: 'Team photo day — this Saturday', body: 'Team photos will be taken before your game this Saturday. Please arrive 20 minutes early in your full uniform. Order forms available at the gym.' },
+  { label: 'Playoffs confirmed',   title: 'Playoffs bracket is set',      body: 'The playoff bracket has been finalized and is available on the FPYC Basketball website. Good luck to all teams!' },
+  { label: 'Volunteer needed',     title: 'Volunteers needed for Saturday', body: 'We need a few parent volunteers to help with scorekeeping and concessions this Saturday. Please reply if you can help — it\'s greatly appreciated!' },
+];
 
-  function handlePost(e) {
-    e.preventDefault();
+const TYPE_CONFIG = {
+  urgent:  { color: 'var(--foul-red)',           bg: 'rgba(200,16,46,0.08)',   label: 'Urgent'  },
+  info:    { color: 'var(--court-navy)',          bg: 'rgba(10,31,61,0.07)',    label: 'Info'    },
+  general: { color: 'var(--basketball-orange)',   bg: 'rgba(232,119,34,0.10)', label: 'General' },
+};
+
+function AnnouncementsTab() {
+  const [announcements, setAnnouncements] = useAnnouncements();
+  const [form, setForm] = useState({ title: '', body: '', target: 'All families', type: 'info', pinned: false });
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [preview, setPreview] = useState(false);
+  const [toast, setToast] = useState('');
+
+  const now = new Date();
+  const dateStr = `${now.toLocaleString('default', { month: 'short' })} ${now.getDate()}`;
+
+  function showToast(msg) { setToast(msg); setTimeout(() => setToast(''), 2500); }
+
+  function handlePost() {
     if (!form.title.trim() || !form.body.trim()) return;
-    const now = new Date();
-    const month = now.toLocaleString('default', { month: 'short' });
-    const newAnnouncement = {
-      id: `a${Date.now()}`,
-      title: form.title.trim(),
-      body: form.body.trim(),
-      target: form.target,
-      date: `${month} ${now.getDate()}`,
-      author: 'Commissioner',
-    };
-    setAnnouncements(prev => [newAnnouncement, ...prev]);
-    setForm({ title: '', body: '', target: 'All families' });
+    const next = { id: `a${Date.now()}`, title: form.title.trim(), body: form.body.trim(), target: form.target, type: form.type, pinned: form.pinned, date: dateStr, author: 'Commissioner' };
+    setAnnouncements(prev => [next, ...prev]);
+    setForm({ title: '', body: '', target: 'All families', type: 'info', pinned: false });
+    setPreview(false);
+    showToast('Announcement posted');
   }
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-      {/* Compose form */}
-      <Card padding={22}>
-        <Eyebrow style={{ marginBottom: 16 }}>New Announcement</Eyebrow>
-        <form onSubmit={handlePost} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Title</label>
-            <input
-              value={form.title}
-              onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-              placeholder="Announcement title…"
-              style={{
-                width: '100%', padding: '10px 12px', borderRadius: 8,
-                border: '1.5px solid var(--border)', fontFamily: 'var(--font-body)',
-                fontSize: 14, color: 'var(--fg)', outline: 'none',
-                background: 'var(--bone)', boxSizing: 'border-box',
-              }}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Body</label>
-            <textarea
-              value={form.body}
-              onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
-              placeholder="Write your announcement…"
-              rows={3}
-              style={{
-                width: '100%', padding: '10px 12px', borderRadius: 8,
-                border: '1.5px solid var(--border)', fontFamily: 'var(--font-body)',
-                fontSize: 14, color: 'var(--fg)', outline: 'none', resize: 'vertical',
-                background: 'var(--bone)', boxSizing: 'border-box',
-              }}
-            />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14 }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Target</label>
-              <select
-                value={form.target}
-                onChange={e => setForm(f => ({ ...f, target: e.target.value }))}
-                style={{
-                  width: '100%', padding: '10px 12px', borderRadius: 8,
-                  border: '1.5px solid var(--border)', fontFamily: 'var(--font-body)',
-                  fontSize: 14, color: 'var(--fg)', background: 'var(--bone)', cursor: 'pointer',
-                }}
-              >
-                {DIVISIONS.map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
-            </div>
-            <Button kind="primary" icon="send" onClick={handlePost}>Post Announcement</Button>
-          </div>
-        </form>
-      </Card>
+  function handleDelete(id) {
+    setAnnouncements(prev => prev.filter(a => a.id !== id));
+    showToast('Announcement deleted');
+  }
 
-      {/* Announcements list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <Eyebrow>Posted Announcements</Eyebrow>
-        {announcements.map(a => (
-          <Card key={a.id} padding={20}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-              <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--fg)', lineHeight: 1.3 }}>{a.title}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                <span style={{
-                  display: 'inline-block', padding: '3px 9px', borderRadius: 'var(--radius-pill)',
-                  fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
-                  background: a.target === 'All families' ? 'var(--court-navy)' : 'var(--basketball-orange)',
-                  color: '#fff',
-                }}>{a.target}</span>
+  function handlePin(id) {
+    setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, pinned: !a.pinned } : a));
+  }
+
+  function applyTemplate(t) {
+    setForm(f => ({ ...f, title: t.title, body: t.body }));
+    setShowTemplates(false);
+  }
+
+  const sorted = [...announcements].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+  const canPost = form.title.trim() && form.body.trim();
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+      {/* Compose */}
+      <Card padding={22}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+          <Eyebrow>New Announcement</Eyebrow>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button kind="ghost" size="sm" icon="file-text" onClick={() => setShowTemplates(t => !t)}>Templates</Button>
+            {canPost && <Button kind="ghost" size="sm" icon="eye" onClick={() => setPreview(p => !p)}>{preview ? 'Edit' : 'Preview'}</Button>}
+          </div>
+        </div>
+
+        {/* Templates drawer */}
+        {showTemplates && (
+          <div style={{ marginBottom: 16, padding: '12px', background: 'var(--bone)', borderRadius: 8, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Quick templates</div>
+            {TEMPLATES.map(t => (
+              <button key={t.label} onClick={() => applyTemplate(t)} style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', textAlign: 'left', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 600, color: 'var(--fg)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Icon name="file-text" size={13} color="var(--fg-muted)" /> {t.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {preview ? (
+          /* Preview card */
+          <div style={{ border: `1.5px solid ${TYPE_CONFIG[form.type].color}`, borderRadius: 10, overflow: 'hidden', marginBottom: 14 }}>
+            <div style={{ padding: '10px 14px', background: TYPE_CONFIG[form.type].bg, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Icon name={form.type === 'urgent' ? 'alert-circle' : form.type === 'info' ? 'info' : 'megaphone'} size={14} color={TYPE_CONFIG[form.type].color} />
+              <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: TYPE_CONFIG[form.type].color }}>{TYPE_CONFIG[form.type].label}</span>
+              {form.pinned && <Icon name="pin" size={12} color={TYPE_CONFIG[form.type].color} />}
+              <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--fg-muted)', fontWeight: 600 }}>{form.target} · {dateStr}</span>
+            </div>
+            <div style={{ padding: '14px' }}>
+              <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--fg)', marginBottom: 6 }}>{form.title}</div>
+              <div style={{ fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.6 }}>{form.body}</div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 14 }}>
+            {/* Type row */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              {Object.entries(TYPE_CONFIG).map(([key, cfg]) => (
+                <button key={key} onClick={() => setForm(f => ({ ...f, type: key }))} style={{ flex: 1, padding: '7px 10px', borderRadius: 7, border: `1.5px solid ${form.type === key ? cfg.color : 'var(--border)'}`, background: form.type === key ? cfg.bg : '#fff', color: form.type === key ? cfg.color : 'var(--fg-muted)', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 120ms' }}>
+                  {cfg.label}
+                </button>
+              ))}
+            </div>
+
+            <AnnField label="Title">
+              <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Announcement title…" style={annInput} />
+            </AnnField>
+
+            <AnnField label="Message" hint={`${form.body.length}/280`}>
+              <textarea value={form.body} onChange={e => setForm(f => ({ ...f, body: e.target.value.slice(0, 280) }))} placeholder="Write your announcement…" rows={3} style={{ ...annInput, resize: 'vertical' }} />
+            </AnnField>
+
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: 160 }}>
+                <AnnField label="Audience">
+                  <select value={form.target} onChange={e => setForm(f => ({ ...f, target: e.target.value }))} style={{ ...annInput, cursor: 'pointer' }}>
+                    {DIVISIONS.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </AnnField>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 1 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600, color: form.pinned ? 'var(--court-navy)' : 'var(--fg-muted)', padding: '10px 12px', borderRadius: 8, border: `1.5px solid ${form.pinned ? 'var(--court-navy)' : 'var(--border)'}`, background: form.pinned ? 'rgba(10,31,61,0.06)' : '#fff', transition: 'all 120ms' }}>
+                  <input type="checkbox" checked={form.pinned} onChange={e => setForm(f => ({ ...f, pinned: e.target.checked }))} style={{ accentColor: 'var(--court-navy)' }} />
+                  <Icon name="pin" size={13} color={form.pinned ? 'var(--court-navy)' : 'var(--fg-muted)'} /> Pin to top
+                </label>
               </div>
             </div>
-            <p style={{ margin: 0, fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.55 }}>{a.body}</p>
-            <div style={{ marginTop: 12, display: 'flex', gap: 12, fontSize: 11, color: 'var(--fg-muted)', fontWeight: 600 }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Icon name="calendar" size={12} color="var(--fg-muted)" /> {a.date}
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Icon name="user" size={12} color="var(--fg-muted)" /> {a.author}
-              </span>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button kind="gold" icon="send" onClick={handlePost} disabled={!canPost}>Post announcement</Button>
+        </div>
+      </Card>
+
+      {/* Posted list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Eyebrow>Posted — {announcements.length} total</Eyebrow>
+        </div>
+        {sorted.map(a => {
+          const cfg = TYPE_CONFIG[a.type] || TYPE_CONFIG.info;
+          return (
+            <div key={a.id} style={{ background: '#fff', border: `1px solid var(--border)`, borderLeft: `4px solid ${cfg.color}`, borderRadius: '0 10px 10px 0', overflow: 'hidden' }}>
+              <div style={{ padding: '12px 16px 10px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 6 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
+                      {a.pinned && <Icon name="pin" size={12} color="var(--court-navy)" />}
+                      <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: cfg.color }}>{cfg.label}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '1px 7px', borderRadius: 999, background: a.target === 'All families' ? 'rgba(10,31,61,0.08)' : 'rgba(232,119,34,0.12)', color: a.target === 'All families' ? 'var(--court-navy)' : 'var(--basketball-orange)' }}>{a.target}</span>
+                      <span style={{ fontSize: 11, color: 'var(--fg-muted)', marginLeft: 'auto' }}>{a.date}</span>
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--fg)', lineHeight: 1.3 }}>{a.title}</div>
+                  </div>
+                </div>
+                <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.55 }}>{a.body}</p>
+                <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                  <button onClick={() => handlePin(a.id)} style={{ ...ghostBtn, color: a.pinned ? 'var(--court-navy)' : 'var(--fg-muted)' }}>
+                    <Icon name="pin" size={13} color={a.pinned ? 'var(--court-navy)' : 'var(--fg-muted)'} /> {a.pinned ? 'Unpin' : 'Pin'}
+                  </button>
+                  <button onClick={() => handleDelete(a.id)} style={{ ...ghostBtn, color: 'var(--foul-red)' }}>
+                    <Icon name="trash-2" size={13} color="var(--foul-red)" /> Delete
+                  </button>
+                </div>
+              </div>
             </div>
-          </Card>
-        ))}
+          );
+        })}
       </div>
+
+      {toast && (
+        <div style={{ position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)', background: 'var(--court-navy)', color: '#fff', padding: '10px 22px', borderRadius: 999, fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, zIndex: 300, boxShadow: '0 8px 24px rgba(0,0,0,0.25)', whiteSpace: 'nowrap', pointerEvents: 'none' }}>
+          <Icon name="check-circle" size={16} color="var(--varsity-gold)" /> {toast}
+        </div>
+      )}
     </div>
   );
 }
+
+function AnnField({ label, hint, children }) {
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+        <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{label}</label>
+        {hint && <span style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{hint}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+const annInput = { width: '100%', padding: '10px 12px', borderRadius: 8, border: '1.5px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--fg)', outline: 'none', background: 'var(--bone)', boxSizing: 'border-box' };
+const ghostBtn = { all: 'unset', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, padding: '4px 8px', borderRadius: 6, background: 'var(--bone)', fontFamily: 'var(--font-body)' };
 
 // ─── Bracket Tab ──────────────────────────────────────────────────────────────
 
