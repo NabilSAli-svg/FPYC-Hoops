@@ -89,7 +89,7 @@ export default function AdminApp() {
           {view === 'dashboard'   && <DashboardView team={TEAM} players={players} games={games} onGo={handleGo} />}
           {view === 'roster'      && <RosterView team={TEAM} players={players} setPlayers={setPlayers} />}
           {view === 'schedule'    && <ScheduleView games={games} onScoreSave={saveScore} onGameUpdate={updateGame} onGameAdd={addGame} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} />}
-          {view === 'lineup'      && <LineupView players={players.filter(p => p.status === 'active')} game={games[0]} />}
+          {view === 'lineup'      && <LineupView players={players.filter(p => p.status === 'active')} games={games} />}
           {view === 'attendance'  && <AttendanceView players={players} />}
           {view === 'messages'    && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} />}
           {view === 'evaluations' && <EvaluationsView players={players.filter(p => p.status !== 'inactive')} />}

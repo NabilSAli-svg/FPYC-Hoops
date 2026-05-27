@@ -178,6 +178,61 @@ export function printGameDay(game, players, team) {
   `);
 }
 
+// ── Lineup card ─────────────────────────────────────────────────────────────
+export function printLineup(game, starters, posMap, bench, team) {
+  const starterRows = starters.map(p => `
+    <tr>
+      <td class="num">${p.number}</td>
+      <td class="name">${p.name}</td>
+      <td style="text-align:center"><span class="pill pill-home">${posMap[p.id] || '—'}</span></td>
+      <td class="muted">${p.grade} · ${p.position}</td>
+    </tr>`).join('');
+
+  const benchRows = bench.map((p, i) => `
+    <tr>
+      <td style="text-align:center;color:#9ca3af;font-weight:700">${i + 1}</td>
+      <td class="num">${p.number}</td>
+      <td class="name">${p.name}</td>
+      <td class="muted">${p.position}</td>
+    </tr>`).join('');
+
+  openPrint(`Lineup — ${game.opponent}`, `
+    <div class="header">
+      <div class="header-left">
+        <div class="team">${team.name}</div>
+        <div class="sub">Starting lineup · ${game.day}</div>
+      </div>
+      <div class="header-right">
+        ${game.home ? 'vs.' : '@'} ${game.opponent}<br>
+        ${game.time} · ${game.location}<br>
+        Jersey: ${game.home ? 'Navy (home)' : 'White (away)'}
+      </div>
+    </div>
+
+    <div class="section">Starting five</div>
+    <table>
+      <thead><tr><th>#</th><th>Player</th><th style="text-align:center">Pos</th><th>Grade · Natural pos</th></tr></thead>
+      <tbody>${starterRows}</tbody>
+    </table>
+
+    <div class="section">Bench rotation</div>
+    <table>
+      <thead><tr><th>Sub#</th><th>#</th><th>Player</th><th>Position</th></tr></thead>
+      <tbody>${benchRows}</tbody>
+    </table>
+
+    <div style="margin-top:16px">
+      <div class="notes-label">Coach notes</div>
+      <div class="notes">${game.note || ''}</div>
+    </div>
+
+    <div class="footer">
+      <span>${team.name} · ${game.day}</span>
+      <span>FPYC Basketball · fpycsports.org</span>
+    </div>
+  `);
+}
+
 // ── Practice sheet ──────────────────────────────────────────────────────────
 export function printPractice(practice, players, team) {
   const active = players.filter(p => p.status === 'active');
