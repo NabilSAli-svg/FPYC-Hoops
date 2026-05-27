@@ -13,6 +13,7 @@ import EvaluationsView from './EvaluationsView.jsx';
 import DraftBoardView from './DraftBoardView.jsx';
 import SeasonView from './SeasonView.jsx';
 import SettingsView from './SettingsView.jsx';
+import StatsView from './StatsView.jsx';
 import { Button } from '../shared/index.js';
 
 const TEAM = { name: TEAM_INFO.name, division: TEAM_INFO.division, number: 12 };
@@ -57,6 +58,7 @@ export default function AdminApp() {
     evaluations: { title: 'Evaluations',     breadcrumb: `${TEAM.name} · ${TEAM.division}` },
     draftboard:  { title: 'Draft Board',     breadcrumb: 'Boys 5–6 House · Season 2025–26' },
     season:      { title: 'Season',          breadcrumb: 'Boys 5–6 House · Season 2025–26' },
+    stats:       { title: 'Player Stats',     breadcrumb: `${TEAM.name} · Season 2025–26` },
     settings:    { title: 'Settings',        breadcrumb: 'FPYC Basketball · Coach console' },
   };
   const t = titleMap[view] || titleMap.dashboard;
@@ -94,6 +96,7 @@ export default function AdminApp() {
           {view === 'messages'    && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} />}
           {view === 'evaluations' && <EvaluationsView players={players.filter(p => p.status !== 'inactive')} />}
           {view === 'draftboard'  && <DraftBoardView />}
+          {view === 'stats'       && <StatsView />}
           {view === 'season'      && <SeasonView games={games} />}
           {view === 'settings'    && <SettingsView />}
         </div>

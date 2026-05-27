@@ -129,6 +129,46 @@ export function useDraftState() {
   return useLocalStorage('fpyc-draft-state', INITIAL_DRAFT);
 }
 
+// ─── Player Stats ─────────────────────────────────────────────────────────────
+// { [gameId]: { [playerId]: { pts, ast, reb, fls } } }
+
+export const INITIAL_STATS = {
+  g4: { // W 48–39 vs Oakton Patriots
+    p1: { pts: 14, ast: 3, reb: 5, fls: 2 },
+    p2: { pts:  8, ast: 4, reb: 3, fls: 1 },
+    p3: { pts:  6, ast: 1, reb: 8, fls: 3 },
+    p4: { pts:  4, ast: 2, reb: 6, fls: 2 },
+    p5: { pts:  8, ast: 0, reb: 9, fls: 4 },
+    p6: { pts:  4, ast: 5, reb: 2, fls: 1 },
+    p7: { pts:  2, ast: 2, reb: 3, fls: 2 },
+    p8: { pts:  2, ast: 1, reb: 4, fls: 1 },
+  },
+  g5: { // L 42–47 vs McLean Mustangs
+    p1: { pts: 12, ast: 2, reb: 4, fls: 3 },
+    p2: { pts:  6, ast: 3, reb: 2, fls: 1 },
+    p3: { pts:  8, ast: 1, reb: 7, fls: 4 },
+    p4: { pts:  4, ast: 2, reb: 5, fls: 2 },
+    p5: { pts:  6, ast: 0, reb: 8, fls: 4 },
+    p6: { pts:  3, ast: 4, reb: 2, fls: 1 },
+    p7: { pts:  2, ast: 2, reb: 3, fls: 2 },
+    p8: { pts:  1, ast: 1, reb: 3, fls: 1 },
+  },
+  g6: { // W 55–50 vs Centreville Eagles
+    p1: { pts: 18, ast: 4, reb:  6, fls: 2 },
+    p2: { pts:  8, ast: 5, reb:  3, fls: 1 },
+    p3: { pts: 10, ast: 2, reb:  9, fls: 3 },
+    p4: { pts:  6, ast: 2, reb:  7, fls: 2 },
+    p5: { pts:  5, ast: 0, reb: 10, fls: 4 },
+    p6: { pts:  4, ast: 6, reb:  2, fls: 1 },
+    p7: { pts:  2, ast: 2, reb:  3, fls: 2 },
+    p8: { pts:  2, ast: 1, reb:  5, fls: 1 },
+  },
+};
+
+export function useStats() {
+  return useLocalStorage('fpyc-stats', INITIAL_STATS);
+}
+
 // Derive family-facing event list from admin games + practices
 export function deriveEvents(games, practices) {
   const gameEvents = games.map(g => ({

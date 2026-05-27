@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { id: 'attendance',  icon: 'check-square',      label: 'Attendance' },
   { id: 'messages',    icon: 'message-square',    label: 'Messages', badge: 3 },
   { id: 'evaluations', icon: 'star',              label: 'Evaluations' },
+  { id: 'stats',       icon: 'bar-chart-2',      label: 'Stats' },
 ];
 
 const SECONDARY = [
