@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
-import OfficialsView from '../admin/OfficialsView.jsx';
+import RefGameDayView from './RefGameDayView.jsx';
 
 const CREDENTIALS = { username: 'ref-admin', password: 'fpyc2025' };
 
@@ -26,7 +26,7 @@ export default function RefAdminApp() {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: 28 }}>
             <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 44, objectFit: 'contain', marginBottom: 4 }} />
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, textTransform: 'uppercase', color: 'var(--court-navy)', letterSpacing: '0.04em' }}>Officials Portal</div>
-            <div style={{ fontSize: 12, color: 'var(--fg-muted)', fontWeight: 600 }}>Ref admin access only</div>
+            <div style={{ fontSize: 12, color: 'var(--fg-muted)', fontWeight: 600 }}>Game-day tools for refs</div>
           </div>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -71,7 +71,7 @@ export default function RefAdminApp() {
 
           <div style={{ marginTop: 20, padding: '12px 16px', borderRadius: 8, background: 'rgba(10,31,61,0.05)', border: '1px solid var(--border)' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Demo credentials</div>
-            <div style={{ fontSize: 12, color: 'var(--fg)', fontFamily: 'var(--font-mono)' }}>ref-admin / fpyc2025</div>
+            <div style={{ fontSize: 12, color: 'var(--fg)', fontFamily: 'var(--font-mono)' }}>ref-admin · fpyc2025</div>
           </div>
         </div>
       </div>
@@ -103,7 +103,7 @@ export default function RefAdminApp() {
       </header>
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '28px 24px 64px' }}>
-        <OfficialsView />
+        <RefGameDayView />
       </div>
     </div>
   );
