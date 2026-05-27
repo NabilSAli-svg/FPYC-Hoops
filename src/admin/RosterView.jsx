@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card, Pill, Button, Icon, Jersey, EmptyState, Skeleton } from '../shared/index.js';
 import { csvDownload } from '../shared/csvDownload.js';
+import { printRoster } from '../shared/printSheet.js';
+import { TEAM_INFO } from '../shared/store.js';
 
 const GRADES    = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
 const POSITIONS = ['Guard', 'Forward', 'Center'];
@@ -170,6 +172,7 @@ export default function RosterView({ team, players, setPlayers }) {
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          <Button kind="ghost" icon="printer" size="sm" onClick={() => printRoster(players, TEAM_INFO)}>Print</Button>
           <Button kind="ghost" icon="download" size="sm" onClick={() => exportRosterCSV(players)}>Export CSV</Button>
           <Button kind="gold" icon="user-plus" onClick={openAdd}>Add player</Button>
         </div>

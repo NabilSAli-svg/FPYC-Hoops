@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, Pill, Button, Icon, Display, Eyebrow, EmptyState, Skeleton } from '../shared/index.js';
-import { usePractices } from '../shared/store.js';
+import { usePractices, usePlayers, TEAM_INFO } from '../shared/store.js';
+import { printGameDay, printPractice } from '../shared/printSheet.js';
 
 const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4', 'OT'];
 
@@ -12,6 +13,7 @@ const PRACTICE_TYPE_COLOR = {
 
 export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameAdd, onGo, initialTab = 'games', openNewGame = false, onNewGameClose }) {
   const [practices, setPractices] = usePractices();
+  const [players] = usePlayers();
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 700);
@@ -184,6 +186,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
                   </div>
 
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <Button kind="ghost" size="sm" icon="printer" onClick={() => printGameDay(g, players, TEAM_INFO)}>Print</Button>
                     {isFinal ? (
                       <Button kind="ghost" size="sm" icon="edit-3" onClick={() => openScore(g)}>Edit score</Button>
                     ) : isLive ? (
@@ -274,6 +277,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
                   </div>
 
                   <div style={{ display: 'flex', gap: 8 }}>
+                    <Button kind="ghost" size="sm" icon="printer" onClick={() => printPractice(p, players, TEAM_INFO)}>Print</Button>
                     {isPast
                       ? <Button kind="ghost" size="sm" icon="check-square" onClick={() => onGo && onGo('attendance')}>Attendance</Button>
                       : <>
