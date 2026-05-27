@@ -22,11 +22,11 @@ const REFS_INITIAL = [
 ];
 
 const ASSIGNMENTS_INITIAL = [
-  { id: 'g1', game: 'Dec 7 vs. Vienna Storm',       refs: ['James Park', 'Marcus Lee'],    status: 'confirmed'  },
-  { id: 'g2', game: 'Dec 14 @ Reston Wolves',       refs: ['Leon Baptiste', 'Devon Tyler'], status: 'confirmed'  },
-  { id: 'g3', game: 'Dec 21 @ Burke Lakers',        refs: ['James Park', 'TBD'],            status: 'partial'    },
-  { id: 'g4', game: 'Jan 4 vs. McLean Mustangs',    refs: ['TBD', 'TBD'],                  status: 'unassigned' },
-  { id: 'g5', game: 'Jan 11 vs. Springfield Bulls', refs: ['TBD', 'TBD'],                  status: 'unassigned' },
+  { id: 'g1', game: 'Hawks vs. Vienna Storm',   day: 'Sat Dec 7',  time: '10:00 AM', location: 'FPYC Gym A',     home: true,  refs: ['James Park', 'Marcus Lee'],    status: 'confirmed'  },
+  { id: 'g2', game: 'Hawks @ Reston Wolves',    day: 'Sat Dec 14', time: '11:30 AM', location: 'Reston Rec Center', home: false, refs: ['Leon Baptiste', 'Devon Tyler'], status: 'confirmed'  },
+  { id: 'g3', game: 'Hawks @ Burke Lakers',     day: 'Sat Dec 21', time: '9:00 AM',  location: 'Burke Lake Park Gym', home: false, refs: ['James Park', 'TBD'],       status: 'partial'    },
+  { id: 'g4', game: 'Hawks vs. McLean Mustangs',day: 'Sat Jan 4',  time: '10:00 AM', location: 'FPYC Gym B',     home: true,  refs: ['TBD', 'TBD'],                  status: 'unassigned' },
+  { id: 'g5', game: 'Hawks vs. Springfield Bulls', day: 'Sat Jan 11', time: '1:00 PM', location: 'FPYC Gym A',   home: true,  refs: ['TBD', 'TBD'],                  status: 'unassigned' },
 ];
 
 const CERT_COLOR = {
@@ -45,7 +45,7 @@ function emptyForm() {
 
 export default function OfficialsView() {
   const isMobile = useIsMobile();
-  const [tab, setTab] = useState('roster');
+  const [tab, setTab] = useState('dashboard');
   const [refs, setRefs] = useState(REFS_INITIAL);
   const [assignments, setAssignments] = useState(ASSIGNMENTS_INITIAL);
   const [showAdd, setShowAdd] = useState(false);
@@ -55,6 +55,10 @@ export default function OfficialsView() {
   const [toast, setToast] = useState('');
 
   const totalOwed = refs.filter(r => !r.paid).reduce((s, r) => s + r.games * r.rate, 0);
+  const unpaidCount = refs.filter(r => !r.paid).length;
+  const unassigned = assignments.filter(g => g.status === 'unassigned');
+  const partial = assignments.filter(g => g.status === 'partial');
+  const availableRefs = refs.filter(r => r.available);
 
   function showToast(msg) {
     setToast(msg);
@@ -90,6 +94,13 @@ export default function OfficialsView() {
     showToast('All officials marked paid');
   }
 
+  function toggleAvailability(id) {
+    const ref = refs.find(r => r.id === id);
+    const next = !ref.available;
+    setRefs(rs => rs.map(r => r.id === id ? { ...r, available: next } : r));
+    showToast(`${ref.name} marked ${next ? 'available' : 'unavailable'}`);
+  }
+
   function toggleRefSelect(name) {
     setSelectedRefs(prev =>
       prev.includes(name)
@@ -114,46 +125,151 @@ export default function OfficialsView() {
     setSelectedRefs(g.refs.filter(r => r !== 'TBD'));
   }
 
+  const TABS = [
+    { id: 'dashboard',   label: 'Dashboard',   icon: 'layout' },
+    { id: 'roster',      label: 'Officials',   icon: 'users' },
+    { id: 'assignments', label: 'Schedule',    icon: 'calendar' },
+    { id: 'payments',    label: 'Payments',    icon: 'dollar-sign' },
+  ];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Summary strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 14 }}>
-        {[
-          { label: 'Registered officials', value: refs.length,                                          icon: 'user-check',    color: 'var(--court-navy)'        },
-          { label: 'Available this week',  value: refs.filter(r => r.available).length,                 icon: 'calendar-check', color: 'var(--status-win)'       },
-          { label: 'Games unassigned',     value: assignments.filter(g => g.status === 'unassigned').length, icon: 'alert-circle', color: 'var(--foul-red)'      },
-          { label: 'Payments pending',     value: `$${totalOwed}`,                                      icon: 'dollar-sign',   color: 'var(--basketball-orange)'  },
-        ].map((s, i) => (
-          <Card key={i} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 42, height: 42, borderRadius: 10, background: `${s.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Icon name={s.icon} size={20} color={s.color} />
-            </div>
-            <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 22 : 28, lineHeight: 1, color: 'var(--court-navy)' }}>{s.value}</div>
-              <div style={{ fontSize: 11, color: 'var(--fg-muted)', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginTop: 3 }}>{s.label}</div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
       {/* Sub-tabs */}
-      <div style={{ display: 'flex', gap: 8, borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
-        {[
-          { id: 'roster',      label: 'Officials roster' },
-          { id: 'assignments', label: 'Game assignments' },
-          { id: 'payments',    label: 'Payments' },
-        ].map(t => (
+      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', flexWrap: 'wrap', alignItems: 'center' }}>
+        {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             background: 'none', border: 'none', cursor: 'pointer',
             padding: '10px 16px', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
+            display: 'flex', alignItems: 'center', gap: 6,
             color: tab === t.id ? 'var(--court-navy)' : 'var(--fg-muted)',
             borderBottom: `2px solid ${tab === t.id ? 'var(--varsity-gold)' : 'transparent'}`,
             marginBottom: -1, transition: 'all 160ms',
-          }}>{t.label}</button>
+          }}>
+            <Icon name={t.icon} size={14} color={tab === t.id ? 'var(--court-navy)' : 'var(--fg-muted)'} />
+            {t.label}
+          </button>
         ))}
         <div style={{ flex: 1 }} />
         <Button kind="gold" icon="user-plus" onClick={() => { setShowAdd(true); setForm(emptyForm()); }}>Add official</Button>
       </div>
+
+      {/* ── DASHBOARD ── */}
+      {tab === 'dashboard' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Stats strip */}
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 14 }}>
+            {[
+              { label: 'Registered officials', value: refs.length,          icon: 'user-check',     color: 'var(--court-navy)'        },
+              { label: 'Available this week',  value: availableRefs.length, icon: 'calendar-check', color: 'var(--status-win)'        },
+              { label: 'Games unassigned',     value: unassigned.length + partial.length, icon: 'alert-circle', color: 'var(--foul-red)' },
+              { label: 'Payments pending',     value: `$${totalOwed}`,      icon: 'dollar-sign',    color: 'var(--basketball-orange)' },
+            ].map((s, i) => (
+              <Card key={i} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 42, height: 42, borderRadius: 10, background: `${s.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon name={s.icon} size={20} color={s.color} />
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 22 : 28, lineHeight: 1, color: 'var(--court-navy)' }}>{s.value}</div>
+                  <div style={{ fontSize: 11, color: 'var(--fg-muted)', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginTop: 3 }}>{s.label}</div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Alerts */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {unassigned.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(200,16,46,0.07)', border: '1px solid rgba(200,16,46,0.25)', borderRadius: 8, padding: '12px 16px' }}>
+                <Icon name="alert-circle" size={16} color="var(--foul-red)" />
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--fg)', flex: 1 }}>
+                  {unassigned.length} game{unassigned.length > 1 ? 's' : ''} fully unassigned — refs needed
+                </span>
+                <Button kind="ghost" size="sm" onClick={() => setTab('assignments')}>View schedule</Button>
+              </div>
+            )}
+            {partial.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(232,119,34,0.08)', border: '1px solid rgba(232,119,34,0.25)', borderRadius: 8, padding: '12px 16px' }}>
+                <Icon name="alert-triangle" size={16} color="var(--basketball-orange)" />
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--fg)', flex: 1 }}>
+                  {partial.length} game{partial.length > 1 ? 's' : ''} still need a second ref
+                </span>
+                <Button kind="ghost" size="sm" onClick={() => setTab('assignments')}>Assign now</Button>
+              </div>
+            )}
+            {unpaidCount > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(232,119,34,0.06)', border: '1px solid rgba(232,119,34,0.18)', borderRadius: 8, padding: '12px 16px' }}>
+                <Icon name="dollar-sign" size={16} color="var(--basketball-orange)" />
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--fg)', flex: 1 }}>
+                  ${totalOwed} owed to {unpaidCount} official{unpaidCount > 1 ? 's' : ''}
+                </span>
+                <Button kind="ghost" size="sm" onClick={() => setTab('payments')}>View payments</Button>
+              </div>
+            )}
+            {unassigned.length === 0 && partial.length === 0 && unpaidCount === 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(31,138,91,0.07)', border: '1px solid rgba(31,138,91,0.20)', borderRadius: 8, padding: '12px 16px' }}>
+                <Icon name="check-circle" size={16} color="var(--status-win)" />
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--fg)' }}>All games covered and payments up to date</span>
+              </div>
+            )}
+          </div>
+
+          {/* Upcoming games needing action */}
+          <div>
+            <Eyebrow style={{ marginBottom: 12 }}>Upcoming Games</Eyebrow>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {assignments.map(g => (
+                <Card key={g.id} padding={0} style={{ overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                    <div style={{ width: 4, alignSelf: 'stretch', background: g.status === 'confirmed' ? 'var(--status-win)' : g.status === 'partial' ? 'var(--basketball-orange)' : 'var(--foul-red)', flexShrink: 0 }} />
+                    <div style={{ flex: 1, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 20, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--fg)', marginBottom: 3 }}>{g.game}</div>
+                        <div style={{ fontSize: 12, color: 'var(--fg-muted)', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Icon name="calendar" size={11} color="var(--fg-muted)" /> {g.day} · {g.time}</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Icon name="map-pin" size={11} color="var(--fg-muted)" /> {g.location}</span>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                          {g.refs.map((ref, ri) => (
+                            <span key={ri} style={{ fontSize: 12, fontWeight: 700, padding: '3px 9px', borderRadius: 999, background: ref === 'TBD' ? 'rgba(200,16,46,0.10)' : 'rgba(10,31,61,0.07)', color: ref === 'TBD' ? 'var(--foul-red)' : 'var(--court-navy)' }}>
+                              {ref === 'TBD' ? 'TBD' : ref}
+                            </span>
+                          ))}
+                        </div>
+                        <Button kind={g.status === 'confirmed' ? 'ghost' : 'gold'} size="sm" icon="user-plus" onClick={() => { openAssign(g); setTab('assignments'); }}>
+                          {g.status === 'confirmed' ? 'Edit' : 'Assign'}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Available refs this week */}
+          <div>
+            <Eyebrow style={{ marginBottom: 12 }}>Available Officials This Week</Eyebrow>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 10 }}>
+              {refs.map(r => (
+                <Card key={r.id} padding={14} style={{ display: 'flex', alignItems: 'center', gap: 12, opacity: r.available ? 1 : 0.5 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: r.available ? 'var(--court-navy)' : 'var(--fg-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 13, color: 'var(--varsity-gold)', flexShrink: 0 }}>
+                    {r.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{r.cert}</div>
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999, flexShrink: 0, background: r.available ? 'rgba(31,138,91,0.10)' : 'rgba(200,16,46,0.08)', color: r.available ? 'var(--status-win)' : 'var(--foul-red)' }}>
+                    {r.available ? 'Available' : 'Out'}
+                  </span>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── ROSTER ── */}
       {tab === 'roster' && (
@@ -175,9 +291,12 @@ export default function OfficialsView() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: r.available ? 'rgba(31,138,91,0.10)' : 'rgba(200,16,46,0.08)', color: r.available ? 'var(--status-win)' : 'var(--foul-red)' }}>
+                  <button
+                    onClick={() => toggleAvailability(r.id)}
+                    style={{ all: 'unset', cursor: 'pointer', fontSize: 11, fontWeight: 700, padding: '2px 10px', borderRadius: 999, background: r.available ? 'rgba(31,138,91,0.10)' : 'rgba(200,16,46,0.08)', color: r.available ? 'var(--status-win)' : 'var(--foul-red)', border: `1px solid ${r.available ? 'rgba(31,138,91,0.25)' : 'rgba(200,16,46,0.20)'}` }}
+                  >
                     {r.available ? 'Available' : 'Unavailable'}
-                  </span>
+                  </button>
                   <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: r.paid ? 'rgba(31,138,91,0.10)' : 'rgba(232,119,34,0.10)', color: r.paid ? 'var(--status-win)' : 'var(--basketball-orange)' }}>
                     {r.paid ? 'Paid' : 'Unpaid'}
                   </span>
@@ -191,8 +310,8 @@ export default function OfficialsView() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'var(--bone)' }}>
-                  {['Official', 'Certification', 'Contact', 'Rate', 'Games', 'Status', ''].map(h => (
-                    <th key={h} style={{ padding: '11px 16px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', borderBottom: '1px solid var(--border)' }}>{h}</th>
+                  {['Official', 'Certification', 'Contact', 'Rate', 'Games', 'Availability', 'Payment', ''].map(h => (
+                    <th key={h} style={{ padding: '11px 16px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -217,14 +336,18 @@ export default function OfficialsView() {
                     <td style={{ padding: '13px 16px', fontFamily: 'var(--font-mono)', fontSize: 14 }}>${r.rate}/game</td>
                     <td style={{ padding: '13px 16px', textAlign: 'center' }}><Display size={22}>{r.games}</Display></td>
                     <td style={{ padding: '13px 16px' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: r.available ? 'rgba(31,138,91,0.10)' : 'rgba(200,16,46,0.08)', color: r.available ? 'var(--status-win)' : 'var(--foul-red)', display: 'inline-block', width: 'fit-content' }}>
-                          {r.available ? 'Available' : 'Unavailable'}
-                        </span>
-                        <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: r.paid ? 'rgba(31,138,91,0.10)' : 'rgba(232,119,34,0.10)', color: r.paid ? 'var(--status-win)' : 'var(--basketball-orange)', display: 'inline-block', width: 'fit-content' }}>
-                          {r.paid ? 'Paid' : 'Unpaid'}
-                        </span>
-                      </div>
+                      <button
+                        onClick={() => toggleAvailability(r.id)}
+                        title="Click to toggle availability"
+                        style={{ all: 'unset', cursor: 'pointer', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: r.available ? 'rgba(31,138,91,0.10)' : 'rgba(200,16,46,0.08)', color: r.available ? 'var(--status-win)' : 'var(--foul-red)', border: `1px solid ${r.available ? 'rgba(31,138,91,0.25)' : 'rgba(200,16,46,0.20)'}`, transition: 'all 120ms' }}
+                      >
+                        {r.available ? 'Available' : 'Unavailable'}
+                      </button>
+                    </td>
+                    <td style={{ padding: '13px 16px' }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: r.paid ? 'rgba(31,138,91,0.10)' : 'rgba(232,119,34,0.10)', color: r.paid ? 'var(--status-win)' : 'var(--basketball-orange)' }}>
+                        {r.paid ? 'Paid' : `$${r.games * r.rate} owed`}
+                      </span>
                     </td>
                     <td style={{ padding: '13px 16px' }}>
                       <Button kind="ghost" size="sm" icon="mail">Contact</Button>
@@ -237,32 +360,56 @@ export default function OfficialsView() {
         )
       )}
 
-      {/* ── ASSIGNMENTS ── */}
+      {/* ── SCHEDULE / ASSIGNMENTS ── */}
       {tab === 'assignments' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {assignments.map(g => (
-            <Card key={g.id} padding={0} style={{ overflow: 'hidden' }}>
-              <div style={{ display: isMobile ? 'flex' : 'grid', flexDirection: isMobile ? 'column' : undefined, gridTemplateColumns: '1fr auto auto', gap: isMobile ? 10 : 18, alignItems: isMobile ? 'flex-start' : 'center', padding: '16px 20px' }}>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 15 : 20, color: 'var(--court-navy)', textTransform: 'uppercase' }}>{g.game}</div>
-                  <div style={{ display: 'flex', gap: 10, marginTop: 8, flexWrap: 'wrap' }}>
-                    {g.refs.map((ref, ri) => (
-                      <div key={ri} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999, background: ref === 'TBD' ? 'rgba(200,16,46,0.08)' : 'rgba(10,31,61,0.06)', border: `1px solid ${ref === 'TBD' ? 'rgba(200,16,46,0.20)' : 'var(--border)'}` }}>
-                        <Icon name={ref === 'TBD' ? 'help-circle' : 'user-check'} size={12} color={ref === 'TBD' ? 'var(--foul-red)' : 'var(--court-navy)'} />
-                        <span style={{ fontSize: 13, fontWeight: 700, color: ref === 'TBD' ? 'var(--foul-red)' : 'var(--court-navy)' }}>{ref === 'TBD' ? 'Ref needed' : ref}</span>
+          {assignments.map(g => {
+            const statusColor = g.status === 'confirmed' ? 'var(--status-win)' : g.status === 'partial' ? 'var(--basketball-orange)' : 'var(--foul-red)';
+            return (
+              <Card key={g.id} padding={0} style={{ overflow: 'hidden' }}>
+                <div style={{ display: 'flex' }}>
+                  <div style={{ width: 5, background: statusColor, flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    {/* Game header */}
+                    <div style={{ padding: '14px 18px 10px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
+                      <div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 15 : 18, color: 'var(--court-navy)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{g.game}</div>
+                        <div style={{ display: 'flex', gap: 16, marginTop: 5, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 12, color: 'var(--fg-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <Icon name="calendar" size={11} color="var(--fg-muted)" /> {g.day} · {g.time}
+                          </span>
+                          <span style={{ fontSize: 12, color: 'var(--fg-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <Icon name="map-pin" size={11} color="var(--fg-muted)" /> {g.location}
+                          </span>
+                          <span style={{ fontSize: 12, color: 'var(--fg-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <Icon name="shirt" size={11} color="var(--fg-muted)" /> {g.home ? 'Home — Navy jerseys' : 'Away — White jerseys'}
+                          </span>
+                        </div>
                       </div>
-                    ))}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: `${statusColor}18`, color: statusColor, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                          {g.status === 'confirmed' ? 'Confirmed' : g.status === 'partial' ? 'Partial' : 'Unassigned'}
+                        </span>
+                        <Button kind={g.status === 'confirmed' ? 'ghost' : 'gold'} size="sm" icon="user-plus" onClick={() => openAssign(g)}>
+                          {g.status === 'confirmed' ? 'Edit' : 'Assign refs'}
+                        </Button>
+                      </div>
+                    </div>
+                    {/* Refs row */}
+                    <div style={{ padding: '10px 18px', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 4 }}>Officials:</span>
+                      {g.refs.map((ref, ri) => (
+                        <div key={ri} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 999, background: ref === 'TBD' ? 'rgba(200,16,46,0.08)' : 'rgba(10,31,61,0.06)', border: `1px solid ${ref === 'TBD' ? 'rgba(200,16,46,0.20)' : 'var(--border)'}` }}>
+                          <Icon name={ref === 'TBD' ? 'help-circle' : 'user-check'} size={12} color={ref === 'TBD' ? 'var(--foul-red)' : 'var(--court-navy)'} />
+                          <span style={{ fontSize: 13, fontWeight: 700, color: ref === 'TBD' ? 'var(--foul-red)' : 'var(--court-navy)' }}>{ref === 'TBD' ? 'Ref needed' : ref}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <Pill kind={g.status === 'confirmed' ? 'navy' : g.status === 'partial' ? 'warn' : 'neutral'}>
-                  {g.status === 'confirmed' ? 'Confirmed' : g.status === 'partial' ? 'Partial' : 'Unassigned'}
-                </Pill>
-                <Button kind={g.status === 'confirmed' ? 'ghost' : 'gold'} size="sm" icon="user-plus" onClick={() => openAssign(g)}>
-                  {g.status === 'confirmed' ? 'Edit' : 'Assign refs'}
-                </Button>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       )}
 
@@ -280,8 +427,8 @@ export default function OfficialsView() {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: isMobile ? 500 : 'auto' }}>
               <thead>
                 <tr style={{ background: 'var(--bone)' }}>
-                  {['Official', 'Games', 'Rate', 'Amount due', 'Status', ''].map(h => (
-                    <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', borderBottom: '1px solid var(--border)' }}>{h}</th>
+                  {['Official', 'Cert', 'Games', 'Rate', 'Amount due', 'Status', ''].map(h => (
+                    <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -290,7 +437,17 @@ export default function OfficialsView() {
                   const owed = r.games * r.rate;
                   return (
                     <tr key={r.id} style={{ borderBottom: i < refs.length - 1 ? '1px solid var(--border)' : 'none', background: r.paid ? '#fff' : 'rgba(232,119,34,0.03)' }}>
-                      <td style={{ padding: '12px 16px', fontWeight: 700, fontSize: 14 }}>{r.name}</td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 11, color: 'var(--varsity-gold)', flexShrink: 0 }}>
+                            {r.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <span style={{ fontWeight: 700, fontSize: 14 }}>{r.name}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '12px 16px' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: `${CERT_COLOR[r.cert]}18`, color: CERT_COLOR[r.cert] }}>{r.cert}</span>
+                      </td>
                       <td style={{ padding: '12px 16px', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{r.games}</td>
                       <td style={{ padding: '12px 16px', fontFamily: 'var(--font-mono)', color: 'var(--fg-muted)' }}>${r.rate}</td>
                       <td style={{ padding: '12px 16px', fontFamily: 'var(--font-display)', fontSize: 22, color: r.paid ? 'var(--fg-muted)' : 'var(--court-navy)' }}>${owed}</td>
@@ -308,9 +465,12 @@ export default function OfficialsView() {
               </tbody>
             </table>
           </div>
-          <div style={{ padding: '14px 18px', borderTop: '1px solid var(--border)', background: 'var(--bone)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16 }}>
-            <span style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Total outstanding</span>
-            <Display size={28} color="var(--basketball-orange)">${totalOwed}</Display>
+          <div style={{ padding: '14px 18px', borderTop: '1px solid var(--border)', background: 'var(--bone)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: 13, color: 'var(--fg-muted)' }}>{unpaidCount} official{unpaidCount !== 1 ? 's' : ''} unpaid</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Total outstanding</span>
+              <Display size={28} color="var(--basketball-orange)">${totalOwed}</Display>
+            </div>
           </div>
         </Card>
       )}
@@ -370,8 +530,11 @@ export default function OfficialsView() {
       {/* ── Assign Refs Modal ── */}
       {assignGame && (
         <Modal title={`Assign officials — ${assignGame.game}`} onClose={() => { setAssignGame(null); setSelectedRefs([]); }}>
-          <div style={{ marginBottom: 16, fontSize: 13, color: 'var(--fg-soft)' }}>
-            Select up to 2 officials for this game.{' '}
+          <div style={{ marginBottom: 4, padding: '10px 14px', borderRadius: 8, background: 'var(--bone)', border: '1px solid var(--border)', fontSize: 13, color: 'var(--fg-muted)' }}>
+            <span style={{ fontWeight: 700, color: 'var(--fg)' }}>{assignGame.day} · {assignGame.time}</span> · {assignGame.location}
+          </div>
+          <div style={{ margin: '14px 0 10px', fontSize: 13, color: 'var(--fg-soft)' }}>
+            Select up to 2 officials.{' '}
             <strong style={{ color: selectedRefs.length === 2 ? 'var(--status-win)' : 'var(--court-navy)' }}>{selectedRefs.length}/2 selected.</strong>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -394,6 +557,9 @@ export default function OfficialsView() {
                 </label>
               );
             })}
+            {refs.filter(r => r.available).length === 0 && (
+              <div style={{ textAlign: 'center', padding: 20, color: 'var(--fg-muted)', fontSize: 14 }}>No officials marked available this week.</div>
+            )}
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
             <Button kind="ghost" onClick={() => { setAssignGame(null); setSelectedRefs([]); }}>Cancel</Button>
