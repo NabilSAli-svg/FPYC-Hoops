@@ -34,23 +34,17 @@ export default function ScheduleTab() {
     return () => clearTimeout(t);
   }, []);
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      window.dispatchEvent(new StorageEvent('storage', { key: 'fpyc-games' }));
-    }, 5000);
-    return () => clearInterval(id);
-  }, []);
-
   if (loading) return <ScheduleSkeleton filter={filter} setFilter={setFilter} />;
 
-  const EVENTS   = deriveEvents(games, practices);
-  const filtered = EVENTS.filter(e => filter === 'all' || e.type === filter);
+  const EVENTS    = deriveEvents(games, practices);
+  const filtered  = EVENTS.filter(e => filter === 'all' || e.type === filter);
 
-  const live     = filtered.filter(e => e.status === 'live');
-  const upcoming = filtered.filter(e => e.status === 'upcoming');
-  const past     = filtered.filter(e => e.status === 'final');
+  const live      = filtered.filter(e => e.status === 'live');
+  const upcoming  = filtered.filter(e => e.status === 'upcoming');
+  const past      = filtered.filter(e => e.status === 'final');
 
-  const nextGame = EVENTS.filter(e => e.type === 'game' && e.status === 'upcoming')[0] || null;
+  const liveGame  = EVENTS.find(e => e.type === 'game' && e.status === 'live') || null;
+  const nextGame  = EVENTS.find(e => e.type === 'game' && e.status === 'upcoming') || null;
 
   const wins   = games.filter(g => g.status === 'final' && g.us > g.them).length;
   const losses = games.filter(g => g.status === 'final' && g.us < g.them).length;
@@ -58,8 +52,11 @@ export default function ScheduleTab() {
   return (
     <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
+      {/* Live game hero — takes priority over next game banner */}
+      {liveGame && filter === 'all' && <LiveGameBanner game={liveGame} />}
+
       {/* Next game hero banner */}
-      {nextGame && filter === 'all' && (
+      {!liveGame && nextGame && filter === 'all' && (
         <NextGameBanner
           game={nextGame}
           rsvp={rsvps[nextGame.id]}
@@ -140,6 +137,59 @@ export default function ScheduleTab() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Live Game Hero ───────────────────────────────────────────────────────────
+
+function LiveGameBanner({ game: e }) {
+  const us      = e.us   ?? 0;
+  const them    = e.them ?? 0;
+  const leading = us > them;
+  const tied    = us === them;
+
+  return (
+    <div style={{ borderRadius: 16, overflow: 'hidden', border: '2px solid #DC2626' }}>
+      {/* Live indicator bar */}
+      <div style={{ background: '#DC2626', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span className="pulse-dot" style={{ width: 7, height: 7, borderRadius: '50%', background: '#fff', display: 'inline-block', flexShrink: 0 }} />
+        <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#fff' }}>
+          Live now{e.quarter ? ` · Q${e.quarter}` : ''}
+        </span>
+        <span style={{ marginLeft: 'auto', fontSize: 11, color: 'rgba(255,255,255,0.70)', fontWeight: 600 }}>{e.location}</span>
+      </div>
+
+      {/* Scoreboard */}
+      <div style={{ background: 'var(--court-navy)', padding: '24px 18px', display: 'flex', alignItems: 'center' }}>
+        {/* Hawks */}
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--varsity-gold)', marginBottom: 8 }}>Fairfax Hawks</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(56px, 14vw, 80px)', lineHeight: 1, color: (leading || tied) ? '#fff' : 'rgba(255,255,255,0.45)', transition: 'color 300ms' }}>
+            {us}
+          </div>
+        </div>
+
+        {/* Dash */}
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, color: 'rgba(255,255,255,0.20)', padding: '0 8px', flexShrink: 0 }}>–</div>
+
+        {/* Opponent */}
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.50)', marginBottom: 8 }}>{e.opponent}</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(56px, 14vw, 80px)', lineHeight: 1, color: (!leading && !tied) ? '#fff' : 'rgba(255,255,255,0.45)', transition: 'color 300ms' }}>
+            {them}
+          </div>
+        </div>
+      </div>
+
+      {/* Status footer */}
+      <div style={{ background: 'rgba(10,31,61,0.96)', padding: '10px 18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: tied ? 'rgba(255,255,255,0.55)' : leading ? 'var(--varsity-gold)' : '#DC2626' }}>
+          {tied ? 'Tied' : leading ? 'Hawks leading' : 'Opponent leading'}
+        </span>
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.30)' }}>·</span>
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.40)' }}>Score updates automatically</span>
+      </div>
     </div>
   );
 }

@@ -21,6 +21,7 @@ export default function TeamSpotlight() {
   const isMobile = useIsMobile();
   const [games] = useGames();
 
+  const liveGame   = games.find(g => g.status === 'live');
   const nextGame   = games.find(g => g.status === 'scheduled');
   const recent     = [...games].filter(g => g.status === 'final').slice(-3).reverse();
   const wins       = games.filter(g => g.status === 'final' && g.us > g.them).length;
@@ -59,8 +60,31 @@ export default function TeamSpotlight() {
             </div>
           </div>
 
-          {/* Next game card */}
-          {nextGame ? (
+          {/* Live game card — replaces next game when a game is in progress */}
+          {liveGame ? (
+            <div style={{ background: 'var(--court-navy)', border: '2px solid #DC2626', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ background: '#DC2626', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 7 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.2s infinite' }} />
+                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#fff' }}>
+                  Live now{liveGame.quarter ? ` · Q${liveGame.quarter}` : ''}
+                </span>
+              </div>
+              <div style={{ padding: '18px 16px', display: 'flex', alignItems: 'center', gap: 0, flex: 1 }}>
+                <div style={{ flex: 1, textAlign: 'center' }}>
+                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--varsity-gold)', marginBottom: 6 }}>Hawks</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 7vw, 60px)', lineHeight: 1, color: '#fff' }}>{liveGame.us ?? 0}</div>
+                </div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'rgba(255,255,255,0.20)', padding: '0 8px' }}>–</div>
+                <div style={{ flex: 1, textAlign: 'center' }}>
+                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 6 }}>{liveGame.opponent}</div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 7vw, 60px)', lineHeight: 1, color: 'rgba(255,255,255,0.65)' }}>{liveGame.them ?? 0}</div>
+                </div>
+              </div>
+              <div style={{ padding: '8px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', fontSize: 11, color: 'rgba(255,255,255,0.40)', textAlign: 'center' }}>
+                {liveGame.location} · Updates live
+              </div>
+            </div>
+          ) : nextGame ? (
             <div style={{ background: '#fff', border: '1.5px solid var(--court-navy)', borderRadius: 12, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--basketball-orange)' }}>
                 ◆ Next game

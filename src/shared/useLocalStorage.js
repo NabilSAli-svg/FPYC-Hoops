@@ -15,5 +15,18 @@ export function useLocalStorage(key, initialValue) {
     } catch {}
   }, [key, value]);
 
+  // Cross-tab real-time sync via native storage event
+  useEffect(() => {
+    function onStorage(e) {
+      if (e.key !== key) return;
+      try {
+        const next = e.newValue !== null ? JSON.parse(e.newValue) : initialValue;
+        setValue(next);
+      } catch {}
+    }
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [key]);
+
   return [value, setValue];
 }
