@@ -1,244 +1,285 @@
 import { useState } from 'react';
-import { useLocalStorage } from '../shared/useLocalStorage.js';
 import { Card, Button, Icon, Display, Eyebrow, Jersey, Pill } from '../shared/index.js';
+import { useDraftState, DRAFT_PLAYERS, DRAFT_TEAMS, buildSnakeOrder } from '../shared/store.js';
 
-const ALL_PLAYERS = [
-  { id: 'u1',  number: 1,  name: 'Marcus Williams', grade: '5th', position: 'Guard',   school: 'Daniels Run ES', skill: 4.2 },
-  { id: 'u2',  number: 2,  name: 'Sofia Torres',    grade: '5th', position: 'Forward', school: 'Providence ES',  skill: 3.8 },
-  { id: 'u3',  number: 3,  name: 'Kai Johnson',     grade: '6th', position: 'Center',  school: 'Lanier MS',      skill: 4.5 },
-  { id: 'u4',  number: 4,  name: 'Priya Nair',      grade: '6th', position: 'Guard',   school: 'Mosby Woods ES', skill: 3.5 },
-  { id: 'u5',  number: 5,  name: 'Zach Carter',     grade: '5th', position: 'Forward', school: 'Daniels Run ES', skill: 4.0 },
-  { id: 'u6',  number: 6,  name: 'Lily Okafor',     grade: '6th', position: 'Guard',   school: 'Providence ES',  skill: 3.2 },
-  { id: 'u7',  number: 7,  name: 'Drew Kim',        grade: '5th', position: 'Center',  school: 'Lanier MS',      skill: 3.9 },
-  { id: 'u8',  number: 8,  name: 'Aaliyah Brown',   grade: '6th', position: 'Forward', school: 'Daniels Run ES', skill: 4.3 },
-  { id: 'u9',  number: 9,  name: 'Finn Murphy',     grade: '5th', position: 'Guard',   school: 'Mosby Woods ES', skill: 3.6 },
-  { id: 'u10', number: 10, name: 'Nia Peterson',    grade: '6th', position: 'Center',  school: 'Providence ES',  skill: 4.1 },
-  { id: 'u11', number: 11, name: 'Liam Burke',      grade: '5th', position: 'Guard',   school: 'Lanier MS',      skill: 3.4 },
-  { id: 'u12', number: 12, name: 'Aria Shah',       grade: '6th', position: 'Forward', school: 'Daniels Run ES', skill: 3.7 },
-];
+const MY_TEAM_ID = 'hawks';
 
-const TEAMS = [
-  { id: 'hawks',   name: 'Hawks',   color: '#0A1F3D' },
-  { id: 'wolves',  name: 'Wolves',  color: '#1F8A5B' },
-  { id: 'eagles',  name: 'Eagles',  color: '#C8102E' },
-  { id: 'cougars', name: 'Cougars', color: '#E87722' },
-];
+function getSnakeOrder(draft) {
+  return buildSnakeOrder(draft.draftOrder, draft.totalRounds);
+}
 
 function teamAvg(pids) {
   if (!pids.length) return null;
-  return pids.reduce((sum, id) => sum + (ALL_PLAYERS.find(p => p.id === id)?.skill || 0), 0) / pids.length;
-}
-
-function posBreakdown(pids) {
-  const counts = { Guard: 0, Forward: 0, Center: 0 };
-  pids.forEach(id => {
-    const p = ALL_PLAYERS.find(x => x.id === id);
-    if (p) counts[p.position]++;
-  });
-  return counts;
+  return pids.reduce((s, id) => s + (DRAFT_PLAYERS.find(p => p.id === id)?.skill || 0), 0) / pids.length;
 }
 
 export default function DraftBoardView() {
-  const [roster, setRoster] = useLocalStorage('fpyc-draft-roster', {});
-  const [selected, setSelected] = useState(null);
+  const [draft, setDraft] = useDraftState();
   const [sortBy, setSortBy] = useState('skill');
-  const [confirmReset, setConfirmReset] = useState(false);
-  const [finalized, setFinalized] = useState(false);
 
-  const drafted = new Set(Object.values(roster).flat());
-  const pool = ALL_PLAYERS.filter(p => !drafted.has(p.id));
+  const snakeOrder = getSnakeOrder(draft);
+  const totalPicks = snakeOrder.length;
+  const done = draft.currentPick >= totalPicks;
+  const onClockTeamId = done ? null : snakeOrder[draft.currentPick];
+  const onClockTeam = DRAFT_TEAMS.find(t => t.id === onClockTeamId);
+  const isMyTurn = onClockTeamId === MY_TEAM_ID;
+  const myTeam = DRAFT_TEAMS.find(t => t.id === MY_TEAM_ID);
 
+  const drafted = new Set(Object.values(draft.roster).flat());
+  const pool = DRAFT_PLAYERS.filter(p => !drafted.has(p.id));
   const sorted = [...pool].sort((a, b) =>
     sortBy === 'skill' ? b.skill - a.skill :
     sortBy === 'name'  ? a.name.localeCompare(b.name) :
     a.position.localeCompare(b.position)
   );
 
-  const assign = (teamId) => {
-    if (!selected) return;
-    setRoster(prev => ({ ...prev, [teamId]: [...(prev[teamId] || []), selected] }));
-    setSelected(null);
-  };
+  // My upcoming picks
+  const myPicks = snakeOrder
+    .map((tid, i) => ({ pickNum: i + 1, round: Math.floor(i / draft.draftOrder.length) + 1, teamId: tid }))
+    .filter(p => p.teamId === MY_TEAM_ID);
 
-  const remove = (teamId, pid) => {
-    setRoster(prev => ({ ...prev, [teamId]: prev[teamId].filter(id => id !== pid) }));
-  };
+  function makePick(playerId) {
+    if (!isMyTurn || draft.status !== 'live') return;
+    const player = DRAFT_PLAYERS.find(p => p.id === playerId);
+    const newPick = draft.currentPick + 1;
+    setDraft(prev => ({
+      ...prev,
+      roster: { ...prev.roster, [MY_TEAM_ID]: [...(prev.roster[MY_TEAM_ID] || []), playerId] },
+      currentPick: newPick,
+      status: newPick >= snakeOrder.length ? 'completed' : 'live',
+      log: [...prev.log, { pick: prev.currentPick + 1, team: MY_TEAM_ID, player: player.name }],
+    }));
+  }
 
-  const autoBalance = () => {
-    const players = [...ALL_PLAYERS].sort((a, b) => b.skill - a.skill);
-    const newRoster = {};
-    TEAMS.forEach(t => { newRoster[t.id] = []; });
-    const n = TEAMS.length;
-    players.forEach((p, i) => {
-      const round = Math.floor(i / n);
-      const pos = i % n;
-      const ti = round % 2 === 0 ? pos : (n - 1 - pos);
-      newRoster[TEAMS[ti].id].push(p.id);
-    });
-    setRoster(newRoster);
-    setSelected(null);
-  };
-
-  // Balance metrics
-  const avgs = TEAMS.map(t => teamAvg(roster[t.id] || [])).filter(a => a !== null);
-  const maxAvg = avgs.length ? Math.max(...avgs) : 0;
-  const minAvg = avgs.length ? Math.min(...avgs) : 0;
-  const spread = maxAvg - minAvg;
-  const allDrafted = drafted.size === ALL_PLAYERS.length;
-  const balanceLabel = !avgs.length ? null : spread < 0.25 ? 'Balanced' : spread < 0.5 ? 'Slightly uneven' : 'Unbalanced';
-  const balanceColor = !avgs.length ? null : spread < 0.25 ? 'var(--status-win)' : spread < 0.5 ? '#E87722' : 'var(--foul-red)';
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Pill kind="navy">{pool.length} in pool</Pill>
-          <Pill kind="neutral">{drafted.size} drafted</Pill>
-          {selected && (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,199,44,0.15)', border: '1px solid var(--varsity-gold)', borderRadius: 8, padding: '6px 12px', fontSize: 13, fontWeight: 700, color: 'var(--court-navy)' }}>
-              <Icon name="mouse-pointer" size={14} color="var(--varsity-gold)" />
-              {ALL_PLAYERS.find(p => p.id === selected)?.name} — click a team to assign
-            </div>
-          )}
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Button kind="ghost" size="sm" icon="shuffle" onClick={autoBalance}>Auto-balance</Button>
-          <Button kind="ghost" size="sm" icon="rotate-ccw" onClick={() => setConfirmReset(true)}>Reset draft</Button>
-          <Button kind="gold" size="sm" icon="save" onClick={() => setFinalized(true)} disabled={!allDrafted}>Finalize teams</Button>
-        </div>
-      </div>
-
-      {/* Balance bar */}
-      {avgs.length > 0 && (
-        <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: balanceColor }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: balanceColor }}>{balanceLabel}</span>
-            {avgs.length === TEAMS.length && (
-              <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>spread {spread.toFixed(2)}</span>
-            )}
-          </div>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            {TEAMS.map(t => {
-              const avg = teamAvg(roster[t.id] || []);
-              if (avg === null) return null;
-              return (
-                <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: 2, background: t.color }} />
-                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--fg-muted)' }}>{t.name}</span>
-                  <span style={{ fontSize: 13, fontFamily: 'var(--font-display)', color: avg === maxAvg ? balanceColor : 'var(--fg)' }}>{avg.toFixed(1)}</span>
-                </div>
-              );
-            })}
-          </div>
-          {!allDrafted && avgs.length === TEAMS.length && (
-            <span style={{ fontSize: 11, color: 'var(--fg-muted)', marginLeft: 'auto' }}>{pool.length} unassigned</span>
-          )}
-        </div>
-      )}
-
-      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16 }}>
-        {/* Player pool */}
-        <Card padding={0}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Display size={18}>Player pool</Display>
-            <div style={{ display: 'flex', gap: 4, background: 'var(--bone)', borderRadius: 6, padding: 3 }}>
-              {['skill', 'name', 'pos'].map(s => (
-                <button key={s} onClick={() => setSortBy(s)} style={{
-                  padding: '4px 8px', borderRadius: 4, border: 'none', cursor: 'pointer',
-                  background: sortBy === s ? 'var(--court-navy)' : 'transparent',
-                  color: sortBy === s ? '#fff' : 'var(--fg-muted)',
-                  fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em',
-                }}>{s}</button>
-              ))}
-            </div>
-          </div>
-          <div style={{ maxHeight: 520, overflowY: 'auto' }}>
-            {sorted.map(p => (
-              <button key={p.id} onClick={() => setSelected(selected === p.id ? null : p.id)} style={{
-                display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', width: '100%', textAlign: 'left',
-                border: 'none', borderBottom: '1px solid var(--border)', cursor: 'pointer',
-                background: selected === p.id ? 'rgba(255,199,44,0.15)' : 'transparent',
-                outline: selected === p.id ? '2px solid var(--varsity-gold)' : 'none',
-                outlineOffset: -2,
-              }}>
-                <Jersey number={p.number} size={28} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.grade} · {p.position}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: p.skill >= 4 ? 'var(--status-win)' : 'var(--fg)' }}>{p.skill}</div>
-                  <div style={{ fontSize: 9, color: 'var(--fg-muted)', fontWeight: 700, textTransform: 'uppercase' }}>rating</div>
-                </div>
-              </button>
-            ))}
-            {sorted.length === 0 && (
-              <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--fg-muted)', fontSize: 13 }}>
-                All players assigned!
-              </div>
-            )}
+  // ── Status: Setup ──
+  if (draft.status === 'setup') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 640 }}>
+        <StatusBanner icon="clock" color="var(--fg-muted)" bg="var(--bone)" border="var(--border)">
+          The commissioner is setting up the draft for <strong>{draft.division}</strong>. You'll be notified when it opens.
+        </StatusBanner>
+        <Card padding={22}>
+          <Eyebrow style={{ marginBottom: 14 }}>Draft overview</Eyebrow>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <Row label="Division" value={draft.division} />
+            <Row label="Season" value={draft.season} />
+            <Row label="Teams" value={`${draft.draftOrder.length} teams`} />
+            <Row label="Players in pool" value={`${DRAFT_PLAYERS.length} players`} />
+            <Row label="Rounds" value={`${draft.totalRounds} rounds (${draft.totalRounds * draft.draftOrder.length} total picks)`} />
+            <Row label="Your team" value={`${myTeam?.name} — Coach ${myTeam?.coach}`} />
           </div>
         </Card>
+      </div>
+    );
+  }
 
-        {/* Teams 2×2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
-          {TEAMS.map(team => {
-            const pids = roster[team.id] || [];
-            const teamPlayers = pids.map(id => ALL_PLAYERS.find(p => p.id === id)).filter(Boolean);
-            const avg = teamAvg(pids);
-            const pos = posBreakdown(pids);
-            return (
-              <div key={team.id} onClick={() => selected && assign(team.id)} style={{
-                background: '#fff', border: `2px solid ${selected ? team.color : 'var(--border)'}`,
-                borderRadius: 10, overflow: 'hidden', cursor: selected ? 'pointer' : 'default',
-                transition: 'all 160ms',
-                boxShadow: selected ? `0 0 0 3px ${team.color}22` : 'var(--shadow-1)',
-              }}>
-                <div style={{ background: team.color, color: '#fff', padding: '12px 16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, letterSpacing: '0.02em', textTransform: 'uppercase' }}>{team.name}</div>
-                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 2 }}>
-                        {teamPlayers.length} players{avg !== null ? ` · Avg ${avg.toFixed(1)}` : ''}
-                      </div>
-                    </div>
-                    {selected
-                      ? <div style={{ background: 'rgba(255,255,255,0.18)', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 700 }}>+ Add here</div>
-                      : avg !== null && (
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, lineHeight: 1 }}>{avg.toFixed(1)}</div>
-                          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.6)', fontWeight: 700, textTransform: 'uppercase' }}>avg</div>
-                        </div>
-                      )
-                    }
+  // ── Status: Open ──
+  if (draft.status === 'open') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <StatusBanner icon="calendar" color="var(--basketball-orange)" bg="rgba(232,119,34,0.07)" border="rgba(232,119,34,0.25)">
+          Draft is open — the commissioner will start it shortly. Here's your pick schedule.
+        </StatusBanner>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          {/* My picks */}
+          <Card padding={20}>
+            <Eyebrow style={{ marginBottom: 14 }}>Your pick slots · {myTeam?.name}</Eyebrow>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {myPicks.map(p => (
+                <div key={p.pickNum} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--varsity-gold)', flexShrink: 0 }}>
+                    {p.pickNum}
                   </div>
-                  {teamPlayers.length > 0 && (
-                    <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-                      {[['G', pos.Guard], ['F', pos.Forward], ['C', pos.Center]].map(([lbl, count]) => count > 0 && (
-                        <div key={lbl} style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 5, padding: '2px 7px', fontSize: 11, fontWeight: 700 }}>
-                          {count}{lbl}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 13 }}>Pick #{p.pickNum}</div>
+                    <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>Round {p.round}</div>
+                  </div>
                 </div>
-                <div style={{ padding: '10px 0', minHeight: 72 }}>
-                  {teamPlayers.length === 0 && (
-                    <div style={{ padding: '18px 16px', textAlign: 'center', color: 'var(--fg-muted)', fontSize: 12 }}>
-                      {selected ? 'Click to add player' : 'No players yet'}
+              ))}
+            </div>
+          </Card>
+
+          {/* Draft order */}
+          <Card padding={20}>
+            <Eyebrow style={{ marginBottom: 14 }}>Draft order · Round 1</Eyebrow>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {draft.draftOrder.map((tid, i) => {
+                const team = DRAFT_TEAMS.find(t => t.id === tid);
+                return (
+                  <div key={tid} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: team?.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 13, color: '#fff', flexShrink: 0 }}>
+                      {i + 1}
                     </div>
+                    <span style={{ fontWeight: tid === MY_TEAM_ID ? 800 : 600, fontSize: 14, color: tid === MY_TEAM_ID ? 'var(--court-navy)' : 'var(--fg)' }}>
+                      {team?.name} {tid === MY_TEAM_ID && '← you'}
+                    </span>
+                  </div>
+                );
+              })}
+              <div style={{ fontSize: 11, color: 'var(--fg-muted)', marginTop: 4 }}>Snake draft — order reverses each round</div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Player pool preview */}
+        <Card padding={0}>
+          <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)' }}>
+            <Display size={18}>Player pool preview — {DRAFT_PLAYERS.length} players</Display>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)' }}>
+            {DRAFT_PLAYERS.map((p, i) => (
+              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: '1px solid var(--border)', borderRight: (i + 1) % 3 !== 0 ? '1px solid var(--border)' : 'none' }}>
+                <Jersey number={p.number} size={26} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.grade} · {p.position}</div>
+                </div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: p.skill >= 4 ? 'var(--status-win)' : 'var(--fg-muted)' }}>{p.skill}</div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // ── Status: Completed ──
+  if (draft.status === 'completed') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <StatusBanner icon="check-circle" color="var(--status-win)" bg="rgba(31,138,91,0.07)" border="rgba(31,138,91,0.20)">
+          Draft complete — teams have been finalized for <strong>{draft.division}</strong>.
+        </StatusBanner>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
+          {DRAFT_TEAMS.map(team => {
+            const pids = draft.roster[team.id] || [];
+            const players = pids.map(id => DRAFT_PLAYERS.find(p => p.id === id)).filter(Boolean);
+            const avg = teamAvg(pids);
+            const isMe = team.id === MY_TEAM_ID;
+            return (
+              <Card key={team.id} padding={0} style={{ border: isMe ? `2px solid ${team.color}` : '1px solid var(--border)', overflow: 'hidden' }}>
+                <div style={{ background: team.color, color: '#fff', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, textTransform: 'uppercase' }}>{team.name}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)' }}>Coach {team.coach}{isMe ? ' · Your team' : ''}</div>
+                  </div>
+                  {avg !== null && <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: 'rgba(255,255,255,0.90)' }}>{avg.toFixed(1)}</div>}
+                </div>
+                {players.map(p => (
+                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', borderBottom: '1px solid var(--border)' }}>
+                    <Jersey number={p.number} size={24} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</div>
+                      <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.grade} · {p.position}</div>
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: p.skill >= 4 ? 'var(--status-win)' : 'var(--fg-muted)' }}>{p.skill}</span>
+                  </div>
+                ))}
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Status: Live ──
+  const round = Math.floor(draft.currentPick / draft.draftOrder.length) + 1;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* On the clock banner */}
+      <div style={{ borderRadius: 10, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', background: isMyTurn ? 'rgba(255,199,44,0.12)' : 'rgba(10,31,61,0.06)', border: `1.5px solid ${isMyTurn ? 'var(--varsity-gold)' : 'var(--border)'}` }}>
+        <div style={{ width: 42, height: 42, borderRadius: '50%', background: onClockTeam?.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 16, color: '#fff', flexShrink: 0 }}>
+          {onClockTeam?.name[0]}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 800, fontSize: 16, color: 'var(--court-navy)' }}>
+            {isMyTurn ? '🏀 Your pick!' : `${onClockTeam?.name} on the clock`}
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>
+            Pick #{draft.currentPick + 1} · Round {round} of {draft.totalRounds} · {pool.length} players remaining
+          </div>
+        </div>
+        {!isMyTurn && (
+          <Pill kind="neutral">{pool.length} in pool</Pill>
+        )}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: isMyTurn ? '300px 1fr' : '1fr', gap: 16 }}>
+        {/* Player pool — only shown when it's your turn */}
+        {isMyTurn && (
+          <Card padding={0}>
+            <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Display size={16}>Select your pick</Display>
+              <div style={{ display: 'flex', gap: 3, background: 'var(--bone)', borderRadius: 6, padding: 2 }}>
+                {['skill', 'name', 'pos'].map(s => (
+                  <button key={s} onClick={() => setSortBy(s)} style={{
+                    padding: '3px 7px', borderRadius: 4, border: 'none', cursor: 'pointer',
+                    background: sortBy === s ? 'var(--court-navy)' : 'transparent',
+                    color: sortBy === s ? '#fff' : 'var(--fg-muted)',
+                    fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em',
+                  }}>{s}</button>
+                ))}
+              </div>
+            </div>
+            <div style={{ maxHeight: 480, overflowY: 'auto' }}>
+              {sorted.map(p => (
+                <button key={p.id} onClick={() => makePick(p.id)} style={{
+                  display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
+                  width: '100%', textAlign: 'left', border: 'none',
+                  borderBottom: '1px solid var(--border)', cursor: 'pointer',
+                  background: 'transparent', transition: 'background 120ms',
+                }}>
+                  <Jersey number={p.number} size={26} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.grade} · {p.position} · {p.school}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: p.skill >= 4 ? 'var(--status-win)' : 'var(--fg)' }}>{p.skill}</div>
+                    <div style={{ width: 28, height: 28, borderRadius: 6, background: 'var(--varsity-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Icon name="plus" size={14} color="var(--court-navy)" />
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* Team rosters */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+          {DRAFT_TEAMS.map(team => {
+            const pids = draft.roster[team.id] || [];
+            const players = pids.map(id => DRAFT_PLAYERS.find(p => p.id === id)).filter(Boolean);
+            const avg = teamAvg(pids);
+            const isMe = team.id === MY_TEAM_ID;
+            const isClock = team.id === onClockTeamId;
+            return (
+              <div key={team.id} style={{ background: '#fff', border: `${isClock ? 2 : 1}px solid ${isClock ? team.color : isMe ? team.color : 'var(--border)'}`, borderRadius: 10, overflow: 'hidden', boxShadow: isClock ? `0 0 0 3px ${team.color}22` : 'var(--shadow-1)' }}>
+                <div style={{ background: team.color, color: '#fff', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, textTransform: 'uppercase' }}>{team.name}</div>
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>
+                      {isClock ? '⏱ On the clock' : isMe ? 'Your team' : `Coach ${team.coach}`}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, lineHeight: 1 }}>{players.length}</div>
+                    {avg !== null && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)' }}>avg {avg.toFixed(1)}</div>}
+                  </div>
+                </div>
+                <div style={{ minHeight: 48 }}>
+                  {players.length === 0 && (
+                    <div style={{ padding: '14px', textAlign: 'center', color: 'var(--fg-muted)', fontSize: 12 }}>No picks yet</div>
                   )}
-                  {teamPlayers.map(p => (
-                    <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 14px' }}>
-                      <Jersey number={p.number} size={26} />
-                      <div style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>{p.name}</div>
-                      <span style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.position[0]}</span>
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: p.skill >= 4 ? 'var(--status-win)' : 'var(--fg-muted)', minWidth: 24, textAlign: 'right' }}>{p.skill}</span>
-                      <button onClick={e => { e.stopPropagation(); remove(team.id, p.id); }} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, color: 'var(--fg-muted)' }}>
-                        <Icon name="x" size={13} />
-                      </button>
+                  {players.map(p => (
+                    <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderBottom: '1px solid var(--border)' }}>
+                      <Jersey number={p.number} size={22} />
+                      <div style={{ flex: 1, fontSize: 12, fontWeight: 600 }}>{p.name}</div>
+                      <span style={{ fontSize: 10, color: 'var(--fg-muted)' }}>{p.position[0]}</span>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, color: p.skill >= 4 ? 'var(--status-win)' : 'var(--fg-muted)' }}>{p.skill}</span>
                     </div>
                   ))}
                 </div>
@@ -248,68 +289,45 @@ export default function DraftBoardView() {
         </div>
       </div>
 
-      {/* Reset confirm modal */}
-      {confirmReset && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.55)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <div style={{ background: '#fff', borderRadius: 14, padding: '28px 28px 24px', width: '100%', maxWidth: 360, boxShadow: '0 24px 64px rgba(0,0,0,0.3)' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--court-navy)', marginBottom: 10 }}>Reset draft?</div>
-            <p style={{ fontSize: 14, color: 'var(--fg-muted)', margin: '0 0 22px', lineHeight: 1.5 }}>All {drafted.size} player assignments will be cleared and everyone goes back to the pool.</p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-              <Button kind="ghost" size="sm" onClick={() => setConfirmReset(false)}>Cancel</Button>
-              <Button kind="danger" size="sm" icon="rotate-ccw" onClick={() => { setRoster({}); setSelected(null); setConfirmReset(false); }}>Yes, reset</Button>
-            </div>
+      {/* Pick log */}
+      {draft.log.length > 0 && (
+        <Card padding={0}>
+          <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--border)' }}>
+            <Eyebrow>Pick log</Eyebrow>
           </div>
-        </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 0 }}>
+            {draft.log.map((entry, i) => {
+              const team = DRAFT_TEAMS.find(t => t.id === entry.team);
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', width: '50%', boxSizing: 'border-box' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)', minWidth: 24 }}>#{entry.pick}</span>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: team?.color, flexShrink: 0 }} />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: team?.color, minWidth: 52 }}>{team?.name}</span>
+                  <span style={{ fontSize: 12, color: 'var(--fg)' }}>{entry.player}</span>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
       )}
+    </div>
+  );
+}
 
-      {/* Finalize modal */}
-      {finalized && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.55)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <div style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 580, maxHeight: '85vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.3)' }}>
-            <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--court-navy)' }}>Finalize teams</div>
-                <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 2 }}>Boys 5–6 House · Season 2025–26</div>
-              </div>
-              <button onClick={() => setFinalized(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 6 }}>
-                <Icon name="x" size={18} color="var(--fg-muted)" />
-              </button>
-            </div>
-            <div style={{ overflowY: 'auto', padding: '16px 24px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
-              {TEAMS.map(team => {
-                const pids = roster[team.id] || [];
-                const teamPlayers = pids.map(id => ALL_PLAYERS.find(p => p.id === id)).filter(Boolean);
-                const avg = teamAvg(pids);
-                return (
-                  <div key={team.id} style={{ border: '1.5px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-                    <div style={{ background: team.color, color: '#fff', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{team.name}</div>
-                      <div style={{ fontSize: 13, fontWeight: 700 }}>Avg {avg?.toFixed(1)}</div>
-                    </div>
-                    {teamPlayers.map(p => (
-                      <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
-                        <Jersey number={p.number} size={22} />
-                        <span style={{ flex: 1, fontWeight: 600 }}>{p.name}</span>
-                        <span style={{ color: 'var(--fg-muted)', fontSize: 11 }}>{p.position[0]}</span>
-                        <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, color: p.skill >= 4 ? 'var(--status-win)' : 'var(--fg-muted)' }}>{p.skill}</span>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-            <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: 12, color: 'var(--fg-muted)' }}>
-                Balance spread: <strong style={{ color: balanceColor }}>{spread.toFixed(2)}</strong> · {balanceLabel}
-              </div>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <Button kind="ghost" size="sm" onClick={() => setFinalized(false)}>Back to editing</Button>
-                <Button kind="gold" size="sm" icon="check">Confirm & publish</Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+function StatusBanner({ icon, color, bg, border, children }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', borderRadius: 10, background: bg, border: `1px solid ${border}` }}>
+      <Icon name={icon} size={18} color={color} />
+      <span style={{ fontSize: 14, color: 'var(--fg)', lineHeight: 1.5 }}>{children}</span>
+    </div>
+  );
+}
+
+function Row({ label, value }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
+      <span style={{ fontSize: 13, color: 'var(--fg-muted)', fontWeight: 600 }}>{label}</span>
+      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--fg)' }}>{value}</span>
     </div>
   );
 }

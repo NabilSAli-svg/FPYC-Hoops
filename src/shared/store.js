@@ -81,6 +81,54 @@ export function useMessages() {
   return useLocalStorage('fpyc-messages', INITIAL_MESSAGES);
 }
 
+// ─── Draft Board ──────────────────────────────────────────────────────────────
+
+export const DRAFT_PLAYERS = [
+  { id: 'u1',  number: 1,  name: 'Marcus Williams', grade: '5th', position: 'Guard',   school: 'Daniels Run ES', skill: 4.2 },
+  { id: 'u2',  number: 2,  name: 'Sofia Torres',    grade: '5th', position: 'Forward', school: 'Providence ES',  skill: 3.8 },
+  { id: 'u3',  number: 3,  name: 'Kai Johnson',     grade: '6th', position: 'Center',  school: 'Lanier MS',      skill: 4.5 },
+  { id: 'u4',  number: 4,  name: 'Priya Nair',      grade: '6th', position: 'Guard',   school: 'Mosby Woods ES', skill: 3.5 },
+  { id: 'u5',  number: 5,  name: 'Zach Carter',     grade: '5th', position: 'Forward', school: 'Daniels Run ES', skill: 4.0 },
+  { id: 'u6',  number: 6,  name: 'Lily Okafor',     grade: '6th', position: 'Guard',   school: 'Providence ES',  skill: 3.2 },
+  { id: 'u7',  number: 7,  name: 'Drew Kim',        grade: '5th', position: 'Center',  school: 'Lanier MS',      skill: 3.9 },
+  { id: 'u8',  number: 8,  name: 'Aaliyah Brown',   grade: '6th', position: 'Forward', school: 'Daniels Run ES', skill: 4.3 },
+  { id: 'u9',  number: 9,  name: 'Finn Murphy',     grade: '5th', position: 'Guard',   school: 'Mosby Woods ES', skill: 3.6 },
+  { id: 'u10', number: 10, name: 'Nia Peterson',    grade: '6th', position: 'Center',  school: 'Providence ES',  skill: 4.1 },
+  { id: 'u11', number: 11, name: 'Liam Burke',      grade: '5th', position: 'Guard',   school: 'Lanier MS',      skill: 3.4 },
+  { id: 'u12', number: 12, name: 'Aria Shah',       grade: '6th', position: 'Forward', school: 'Daniels Run ES', skill: 3.7 },
+];
+
+export const DRAFT_TEAMS = [
+  { id: 'hawks',   name: 'Hawks',   coach: 'M. Davis',    color: '#0A1F3D' },
+  { id: 'wolves',  name: 'Wolves',  coach: 'S. Thompson', color: '#1F8A5B' },
+  { id: 'eagles',  name: 'Eagles',  coach: 'J. Williams', color: '#C8102E' },
+  { id: 'cougars', name: 'Cougars', coach: 'D. Park',     color: '#E87722' },
+];
+
+export function buildSnakeOrder(teamIds, rounds) {
+  const order = [];
+  for (let r = 0; r < rounds; r++) {
+    const round = r % 2 === 0 ? [...teamIds] : [...teamIds].reverse();
+    order.push(...round);
+  }
+  return order;
+}
+
+export const INITIAL_DRAFT = {
+  status: 'setup',  // 'setup' | 'open' | 'live' | 'completed'
+  division: 'Boys 5–6 House',
+  season: '2025–26',
+  draftOrder: ['hawks', 'wolves', 'eagles', 'cougars'],
+  totalRounds: 3,
+  currentPick: 0,
+  roster: { hawks: [], wolves: [], eagles: [], cougars: [] },
+  log: [],
+};
+
+export function useDraftState() {
+  return useLocalStorage('fpyc-draft-state', INITIAL_DRAFT);
+}
+
 // Derive family-facing event list from admin games + practices
 export function deriveEvents(games, practices) {
   const gameEvents = games.map(g => ({
