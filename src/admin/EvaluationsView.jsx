@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
 import { Card, Button, Icon, Display, Eyebrow, Jersey } from '../shared/index.js';
+import { csvDownload } from '../shared/csvDownload.js';
 
 const SKILLS = [
   { id: 'shooting',     label: 'Shooting',      icon: 'target'    },
@@ -38,12 +39,23 @@ function initEvals(players) {
   return map;
 }
 
+function exportEvalsCSV(players, evals, notes) {
+  const headers = ['Name', '#', 'Grade', 'Position', 'Overall', ...SKILLS.map(s => s.label), 'Notes'];
+  const rows = players.map(p => {
+    const e = evals[p.id] || {};
+    const vals = SKILLS.map(s => e[s.id] || 0);
+    const overall = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '0.0';
+    return [p.name, p.number, p.grade, p.position, overall, ...vals, notes[p.id] || ''];
+  });
+  csvDownload('fpyc-evaluations.csv', [headers, ...rows]);
+}
+
 function avg(evalsMap, pid) {
   const vals = Object.values(evalsMap[pid] || {});
   return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '—';
 }
 
-function RadarChart({ evals, size = 220 }) {
+function RadarChart({ evals, teamAvg, size = 220 }) {
   const cx = size / 2, cy = size / 2;
   const r = size * 0.34;
   const n = SKILLS.length;
@@ -53,14 +65,12 @@ function RadarChart({ evals, size = 220 }) {
     const d = (val / 5) * r;
     return [cx + d * Math.cos(a), cy + d * Math.sin(a)];
   };
+  const makePath = pts => pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ') + ' Z';
 
-  const gridPath = level => {
-    const pts = SKILLS.map((_, i) => pt(i, level));
-    return pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ') + ' Z';
-  };
-
+  const gridPath = level => makePath(SKILLS.map((_, i) => pt(i, level)));
+  const playerPath = makePath(SKILLS.map((s, i) => pt(i, evals[s.id] || 0)));
+  const teamPath = teamAvg ? makePath(SKILLS.map((s, i) => pt(i, teamAvg[s.id] || 0))) : null;
   const playerPts = SKILLS.map((s, i) => pt(i, evals[s.id] || 0));
-  const playerPath = playerPts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ') + ' Z';
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: 'block' }}>
@@ -71,6 +81,9 @@ function RadarChart({ evals, size = 220 }) {
         const [x, y] = pt(i, 5);
         return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="var(--border)" strokeWidth="1" />;
       })}
+      {teamPath && (
+        <path d={teamPath} fill="rgba(10,31,61,0.07)" stroke="rgba(10,31,61,0.28)" strokeWidth="1.5" strokeDasharray="4 3" strokeLinejoin="round" />
+      )}
       <path d={playerPath} fill="rgba(255,199,44,0.22)" stroke="var(--varsity-gold)" strokeWidth="2" strokeLinejoin="round" />
       {playerPts.map(([x, y], i) => (
         <circle key={i} cx={x} cy={y} r={3.5} fill="var(--varsity-gold)" />
@@ -98,6 +111,15 @@ export default function EvaluationsView({ players }) {
   const [notes, setNotes] = useLocalStorage('fpyc-notes', {});
   const [savedNotes, setSavedNotes] = useState(notes);
   const [justSaved, setJustSaved] = useState(false);
+
+  const active = players.filter(p => p.status !== 'inactive');
+  const sortedPlayers = [...active].sort((a, b) => parseFloat(avg(evals, b.id)) - parseFloat(avg(evals, a.id)));
+
+  const teamAvgEvals = SKILLS.reduce((acc, s) => {
+    const vals = active.map(p => evals[p.id]?.[s.id]).filter(Boolean);
+    acc[s.id] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+    return acc;
+  }, {});
 
   const player = players.find(p => p.id === selected);
   const playerEvals = evals[selected] || {};
@@ -127,31 +149,33 @@ export default function EvaluationsView({ players }) {
       <Card padding={0} style={{ height: 'fit-content' }}>
         <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Display size={18}>Players</Display>
-          <Button kind="ghost" size="sm" icon="download">Export</Button>
+          <Button kind="ghost" size="sm" icon="download" onClick={() => exportEvalsCSV(active, evals, notes)}>Export</Button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {players.filter(p => p.status !== 'inactive').map((p, i) => {
+          {sortedPlayers.map((p, i) => {
             const a = avg(evals, p.id);
             const isActive = selected === p.id;
             const dirty = JSON.stringify(evals[p.id]) !== JSON.stringify(savedEvals[p.id]) ||
               (notes[p.id] || '') !== (savedNotes[p.id] || '');
+            const ratingColor = parseFloat(a) >= 4 ? 'var(--status-win)' : parseFloat(a) >= 3 ? 'var(--fg)' : 'var(--foul-red)';
             return (
               <button key={p.id} onClick={() => setSelected(p.id)} style={{
                 display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
                 background: isActive ? 'rgba(255,199,44,0.10)' : 'transparent',
                 borderLeft: `3px solid ${isActive ? 'var(--varsity-gold)' : 'transparent'}`,
-                border: 'none', borderBottom: i < players.length - 1 ? '1px solid var(--border)' : 'none',
+                border: 'none', borderBottom: i < sortedPlayers.length - 1 ? '1px solid var(--border)' : 'none',
                 cursor: 'pointer', textAlign: 'left', width: '100%',
               }}>
-                <Jersey number={p.number} size={30} />
+                <div style={{ width: 18, fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', textAlign: 'center', flexShrink: 0 }}>{i + 1}</div>
+                <Jersey number={p.number} size={28} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--court-navy)', display: 'flex', alignItems: 'center', gap: 5 }}>
                     {p.name.split(' ')[1]}
                     {dirty && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--basketball-orange)', display: 'inline-block', flexShrink: 0 }} />}
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.grade} · {p.position}</div>
+                  <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.position}</div>
                 </div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: parseFloat(a) >= 4 ? 'var(--status-win)' : parseFloat(a) >= 3 ? 'var(--fg)' : 'var(--foul-red)' }}>{a}</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: ratingColor }}>{a}</div>
               </button>
             );
           })}
@@ -224,7 +248,15 @@ export default function EvaluationsView({ players }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: 260 }}>
               <Card style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                 <Eyebrow>Skill profile</Eyebrow>
-                <RadarChart evals={playerEvals} size={220} />
+                <RadarChart evals={playerEvals} teamAvg={teamAvgEvals} size={220} />
+                <div style={{ display: 'flex', gap: 14, fontSize: 10, color: 'var(--fg-muted)' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <span style={{ width: 12, height: 3, background: 'var(--varsity-gold)', borderRadius: 2, display: 'inline-block' }} /> Player
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <span style={{ width: 12, height: 2, borderTop: '2px dashed rgba(10,31,61,0.35)', display: 'inline-block' }} /> Team avg
+                  </span>
+                </div>
               </Card>
               <Card>
                 <Display size={16} style={{ marginBottom: 10 }}>Coach notes</Display>

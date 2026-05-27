@@ -1,5 +1,34 @@
 import { Card, Display, Eyebrow, Pill } from '../shared/index.js';
 
+function ScoringChart({ games }) {
+  const final = [...games].filter(g => g.status === 'final').reverse();
+  if (!final.length) return null;
+  const maxScore = Math.max(...final.flatMap(g => [g.us, g.them]), 1);
+  const H = 80, barW = 14, gap = 5, groupW = 52;
+  const totalW = final.length * groupW;
+  return (
+    <svg width={totalW} height={H + 46} viewBox={`0 0 ${totalW} ${H + 46}`} style={{ display: 'block', overflow: 'visible' }}>
+      {final.map((g, i) => {
+        const win = g.us > g.them;
+        const x = i * groupW + (groupW - barW * 2 - gap) / 2;
+        const usH = Math.max(Math.round((g.us / maxScore) * H), 2);
+        const themH = Math.max(Math.round((g.them / maxScore) * H), 2);
+        return (
+          <g key={g.id}>
+            <rect x={x} y={H - usH} width={barW} height={usH} rx={3} style={{ fill: win ? '#FFC72C' : '#0A1F3D' }} />
+            <text x={x + barW / 2} y={H - usH - 4} textAnchor="middle" style={{ fontSize: 10, fontWeight: 700, fill: win ? '#059669' : '#DC2626', fontFamily: 'Arial,sans-serif' }}>{g.us}</text>
+            <rect x={x + barW + gap} y={H - themH} width={barW} height={themH} rx={3} style={{ fill: '#D1D5DB' }} />
+            <text x={x + barW + gap + barW / 2} y={H - themH - 4} textAnchor="middle" style={{ fontSize: 10, fill: '#9CA3AF', fontFamily: 'Arial,sans-serif' }}>{g.them}</text>
+            <text x={x + barW + gap / 2} y={H + 14} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: win ? '#059669' : '#DC2626', fontFamily: 'Arial,sans-serif' }}>{win ? 'W' : 'L'}</text>
+            <text x={x + barW + gap / 2} y={H + 27} textAnchor="middle" style={{ fontSize: 9, fill: '#9CA3AF', fontFamily: 'Arial,sans-serif' }}>{g.month} {g.date}</text>
+            <text x={x + barW + gap / 2} y={H + 39} textAnchor="middle" style={{ fontSize: 9, fill: '#6B7280', fontFamily: 'Arial,sans-serif' }}>{g.opponent.split(' ').slice(-1)[0]}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 function computeStats(games) {
   const final = games.filter(g => g.status === 'final');
   const scheduled = games.filter(g => g.status === 'scheduled');
@@ -84,6 +113,22 @@ export default function SeasonView({ games = [] }) {
         </div>
       </Card>
 
+      {/* Scoring trend */}
+      {games.some(g => g.status === 'final') && (
+        <Card>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Display size={20}>Scoring trend</Display>
+            <div style={{ display: 'flex', gap: 14, fontSize: 11, color: 'var(--fg-muted)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--varsity-gold)', display: 'inline-block' }} /> Hawks</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#D1D5DB', display: 'inline-block' }} /> Opponent</span>
+            </div>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <ScoringChart games={games} />
+          </div>
+        </Card>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 20 }}>
         {/* Standings */}
         <Card padding={0}>
@@ -94,7 +139,7 @@ export default function SeasonView({ games = [] }) {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'var(--bone)' }}>
-                {['#', 'Team', 'W', 'L', 'PCT', 'PF', 'PA', 'Str'].map(h => (
+                {['#', 'Team', 'W', 'L', 'PCT', 'GB', 'Str'].map(h => (
                   <th key={h} style={{ padding: '10px 14px', textAlign: h === 'Team' ? 'left' : 'center', fontSize: 10, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', borderBottom: '1px solid var(--border)' }}>{h}</th>
                 ))}
               </tr>
@@ -102,26 +147,43 @@ export default function SeasonView({ games = [] }) {
             <tbody>
               {STANDINGS.map((row, i) => {
                 const isUs = row.team === 'Fairfax Hawks';
-                const displayRow = isUs ? { ...row, w: s.wins, l: s.losses, pf: s.pf, pa: s.pa, streak: s.streak } : row;
+                const displayRow = isUs ? { ...row, w: s.wins, l: s.losses, streak: s.streak } : row;
                 const pct = displayRow.w + displayRow.l > 0
                   ? (displayRow.w / (displayRow.w + displayRow.l)).toFixed(3).replace(/^0/, '')
                   : '.000';
+                const leader = STANDINGS[0];
+                const leaderW = leader.team === 'Fairfax Hawks' ? s.wins : leader.w;
+                const leaderL = leader.team === 'Fairfax Hawks' ? s.losses : leader.l;
+                const gbVal = ((leaderW - displayRow.w) + (displayRow.l - leaderL)) / 2;
+                const gb = i === 0 ? '—' : gbVal === 0 ? '—' : gbVal % 1 === 0 ? String(gbVal) : gbVal.toFixed(1);
+                const isPlayoffCutoff = i === 3;
                 return (
-                  <tr key={i} style={{ background: isUs ? 'rgba(255,199,44,0.08)' : '#fff', borderBottom: i < STANDINGS.length - 1 ? '1px solid var(--border)' : 'none', fontWeight: isUs ? 700 : 400 }}>
-                    <td style={{ padding: '11px 14px', textAlign: 'center', fontSize: 13, color: isUs ? 'var(--court-navy)' : 'var(--fg-muted)', fontWeight: 700 }}>{row.rank}</td>
-                    <td style={{ padding: '11px 14px', fontSize: 13 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {isUs && <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--varsity-gold)', flexShrink: 0 }} />}
-                        <span style={{ color: isUs ? 'var(--court-navy)' : 'var(--fg)' }}>{row.team}</span>
-                      </div>
-                    </td>
-                    {[displayRow.w, displayRow.l, pct, displayRow.pf, displayRow.pa].map((v, j) => (
-                      <td key={j} style={{ padding: '11px 14px', textAlign: 'center', fontSize: 13, fontFamily: j >= 2 ? 'var(--font-mono)' : 'inherit', color: 'var(--fg)' }}>{v}</td>
-                    ))}
-                    <td style={{ padding: '11px 14px', textAlign: 'center' }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: displayRow.streak.startsWith('W') ? 'rgba(31,138,91,0.12)' : 'rgba(200,16,46,0.10)', color: displayRow.streak.startsWith('W') ? 'var(--status-win)' : 'var(--foul-red)' }}>{displayRow.streak}</span>
-                    </td>
-                  </tr>
+                  <>
+                    <tr key={i} style={{ background: isUs ? 'rgba(255,199,44,0.08)' : '#fff', borderBottom: '1px solid var(--border)', fontWeight: isUs ? 700 : 400 }}>
+                      <td style={{ padding: '11px 14px', textAlign: 'center', fontSize: 13, color: isUs ? 'var(--court-navy)' : 'var(--fg-muted)', fontWeight: 700 }}>{row.rank}</td>
+                      <td style={{ padding: '11px 14px', fontSize: 13 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {isUs && <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--varsity-gold)', flexShrink: 0 }} />}
+                          <span style={{ color: isUs ? 'var(--court-navy)' : 'var(--fg)' }}>{row.team}</span>
+                        </div>
+                      </td>
+                      {[displayRow.w, displayRow.l, pct, gb].map((v, j) => (
+                        <td key={j} style={{ padding: '11px 14px', textAlign: 'center', fontSize: 13, fontFamily: j >= 2 ? 'var(--font-mono)' : 'inherit', color: 'var(--fg)' }}>{v}</td>
+                      ))}
+                      <td style={{ padding: '11px 14px', textAlign: 'center' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: displayRow.streak.startsWith('W') ? 'rgba(31,138,91,0.12)' : 'rgba(200,16,46,0.10)', color: displayRow.streak.startsWith('W') ? 'var(--status-win)' : 'var(--foul-red)' }}>{displayRow.streak}</span>
+                      </td>
+                    </tr>
+                    {isPlayoffCutoff && (
+                      <tr key="cutoff">
+                        <td colSpan={7} style={{ padding: 0, position: 'relative' }}>
+                          <div style={{ borderTop: '2px dashed var(--status-warning)', margin: '0', position: 'relative' }}>
+                            <span style={{ position: 'absolute', right: 14, top: -9, fontSize: 9, background: 'var(--status-warning)', color: '#fff', padding: '1px 7px', borderRadius: 999, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Playoff cutoff</span>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 );
               })}
             </tbody>
