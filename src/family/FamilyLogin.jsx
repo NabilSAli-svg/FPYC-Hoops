@@ -2,8 +2,11 @@ import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
 
 const DEMO_ACCOUNTS = [
-  { id: 'reeves', label: 'A. Reeves (Parent)', sub: 'Jordan · #23 · Guard', initials: 'AR', color: 'var(--court-navy)' },
-  { id: 'chen',   label: 'L. Chen (Parent)',   sub: 'Maya · #7 · Guard',    initials: 'LC', color: '#1e3a8a' },
+  { id: 'reeves',    label: 'A. Reeves (Parent)',    sub: 'Jordan · #23 · Hawks',  initials: 'AR', color: 'var(--court-navy)' },
+  { id: 'chen',      label: 'L. Chen (Parent)',      sub: 'Maya · #7 · Hawks',     initials: 'LC', color: '#1e3a8a' },
+  { id: 'williams',  label: 'D. Williams (Parent)',  sub: 'Devon · #5 · Eagles',   initials: 'DW', color: '#C8102E' },
+  { id: 'hernandez', label: 'R. Hernandez (Parent)', sub: 'Sofia · #12 · Wolves',  initials: 'RH', color: '#1F8A5B' },
+  { id: 'morrison',  label: 'T. Morrison (Parent)',  sub: 'Emma · #4 · Cougars',   initials: 'TM', color: 'var(--basketball-orange)' },
 ];
 
 export default function FamilyLogin({ onLogin }) {

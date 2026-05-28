@@ -1,17 +1,15 @@
 import { usePlayers, useGames, useStats, useRsvps, countRsvps } from '../shared/store.js';
 import Icon from '../shared/Icon.jsx';
 
-const TEAM = 'Fairfax Hawks';
-
-export default function CoachHome({ coach }) {
+export default function CoachHome({ team }) {
   const [players] = usePlayers();
   const [games]   = useGames();
   const [stats]   = useStats();
 
   const [rsvps] = useRsvps();
-  const roster  = players.filter(p => p.team === TEAM && p.status === 'active');
-  const played  = games.filter(g => g.status === 'final');
-  const upcoming = games.filter(g => g.status === 'scheduled').sort((a, b) => a.date - b.date);
+  const roster  = players.filter(p => p.team === team.name && p.status === 'active');
+  const played  = games.filter(g => g.status === 'final' && (!g.team || g.team === team.name));
+  const upcoming = games.filter(g => g.status === 'scheduled' && (!g.team || g.team === team.name)).sort((a, b) => a.date - b.date);
   const next    = upcoming[0] ?? null;
 
   const wins   = played.filter(g => g.us > g.them).length;

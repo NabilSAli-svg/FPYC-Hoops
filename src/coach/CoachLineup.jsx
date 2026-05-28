@@ -3,15 +3,14 @@ import { usePlayers } from '../shared/store.js';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
 import Icon from '../shared/Icon.jsx';
 
-const TEAM = 'Fairfax Hawks';
 const POSITIONS = ['PG', 'SG', 'SF', 'PF', 'C'];
 
-export default function CoachLineup() {
+export default function CoachLineup({ team }) {
   const [players] = usePlayers();
-  const roster = players.filter(p => p.team === TEAM && p.status === 'active');
+  const roster = players.filter(p => p.team === team.name && p.status === 'active');
 
   const defaultStarters = roster.slice(0, 5).map(p => p.id);
-  const [starters, setStarters] = useLocalStorage('fpyc-lineup-starters', defaultStarters);
+  const [starters, setStarters] = useLocalStorage(team.lineupKey, defaultStarters);
   const [posMap, setPosMap]     = useLocalStorage('fpyc-lineup-pos', () => {
     const m = {};
     roster.slice(0, 5).forEach((p, i) => { m[p.id] = POSITIONS[i]; });
@@ -54,7 +53,7 @@ export default function CoachLineup() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.10em', color: 'rgba(255,255,255,0.5)' }}>Starting Five</div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#fff', marginTop: 2 }}>Fairfax Hawks</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: '#fff', marginTop: 2 }}>{team.name}</div>
           </div>
           <CourtIcon />
         </div>

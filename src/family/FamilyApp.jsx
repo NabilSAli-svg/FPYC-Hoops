@@ -9,6 +9,7 @@ import RosterTab from './RosterTab.jsx';
 import MessagesTab from './MessagesTab.jsx';
 import PaymentsTab from './PaymentsTab.jsx';
 import StatsTab from './StatsTab.jsx';
+import BracketTab from './BracketTab.jsx';
 import { FAMILIES } from './data.js';
 
 async function requestAndNotify(games) {
@@ -37,6 +38,7 @@ const TABS = [
   { id: 'home',     label: 'Home',     icon: 'home' },
   { id: 'schedule', label: 'Schedule', icon: 'calendar' },
   { id: 'stats',    label: 'Stats',    icon: 'bar-chart-2' },
+  { id: 'bracket',  label: 'Bracket',  icon: 'trophy' },
   { id: 'roster',   label: 'Team',     icon: 'users' },
   { id: 'messages', label: 'Messages', icon: 'message-square' },
 ];
@@ -85,7 +87,7 @@ export default function FamilyApp() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 32, objectFit: 'contain' }} />
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1 }}>Fairfax Hawks</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1 }}>{family.child.team}</div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.04em' }}>Family Portal</div>
             </div>
           </div>
@@ -120,8 +122,9 @@ export default function FamilyApp() {
       {/* Content */}
       <div style={{ flex: 1, maxWidth: 640, width: '100%', margin: '0 auto', padding: '20px 16px', paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))' }}>
         {tab === 'home'     && <HomeTab family={family} messages={messages} onTabChange={setTab} />}
-        {tab === 'schedule' && <ScheduleTab familyKey={userKey} />}
+        {tab === 'schedule' && <ScheduleTab familyKey={userKey} childTeam={family.child.team} />}
         {tab === 'stats'    && <StatsTab family={family} />}
+        {tab === 'bracket'  && <BracketTab childTeam={family.child.team} />}
         {tab === 'roster'   && <RosterTab family={family} />}
         {tab === 'messages' && <MessagesTab messages={messages} readIds={readIds} onMarkRead={markRead} />}
         {tab === 'payments' && <PaymentsTab family={family} />}

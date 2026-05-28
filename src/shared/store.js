@@ -9,6 +9,13 @@ export const TEAM_INFO = {
   coachEmail: 'coach.davis@fpycsports.org',
 };
 
+export const TEAMS_INFO = {
+  'Fairfax Hawks':   { id: 'hawks',   name: 'Fairfax Hawks',   division: 'Boys 5–6 House',  coach: 'Coach M. Davis',    color: 'var(--court-navy)' },
+  'Fairfax Wolves':  { id: 'wolves',  name: 'Fairfax Wolves',  division: 'Girls 5–6 House', coach: 'Coach S. Thompson', color: '#1F8A5B' },
+  'Fairfax Eagles':  { id: 'eagles',  name: 'Fairfax Eagles',  division: 'Boys 7–8 Select', coach: 'Coach J. Williams', color: '#C8102E' },
+  'Fairfax Cougars': { id: 'cougars', name: 'Fairfax Cougars', division: 'Girls 3–4 House', coach: 'Coach D. Park',     color: 'var(--basketball-orange)' },
+};
+
 export const INITIAL_PLAYERS = [
   { id: 'p1',  number: 23, name: 'Jordan Reeves',   grade: '6th', school: 'Daniels Run ES', guardian: 'A. Reeves',   phone: '(703) 555-0123', position: 'Guard',   status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
   { id: 'p2',  number:  7, name: 'Maya Chen',        grade: '5th', school: 'Providence ES',  guardian: 'L. Chen',     phone: '(703) 555-0144', position: 'Guard',   status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
@@ -22,24 +29,57 @@ export const INITIAL_PLAYERS = [
   { id: 'p10', number:  9, name: 'Noah Patel',       grade: '5th', school: 'Providence ES',  guardian: 'V. Patel',    phone: '(703) 555-0173', position: 'Forward', status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
   { id: 'p11', number: 25, name: 'Luca Bianchi',     grade: '6th', school: 'Mosby Woods ES', guardian: 'G. Bianchi',  phone: '(703) 555-0128', position: 'Center',  status: 'active',   waiver: true,  program: 'House League',  division: 'Boys 5–6 House',  team: 'Fairfax Hawks'   },
   { id: 'p12', number:  8, name: 'Chloe Adebayo',    grade: '5th', school: 'Daniels Run ES', guardian: 'O. Adebayo',  phone: '(703) 555-0145', position: 'Guard',   status: 'inactive', waiver: true,  program: 'House League',  division: 'Girls 5–6 House', team: 'Fairfax Wolves'  },
+  { id: 'p13', number:  5, name: 'Devon Williams',  grade: '7th', school: 'Lanier MS',      guardian: 'D. Williams',  phone: '(703) 555-0301', position: 'Forward', status: 'active', waiver: true,  program: 'Select Travel', division: 'Boys 7–8 Select',  team: 'Fairfax Eagles'  },
+  { id: 'p14', number: 11, name: 'Marcus Johnson',   grade: '8th', school: 'Cooper MS',      guardian: 'T. Johnson',   phone: '(703) 555-0315', position: 'Guard',   status: 'active', waiver: true,  program: 'Select Travel', division: 'Boys 7–8 Select',  team: 'Fairfax Eagles'  },
+  { id: 'p15', number: 12, name: 'Sofia Hernandez',  grade: '5th', school: 'Daniels Run ES', guardian: 'R. Hernandez', phone: '(703) 555-0328', position: 'Guard',   status: 'active', waiver: true,  program: 'House League',  division: 'Girls 5–6 House', team: 'Fairfax Wolves'  },
+  { id: 'p16', number:  9, name: 'Casey Walsh',      grade: '5th', school: 'Providence ES',  guardian: 'P. Walsh',     phone: '(703) 555-0342', position: 'Forward', status: 'active', waiver: true,  program: 'House League',  division: 'Girls 5–6 House', team: 'Fairfax Wolves'  },
+  { id: 'p17', number:  4, name: 'Emma Morrison',    grade: '4th', school: 'Mosby Woods ES', guardian: 'T. Morrison',  phone: '(703) 555-0356', position: 'Guard',   status: 'active', waiver: true,  program: 'House League',  division: 'Girls 3–4 House', team: 'Fairfax Cougars' },
+  { id: 'p18', number:  8, name: 'Lily Park',        grade: '3rd', school: 'Daniels Run ES', guardian: 'E. Park',      phone: '(703) 555-0367', position: 'Forward', status: 'active', waiver: true,  program: 'House League',  division: 'Girls 3–4 House', team: 'Fairfax Cougars' },
 ];
 
 export const INITIAL_GAMES = [
-  { id: 'g1', status: 'scheduled', month: 'Dec', date: 7,  weekday: 'Sat', day: 'Sat, Dec 7',  time: '10:00 AM', opponent: 'Vienna Storm',     location: 'Robinson Secondary · Gym B', home: true,  refs: 'J. Park, M. Lee', countdown: 4, confirmed: 11, note: 'Carpool sheet posted — 3 families volunteered to drive.' },
-  { id: 'g2', status: 'scheduled', month: 'Dec', date: 14, weekday: 'Sat', day: 'Sat, Dec 14', time: '11:30 AM', opponent: 'Reston Wolves',     location: 'South Lakes HS · Gym A',      home: false, countdown: 11, confirmed: 9 },
-  { id: 'g3', status: 'scheduled', month: 'Dec', date: 21, weekday: 'Sat', day: 'Sat, Dec 21', time: '9:00 AM',  opponent: 'Burke Lakers',       location: 'Lake Braddock HS · Main',     home: false, countdown: 18, confirmed: 8 },
-  { id: 'g4', status: 'final',     month: 'Nov', date: 30, weekday: 'Sat', day: 'Sat, Nov 30', time: '10:00 AM', opponent: 'Oakton Patriots',    location: 'Robinson Secondary · Gym B',  home: true,  us: 48, them: 39 },
-  { id: 'g5', status: 'final',     month: 'Nov', date: 23, weekday: 'Sat', day: 'Sat, Nov 23', time: '10:00 AM', opponent: 'McLean Mustangs',    location: 'Cooper MS · Main',            home: false, us: 42, them: 47 },
-  { id: 'g6', status: 'final',     month: 'Nov', date: 16, weekday: 'Sat', day: 'Sat, Nov 16', time: '11:30 AM', opponent: 'Centreville Eagles', location: 'Robinson Secondary · Gym B',  home: true,  us: 55, them: 50 },
+  { id: 'g1', status: 'scheduled', month: 'Dec', date: 7,  weekday: 'Sat', day: 'Sat, Dec 7',  time: '10:00 AM', opponent: 'Vienna Storm',     location: 'Robinson Secondary · Gym B', home: true,  refs: 'J. Park, M. Lee', countdown: 4, confirmed: 11, note: 'Carpool sheet posted — 3 families volunteered to drive.', team: 'Fairfax Hawks' },
+  { id: 'g2', status: 'scheduled', month: 'Dec', date: 14, weekday: 'Sat', day: 'Sat, Dec 14', time: '11:30 AM', opponent: 'Reston Wolves',     location: 'South Lakes HS · Gym A',      home: false, countdown: 11, confirmed: 9, team: 'Fairfax Hawks' },
+  { id: 'g3', status: 'scheduled', month: 'Dec', date: 21, weekday: 'Sat', day: 'Sat, Dec 21', time: '9:00 AM',  opponent: 'Burke Lakers',       location: 'Lake Braddock HS · Main',     home: false, countdown: 18, confirmed: 8, team: 'Fairfax Hawks' },
+  { id: 'g4', status: 'final',     month: 'Nov', date: 30, weekday: 'Sat', day: 'Sat, Nov 30', time: '10:00 AM', opponent: 'Oakton Patriots',    location: 'Robinson Secondary · Gym B',  home: true,  us: 48, them: 39, team: 'Fairfax Hawks' },
+  { id: 'g5', status: 'final',     month: 'Nov', date: 23, weekday: 'Sat', day: 'Sat, Nov 23', time: '10:00 AM', opponent: 'McLean Mustangs',    location: 'Cooper MS · Main',            home: false, us: 42, them: 47, team: 'Fairfax Hawks' },
+  { id: 'g6', status: 'final',     month: 'Nov', date: 16, weekday: 'Sat', day: 'Sat, Nov 16', time: '11:30 AM', opponent: 'Centreville Eagles', location: 'Robinson Secondary · Gym B',  home: true,  us: 55, them: 50, team: 'Fairfax Hawks' },
+  // Fairfax Wolves — Girls 5–6 House
+  { id: 'gw1', status: 'scheduled', month: 'Dec', date: 21, weekday: 'Sat', day: 'Sat, Dec 21', time: '1:00 PM',  opponent: 'Vienna Rockets',   location: 'South Lakes HS · Gym A',      home: true,  team: 'Fairfax Wolves',  countdown: 18 },
+  { id: 'gw2', status: 'scheduled', month: 'Jan', date: 11, weekday: 'Sat', day: 'Sat, Jan 11', time: '9:00 AM',  opponent: 'McLean Cardinals',  location: 'Robinson Secondary · Gym B',  home: false, team: 'Fairfax Wolves',  countdown: 39 },
+  { id: 'gw3', status: 'final',     month: 'Dec', date: 14, weekday: 'Sat', day: 'Sat, Dec 14', time: '10:00 AM', opponent: 'McLean Cardinals',  location: 'Cooper MS · Main',             home: true,  team: 'Fairfax Wolves',  us: 38, them: 35 },
+  { id: 'gw4', status: 'final',     month: 'Nov', date: 30, weekday: 'Sat', day: 'Sat, Nov 30', time: '11:30 AM', opponent: 'Herndon Thunder',   location: 'Robinson Secondary · Gym B',  home: true,  team: 'Fairfax Wolves',  us: 42, them: 28 },
+  { id: 'gw5', status: 'final',     month: 'Nov', date: 23, weekday: 'Sat', day: 'Sat, Nov 23', time: '10:00 AM', opponent: 'Arlington Stars',   location: 'South Lakes HS · Gym A',      home: false, team: 'Fairfax Wolves',  us: 31, them: 44 },
+  { id: 'gw6', status: 'final',     month: 'Nov', date: 16, weekday: 'Sat', day: 'Sat, Nov 16', time: '1:00 PM',  opponent: 'Reston Blaze',      location: 'Lake Braddock HS · Main',     home: false, team: 'Fairfax Wolves',  us: 29, them: 36 },
+  // Fairfax Eagles — Boys 7–8 Select
+  { id: 'ge1', status: 'scheduled', month: 'Dec', date: 21, weekday: 'Sat', day: 'Sat, Dec 21', time: '11:30 AM', opponent: 'Chantilly Force',   location: 'Robinson Secondary · Gym B',  home: true,  team: 'Fairfax Eagles',  countdown: 18 },
+  { id: 'ge2', status: 'scheduled', month: 'Jan', date: 11, weekday: 'Sat', day: 'Sat, Jan 11', time: '1:00 PM',  opponent: 'McLean Select',     location: 'South Lakes HS · Gym A',      home: false, team: 'Fairfax Eagles',  countdown: 39 },
+  { id: 'ge3', status: 'final',     month: 'Dec', date:  7, weekday: 'Sat', day: 'Sat, Dec 7',  time: '1:00 PM',  opponent: 'McLean Select',     location: 'Robinson Secondary · Gym B',  home: true,  team: 'Fairfax Eagles',  us: 62, them: 48 },
+  { id: 'ge4', status: 'final',     month: 'Nov', date: 30, weekday: 'Sat', day: 'Sat, Nov 30', time: '10:00 AM', opponent: 'Arlington Gold',    location: 'Cooper MS · Main',             home: false, team: 'Fairfax Eagles',  us: 57, them: 41 },
+  { id: 'ge5', status: 'final',     month: 'Nov', date: 23, weekday: 'Sat', day: 'Sat, Nov 23', time: '11:30 AM', opponent: 'Reston Select',     location: 'South Lakes HS · Gym A',      home: true,  team: 'Fairfax Eagles',  us: 54, them: 39 },
+  { id: 'ge6', status: 'final',     month: 'Nov', date: 16, weekday: 'Sat', day: 'Sat, Nov 16', time: '10:00 AM', opponent: 'Vienna Elite',      location: 'Lake Braddock HS · Main',     home: false, team: 'Fairfax Eagles',  us: 44, them: 51 },
+  // Fairfax Cougars — Girls 3–4 House
+  { id: 'gc1', status: 'scheduled', month: 'Dec', date: 21, weekday: 'Sat', day: 'Sat, Dec 21', time: '9:00 AM',  opponent: 'Vienna Flames',     location: 'Daniels Run ES · Gym',         home: true,  team: 'Fairfax Cougars', countdown: 18 },
+  { id: 'gc2', status: 'scheduled', month: 'Jan', date: 11, weekday: 'Sat', day: 'Sat, Jan 11', time: '10:00 AM', opponent: 'Herndon Comets',    location: 'Providence ES · Main',          home: false, team: 'Fairfax Cougars', countdown: 39 },
+  { id: 'gc3', status: 'final',     month: 'Dec', date:  7, weekday: 'Sat', day: 'Sat, Dec 7',  time: '9:00 AM',  opponent: 'Reston Stars',      location: 'Robinson Secondary · Gym B',  home: false, team: 'Fairfax Cougars', us: 24, them: 31 },
+  { id: 'gc4', status: 'final',     month: 'Nov', date: 30, weekday: 'Sat', day: 'Sat, Nov 30', time: '9:00 AM',  opponent: 'Herndon Comets',    location: 'Daniels Run ES · Gym',         home: true,  team: 'Fairfax Cougars', us: 29, them: 18 },
+  { id: 'gc5', status: 'final',     month: 'Nov', date: 23, weekday: 'Sat', day: 'Sat, Nov 23', time: '9:00 AM',  opponent: 'McLean Gems',       location: 'Providence ES · Main',          home: false, team: 'Fairfax Cougars', us: 26, them: 22 },
+  { id: 'gc6', status: 'final',     month: 'Nov', date: 16, weekday: 'Sat', day: 'Sat, Nov 16', time: '9:00 AM',  opponent: 'Arlington Aces',    location: 'Lake Braddock HS · Main',     home: false, team: 'Fairfax Cougars', us: 17, them: 35 },
 ];
 
 export const INITIAL_PRACTICES = [
-  { id: 'pr1', date: 'Mon, Dec 2',  time: '6:00–7:30 PM', gym: 'Daniels Run ES · Gym', type: 'Regular',      rsvp: 10, notes: 'Focus: ball handling and pick-and-roll defense' },
-  { id: 'pr2', date: 'Wed, Dec 4',  time: '6:00–7:30 PM', gym: 'Providence ES · Main',  type: 'Regular',      rsvp: 11, notes: '' },
-  { id: 'pr3', date: 'Mon, Dec 9',  time: '6:00–7:30 PM', gym: 'Daniels Run ES · Gym', type: 'Scrimmage',    rsvp: 12, notes: 'Scrimmage vs. Hawks 7–8 team' },
-  { id: 'pr4', date: 'Wed, Dec 11', time: '6:00–7:30 PM', gym: 'Providence ES · Main',  type: 'Regular',      rsvp: 9,  notes: '' },
-  { id: 'pr5', date: 'Mon, Dec 16', time: '6:00–7:30 PM', gym: 'Daniels Run ES · Gym', type: 'Conditioning', rsvp: 8,  notes: 'Film review first 20 min' },
-  { id: 'pr6', date: 'Wed, Dec 18', time: '6:00–7:30 PM', gym: 'TBD',                  type: 'Regular',      rsvp: 0,  notes: 'Gym TBD — check back Dec 10' },
+  { id: 'pr1', date: 'Mon, Dec 2',  time: '6:00–7:30 PM', gym: 'Daniels Run ES · Gym', type: 'Regular',      rsvp: 10, notes: 'Focus: ball handling and pick-and-roll defense', team: 'Fairfax Hawks' },
+  { id: 'pr2', date: 'Wed, Dec 4',  time: '6:00–7:30 PM', gym: 'Providence ES · Main',  type: 'Regular',      rsvp: 11, notes: '', team: 'Fairfax Hawks' },
+  { id: 'pr3', date: 'Mon, Dec 9',  time: '6:00–7:30 PM', gym: 'Daniels Run ES · Gym', type: 'Scrimmage',    rsvp: 12, notes: 'Scrimmage vs. Hawks 7–8 team', team: 'Fairfax Hawks' },
+  { id: 'pr4', date: 'Wed, Dec 11', time: '6:00–7:30 PM', gym: 'Providence ES · Main',  type: 'Regular',      rsvp: 9,  notes: '', team: 'Fairfax Hawks' },
+  { id: 'pr5', date: 'Mon, Dec 16', time: '6:00–7:30 PM', gym: 'Daniels Run ES · Gym', type: 'Conditioning', rsvp: 8,  notes: 'Film review first 20 min', team: 'Fairfax Hawks' },
+  { id: 'pr6', date: 'Wed, Dec 18', time: '6:00–7:30 PM', gym: 'TBD',                  type: 'Regular',      rsvp: 0,  notes: 'Gym TBD — check back Dec 10', team: 'Fairfax Hawks' },
+  { id: 'pw1', date: 'Tue, Dec 3',  time: '5:00–6:30 PM', gym: 'South Lakes HS · Gym A',  type: 'Regular',      rsvp: 8,  notes: '',                           team: 'Fairfax Wolves'  },
+  { id: 'pw2', date: 'Thu, Dec 5',  time: '5:00–6:30 PM', gym: 'South Lakes HS · Gym A',  type: 'Regular',      rsvp: 9,  notes: '',                           team: 'Fairfax Wolves'  },
+  { id: 'pe1', date: 'Tue, Dec 3',  time: '7:00–8:30 PM', gym: 'Lake Braddock HS · Main', type: 'Regular',      rsvp: 12, notes: 'Film review: McLean Select', team: 'Fairfax Eagles'  },
+  { id: 'pe2', date: 'Thu, Dec 5',  time: '7:00–8:30 PM', gym: 'Lake Braddock HS · Main', type: 'Scrimmage',    rsvp: 14, notes: 'Scrimmage vs Eagles 5–6',   team: 'Fairfax Eagles'  },
+  { id: 'pc1', date: 'Tue, Dec 3',  time: '4:00–5:00 PM', gym: 'Daniels Run ES · Gym',    type: 'Regular',      rsvp: 7,  notes: '',                           team: 'Fairfax Cougars' },
+  { id: 'pc2', date: 'Thu, Dec 5',  time: '4:00–5:00 PM', gym: 'Daniels Run ES · Gym',    type: 'Conditioning', rsvp: 8,  notes: '',                           team: 'Fairfax Cougars' },
 ];
 
 export const INITIAL_MESSAGES = [
@@ -226,6 +266,7 @@ export function deriveEvents(games, practices) {
     confirmed: g.confirmed || 0,
     month: g.month,
     dayNum: g.date,
+    team: g.team || 'Fairfax Hawks',
   }));
 
   const practiceEvents = practices.map(p => ({
@@ -240,6 +281,7 @@ export function deriveEvents(games, practices) {
     home: true,
     status: 'upcoming',
     notes: p.notes || '',
+    team: p.team || 'Fairfax Hawks',
   }));
 
   return [...gameEvents, ...practiceEvents];

@@ -21,7 +21,7 @@ function gCalLink(e) {
   return `https://calendar.google.com/calendar/r/eventedit?text=${encodeURIComponent('Hawks ' + e.label)}&dates=${s}/${eh}&location=${encodeURIComponent(e.location + ', Fairfax VA')}&details=${encodeURIComponent('FPYC Basketball')}`;
 }
 
-export default function ScheduleTab({ familyKey }) {
+export default function ScheduleTab({ familyKey, childTeam = 'Fairfax Hawks' }) {
   const [games] = useGames();
   const [practices] = usePractices();
   const [loading, setLoading] = useState(true);
@@ -39,7 +39,8 @@ export default function ScheduleTab({ familyKey }) {
 
   if (loading) return <ScheduleSkeleton filter={filter} setFilter={setFilter} />;
 
-  const EVENTS    = deriveEvents(games, practices);
+  const teamEvents = deriveEvents(games, practices).filter(e => !e.team || e.team === childTeam);
+  const EVENTS    = teamEvents;
   const filtered  = EVENTS.filter(e => filter === 'all' || e.type === filter);
 
   const live      = filtered.filter(e => e.status === 'live');
@@ -49,8 +50,9 @@ export default function ScheduleTab({ familyKey }) {
   const liveGame  = EVENTS.find(e => e.type === 'game' && e.status === 'live') || null;
   const nextGame  = EVENTS.find(e => e.type === 'game' && e.status === 'upcoming') || null;
 
-  const wins   = games.filter(g => g.status === 'final' && g.us > g.them).length;
-  const losses = games.filter(g => g.status === 'final' && g.us < g.them).length;
+  const teamGames = games.filter(g => !g.team || g.team === childTeam);
+  const wins   = teamGames.filter(g => g.status === 'final' && g.us > g.them).length;
+  const losses = teamGames.filter(g => g.status === 'final' && g.us < g.them).length;
 
   return (
     <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

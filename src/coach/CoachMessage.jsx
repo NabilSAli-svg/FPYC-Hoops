@@ -2,16 +2,14 @@ import { useState } from 'react';
 import { useMessages, usePlayers } from '../shared/store.js';
 import Icon from '../shared/Icon.jsx';
 
-const TEAM = 'Fairfax Hawks';
-
 const TEMPLATES = [
   { label: 'Game reminder',   text: 'Reminder: game this Saturday at {time} vs {opponent}. Please arrive 30 min early for warm-ups. Wear {jerseyColor} jerseys.' },
   { label: 'Practice update', text: 'Practice this {day} is confirmed at {gym}, starting at 6:00 PM sharp. Bring water and sneakers.' },
-  { label: 'Good game!',      text: 'Great effort today, Hawks! Proud of the team\'s hustle out there. Next up: {opponent} on {date}.' },
+  { label: 'Good game!',      text: 'Great effort today! Proud of the team\'s hustle out there. Next up: {opponent} on {date}.' },
   { label: 'Weather delay',   text: 'Important: {event} is delayed/rescheduled due to weather. Updated info to follow shortly.' },
 ];
 
-export default function CoachMessage({ coach }) {
+export default function CoachMessage({ team }) {
   const [messages, setMessages] = useMessages();
   const [players] = usePlayers();
 
@@ -21,8 +19,8 @@ export default function CoachMessage({ coach }) {
   const [sent, setSent] = useState(false);
   const [view, setView] = useState('compose'); // 'compose' | 'history'
 
-  const roster = players.filter(p => p.team === TEAM && p.status === 'active');
-  const sent_msgs = messages.filter(m => m.from.includes('Davis'));
+  const roster = players.filter(p => p.team === team.name && p.status === 'active');
+  const sent_msgs = messages.filter(m => m.from === team.coach);
 
   function applyTemplate(text) {
     setBody(text);
@@ -34,7 +32,7 @@ export default function CoachMessage({ coach }) {
     setTimeout(() => {
       const newMsg = {
         id: `m${Date.now()}`,
-        from: coach.name,
+        from: team.coach,
         time: 'Just now',
         unread: true,
         subject: subject.trim(),
@@ -136,7 +134,7 @@ export default function CoachMessage({ coach }) {
               <textarea
                 value={body}
                 onChange={e => setBody(e.target.value)}
-                placeholder="Type your message to all Hawks families…"
+                placeholder={`Type your message to all ${team.name} families…`}
                 rows={6}
                 style={{
                   width: '100%', boxSizing: 'border-box',
@@ -171,7 +169,7 @@ export default function CoachMessage({ coach }) {
             ) : sent ? (
               <><Icon name="check" size={16} color="#fff" />Message sent!</>
             ) : (
-              <><Icon name="send" size={16} color={subject.trim() && body.trim() ? '#fff' : '#9CA3AF'} />Send to all Hawks families</>
+              <><Icon name="send" size={16} color={subject.trim() && body.trim() ? '#fff' : '#9CA3AF'} />Send to all {team.name} families</>
             )}
           </button>
         </>

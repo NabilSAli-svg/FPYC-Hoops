@@ -7,7 +7,38 @@ export default function PlayoffBracket() {
   const [bracket] = useBracket();
   const { status, seeds, semis, final } = bracket;
 
-  if (status === 'setup') return null;
+  if (status === 'setup') {
+    return (
+      <section style={{ background: '#fff', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', padding: '64px 24px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32, flexWrap: 'wrap', gap: 12 }}>
+            <SectionHead eyebrow={`${bracket.season} Playoffs`} title={`${bracket.division} · Playoff Seeds`} />
+            <span style={{ fontSize: 12, fontWeight: 700, padding: '5px 14px', borderRadius: 999, background: 'rgba(10,31,61,0.07)', color: 'var(--court-navy)' }}>Bracket TBD</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', gap: 12 }}>
+            {seeds.map(team => (
+              <div key={team.seed} style={{ background: '#fff', border: `1.5px solid ${team.fpyc ? 'var(--varsity-gold)' : 'var(--border)'}`, borderRadius: 12, padding: '16px 18px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: team.fpyc ? 'var(--varsity-gold)' : 'var(--fg-muted)', lineHeight: 1, flexShrink: 0 }}>#{team.seed}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                      {team.fpyc && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--varsity-gold)', flexShrink: 0 }} />}
+                      <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--fg)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{team.name}</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--fg-muted)' }}>{team.record}</div>
+                    {team.fpyc && <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 5px', borderRadius: 999, background: 'rgba(10,31,61,0.08)', color: 'var(--court-navy)', display: 'inline-block', marginTop: 4 }}>FPYC</span>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 20, fontSize: 13, color: 'var(--fg-muted)', textAlign: 'center' }}>
+            Playoff bracket will be published once the regular season concludes.
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const champ = bracket.champion != null ? seeds[bracket.champion] : null;
 

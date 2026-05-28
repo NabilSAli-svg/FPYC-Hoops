@@ -3,7 +3,6 @@ import Icon from '../shared/Icon.jsx';
 import { useGames, usePlayers, useStats } from '../shared/store.js';
 
 const CREDENTIALS = { username: 'scorekeeper', password: 'fpyc2025' };
-const TEAM_NAME = 'Fairfax Hawks';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -111,7 +110,8 @@ function ScorekeeperMain() {
   const [selectedId, setSelectedId] = useState(null);
   const [saved, setSaved] = useState(false);
 
-  const rosterPlayers = players.filter(p => p.team === TEAM_NAME && p.status !== 'inactive');
+  const gameTeam = selectedGame?.team || 'Fairfax Hawks';
+  const rosterPlayers = players.filter(p => p.team === gameTeam && p.status !== 'inactive');
 
   const scheduled = games.filter(g => g.status === 'scheduled' || g.status === 'live').sort((a, b) => {
     const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
@@ -275,7 +275,7 @@ function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 16, alignItems: 'center', marginBottom: 16 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={{ fontSize: 11, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              {TEAM_NAME} (Us)
+              {gameTeam} (Us)
             </label>
             <input
               type="number" min="0" max="200" value={scoreUs}

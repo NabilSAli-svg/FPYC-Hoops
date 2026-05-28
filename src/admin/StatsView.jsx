@@ -34,7 +34,7 @@ function computeSeasonStats(players, stats, games) {
   });
 }
 
-export default function StatsView() {
+export default function StatsView({ teamFilter }) {
   const isMobile = useIsMobile();
   const [stats, setStats] = useStats();
   const [games]   = useGames();
@@ -45,10 +45,11 @@ export default function StatsView() {
   const [logGameId, setLogGameId] = useState('');
   const [logDraft, setLogDraft] = useState({});
 
-  const activePlayers = players.filter(p => p.status !== 'inactive');
-  const finalGames    = games.filter(g => g.status === 'final');
+  const activePlayers = players.filter(p => p.status !== 'inactive' && (!teamFilter || p.team === teamFilter));
+  const teamGames     = games.filter(g => !teamFilter || !g.team || g.team === teamFilter);
+  const finalGames    = teamGames.filter(g => g.status === 'final');
 
-  const seasonStats = computeSeasonStats(activePlayers, stats, games);
+  const seasonStats = computeSeasonStats(activePlayers, stats, teamGames);
 
   function handleSort(key) {
     if (sortKey === key) setSortDir(d => d === 'desc' ? 'asc' : 'desc');

@@ -3,15 +3,13 @@ import { usePractices, usePlayers } from '../shared/store.js';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
 import Icon from '../shared/Icon.jsx';
 
-const TEAM = 'Fairfax Hawks';
-
 const TYPE_COLOR = {
   Regular:      { bg: 'rgba(10,31,61,0.08)',   text: 'var(--court-navy)' },
   Scrimmage:    { bg: 'rgba(255,199,44,0.15)',  text: '#92660A' },
   Conditioning: { bg: 'rgba(232,119,34,0.12)',  text: '#B45309' },
 };
 
-export default function CoachPractice() {
+export default function CoachPractice({ team }) {
   const [practices] = usePractices();
   const [players]   = usePlayers();
   const [attendance, setAttendance] = useLocalStorage('fpyc-attendance', {});
@@ -19,8 +17,9 @@ export default function CoachPractice() {
   const [note, setNote] = useState('');
   const [noteSaved, setNoteSaved] = useState(false);
 
-  const roster = players.filter(p => p.team === TEAM && p.status === 'active');
-  const practice = practices.find(p => p.id === selected);
+  const roster = players.filter(p => p.team === team.name && p.status === 'active');
+  const teamPractices = practices.filter(p => !p.team || p.team === team.name);
+  const practice = teamPractices.find(p => p.id === selected);
 
   function toggleAttendance(practiceId, playerId) {
     setAttendance(prev => {
@@ -154,10 +153,10 @@ export default function CoachPractice() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--court-navy)', lineHeight: 1, marginBottom: 4 }}>Practice Schedule</div>
-        <div style={{ fontSize: 13, color: '#6B7280' }}>{practices.length} sessions · Fairfax Hawks</div>
+        <div style={{ fontSize: 13, color: '#6B7280' }}>{teamPractices.length} sessions · {team.name}</div>
       </div>
 
-      {practices.map(p => {
+      {teamPractices.map(p => {
         const present = countPresent(p.id);
         const taken = present > 0;
         const typeStyle = TYPE_COLOR[p.type] || TYPE_COLOR.Regular;
