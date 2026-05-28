@@ -1,8 +1,23 @@
 import { useState } from 'react';
 import { BackBtn } from './StepProgram.jsx';
+import { usePlayers } from '../shared/store.js';
 
 const PROGRAM_PRICES  = { house: 195, clinic: 95, travel: 425 };
 const PROGRAM_LABELS  = { house: 'House League', clinic: 'Skills Clinic', travel: 'Travel Select' };
+
+const GRADE_RANK = { 'Kindergarten': 0, '1st Grade': 1, '2nd Grade': 2, '3rd Grade': 3, '4th Grade': 4, '5th Grade': 5, '6th Grade': 6, '7th Grade': 7, '8th Grade': 8 };
+
+function gradeShort(g) { return g === 'Kindergarten' ? 'K' : g?.replace(' Grade', '') || '?'; }
+
+function deriveDivision(gender, grade, programId) {
+  if (programId === 'clinic') return 'Skills Clinic';
+  const rank = GRADE_RANK[grade] ?? 5;
+  const genderLabel = gender === 'Female' ? 'Girls' : 'Boys';
+  if (rank <= 2) return `${genderLabel} K–2 House`;
+  if (rank <= 4) return `${genderLabel} 3–4 House`;
+  if (rank <= 6) return programId === 'travel' ? `${genderLabel} 5–6 Select` : `${genderLabel} 5–6 House`;
+  return programId === 'travel' ? `${genderLabel} 7–8 Select` : `${genderLabel} 7–8 House`;
+}
 
 function formatCardNumber(val) {
   const digits = val.replace(/\D/g, '').slice(0, 16);
@@ -21,6 +36,7 @@ export default function StepReview({ data, back, isMobile }) {
   const [submitted, setSubmitted] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [confirmNum] = useState(() => 'FPYC-' + Math.random().toString(36).slice(2, 8).toUpperCase());
+  const [, setPlayers] = usePlayers();
 
   const prog   = data.program;
   const player = data.player;
@@ -43,7 +59,32 @@ export default function StepReview({ data, back, isMobile }) {
   function handlePay() {
     if (!cardValid) return;
     setProcessing(true);
-    setTimeout(() => { setProcessing(false); setSubmitted(true); }, 2200);
+    setTimeout(() => {
+      setPlayers(prev => {
+        const ids = prev.map(p => parseInt(p.id.replace('p', ''), 10)).filter(n => !isNaN(n));
+        const nextId = 'p' + (Math.max(0, ...ids) + 1);
+        const newPlayer = {
+          id: nextId,
+          number: Math.floor(Math.random() * 49) + 1,
+          name: `${player.firstName} ${player.lastName}`,
+          grade: gradeShort(player.grade),
+          school: player.school || '',
+          guardian: `${p1.firstName?.[0] || ''}. ${p1.lastName || ''}`.trim(),
+          phone: p1.phone || '',
+          position: 'Guard',
+          status: 'pending',
+          waiver: data.waivers?.concussion && data.waivers?.seasonal,
+          program: prog ? PROGRAM_LABELS[prog.id] : 'House League',
+          division: deriveDivision(player.gender, player.grade, prog?.id || 'house'),
+          team: 'TBD',
+          regDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          confirmNum,
+        };
+        return [...prev, newPlayer];
+      });
+      setProcessing(false);
+      setSubmitted(true);
+    }, 2200);
   }
 
   if (submitted) return <SuccessScreen player={player} prog={prog} email={p1.email} confirmNum={confirmNum} isMobile={isMobile} />;

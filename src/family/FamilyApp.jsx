@@ -8,6 +8,7 @@ import ScheduleTab from './ScheduleTab.jsx';
 import RosterTab from './RosterTab.jsx';
 import MessagesTab from './MessagesTab.jsx';
 import PaymentsTab from './PaymentsTab.jsx';
+import StatsTab from './StatsTab.jsx';
 import { FAMILIES } from './data.js';
 
 async function requestAndNotify(games) {
@@ -35,9 +36,9 @@ async function requestAndNotify(games) {
 const TABS = [
   { id: 'home',     label: 'Home',     icon: 'home' },
   { id: 'schedule', label: 'Schedule', icon: 'calendar' },
+  { id: 'stats',    label: 'Stats',    icon: 'bar-chart-2' },
   { id: 'roster',   label: 'Team',     icon: 'users' },
   { id: 'messages', label: 'Messages', icon: 'message-square' },
-  { id: 'payments', label: 'Payments', icon: 'credit-card' },
 ];
 
 export default function FamilyApp() {
@@ -119,6 +120,7 @@ export default function FamilyApp() {
       <div style={{ flex: 1, maxWidth: 640, width: '100%', margin: '0 auto', padding: '20px 16px', paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))' }}>
         {tab === 'home'     && <HomeTab family={family} messages={messages} onTabChange={setTab} />}
         {tab === 'schedule' && <ScheduleTab />}
+        {tab === 'stats'    && <StatsTab family={family} />}
         {tab === 'roster'   && <RosterTab family={family} />}
         {tab === 'messages' && <MessagesTab messages={messages} readIds={readIds} onMarkRead={markRead} />}
         {tab === 'payments' && <PaymentsTab family={family} />}

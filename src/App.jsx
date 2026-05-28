@@ -5,6 +5,7 @@ import RegisterApp from './register/RegisterApp.jsx';
 import FamilyApp from './family/FamilyApp.jsx';
 import RefAdminApp from './refs/RefAdminApp.jsx';
 import CommissionerApp from './commissioner/CommissionerApp.jsx';
+import CoachApp from './coach/CoachApp.jsx';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
       <Route path="/admin/*" element={<AdminApp />} />
       <Route path="/refs" element={<RefAdminApp />} />
       <Route path="/commissioner" element={<CommissionerApp />} />
+      <Route path="/coach" element={<CoachApp />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
