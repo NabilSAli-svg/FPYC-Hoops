@@ -9,6 +9,7 @@ import HowToRegister from './HowToRegister.jsx';
 import TeamSpotlight from './TeamSpotlight.jsx';
 import PlayoffBracket from './PlayoffBracket.jsx';
 import Standings from './Standings.jsx';
+import SeasonRecap from './SeasonRecap.jsx';
 import { Announcements, Schedule, News, FaqContact } from './Sections.jsx';
 
 function scrollTo(id) {
@@ -33,6 +34,7 @@ export default function WebsiteApp() {
         <TeamSpotlight />
         <PlayoffBracket />
         <Standings />
+        <SeasonRecap />
         <WhyFPYC />
         <Testimonials />
         <Programs />

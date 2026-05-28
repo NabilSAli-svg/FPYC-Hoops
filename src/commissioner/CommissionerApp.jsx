@@ -115,123 +115,203 @@ function StatusPill({ status }) {
 
 // ─── Dashboard Tab ────────────────────────────────────────────────────────────
 
+const DIV_FEE = { 'Boys 5–6 House': 195, 'Girls 5–6 House': 195, 'Girls 3–4 House': 195, 'Boys 7–8 Select': 425 };
+
+const FPYC_STANDINGS = {
+  'Fairfax Hawks':   { div: 'Boys 5–6 House',  rank: 2, playoff: true  },
+  'Fairfax Wolves':  { div: 'Girls 5–6 House', rank: 5, playoff: false },
+  'Fairfax Eagles':  { div: 'Boys 7–8 Select', rank: 1, playoff: true  },
+  'Fairfax Cougars': { div: 'Girls 3–4 House', rank: 5, playoff: false },
+};
+
+const SEASON_WEEKS = [
+  { label: 'Registration',  dates: 'Sep–Oct',  done: true  },
+  { label: 'Team draft',    dates: 'Oct',       done: true  },
+  { label: 'Practices',     dates: 'Nov',       done: true  },
+  { label: 'Regular season',dates: 'Dec–Jan',   done: false, current: true },
+  { label: 'Playoffs',      dates: 'Jan',       done: false },
+  { label: 'Awards night',  dates: 'Feb',       done: false },
+];
+
 function DashboardTab({ isMobile }) {
-  const stats = [
-    { label: 'Total Registered Kids', value: '47', icon: 'users' },
-    { label: 'Season Revenue',        value: '$8,227', icon: 'dollar-sign' },
-    { label: 'Pending Approvals',     value: '3', icon: 'clock' },
-    { label: 'Games This Weekend',    value: '4', icon: 'calendar' },
+  const [bracket]       = useBracket();
+  const [announcements] = useAnnouncements();
+
+  const regs = INITIAL_REGS;
+  const total     = regs.length;
+  const approved  = regs.filter(r => r.status === 'approved').length;
+  const pending   = regs.filter(r => r.status === 'pending').length;
+  const waitlist  = regs.filter(r => r.status === 'waitlisted').length;
+  const revenue   = regs.filter(r => r.paid).reduce((s, r) => s + (DIV_FEE[r.division] || 195), 0);
+  const waiverMissing = regs.filter(r => r.status === 'approved' && !r.waiver).length;
+  const recentRegs = [...regs].reverse().slice(0, 5);
+
+  const bracketPhase = bracket.status === 'setup' ? 'Not started' : bracket.status === 'semis' ? 'Semis live' : bracket.status === 'finals' ? 'Finals live' : 'Complete';
+  const bracketColor = bracket.status === 'setup' ? 'var(--fg-muted)' : bracket.status === 'complete' ? 'var(--status-win)' : 'var(--basketball-orange)';
+
+  const kpis = [
+    { label: 'Players registered', value: total,    sub: `${approved} approved · ${pending} pending`,   icon: 'users',        color: 'var(--court-navy)'        },
+    { label: 'Revenue collected',  value: `$${revenue.toLocaleString()}`, sub: `${regs.filter(r=>r.paid).length} of ${total} paid`, icon: 'dollar-sign', color: 'var(--status-win)' },
+    { label: 'Need action',        value: pending + waiverMissing, sub: `${pending} pending · ${waiverMissing} waivers missing`, icon: 'alert-triangle', color: pending + waiverMissing > 0 ? 'var(--basketball-orange)' : 'var(--status-win)' },
+    { label: 'Bracket',            value: bracketPhase, sub: bracket.champion != null ? `Champion: ${bracket.seeds[bracket.champion]?.name}` : 'Season 2025–26', icon: 'trophy', color: bracketColor },
   ];
 
-  const glance = [
-    { short: 'Hawks',   ...TEAMS[0] },
-    { short: 'Wolves',  ...TEAMS[1] },
-    { short: 'Eagles',  ...TEAMS[2] },
-    { short: 'Cougars', ...TEAMS[3] },
-  ];
-
-  const recentRegs = [
-    { player: 'O. Adeyemi',   division: 'Boys 5–6 House',  date: 'Nov 28', status: 'pending' },
-    { player: 'P. Walsh',     division: 'Girls 5–6 House', date: 'Nov 27', status: 'pending' },
-    { player: 'K. Brooks',    division: 'Boys 7–8 Select', date: 'Nov 25', status: 'approved' },
-    { player: 'R. Hernandez', division: 'Girls 3–4 House', date: 'Nov 24', status: 'pending' },
-    { player: 'T. Morrison',  division: 'Boys 5–6 House',  date: 'Nov 22', status: 'approved' },
-  ];
+  const alerts = [
+    pending > 0   && { kind: 'warn',  icon: 'clock',         msg: `${pending} registration${pending > 1 ? 's' : ''} awaiting approval` },
+    waiverMissing > 0 && { kind: 'warn', icon: 'shield-off',  msg: `${waiverMissing} approved player${waiverMissing > 1 ? 's' : ''} missing signed waiver` },
+    waitlist > 0  && { kind: 'info',  icon: 'list',          msg: `${waitlist} player${waitlist > 1 ? 's' : ''} on waitlist — review for open spots` },
+    announcements.filter(a => a.pinned).length === 0 && { kind: 'info', icon: 'megaphone', msg: 'No pinned announcements — families see nothing in the website banner' },
+  ].filter(Boolean);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-      {/* Stats strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 16 }}>
-        {stats.map(s => (
-          <Card key={s.label} padding={isMobile ? '14px 16px' : 20}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
-              <Eyebrow>{s.label}</Eyebrow>
-              <Icon name={s.icon} size={16} color="var(--fg-muted)" />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+      {/* KPI strip */}
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: 14 }}>
+        {kpis.map(k => (
+          <Card key={k.label} padding={isMobile ? '14px 16px' : '18px 20px'}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
+              <div style={{ width: 34, height: 34, borderRadius: 8, background: `${k.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name={k.icon} size={17} color={k.color} />
+              </div>
             </div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 24 : 32, color: 'var(--court-navy)', lineHeight: 1 }}>{s.value}</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 22 : 28, color: k.color, lineHeight: 1, marginBottom: 4 }}>{k.value}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 2 }}>{k.label}</div>
+            <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{k.sub}</div>
           </Card>
         ))}
       </div>
 
-      {/* Alert strip */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          background: 'rgba(232,119,34,0.10)', border: '1px solid var(--basketball-orange)',
-          borderRadius: 8, padding: '12px 16px',
-        }}>
-          <Icon name="alert-triangle" size={16} color="var(--basketball-orange)" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--fg)' }}>
-            3 families haven't completed waivers — games are Saturday
-          </span>
+      {/* Alerts */}
+      {alerts.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {alerts.map((a, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderRadius: 8, background: a.kind === 'warn' ? 'rgba(232,119,34,0.08)' : 'rgba(10,31,61,0.05)', border: `1px solid ${a.kind === 'warn' ? 'rgba(232,119,34,0.3)' : 'rgba(10,31,61,0.12)'}` }}>
+              <Icon name={a.icon} size={15} color={a.kind === 'warn' ? 'var(--basketball-orange)' : 'var(--court-navy)'} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--fg)', flex: 1 }}>{a.msg}</span>
+            </div>
+          ))}
         </div>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          background: 'rgba(200,16,46,0.08)', border: '1px solid var(--foul-red)',
-          borderRadius: 8, padding: '12px 16px',
-        }}>
-          <Icon name="alert-circle" size={16} color="var(--foul-red)" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--fg)' }}>
-            2 refs unassigned for Dec 21
-          </span>
-        </div>
-      </div>
+      )}
 
-      {/* Teams at a glance */}
-      <div>
-        <Eyebrow style={{ marginBottom: 14 }}>Teams at a Glance</Eyebrow>
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
-          {glance.map(t => (
-            <Card key={t.name} padding={18}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: 8,
-                  background: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: '#fff', lineHeight: 1 }}>
-                    {t.short.slice(0,1)}
-                  </span>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                    <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--fg)' }}>{t.short}</span>
-                    <span style={{ fontSize: 11, color: 'var(--fg-muted)', fontWeight: 500 }}>{t.division}</span>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 20, alignItems: 'start' }}>
+
+        {/* FPYC Teams */}
+        <div>
+          <Eyebrow style={{ marginBottom: 12 }}>FPYC Teams — Current Standing</Eyebrow>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {TEAMS.map(t => {
+              const st = FPYC_STANDINGS[t.name];
+              return (
+                <Card key={t.name} padding={16}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 38, height: 38, borderRadius: 8, background: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: '#fff' }}>{t.name.split(' ')[1][0]}</span>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--fg)', marginBottom: 1 }}>{t.name}</div>
+                      <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{t.division} · Coach {t.coach}</div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 700, color: 'var(--court-navy)' }}>{t.record}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: st.playoff ? 'rgba(31,138,91,0.10)' : 'rgba(200,16,46,0.08)', color: st.playoff ? 'var(--status-win)' : 'var(--foul-red)' }}>
+                        {st.playoff ? `#${st.rank} — In playoffs` : `#${st.rank} — Out`}
+                      </span>
+                    </div>
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--fg-muted)' }}>Coach {t.coach}</div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 700, color: 'var(--court-navy)' }}>{t.record}</span>
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                    <span style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{t.players} players</span>
-                    <Pill kind="navy">{t.seed}</Pill>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Season timeline + reg breakdown */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div>
+            <Eyebrow style={{ marginBottom: 12 }}>Season Timeline</Eyebrow>
+            <Card padding={18}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {SEASON_WEEKS.map((w, i) => (
+                  <div key={w.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 24, height: 24, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: w.done ? 'var(--court-navy)' : w.current ? 'var(--varsity-gold)' : 'var(--border)' }}>
+                      {w.done
+                        ? <Icon name="check" size={12} color="#fff" />
+                        : w.current
+                          ? <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--court-navy)' }} />
+                          : <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}
+                    </div>
+                    {i < SEASON_WEEKS.length - 1 && (
+                      <div style={{ position: 'absolute', marginLeft: 11, marginTop: 24, width: 2, height: 10, background: w.done ? 'var(--court-navy)' : 'var(--border)' }} />
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <span style={{ fontSize: 13, fontWeight: w.current ? 800 : 600, color: w.current ? 'var(--court-navy)' : w.done ? 'var(--fg)' : 'var(--fg-muted)' }}>{w.label}</span>
+                      {w.current && <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 999, background: 'var(--varsity-gold)', color: 'var(--court-navy)' }}>NOW</span>}
+                    </div>
+                    <span style={{ fontSize: 11, color: 'var(--fg-muted)', fontWeight: 500 }}>{w.dates}</span>
                   </div>
-                </div>
+                ))}
               </div>
             </Card>
-          ))}
+          </div>
+
+          <div>
+            <Eyebrow style={{ marginBottom: 12 }}>Registration Breakdown</Eyebrow>
+            <Card padding={18}>
+              {Object.entries(
+                regs.reduce((acc, r) => { acc[r.division] = (acc[r.division] || 0) + 1; return acc; }, {})
+              ).map(([div, count]) => {
+                const divApproved = regs.filter(r => r.division === div && r.status === 'approved').length;
+                const pct = Math.round((divApproved / count) * 100);
+                return (
+                  <div key={div} style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg)' }}>{div}</span>
+                      <span style={{ fontSize: 12, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)' }}>{divApproved}/{count}</span>
+                    </div>
+                    <div style={{ height: 6, borderRadius: 999, background: 'var(--border)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: 'var(--court-navy)', transition: 'width 600ms' }} />
+                    </div>
+                  </div>
+                );
+              })}
+              <div style={{ display: 'flex', gap: 16, marginTop: 4, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+                {[['approved', 'var(--status-win)'], ['pending', 'var(--basketball-orange)'], ['waitlisted', 'var(--fg-muted)']].map(([s, c]) => (
+                  <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />
+                    <span style={{ fontSize: 11, color: 'var(--fg-muted)', fontWeight: 600 }}>{regs.filter(r => r.status === s).length} {s}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
 
       {/* Recent registrations */}
       <div>
-        <Eyebrow style={{ marginBottom: 14 }}>Recent Registrations</Eyebrow>
+        <Eyebrow style={{ marginBottom: 12 }}>Recent Registrations</Eyebrow>
         <Card padding={0}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Player', 'Division', 'Date', 'Status'].map(h => (
-                  <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--fg-muted)' }}>{h}</th>
+              <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bone)' }}>
+                {['Player', 'Division', 'Date', 'Paid', 'Waiver', 'Status'].map(h => (
+                  <th key={h} style={{ padding: '9px 14px', textAlign: 'left', fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--fg-muted)' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {recentRegs.map((r, i) => (
-                <tr key={i} style={{ borderBottom: i < recentRegs.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                  <td style={{ padding: '11px 16px', fontSize: 14, fontWeight: 600, color: 'var(--fg)' }}>{r.player}</td>
-                  <td style={{ padding: '11px 16px', fontSize: 13, color: 'var(--fg-muted)' }}>{r.division}</td>
-                  <td style={{ padding: '11px 16px', fontSize: 13, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)' }}>{r.date}</td>
-                  <td style={{ padding: '11px 16px' }}><StatusPill status={r.status} /></td>
+                <tr key={r.id} style={{ borderBottom: i < recentRegs.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                  <td style={{ padding: '11px 14px', fontSize: 14, fontWeight: 600, color: 'var(--fg)' }}>{r.player}</td>
+                  <td style={{ padding: '11px 14px', fontSize: 12, color: 'var(--fg-muted)' }}>{r.division}</td>
+                  <td style={{ padding: '11px 14px', fontSize: 12, color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)' }}>{r.date}</td>
+                  <td style={{ padding: '11px 14px' }}>
+                    <Icon name={r.paid ? 'check-circle' : 'x-circle'} size={15} color={r.paid ? 'var(--status-win)' : 'var(--foul-red)'} />
+                  </td>
+                  <td style={{ padding: '11px 14px' }}>
+                    <Icon name={r.waiver ? 'check-circle' : 'x-circle'} size={15} color={r.waiver ? 'var(--status-win)' : 'var(--basketball-orange)'} />
+                  </td>
+                  <td style={{ padding: '11px 14px' }}><StatusPill status={r.status} /></td>
                 </tr>
               ))}
             </tbody>
