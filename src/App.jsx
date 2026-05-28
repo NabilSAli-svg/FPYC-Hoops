@@ -6,6 +6,7 @@ import FamilyApp from './family/FamilyApp.jsx';
 import RefAdminApp from './refs/RefAdminApp.jsx';
 import CommissionerApp from './commissioner/CommissionerApp.jsx';
 import CoachApp from './coach/CoachApp.jsx';
+import SchedulerApp from './scheduler/SchedulerApp.jsx';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
       <Route path="/refs" element={<RefAdminApp />} />
       <Route path="/commissioner" element={<CommissionerApp />} />
       <Route path="/coach" element={<CoachApp />} />
+      <Route path="/scheduler" element={<SchedulerApp />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
