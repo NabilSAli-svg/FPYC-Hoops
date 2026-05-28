@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, Pill, Button, Icon, Display, Eyebrow, EmptyState, Skeleton } from '../shared/index.js';
-import { usePractices, usePlayers, TEAM_INFO } from '../shared/store.js';
+import { usePractices, usePlayers, TEAM_INFO, useRsvps, countRsvps } from '../shared/store.js';
 import { printGameDay, printPractice } from '../shared/printSheet.js';
 
 const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4', 'OT'];
@@ -14,6 +14,7 @@ const PRACTICE_TYPE_COLOR = {
 export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameAdd, onGo, initialTab = 'games', openNewGame = false, onNewGameClose }) {
   const [practices, setPractices] = usePractices();
   const [players] = usePlayers();
+  const [rsvps] = useRsvps();
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 700);
@@ -167,9 +168,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 6, fontSize: 12, color: 'var(--fg-soft)' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="map-pin" size={12} />{g.location}</span>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="user-check" size={12} />{g.refs || 'Refs TBD'}</span>
-                      {!isFinal && !isLive && g.confirmed && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="check-circle" size={12} color="var(--status-win)" />{g.confirmed} confirmed</span>
-                      )}
+                      {!isFinal && !isLive && (() => { const n = countRsvps(rsvps, g.id); return n > 0 ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="check-circle" size={12} color="var(--status-win)" />{n} confirmed</span> : null; })()}
                     </div>
                   </div>
 

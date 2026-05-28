@@ -43,6 +43,7 @@ const TABS = [
 
 export default function FamilyApp() {
   const [user, setUser] = useState(null);
+  const [userKey, setUserKey] = useState(null);
   const [tab, setTab] = useState('home');
   const [notifPerm, setNotifPerm] = useState(() =>
     'Notification' in window ? Notification.permission : 'unsupported'
@@ -63,7 +64,7 @@ export default function FamilyApp() {
     setNotifBusy(false);
   }, [notifBusy, notifPerm, games]);
 
-  if (!user) return <FamilyLogin onLogin={who => setUser(FAMILIES[who])} />;
+  if (!user) return <FamilyLogin onLogin={who => { setUser(FAMILIES[who]); setUserKey(who); }} />;
 
   const unread = messages.filter(m => m.unread && !readIds.has(m.id)).length;
   const family = user;
@@ -119,7 +120,7 @@ export default function FamilyApp() {
       {/* Content */}
       <div style={{ flex: 1, maxWidth: 640, width: '100%', margin: '0 auto', padding: '20px 16px', paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))' }}>
         {tab === 'home'     && <HomeTab family={family} messages={messages} onTabChange={setTab} />}
-        {tab === 'schedule' && <ScheduleTab />}
+        {tab === 'schedule' && <ScheduleTab familyKey={userKey} />}
         {tab === 'stats'    && <StatsTab family={family} />}
         {tab === 'roster'   && <RosterTab family={family} />}
         {tab === 'messages' && <MessagesTab messages={messages} readIds={readIds} onMarkRead={markRead} />}

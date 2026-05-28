@@ -244,3 +244,16 @@ export function deriveEvents(games, practices) {
 
   return [...gameEvents, ...practiceEvents];
 }
+
+// ─── RSVPs ────────────────────────────────────────────────────────────────────
+// { [gameId]: { [familyKey]: 'yes' | 'no' } }
+// e.g. { g1: { reeves: 'yes', chen: 'no' } }
+
+export function useRsvps() {
+  return useLocalStorage('fpyc-rsvps', {});
+}
+
+export function countRsvps(rsvps, gameId) {
+  const game = rsvps[gameId] || {};
+  return Object.values(game).filter(v => v === 'yes').length;
+}

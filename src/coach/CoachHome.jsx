@@ -1,4 +1,4 @@
-import { usePlayers, useGames, useStats } from '../shared/store.js';
+import { usePlayers, useGames, useStats, useRsvps, countRsvps } from '../shared/store.js';
 import Icon from '../shared/Icon.jsx';
 
 const TEAM = 'Fairfax Hawks';
@@ -8,6 +8,7 @@ export default function CoachHome({ coach }) {
   const [games]   = useGames();
   const [stats]   = useStats();
 
+  const [rsvps] = useRsvps();
   const roster  = players.filter(p => p.team === TEAM && p.status === 'active');
   const played  = games.filter(g => g.status === 'final');
   const upcoming = games.filter(g => g.status === 'scheduled').sort((a, b) => a.date - b.date);
@@ -74,6 +75,7 @@ export default function CoachHome({ coach }) {
               <InfoRow icon="clock"   text={next.time} />
               <InfoRow icon="map-pin" text={next.location} />
               {next.refs && <InfoRow icon="user" text={`Refs: ${next.refs}`} />}
+              {(() => { const n = countRsvps(rsvps, next.id); return n > 0 ? <InfoRow icon="check-circle" text={`${n} player${n !== 1 ? 's' : ''} confirmed`} /> : null; })()}
             </div>
             {next.note && (
               <div style={{ marginTop: 12, padding: '10px 14px', background: '#FFF9E6', border: '1px solid rgba(255,199,44,0.3)', borderRadius: 8, fontSize: 13, color: '#374151', lineHeight: 1.5 }}>

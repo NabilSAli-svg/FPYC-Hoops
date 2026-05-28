@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useLocalStorage } from '../shared/useLocalStorage.js';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
-import { useGames, usePractices, deriveEvents, TEAM_INFO } from '../shared/store.js';
+import { useGames, usePractices, deriveEvents, TEAM_INFO, useRsvps } from '../shared/store.js';
 
 const MONTH_NUM = { Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12' };
 
@@ -22,12 +21,16 @@ function gCalLink(e) {
   return `https://calendar.google.com/calendar/r/eventedit?text=${encodeURIComponent('Hawks ' + e.label)}&dates=${s}/${eh}&location=${encodeURIComponent(e.location + ', Fairfax VA')}&details=${encodeURIComponent('FPYC Basketball')}`;
 }
 
-export default function ScheduleTab() {
+export default function ScheduleTab({ familyKey }) {
   const [games] = useGames();
   const [practices] = usePractices();
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
-  const [rsvps, setRsvps] = useLocalStorage('fpyc-rsvps', {});
+  const [rsvps, setRsvps] = useRsvps();
+
+  const myRsvp = (gameId) => rsvps[gameId]?.[familyKey];
+  const setMyRsvp = (gameId, val) =>
+    setRsvps(r => ({ ...r, [gameId]: { ...(r[gameId] || {}), [familyKey]: val } }));
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 650);
@@ -59,8 +62,9 @@ export default function ScheduleTab() {
       {!liveGame && nextGame && filter === 'all' && (
         <NextGameBanner
           game={nextGame}
-          rsvp={rsvps[nextGame.id]}
-          onRsvp={val => setRsvps(r => ({ ...r, [nextGame.id]: val }))}
+          rsvp={myRsvp(nextGame.id)}
+          onRsvp={val => setMyRsvp(nextGame.id, val)}
+          totalYes={Object.values(rsvps[nextGame.id] || {}).filter(v => v === 'yes').length}
         />
       )}
 
@@ -110,8 +114,8 @@ export default function ScheduleTab() {
               <EventCard
                 key={e.id}
                 event={e}
-                rsvp={rsvps[e.id] ?? e.rsvp}
-                onRsvp={val => setRsvps(r => ({ ...r, [e.id]: val }))}
+                rsvp={myRsvp(e.id)}
+                onRsvp={val => setMyRsvp(e.id, val)}
               />
             ))}
           </div>
@@ -196,7 +200,7 @@ function LiveGameBanner({ game: e }) {
 
 // ─── Next Game Hero ───────────────────────────────────────────────────────────
 
-function NextGameBanner({ game: e, rsvp, onRsvp }) {
+function NextGameBanner({ game: e, rsvp, onRsvp, totalYes = 0 }) {
   const jerseyColor = e.home ? '#0A1F3D' : '#fff';
   const jerseyText  = e.home ? '#fff'    : '#0A1F3D';
   const jerseyLabel = e.home ? 'Navy (home)' : 'White (away)';
@@ -240,10 +244,10 @@ function NextGameBanner({ game: e, rsvp, onRsvp }) {
         </div>
 
         {/* Confirmed RSVP count */}
-        {e.confirmed > 0 && (
+        {totalYes > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--fg-muted)' }}>
             <Icon name="users" size={13} color="var(--status-win)" />
-            <span><span style={{ fontWeight: 700, color: 'var(--status-win)' }}>{e.confirmed}</span> players confirmed</span>
+            <span><span style={{ fontWeight: 700, color: 'var(--status-win)' }}>{totalYes}</span> player{totalYes !== 1 ? 's' : ''} confirmed</span>
           </div>
         )}
 
