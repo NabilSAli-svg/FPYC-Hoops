@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, Pill, Button, Icon, Eyebrow, Display, Skeleton } from '../shared/index.js';
+import { usePractices, useAnnouncements } from '../shared/store.js';
+import { useLocalStorage } from '../shared/useLocalStorage.js';
 
 export default function DashboardView({ team, players, games, onGo }) {
   const [loading, setLoading] = useState(true);
@@ -13,10 +15,54 @@ export default function DashboardView({ team, players, games, onGo }) {
 }
 
 function DashboardContent({ team, players, games, onGo }) {
-  const next = games.find(g => g.status === 'scheduled');
+  const [practices]     = usePractices();
+  const [announcements] = useAnnouncements();
+  const [attendance]    = useLocalStorage('fpyc-attendance', {});
+
+  const next   = games.find(g => g.status === 'scheduled');
   const recent = games.filter(g => g.status === 'final').slice(0, 3);
 
+  // Compute real attendance per practice session
+  const activePlayers = players.filter(p => p.status === 'active');
+  const recentPractices = [...practices].slice(-4);
+  const practiceAttendance = recentPractices.map(p => {
+    const present = activePlayers.filter(pl => (attendance[pl.id]?.[p.id] ?? 'none') === 'present').length;
+    return { label: p.date.split(', ')[1] || p.date, value: present, id: p.id };
+  });
+  const avgAtt = practiceAttendance.length
+    ? Math.round(practiceAttendance.reduce((s, p) => s + p.value, 0) / practiceAttendance.length)
+    : 0;
+  const attPct = activePlayers.length ? Math.round((avgAtt / activePlayers.length) * 100) : 0;
+
+  // Live stats
+  const finalGames = games.filter(g => g.status === 'final');
+  const wins = finalGames.filter(g => g.us > g.them).length;
+  const ppg  = finalGames.length ? (finalGames.reduce((s, g) => s + g.us, 0) / finalGames.length).toFixed(1) : '—';
+
+  // Commissioner announcements (all-families or no target)
+  const leagueAnnouncements = announcements.filter(a => a.target === 'All families').slice(0, 3);
+
   return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+      {/* Season quick stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+        {[
+          { label: 'Record',        value: `${wins}–${finalGames.length - wins}`, icon: 'bar-chart-2',   color: 'var(--court-navy)'        },
+          { label: 'Avg score',     value: ppg,                                   icon: 'trending-up',   color: 'var(--status-win)'        },
+          { label: 'Roster',        value: activePlayers.length,                  icon: 'users',         color: 'var(--court-navy)'        },
+          { label: 'Avg attendance',value: `${attPct}%`,                          icon: 'check-square',  color: attPct >= 80 ? 'var(--status-win)' : 'var(--basketball-orange)' },
+        ].map(s => (
+          <Card key={s.label} padding="14px 16px">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <Eyebrow>{s.label}</Eyebrow>
+              <Icon name={s.icon} size={14} color={s.color} />
+            </div>
+            <Display size={28} color={s.color}>{s.value}</Display>
+          </Card>
+        ))}
+      </div>
+
     <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 20 }}>
       {/* Next game hero */}
       <Card padding={0} style={{ overflow: 'hidden', gridColumn: '1 / -1' }}>
@@ -62,19 +108,23 @@ function DashboardContent({ team, players, games, onGo }) {
             </div>
           </div>
         </div>
-        <div style={{ padding: '14px 26px', display: 'flex', gap: 28, alignItems: 'center', background: 'var(--bone)', borderTop: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Icon name="bus" size={16} color="var(--fg-muted)" />
-            <span style={{ fontSize: 13 }}>Carpool: <strong>3 families volunteered</strong></span>
-          </div>
+        <div style={{ padding: '14px 26px', display: 'flex', gap: 28, alignItems: 'center', background: 'var(--bone)', borderTop: '1px solid var(--border)', flexWrap: 'wrap' }}>
+          {next.note && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Icon name="bus" size={16} color="var(--fg-muted)" />
+              <span style={{ fontSize: 13 }}>{next.note}</span>
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Icon name="shirt" size={16} color="var(--fg-muted)" />
-            <span style={{ fontSize: 13 }}>Jerseys: <strong>Navy (home)</strong></span>
+            <span style={{ fontSize: 13 }}>Jerseys: <strong>{next.home ? 'Navy (home)' : 'White (away)'}</strong></span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Icon name="users" size={16} color="var(--fg-muted)" />
-            <span style={{ fontSize: 13 }}>Referees: <strong>Confirmed</strong></span>
-          </div>
+          {next.refs && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Icon name="user-check" size={16} color="var(--fg-muted)" />
+              <span style={{ fontSize: 13 }}>Refs: <strong>{next.refs}</strong></span>
+            </div>
+          )}
         </div>
       </Card>
 
@@ -90,48 +140,44 @@ function DashboardContent({ team, players, games, onGo }) {
       <Card>
         <SectionHeader title="Practice attendance" subtitle="Last 4 sessions" />
         <div style={{ display: 'flex', gap: 18, marginTop: 14, alignItems: 'flex-end' }}>
-          {[
-            { label: 'Nov 3', value: 11 },
-            { label: 'Nov 5', value: 10 },
-            { label: 'Nov 10', value: 12 },
-            { label: 'Nov 12', value: 9 },
-          ].map((b, i) => (
+          {practiceAttendance.length > 0 ? practiceAttendance.map((b, i) => (
             <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
               <Display size={28}>{b.value}</Display>
               <div style={{ width: '100%', height: 6, background: 'var(--border)', borderRadius: 999, overflow: 'hidden' }}>
-                <div style={{ width: `${(b.value / 12) * 100}%`, height: '100%', background: 'var(--varsity-gold)' }} />
+                <div style={{ width: `${activePlayers.length ? (b.value / activePlayers.length) * 100 : 0}%`, height: '100%', background: 'var(--varsity-gold)', transition: 'width 600ms' }} />
               </div>
               <div style={{ fontSize: 11, color: 'var(--fg-muted)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{b.label}</div>
             </div>
-          ))}
+          )) : (
+            <div style={{ fontSize: 13, color: 'var(--fg-muted)', fontStyle: 'italic' }}>No practices logged yet</div>
+          )}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-          <span style={{ fontSize: 13, color: 'var(--fg-soft)' }}>Avg 87% · {players.length} roster</span>
+          <span style={{ fontSize: 13, color: 'var(--fg-soft)' }}>Avg {attPct}% · {activePlayers.length} active players</span>
           <Button kind="ghost" size="sm" icon="plus" onClick={() => onGo('schedule:practices')}>Log practice</Button>
         </div>
       </Card>
 
       {/* League announcements */}
       <Card style={{ gridColumn: '1 / -1' }}>
-        <SectionHeader title="League announcements" link="Inbox · 2" />
+        <SectionHeader title="Commissioner announcements" link={`${announcements.length} posted`} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginTop: 8 }}>
-          <Announce
-            from="Commissioner Patel" time="2h ago" warn
-            title="Late fees begin November 15"
-            body="Reminder for all coaches: please confirm your roster by Nov 14. Late registrations after the 15th will incur a $45 fee."
-          />
-          <Announce
-            from="Skills Clinic" time="Yesterday"
-            title="Saturday clinic moved to Robinson HS Gym B"
-            body="Due to a scheduling conflict at Lanier MS, this Saturday's K–2 skills clinic will be held at Robinson HS Gym B from 9–10:30am."
-          />
-          <Announce
-            from="Director's office" time="Mon"
-            title="Volunteers needed — scorekeeping"
-            body="We are in need of volunteers for scorekeeping at the Dec 7–8 weekend. One game = one volunteer credit toward next season."
-          />
+          {leagueAnnouncements.length > 0 ? leagueAnnouncements.map(a => (
+            <Announce
+              key={a.id}
+              from="Commissioner" time={a.date}
+              title={a.title} body={a.body}
+              warn={a.type === 'urgent'} pinned={a.pinned}
+              type={a.type}
+            />
+          )) : (
+            <div style={{ padding: '16px 0', fontSize: 13, color: 'var(--fg-muted)', fontStyle: 'italic' }}>
+              No commissioner announcements yet.
+            </div>
+          )}
         </div>
       </Card>
+    </div>
     </div>
   );
 }
@@ -170,11 +216,13 @@ function ResultRow({ game }) {
   );
 }
 
-function Announce({ from, time, title, body, warn }) {
+function Announce({ from, time, title, body, warn, pinned, type }) {
+  const kindLabel = type === 'urgent' ? 'Urgent' : type === 'info' ? 'Info' : 'Notice';
   return (
     <div style={{ padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-        {warn ? <Pill kind="warn">Action needed</Pill> : <Pill kind="neutral">Notice</Pill>}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+        {warn ? <Pill kind="warn">{kindLabel}</Pill> : <Pill kind="neutral">{kindLabel}</Pill>}
+        {pinned && <Pill kind="navy">Pinned</Pill>}
         <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>{from} · {time}</span>
       </div>
       <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>{title}</div>

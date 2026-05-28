@@ -232,44 +232,154 @@ export function News() {
   );
 }
 
+const VOLUNTEER_ROLES = [
+  { icon: 'whistle',      title: 'Head Coach',       commitment: '2–3 hrs/week', desc: 'Run practices, set lineups, communicate with families. No experience required — just patience and enthusiasm.', spots: 2 },
+  { icon: 'clipboard',    title: 'Scorekeeper',       commitment: '2 hrs/game',  desc: 'Track points and fouls at the scorer\'s table. Quick training provided. One game = one volunteer credit.', spots: 8 },
+  { icon: 'users',        title: 'Team Parent',       commitment: '1 hr/week',   desc: 'Coordinate carpools, collect snacks, send reminders. The glue that keeps a team together off the court.', spots: 4 },
+  { icon: 'megaphone',    title: 'Communications',    commitment: '1–2 hrs/week',desc: 'Help manage the website, send newsletters, run social media. Great for parents with a marketing or tech background.', spots: 1 },
+  { icon: 'layout',       title: 'Board Member',      commitment: '4–6 hrs/month',desc: 'Shape FPYC policy, manage budgets, plan the season. Elections held each spring. Open to all FPYC families.', spots: 3 },
+  { icon: 'camera',       title: 'Game Photographer', commitment: 'Per game',    desc: 'Capture game-day moments families will treasure. Share photos with teams after each game day.', spots: 'Open' },
+];
+
 export function FaqContact() {
   const isMobile = useIsMobile();
+  const [volForm, setVolForm] = useState({ name: '', email: '', role: '', note: '' });
+  const [volSent, setVolSent] = useState(false);
+
+  function handleVolSubmit(e) {
+    e.preventDefault();
+    if (!volForm.name.trim() || !volForm.email.trim() || !volForm.role) return;
+    setVolSent(true);
+  }
+
   return (
-    <section id="contact" style={{ maxWidth: 1200, margin: '0 auto', padding: '88px 24px 0' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr', gap: isMobile ? 32 : 56 }}>
-        <div>
-          <SectionHead eyebrow="FAQ" title="Common questions" />
-          <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 0 }}>
-            {[
-              { q: 'When does the season run?', a: 'House League runs December through February, with practices starting in mid-November. Select Travel runs October through March.' },
-              { q: 'Are there tryouts?', a: 'House League does NOT have tryouts — every kid is placed on a team. Select / Travel has tryouts in early September.' },
-              { q: 'How do scholarships work?', a: 'FPYC offers need-based scholarships for any family that asks. There is no separate application — just check the box during registration and the Commissioner will follow up.' },
-              { q: 'Do I have to volunteer?', a: 'No, but FPYC is a 100% volunteer-run nonprofit. Coaches, scorekeepers, and board members are all parents giving time. Volunteer credit reduces next-season fees.' },
-              { q: 'Where are practices held?', a: 'At Fairfax County public school gyms — usually Daniels Run, Providence, Lanier, and Robinson. Specific gym is set after teams are formed.' },
-            ].map((f, i) => <Faq key={i} {...f} />)}
+    <>
+      {/* Volunteer section */}
+      <section id="volunteer" style={{ background: 'var(--court-navy)', padding: '72px 24px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--varsity-gold)', marginBottom: 8 }}>Get involved</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 5vw, 42px)', textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>Volunteer with us</div>
+              <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.65)', marginTop: 10, maxWidth: 540, lineHeight: 1.6 }}>
+                FPYC is 100% volunteer-run. Every coach, scorekeeper, and board member is a parent giving time so kids can play.
+              </p>
+            </div>
+          </div>
+
+          {/* Role cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 14, marginBottom: 48 }}>
+            {VOLUNTEER_ROLES.map(r => (
+              <div key={r.title} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 12, padding: '20px 20px 18px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 8, background: 'rgba(255,199,44,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon name={r.icon} size={18} color="var(--varsity-gold)" />
+                  </div>
+                  <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 999, background: 'rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.55)', letterSpacing: '0.06em' }}>
+                    {typeof r.spots === 'number' ? `${r.spots} spots` : r.spots}
+                  </span>
+                </div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: '#fff', marginBottom: 4 }}>{r.title}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--varsity-gold)', marginBottom: 8, letterSpacing: '0.04em' }}>{r.commitment}</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.55 }}>{r.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Sign-up form */}
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 32, alignItems: 'start' }}>
+            <div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, textTransform: 'uppercase', color: '#fff', lineHeight: 1, marginBottom: 10 }}>Express interest</div>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.60)', lineHeight: 1.6, marginBottom: 0 }}>
+                Fill out the form and the Commissioner will reach out before the season starts. No commitment yet — just let us know you're interested.
+              </p>
+            </div>
+
+            {volSent ? (
+              <div style={{ background: 'rgba(31,138,91,0.15)', border: '1px solid rgba(31,138,91,0.35)', borderRadius: 12, padding: '28px 24px', textAlign: 'center' }}>
+                <Icon name="check-circle" size={36} color="var(--status-win)" />
+                <div style={{ fontWeight: 700, fontSize: 18, color: '#fff', marginTop: 12 }}>Thanks, {volForm.name.split(' ')[0]}!</div>
+                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', marginTop: 6 }}>We'll be in touch at {volForm.email} before the season kicks off.</div>
+                <button onClick={() => { setVolSent(false); setVolForm({ name: '', email: '', role: '', note: '' }); }} style={{ all: 'unset', cursor: 'pointer', marginTop: 16, fontSize: 13, color: 'rgba(255,255,255,0.45)', textDecoration: 'underline', fontFamily: 'var(--font-body)' }}>Submit another response</button>
+              </div>
+            ) : (
+              <form onSubmit={handleVolSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {[
+                  { key: 'name',  label: 'Your name',     placeholder: 'Full name',          type: 'text'  },
+                  { key: 'email', label: 'Email address', placeholder: 'you@email.com',       type: 'email' },
+                ].map(f => (
+                  <div key={f.key}>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>{f.label}</label>
+                    <input type={f.type} value={volForm[f.key]} onChange={e => setVolForm(v => ({ ...v, [f.key]: e.target.value }))} placeholder={f.placeholder} required
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '10px 13px', borderRadius: 8, border: '1.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.07)', color: '#fff', fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none' }} />
+                  </div>
+                ))}
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Role of interest</label>
+                  <select value={volForm.role} onChange={e => setVolForm(v => ({ ...v, role: e.target.value }))} required
+                    style={{ width: '100%', padding: '10px 13px', borderRadius: 8, border: '1.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.07)', color: volForm.role ? '#fff' : 'rgba(255,255,255,0.35)', fontSize: 14, fontFamily: 'var(--font-body)', cursor: 'pointer', outline: 'none' }}>
+                    <option value="" style={{ color: '#111' }}>Select a role…</option>
+                    {VOLUNTEER_ROLES.map(r => <option key={r.title} value={r.title} style={{ color: '#111' }}>{r.title} — {r.commitment}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Anything else? <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+                  <textarea value={volForm.note} onChange={e => setVolForm(v => ({ ...v, note: e.target.value }))} placeholder="Availability, prior experience, questions…" rows={3}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 13px', borderRadius: 8, border: '1.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.07)', color: '#fff', fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none', resize: 'vertical' }} />
+                </div>
+                <button type="submit" style={{ padding: '13px', borderRadius: 8, border: 'none', background: 'var(--varsity-gold)', color: 'var(--court-navy)', fontFamily: 'var(--font-body)', fontWeight: 800, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  Submit interest <Icon name="arrow-right" size={15} color="var(--court-navy)" />
+                </button>
+              </form>
+            )}
           </div>
         </div>
+      </section>
 
-        <aside id="volunteer" style={{ background: 'var(--court-navy)', color: '#fff', borderRadius: 14, padding: 32, alignSelf: 'start', ...(isMobile ? {} : { position: 'sticky', top: 92 }) }}>
-          <div style={{ height: 4, background: 'var(--varsity-gold)', borderRadius: 2, width: 48, marginBottom: 18 }} />
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, lineHeight: 1, textTransform: 'uppercase', marginBottom: 10 }}>Volunteer with us</div>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.78)', lineHeight: 1.55, marginBottom: 22 }}>
-            FPYC is completely volunteer-based. Coaches, refs, scorekeepers, and admins — every role is a parent or community member showing up for kids.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 22 }}>
-            <ContactItem icon="phone"   label="Commissioner of Basketball" value="(703) 425-7000" />
-            <ContactItem icon="mail"    label="Email"                      value="basketball@fpycsports.com" />
-            <ContactItem icon="map-pin" label="Office"                     value="3955 Pickett Rd, Fairfax VA" />
+      {/* FAQ + Contact */}
+      <section id="contact" style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 24px 0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr', gap: isMobile ? 32 : 56 }}>
+          <div>
+            <SectionHead eyebrow="FAQ" title="Common questions" />
+            <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 0 }}>
+              {[
+                { q: 'When does the season run?', a: 'House League runs December through February, with practices starting in mid-November. Select Travel runs October through March.' },
+                { q: 'Are there tryouts?', a: 'House League does NOT have tryouts — every kid is placed on a team. Select / Travel has tryouts in early September.' },
+                { q: 'How do scholarships work?', a: 'FPYC offers need-based scholarships for any family that asks. There is no separate application — just check the box during registration and the Commissioner will follow up.' },
+                { q: 'Do I have to volunteer?', a: 'No, but FPYC is a 100% volunteer-run nonprofit. Coaches, scorekeepers, and board members are all parents giving time. Volunteer credit reduces next-season fees.' },
+                { q: 'Where are practices held?', a: 'At Fairfax County public school gyms — usually Daniels Run, Providence, Lanier, and Robinson. Specific gym is set after teams are formed.' },
+                { q: 'What\'s the refund policy?', a: 'Full refund minus a $50 admin fee through November 30. No refunds after December 1 once the season has begun.' },
+              ].map((f, i) => <Faq key={i} {...f} />)}
+            </div>
           </div>
-          <a href="#volunteer" style={{
-            background: 'var(--varsity-gold)', color: 'var(--court-navy)',
-            padding: '12px 18px', borderRadius: 8, textDecoration: 'none',
-            fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-          }}>I want to coach <Icon name="arrow-right" size={14} /></a>
-        </aside>
-      </div>
-    </section>
+
+          <aside style={{ alignSelf: 'start', ...(isMobile ? {} : { position: 'sticky', top: 92 }) }}>
+            <div style={{ background: 'var(--court-navy)', borderRadius: 14, padding: 28, marginBottom: 16 }}>
+              <div style={{ height: 4, background: 'var(--varsity-gold)', borderRadius: 2, width: 48, marginBottom: 16 }} />
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: 1, textTransform: 'uppercase', color: '#fff', marginBottom: 18 }}>Get in touch</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <ContactItem icon="phone"   label="Commissioner of Basketball" value="(703) 425-7000" />
+                <ContactItem icon="mail"    label="Email"                      value="basketball@fpycsports.org" />
+                <ContactItem icon="map-pin" label="Office"                     value="3955 Pickett Rd, Fairfax VA 22030" />
+                <ContactItem icon="clock"   label="Office hours"               value="Mon–Fri 9am–5pm" />
+              </div>
+            </div>
+            <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 14, padding: 24 }}>
+              <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--court-navy)', marginBottom: 6 }}>Mailing address</div>
+              <div style={{ fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.7 }}>
+                FPYC Basketball<br />
+                3955 Pickett Road<br />
+                Fairfax, VA 22030
+              </div>
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--court-navy)', marginBottom: 6 }}>About FPYC</div>
+                <div style={{ fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.6 }}>The Fairfax Police Youth Club is a 501(c)(3) nonprofit serving Fairfax County youth since 1951. Basketball registration fees support programs, gym rentals, and equipment.</div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </>
   );
 }
 
