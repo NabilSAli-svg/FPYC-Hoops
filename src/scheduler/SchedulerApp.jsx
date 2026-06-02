@@ -34,7 +34,7 @@ export default function SchedulerApp() {
               return (
                 <button key={t.id} onClick={() => setTab(t.id)} style={{
                   display: 'flex', alignItems: 'center', gap: 7,
-                  padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  padding: '8px 16px', border: 'none', cursor: 'pointer',
                   background: active ? 'rgba(255,255,255,0.15)' : 'transparent',
                   color: active ? '#fff' : 'rgba(255,255,255,0.55)',
                   fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13,
