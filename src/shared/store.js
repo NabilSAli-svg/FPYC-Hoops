@@ -172,24 +172,61 @@ export function useDraftState() {
 // ─── Playoff Bracket ──────────────────────────────────────────────────────────
 // 4-team single-elimination. Seeds are indices into the seeds array.
 
-export const INITIAL_BRACKET = {
-  status: 'setup',  // 'setup' | 'semis' | 'finals' | 'complete'
-  division: 'Boys 5–6 House',
-  season: '2025–26',
-  seeds: [
+const DIVISION_SEEDS = {
+  'Boys 5–6 House': [
     { seed: 1, name: 'Centreville Eagles', record: '8–1', fpyc: false },
     { seed: 2, name: 'Fairfax Hawks',       record: '6–3', fpyc: true  },
     { seed: 3, name: 'Vienna Storm',        record: '5–4', fpyc: false },
     { seed: 4, name: 'Reston Wolves',       record: '5–4', fpyc: false },
   ],
-  semis: [
-    { id: 's1', top: 0, bottom: 3, scoreTop: null, scoreBottom: null, winner: null, date: 'Sat, Jan 11', time: '10:00 AM', location: 'Robinson Secondary · Gym B' },
-    { id: 's2', top: 1, bottom: 2, scoreTop: null, scoreBottom: null, winner: null, date: 'Sat, Jan 11', time: '11:30 AM', location: 'Robinson Secondary · Gym B' },
+  'Girls 5–6 House': [
+    { seed: 1, name: 'Arlington Stars',  record: '7–2', fpyc: false },
+    { seed: 2, name: 'McLean Cardinals', record: '6–3', fpyc: false },
+    { seed: 3, name: 'Vienna Rockets',   record: '5–4', fpyc: false },
+    { seed: 4, name: 'Fairfax Wolves',   record: '4–5', fpyc: true  },
   ],
-  final: { top: null, bottom: null, scoreTop: null, scoreBottom: null, winner: null, date: 'Sat, Jan 18', time: '10:00 AM', location: 'Robinson Secondary · Gym A' },
-  champion: null,
+  'Boys 7–8 Select': [
+    { seed: 1, name: 'Fairfax Eagles', record: '8–1', fpyc: true  },
+    { seed: 2, name: 'McLean Select',  record: '7–2', fpyc: false },
+    { seed: 3, name: 'Reston Select',  record: '5–4', fpyc: false },
+    { seed: 4, name: 'Arlington Gold', record: '4–5', fpyc: false },
+  ],
+  'Girls 3–4 House': [
+    { seed: 1, name: 'Arlington Aces',  record: '7–2', fpyc: false },
+    { seed: 2, name: 'Reston Stars',    record: '6–3', fpyc: false },
+    { seed: 3, name: 'Vienna Flames',   record: '5–4', fpyc: false },
+    { seed: 4, name: 'Fairfax Cougars', record: '3–6', fpyc: true  },
+  ],
 };
 
+function makeBracket(division) {
+  return {
+    status: 'setup',
+    division,
+    season: '2025–26',
+    seeds: DIVISION_SEEDS[division],
+    semis: [
+      { id: 's1', top: 0, bottom: 3, scoreTop: null, scoreBottom: null, winner: null, date: 'Sat, Jan 11', time: '10:00 AM', location: 'Robinson Secondary · Gym B' },
+      { id: 's2', top: 1, bottom: 2, scoreTop: null, scoreBottom: null, winner: null, date: 'Sat, Jan 11', time: '11:30 AM', location: 'Robinson Secondary · Gym B' },
+    ],
+    final: { top: null, bottom: null, scoreTop: null, scoreBottom: null, winner: null, date: 'Sat, Jan 18', time: '10:00 AM', location: 'Robinson Secondary · Gym A' },
+    champion: null,
+  };
+}
+
+export const INITIAL_BRACKETS = {
+  'Boys 5–6 House':  makeBracket('Boys 5–6 House'),
+  'Girls 5–6 House': makeBracket('Girls 5–6 House'),
+  'Boys 7–8 Select': makeBracket('Boys 7–8 Select'),
+  'Girls 3–4 House': makeBracket('Girls 3–4 House'),
+};
+
+export function useBrackets() {
+  return useLocalStorage('fpyc-brackets', INITIAL_BRACKETS);
+}
+
+// Legacy single-bracket shim (Boys 5–6 House) — used by SeasonRecap
+export const INITIAL_BRACKET = INITIAL_BRACKETS['Boys 5–6 House'];
 export function useBracket() {
   return useLocalStorage('fpyc-bracket', INITIAL_BRACKET);
 }

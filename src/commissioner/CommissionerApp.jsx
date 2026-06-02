@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 import { csvDownload } from '../shared/csvDownload.js';
-import { useDraftState, DRAFT_PLAYERS, DRAFT_TEAMS, buildSnakeOrder, INITIAL_DRAFT, useBracket, INITIAL_BRACKET, useAnnouncements, useRegistrations, usePlayers } from '../shared/store.js';
+import { useDraftState, DRAFT_PLAYERS, DRAFT_TEAMS, buildSnakeOrder, INITIAL_DRAFT, useBrackets, INITIAL_BRACKETS, useAnnouncements, useRegistrations, usePlayers } from '../shared/store.js';
 
 const CREDENTIALS = { username: 'commissioner', password: 'fpyc2025' };
 
@@ -117,7 +117,7 @@ const SEASON_WEEKS = [
 ];
 
 function DashboardTab({ isMobile }) {
-  const [bracket]       = useBracket();
+  const [brackets]      = useBrackets();
   const [announcements] = useAnnouncements();
   const [regs]          = useRegistrations();
   const total     = regs.length;
@@ -128,14 +128,18 @@ function DashboardTab({ isMobile }) {
   const waiverMissing = regs.filter(r => r.status === 'approved' && !r.waiver).length;
   const recentRegs = [...regs].reverse().slice(0, 5);
 
-  const bracketPhase = bracket.status === 'setup' ? 'Not started' : bracket.status === 'semis' ? 'Semis live' : bracket.status === 'finals' ? 'Finals live' : 'Complete';
-  const bracketColor = bracket.status === 'setup' ? 'var(--fg-muted)' : bracket.status === 'complete' ? 'var(--status-win)' : 'var(--basketball-orange)';
+  const bracketDivs  = Object.values(brackets);
+  const liveCount    = bracketDivs.filter(b => b.status === 'semis' || b.status === 'finals').length;
+  const doneCount    = bracketDivs.filter(b => b.status === 'complete').length;
+  const bracketPhase = doneCount === bracketDivs.length ? 'All complete' : liveCount > 0 ? `${liveCount} live` : doneCount > 0 ? `${doneCount}/${bracketDivs.length} done` : 'Setup';
+  const bracketColor = doneCount > 0 ? 'var(--status-win)' : liveCount > 0 ? 'var(--basketball-orange)' : 'var(--fg-muted)';
+  const champNames   = bracketDivs.filter(b => b.champion != null).map(b => b.seeds[b.champion]?.name).filter(Boolean);
 
   const kpis = [
     { label: 'Players registered', value: total,    sub: `${approved} approved · ${pending} pending`,   icon: 'users',        color: 'var(--court-navy)'        },
     { label: 'Revenue collected',  value: `$${revenue.toLocaleString()}`, sub: `${regs.filter(r=>r.paid).length} of ${total} paid`, icon: 'dollar-sign', color: 'var(--status-win)' },
     { label: 'Need action',        value: pending + waiverMissing, sub: `${pending} pending · ${waiverMissing} waivers missing`, icon: 'alert-triangle', color: pending + waiverMissing > 0 ? 'var(--basketball-orange)' : 'var(--status-win)' },
-    { label: 'Bracket',            value: bracketPhase, sub: bracket.champion != null ? `Champion: ${bracket.seeds[bracket.champion]?.name}` : 'Season 2025–26', icon: 'trophy', color: bracketColor },
+    { label: 'Brackets',           value: bracketPhase, sub: champNames.length > 0 ? `${champNames.length} champion${champNames.length > 1 ? 's' : ''} crowned` : 'Season 2025–26', icon: 'trophy', color: bracketColor },
   ];
 
   const alerts = [
@@ -955,7 +959,14 @@ const ghostBtn = { all: 'unset', cursor: 'pointer', display: 'inline-flex', alig
 // ─── Bracket Tab ──────────────────────────────────────────────────────────────
 
 function BracketTab({ isMobile }) {
-  const [bracket, setBracket] = useBracket();
+  const [brackets, setBrackets] = useBrackets();
+  const DIV_NAMES = Object.keys(INITIAL_BRACKETS);
+  const [activeDiv, setActiveDiv] = useState(DIV_NAMES[0]);
+
+  const bracket    = brackets[activeDiv] || INITIAL_BRACKETS[activeDiv];
+  const setBracket = (updater) =>
+    setBrackets(all => ({ ...all, [activeDiv]: typeof updater === 'function' ? updater(all[activeDiv]) : updater }));
+
   const [scores, setScores] = useState({});
 
   const { seeds, semis, final, status } = bracket;
@@ -996,7 +1007,7 @@ function BracketTab({ isMobile }) {
   }
 
   function resetBracket() {
-    setBracket({ ...INITIAL_BRACKET });
+    setBracket({ ...INITIAL_BRACKETS[activeDiv] });
     setScores({});
   }
 
@@ -1054,10 +1065,32 @@ function BracketTab({ isMobile }) {
     );
   }
 
+  const divSelector = (
+    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
+      {DIV_NAMES.map(d => {
+        const b = brackets[d];
+        const active = d === activeDiv;
+        const statusDot = b.status === 'complete' ? 'var(--status-win)' : b.status === 'setup' ? 'var(--border)' : 'var(--basketball-orange)';
+        return (
+          <button key={d} onClick={() => { setActiveDiv(d); setScores({}); }} style={{
+            padding: '7px 14px', borderRadius: 999, border: `1.5px solid ${active ? 'var(--court-navy)' : 'var(--border)'}`,
+            background: active ? 'var(--court-navy)' : '#fff', color: active ? '#fff' : 'var(--fg)',
+            fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 6, transition: 'all 120ms',
+          }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: active ? 'var(--varsity-gold)' : statusDot, flexShrink: 0 }} />
+            {d}
+          </button>
+        );
+      })}
+    </div>
+  );
+
   // ── Setup ──
   if (status === 'setup') {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {divSelector}
         <Card padding={22}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
             <div>
@@ -1127,6 +1160,7 @@ function BracketTab({ isMobile }) {
     const semisComplete = semis.every(s => getScore(s.id, 'top') !== '' && getScore(s.id, 'bottom') !== '');
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {divSelector}
         <div style={{ background: 'var(--court-navy)', borderRadius: 12, padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--varsity-gold)', marginBottom: 4 }}>Semifinals</div>
@@ -1166,6 +1200,7 @@ function BracketTab({ isMobile }) {
     const bottomTeam = seeds[final.bottom];
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {divSelector}
         <div style={{ background: 'var(--court-navy)', borderRadius: 12, padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--varsity-gold)', marginBottom: 4 }}>Championship Game</div>
@@ -1191,6 +1226,7 @@ function BracketTab({ isMobile }) {
   const champ = seeds[bracket.champion];
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {divSelector}
       <div style={{ background: 'var(--court-navy)', borderRadius: 12, overflow: 'hidden' }}>
         <div style={{ background: 'var(--varsity-gold)', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 10 }}>
           <Icon name="trophy" size={20} color="var(--court-navy)" />

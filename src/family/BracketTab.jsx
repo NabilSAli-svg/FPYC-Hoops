@@ -1,8 +1,10 @@
-import { useBracket } from '../shared/store.js';
+import { useBrackets, INITIAL_BRACKETS, TEAMS_INFO } from '../shared/store.js';
 import Icon from '../shared/Icon.jsx';
 
 export default function BracketTab({ childTeam }) {
-  const [bracket] = useBracket();
+  const [brackets] = useBrackets();
+  const childDiv = TEAMS_INFO[childTeam]?.division || Object.keys(INITIAL_BRACKETS)[0];
+  const bracket = brackets[childDiv] || INITIAL_BRACKETS[childDiv];
   const { status, seeds, semis, final } = bracket;
 
   const champ = bracket.champion != null ? seeds[bracket.champion] : null;
