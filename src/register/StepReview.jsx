@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BackBtn } from './StepProgram.jsx';
-import { usePlayers } from '../shared/store.js';
+import { usePlayers, useRegistrations } from '../shared/store.js';
 
 const PROGRAM_PRICES  = { house: 195, clinic: 95, travel: 425 };
 const PROGRAM_LABELS  = { house: 'House League', clinic: 'Skills Clinic', travel: 'Travel Select' };
@@ -37,6 +37,7 @@ export default function StepReview({ data, back, isMobile }) {
   const [processing, setProcessing] = useState(false);
   const [confirmNum] = useState(() => 'FPYC-' + Math.random().toString(36).slice(2, 8).toUpperCase());
   const [, setPlayers] = usePlayers();
+  const [, setRegistrations] = useRegistrations();
 
   const prog   = data.program;
   const player = data.player;
@@ -60,9 +61,14 @@ export default function StepReview({ data, back, isMobile }) {
     if (!cardValid) return;
     setProcessing(true);
     setTimeout(() => {
+      const division = deriveDivision(player.gender, player.grade, prog?.id || 'house');
+      const waiverSigned = !!(data.waivers?.concussion && data.waivers?.seasonal);
+      const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+      let nextId;
       setPlayers(prev => {
         const ids = prev.map(p => parseInt(p.id.replace('p', ''), 10)).filter(n => !isNaN(n));
-        const nextId = 'p' + (Math.max(0, ...ids) + 1);
+        nextId = 'p' + (Math.max(0, ...ids) + 1);
         const newPlayer = {
           id: nextId,
           number: Math.floor(Math.random() * 49) + 1,
@@ -73,15 +79,34 @@ export default function StepReview({ data, back, isMobile }) {
           phone: p1.phone || '',
           position: 'Guard',
           status: 'pending',
-          waiver: data.waivers?.concussion && data.waivers?.seasonal,
+          waiver: waiverSigned,
           program: prog ? PROGRAM_LABELS[prog.id] : 'House League',
-          division: deriveDivision(player.gender, player.grade, prog?.id || 'house'),
-          team: 'TBD',
+          division,
+          team: 'Unassigned',
           regDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
           confirmNum,
         };
         return [...prev, newPlayer];
       });
+
+      setRegistrations(prev => {
+        const ids = prev.map(r => parseInt(r.id.replace('r', ''), 10)).filter(n => !isNaN(n));
+        const regId = 'r' + (Math.max(0, ...ids) + 1);
+        return [...prev, {
+          id: regId,
+          parent: `${p1.firstName?.[0] || ''}. ${p1.lastName || ''}`.trim(),
+          player: `${player.firstName} ${player.lastName}`,
+          grade: gradeShort(player.grade),
+          division,
+          date: dateStr,
+          paid: true,
+          waiver: waiverSigned,
+          status: 'pending',
+          playerId: nextId,
+          confirmNum,
+        }];
+      });
+
       setProcessing(false);
       setSubmitted(true);
     }, 2200);

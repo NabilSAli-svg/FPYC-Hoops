@@ -287,6 +287,30 @@ export function deriveEvents(games, practices) {
   return [...gameEvents, ...practiceEvents];
 }
 
+// ─── Registrations ───────────────────────────────────────────────────────────
+
+export const INITIAL_REGISTRATIONS = [
+  { id: 'r1',  parent: 'A. Reeves',    player: 'Jordan Reeves',   grade: '6th', division: 'Boys 5–6 House',  date: 'Oct 3',  paid: true,  waiver: true,  status: 'approved', playerId: 'p1' },
+  { id: 'r2',  parent: 'L. Chen',      player: 'Maya Chen',       grade: '5th', division: 'Boys 5–6 House',  date: 'Oct 3',  paid: true,  waiver: true,  status: 'approved', playerId: 'p2' },
+  { id: 'r3',  parent: 'K. Brooks',    player: 'Devon Brooks',    grade: '6th', division: 'Boys 7–8 Select', date: 'Oct 5',  paid: true,  waiver: true,  status: 'approved', playerId: null },
+  { id: 'r4',  parent: 'P. Whitaker',  player: 'Sam Whitaker',    grade: '5th', division: 'Boys 5–6 House',  date: 'Oct 7',  paid: true,  waiver: true,  status: 'approved', playerId: null },
+  { id: 'r5',  parent: 'R. Singh',     player: 'Tariq Singh',     grade: '6th', division: 'Boys 5–6 House',  date: 'Oct 8',  paid: true,  waiver: false, status: 'approved', playerId: null },
+  { id: 'r6',  parent: 'M. Romero',    player: 'Alex Romero',     grade: '5th', division: 'Boys 5–6 House',  date: 'Oct 9',  paid: true,  waiver: true,  status: 'approved', playerId: null },
+  { id: 'r7',  parent: 'G. Bianchi',   player: 'Luca Bianchi',    grade: '6th', division: 'Boys 5–6 House',  date: 'Oct 10', paid: true,  waiver: true,  status: 'approved', playerId: null },
+  { id: 'r8',  parent: 'H. Park',      player: 'Ethan Park',      grade: '6th', division: 'Boys 5–6 House',  date: 'Oct 12', paid: false, waiver: false, status: 'pending',  playerId: null },
+  { id: 'r9',  parent: 'O. Adeyemi',   player: 'Tolu Adeyemi',    grade: '5th', division: 'Boys 5–6 House',  date: 'Nov 28', paid: false, waiver: false, status: 'pending',  playerId: null },
+  { id: 'r10', parent: 'P. Walsh',     player: 'Casey Walsh',     grade: '5th', division: 'Girls 5–6 House', date: 'Nov 27', paid: true,  waiver: false, status: 'pending',  playerId: null },
+  { id: 'r11', parent: 'R. Hernandez', player: 'Sofia Hernandez', grade: '4th', division: 'Girls 3–4 House', date: 'Nov 24', paid: false, waiver: false, status: 'pending',  playerId: null },
+  { id: 'r12', parent: 'T. Morrison',  player: 'Jake Morrison',   grade: '5th', division: 'Boys 5–6 House',  date: 'Nov 22', paid: true,  waiver: true,  status: 'approved', playerId: null },
+  { id: 'r13', parent: 'D. Okafor',    player: 'Imani Okafor',    grade: '7th', division: 'Boys 7–8 Select', date: 'Nov 20', paid: true,  waiver: true,  status: 'waitlisted', playerId: null },
+  { id: 'r14', parent: 'V. Patel',     player: 'Noah Patel',      grade: '5th', division: 'Boys 5–6 House',  date: 'Oct 15', paid: true,  waiver: true,  status: 'approved', playerId: null },
+  { id: 'r15', parent: 'B. Walker',    player: 'Imani Walker',    grade: '5th', division: 'Boys 5–6 House',  date: 'Oct 11', paid: true,  waiver: false, status: 'approved', playerId: null },
+];
+
+export function useRegistrations() {
+  return useLocalStorage('fpyc-registrations', INITIAL_REGISTRATIONS);
+}
+
 // ─── RSVPs ────────────────────────────────────────────────────────────────────
 // { [gameId]: { [familyKey]: 'yes' | 'no' } }
 // e.g. { g1: { reeves: 'yes', chen: 'no' } }

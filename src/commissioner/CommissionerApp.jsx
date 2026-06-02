@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 import { csvDownload } from '../shared/csvDownload.js';
-import { useDraftState, DRAFT_PLAYERS, DRAFT_TEAMS, buildSnakeOrder, INITIAL_DRAFT, useBracket, INITIAL_BRACKET, useAnnouncements } from '../shared/store.js';
+import { useDraftState, DRAFT_PLAYERS, DRAFT_TEAMS, buildSnakeOrder, INITIAL_DRAFT, useBracket, INITIAL_BRACKET, useAnnouncements, useRegistrations, usePlayers } from '../shared/store.js';
 
 const CREDENTIALS = { username: 'commissioner', password: 'fpyc2025' };
 
@@ -15,23 +15,6 @@ const TEAMS = [
   { name: 'Fairfax Cougars', division: 'Girls 3–4 House', coach: 'D. Park',     email: 'dpark@fpycsports.com',    phone: '(703) 555-0218', players: 10, record: '3–6', seed: '6th', color: 'var(--basketball-orange)' },
 ];
 
-const INITIAL_REGS = [
-  { id: 'r1',  parent: 'A. Reeves',    player: 'Jordan Reeves',   grade: '6th', division: 'Boys 5–6 House',  date: 'Oct 3',  paid: true,  waiver: true,  status: 'approved' },
-  { id: 'r2',  parent: 'L. Chen',      player: 'Maya Chen',       grade: '5th', division: 'Boys 5–6 House',  date: 'Oct 3',  paid: true,  waiver: true,  status: 'approved' },
-  { id: 'r3',  parent: 'K. Brooks',    player: 'Devon Brooks',    grade: '6th', division: 'Boys 7–8 Select', date: 'Oct 5',  paid: true,  waiver: true,  status: 'approved' },
-  { id: 'r4',  parent: 'P. Whitaker',  player: 'Sam Whitaker',    grade: '5th', division: 'Boys 5–6 House',  date: 'Oct 7',  paid: true,  waiver: true,  status: 'approved' },
-  { id: 'r5',  parent: 'R. Singh',     player: 'Tariq Singh',     grade: '6th', division: 'Boys 5–6 House',  date: 'Oct 8',  paid: true,  waiver: false, status: 'approved' },
-  { id: 'r6',  parent: 'M. Romero',    player: 'Alex Romero',     grade: '5th', division: 'Boys 5–6 House',  date: 'Oct 9',  paid: true,  waiver: true,  status: 'approved' },
-  { id: 'r7',  parent: 'G. Bianchi',   player: 'Luca Bianchi',    grade: '6th', division: 'Boys 5–6 House',  date: 'Oct 10', paid: true,  waiver: true,  status: 'approved' },
-  { id: 'r8',  parent: 'H. Park',      player: 'Ethan Park',      grade: '6th', division: 'Boys 5–6 House',  date: 'Oct 12', paid: false, waiver: false, status: 'pending' },
-  { id: 'r9',  parent: 'O. Adeyemi',   player: 'Tolu Adeyemi',    grade: '5th', division: 'Boys 5–6 House',  date: 'Nov 28', paid: false, waiver: false, status: 'pending' },
-  { id: 'r10', parent: 'P. Walsh',     player: 'Casey Walsh',     grade: '5th', division: 'Girls 5–6 House', date: 'Nov 27', paid: true,  waiver: false, status: 'pending' },
-  { id: 'r11', parent: 'R. Hernandez', player: 'Sofia Hernandez', grade: '4th', division: 'Girls 3–4 House', date: 'Nov 24', paid: false, waiver: false, status: 'pending' },
-  { id: 'r12', parent: 'T. Morrison',  player: 'Jake Morrison',   grade: '5th', division: 'Boys 5–6 House',  date: 'Nov 22', paid: true,  waiver: true,  status: 'approved' },
-  { id: 'r13', parent: 'D. Okafor',    player: 'Imani Okafor',    grade: '7th', division: 'Boys 7–8 Select', date: 'Nov 20', paid: true,  waiver: true,  status: 'waitlisted' },
-  { id: 'r14', parent: 'V. Patel',     player: 'Noah Patel',      grade: '5th', division: 'Boys 5–6 House',  date: 'Oct 15', paid: true,  waiver: true,  status: 'approved' },
-  { id: 'r15', parent: 'B. Walker',    player: 'Imani Walker',    grade: '5th', division: 'Boys 5–6 House',  date: 'Oct 11', paid: true,  waiver: false, status: 'approved' },
-];
 
 const INITIAL_ANNOUNCEMENTS = [
   { id: 'a1', title: 'Late fees begin November 15', body: 'Registration fees increase by $45 after Nov 15. Please complete registration before this date to avoid the surcharge.', target: 'All families', date: 'Nov 1', author: 'Commissioner' },
@@ -136,8 +119,7 @@ const SEASON_WEEKS = [
 function DashboardTab({ isMobile }) {
   const [bracket]       = useBracket();
   const [announcements] = useAnnouncements();
-
-  const regs = INITIAL_REGS;
+  const [regs]          = useRegistrations();
   const total     = regs.length;
   const approved  = regs.filter(r => r.status === 'approved').length;
   const pending   = regs.filter(r => r.status === 'pending').length;
@@ -407,12 +389,18 @@ function TeamsTab() {
 // ─── Registrations Tab ───────────────────────────────────────────────────────
 
 function RegistrationsTab({ isMobile }) {
-  const [regs, setRegs] = useState(INITIAL_REGS);
+  const [regs, setRegs] = useRegistrations();
+  const [, setPlayers]  = usePlayers();
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterDivision, setFilterDivision] = useState('All');
 
   function updateStatus(id, newStatus) {
+    const reg = regs.find(r => r.id === id);
     setRegs(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
+    if (reg?.playerId) {
+      const playerStatus = newStatus === 'approved' ? 'active' : 'pending';
+      setPlayers(prev => prev.map(p => p.id === reg.playerId ? { ...p, status: playerStatus } : p));
+    }
   }
 
   const filtered = regs.filter(r => {
