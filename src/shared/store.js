@@ -265,6 +265,61 @@ export const INITIAL_STATS = {
     p7: { pts:  2, ast: 2, reb:  3, fls: 2 },
     p8: { pts:  2, ast: 1, reb:  5, fls: 1 },
   },
+  // Fairfax Wolves — Girls 5–6 House (p12, p15, p16)
+  gw3: { // W 38–35 vs McLean Cardinals
+    p12: { pts:  9, ast: 2, reb: 4, fls: 1 },
+    p15: { pts: 11, ast: 3, reb: 5, fls: 2 },
+    p16: { pts:  8, ast: 1, reb: 7, fls: 3 },
+  },
+  gw4: { // W 42–28 vs Herndon Thunder
+    p12: { pts:  6, ast: 3, reb: 3, fls: 2 },
+    p15: { pts: 14, ast: 2, reb: 6, fls: 1 },
+    p16: { pts: 10, ast: 1, reb: 8, fls: 2 },
+  },
+  gw5: { // L 31–44 vs Arlington Stars
+    p12: { pts:  4, ast: 1, reb: 2, fls: 3 },
+    p15: { pts:  9, ast: 4, reb: 4, fls: 2 },
+    p16: { pts:  8, ast: 0, reb: 9, fls: 4 },
+  },
+  gw6: { // L 29–36 vs Reston Blaze
+    p12: { pts:  3, ast: 2, reb: 3, fls: 2 },
+    p15: { pts:  7, ast: 3, reb: 3, fls: 3 },
+    p16: { pts:  6, ast: 1, reb: 6, fls: 2 },
+  },
+  // Fairfax Eagles — Boys 7–8 Select (p13, p14)
+  ge3: { // W 62–48 vs McLean Select
+    p13: { pts: 22, ast: 4, reb:  8, fls: 2 },
+    p14: { pts: 18, ast: 7, reb:  5, fls: 1 },
+  },
+  ge4: { // W 57–41 vs Arlington Gold
+    p13: { pts: 19, ast: 5, reb: 10, fls: 3 },
+    p14: { pts: 16, ast: 6, reb:  4, fls: 2 },
+  },
+  ge5: { // W 54–39 vs Reston Select
+    p13: { pts: 16, ast: 3, reb:  7, fls: 2 },
+    p14: { pts: 14, ast: 8, reb:  3, fls: 1 },
+  },
+  ge6: { // L 44–51 vs Vienna Elite
+    p13: { pts: 14, ast: 2, reb:  6, fls: 4 },
+    p14: { pts: 12, ast: 5, reb:  4, fls: 3 },
+  },
+  // Fairfax Cougars — Girls 3–4 House (p17, p18)
+  gc3: { // L 24–31 vs Reston Stars
+    p17: { pts:  8, ast: 2, reb: 4, fls: 2 },
+    p18: { pts:  6, ast: 0, reb: 7, fls: 3 },
+  },
+  gc4: { // W 29–18 vs Herndon Comets
+    p17: { pts: 10, ast: 3, reb: 5, fls: 1 },
+    p18: { pts:  9, ast: 1, reb: 8, fls: 2 },
+  },
+  gc5: { // W 26–22 vs McLean Gems
+    p17: { pts:  7, ast: 4, reb: 3, fls: 2 },
+    p18: { pts:  8, ast: 0, reb: 9, fls: 1 },
+  },
+  gc6: { // L 17–35 vs Arlington Aces
+    p17: { pts:  4, ast: 1, reb: 3, fls: 3 },
+    p18: { pts:  2, ast: 0, reb: 5, fls: 2 },
+  },
 };
 
 export function useStats() {
