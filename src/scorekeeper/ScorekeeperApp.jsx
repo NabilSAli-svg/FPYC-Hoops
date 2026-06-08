@@ -150,6 +150,16 @@ function ScorekeeperMain() {
     setPlayerStats(prev => ({ ...prev, [pid]: { ...prev[pid], [field]: val } }));
   }
 
+  function handleGoLive() {
+    if (scoreUs === '' || scoreThem === '') { setScoreError('Enter both scores to push live.'); return; }
+    const us = parseInt(scoreUs);
+    const them = parseInt(scoreThem);
+    if (isNaN(us) || isNaN(them) || us < 0 || them < 0) { setScoreError('Scores must be non-negative numbers.'); return; }
+    setScoreError('');
+    setGames(prev => prev.map(g => g.id === selectedId ? { ...g, status: 'live', us, them } : g));
+    setSaved(false);
+  }
+
   function handleSave() {
     if (scoreUs === '' || scoreThem === '') { setScoreError('Both scores are required.'); return; }
     const us = parseInt(scoreUs);
@@ -229,6 +239,7 @@ function ScorekeeperMain() {
             setPlayerStat={setPlayerStat}
             scoreError={scoreError}
             onSave={handleSave}
+            onGoLive={handleGoLive}
             saved={saved}
             setSaved={setSaved}
           />
@@ -240,7 +251,7 @@ function ScorekeeperMain() {
 
 // ── Score entry panel ─────────────────────────────────────────────────────────
 
-function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, setScoreThem, playerStats, setPlayerStat, scoreError, onSave, saved, setSaved }) {
+function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, setScoreThem, playerStats, setPlayerStat, scoreError, onSave, onGoLive, saved, setSaved }) {
   const playerTotal = Object.values(playerStats).reduce((sum, s) => sum + (parseInt(s.pts) || 0), 0);
   const teamScore = parseInt(scoreUs) || 0;
   const ptsMismatch = teamScore > 0 && playerTotal !== teamScore;
@@ -350,12 +361,18 @@ function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, 
         </div>
       </div>
 
-      {/* Save button */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 14 }}>
+      {/* Save buttons */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         {saved && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#059669', fontWeight: 700 }}>
             <Icon name="check-circle" size={15} color="#059669" /> Saved successfully
           </div>
+        )}
+        {game.status !== 'final' && (
+          <button onClick={onGoLive} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px', borderRadius: 10, border: '1.5px solid var(--basketball-orange)', background: 'rgba(232,119,34,0.08)', color: 'var(--basketball-orange)', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--basketball-orange)', flexShrink: 0 }} />
+            Push to Scoreboard
+          </button>
         )}
         <button onClick={onSave} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px', borderRadius: 10, border: 'none', background: 'var(--court-navy)', color: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
           <Icon name="save" size={16} color="#fff" />
