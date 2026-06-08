@@ -69,6 +69,7 @@ export default function Footer() {
           { label: 'Skills Clinic',   href: '/register' },
           { label: 'Schedules',       href: '/#schedule' },
           { label: 'Standings',       href: '/#season' },
+          { label: 'Live scoreboard', href: '/scoreboard' },
         ]} />
         <FooterCol title="Help" items={[
           { label: 'Registration',  href: '/register' },

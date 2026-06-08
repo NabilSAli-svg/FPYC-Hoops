@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
+import { useGames } from '../shared/store.js';
 
 const NAV_ITEMS = [
   { id: 'programs',  label: 'Programs' },
@@ -12,6 +13,8 @@ const NAV_ITEMS = [
 
 export default function Header({ onJump }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [games] = useGames();
+  const isLive = games.some(g => g.status === 'live');
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -44,6 +47,15 @@ export default function Header({ onJump }) {
         </nav>
 
         <div style={{ flex: 1 }} />
+
+        <a href="/scoreboard" className="desk-hide" style={{
+          fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13, color: isLive ? '#fff' : 'rgba(255,255,255,0.75)',
+          textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap',
+          display: 'inline-flex', alignItems: 'center', gap: 7,
+        }}>
+          {isLive && <span className="pulse-dot" style={{ width: 7, height: 7, borderRadius: '50%', background: '#DC2626', display: 'inline-block', flexShrink: 0 }} />}
+          {isLive ? 'Live now' : 'Scoreboard'}
+        </a>
 
         <a href="/family" className="desk-hide" style={{
           fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13, color: 'rgba(255,255,255,0.75)',
@@ -90,6 +102,15 @@ export default function Header({ onJump }) {
               padding: '16px 24px', borderBottom: '1px solid var(--border)',
             }}>{it.label}</a>
           ))}
+          <a href="/scoreboard" onClick={closeMenu} style={{
+            color: 'var(--court-navy)', textDecoration: 'none',
+            fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 15,
+            padding: '16px 24px', borderBottom: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            {isLive && <span className="pulse-dot" style={{ width: 7, height: 7, borderRadius: '50%', background: '#DC2626', display: 'inline-block', flexShrink: 0 }} />}
+            {isLive ? 'Live now · Scoreboard' : 'Scoreboard'}
+          </a>
           <a href="/family" onClick={closeMenu} style={{
             color: 'var(--court-navy)', textDecoration: 'none',
             fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 15,
