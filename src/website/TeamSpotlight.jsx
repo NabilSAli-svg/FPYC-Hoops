@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { useGames, useStandings, INITIAL_STANDINGS, PLAYOFF_SPOTS } from '../shared/store.js';
 import { TEAM_INFO } from '../shared/store.js';
 import { SectionHead } from './Programs.jsx';
@@ -161,8 +162,8 @@ export default function TeamSpotlight() {
                   const gb = i === 0 ? '—' : gbVal === 0 ? '—' : gbVal % 1 === 0 ? String(gbVal) : gbVal.toFixed(1);
                   const inPlayoffs = i < PLAYOFF_SPOTS;
                   return (
-                    <>
-                      <tr key={row.rank} style={{ background: row.fpyc ? 'rgba(255,199,44,0.07)' : '#fff', fontWeight: row.fpyc ? 700 : 400 }}>
+                    <Fragment key={row.rank}>
+                      <tr style={{ background: row.fpyc ? 'rgba(255,199,44,0.07)' : '#fff', fontWeight: row.fpyc ? 700 : 400 }}>
                         <td style={{ padding: '10px 14px', textAlign: 'center', fontSize: 13, fontWeight: 700, color: inPlayoffs ? 'var(--status-win)' : 'var(--fg-muted)' }}>{row.rank}</td>
                         <td style={{ padding: '10px 14px', fontSize: 13 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -184,7 +185,7 @@ export default function TeamSpotlight() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })}
               </tbody>

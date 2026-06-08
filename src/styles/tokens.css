@@ -163,7 +163,7 @@ html, body {
   .mob-stack  { flex-direction: column !important; }
   .mob-p-sm   { padding: 16px !important; }
 }
-@media (min-width: 769px) {
+@media (max-width: 768px) {
   .desk-hide { display: none !important; }
 }
 @media (max-width: 1024px) {
