@@ -124,7 +124,7 @@ export default function AdminApp() {
           {view === 'evaluations' && <EvaluationsView players={teamPlayers.filter(p => p.status !== 'inactive')} />}
           {view === 'draftboard'  && <DraftBoardView />}
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} />}
-          {view === 'season'      && <SeasonView games={teamGames} />}
+          {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} />}
           {view === 'settings'    && <SettingsView />}
         </div>
       </div>

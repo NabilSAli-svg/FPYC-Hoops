@@ -1,25 +1,14 @@
-import { useGames } from '../shared/store.js';
+import { useGames, useStandings, INITIAL_STANDINGS, PLAYOFF_SPOTS } from '../shared/store.js';
 import { TEAM_INFO } from '../shared/store.js';
 import { SectionHead } from './Programs.jsx';
 import Icon from '../shared/Icon.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
 
-const STANDINGS = [
-  { rank: 1, team: 'Centreville Eagles', fpyc: false, w: 8, l: 1 },
-  { rank: 2, team: 'Fairfax Hawks',      fpyc: true,  w: 6, l: 3 },
-  { rank: 3, team: 'Vienna Storm',       fpyc: false, w: 5, l: 4 },
-  { rank: 4, team: 'Reston Wolves',      fpyc: false, w: 5, l: 4 },
-  { rank: 5, team: 'Oakton Patriots',    fpyc: false, w: 4, l: 5 },
-  { rank: 6, team: 'McLean Mustangs',    fpyc: false, w: 3, l: 6 },
-  { rank: 7, team: 'Burke Lakers',       fpyc: false, w: 2, l: 7 },
-  { rank: 8, team: 'Springfield Bulls',  fpyc: false, w: 1, l: 8 },
-];
-
-const PLAYOFF_SPOTS = 4;
-
 export default function TeamSpotlight() {
   const isMobile = useIsMobile();
   const [games] = useGames();
+  const [standings] = useStandings();
+  const STANDINGS = standings[TEAM_INFO.division] || INITIAL_STANDINGS[TEAM_INFO.division];
 
   const liveGame   = games.find(g => g.status === 'live');
   const nextGame   = games.find(g => g.status === 'scheduled');

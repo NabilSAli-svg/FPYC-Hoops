@@ -1,4 +1,5 @@
 import { Card, Display, Eyebrow, Pill } from '../shared/index.js';
+import { useStandings, INITIAL_STANDINGS } from '../shared/store.js';
 
 function ScoringChart({ games }) {
   const final = [...games].filter(g => g.status === 'final').reverse();
@@ -60,25 +61,16 @@ function computeStats(games) {
   };
 }
 
-const STANDINGS = [
-  { rank: 1, team: 'Centreville Eagles', w: 8, l: 1, pf: 524, pa: 398, streak: 'W3', home: true },
-  { rank: 2, team: 'Fairfax Hawks',      w: 6, l: 3, pf: 487, pa: 423, streak: 'W2', home: true },
-  { rank: 3, team: 'Vienna Storm',       w: 5, l: 4, pf: 461, pa: 448, streak: 'L1', home: false },
-  { rank: 4, team: 'Reston Wolves',      w: 5, l: 4, pf: 439, pa: 441, streak: 'W1', home: false },
-  { rank: 5, team: 'Oakton Patriots',    w: 4, l: 5, pf: 412, pa: 459, streak: 'L2', home: false },
-  { rank: 6, team: 'McLean Mustangs',    w: 3, l: 6, pf: 398, pa: 467, streak: 'L3', home: false },
-  { rank: 7, team: 'Burke Lakers',       w: 2, l: 7, pf: 374, pa: 492, streak: 'L4', home: false },
-  { rank: 8, team: 'Springfield Bulls',  w: 1, l: 8, pf: 352, pa: 520, streak: 'L5', home: false },
-];
-
 const LEADERS = [
   { stat: 'Points', leaders: [{ name: 'Jordan Reeves', value: '18.4', team: 'Fairfax Hawks' }, { name: 'Tariq Singh', value: '16.2', team: 'Fairfax Hawks' }, { name: 'Devon Brooks', value: '14.8', team: 'Fairfax Hawks' }] },
   { stat: 'Rebounds', leaders: [{ name: 'Tariq Singh', value: '9.1', team: 'Fairfax Hawks' }, { name: 'Devon Brooks', value: '7.4', team: 'Fairfax Hawks' }, { name: 'Sam Whitaker', value: '6.8', team: 'Fairfax Hawks' }] },
   { stat: 'Assists', leaders: [{ name: 'Maya Chen', value: '6.3', team: 'Fairfax Hawks' }, { name: 'Alex Romero', value: '5.1', team: 'Fairfax Hawks' }, { name: 'Jordan Reeves', value: '4.7', team: 'Fairfax Hawks' }] },
 ];
 
-export default function SeasonView({ games = [] }) {
+export default function SeasonView({ games = [], team = 'Fairfax Hawks', division = 'Boys 5–6 House' }) {
   const s = computeStats(games);
+  const [standings] = useStandings();
+  const STANDINGS = standings[division] || INITIAL_STANDINGS[division];
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Season summary banner */}
@@ -134,7 +126,7 @@ export default function SeasonView({ games = [] }) {
         <Card padding={0}>
           <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Display size={20}>Division standings</Display>
-            <Pill kind="navy">Boys 5–6 House</Pill>
+            <Pill kind="navy">{division}</Pill>
           </div>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -146,14 +138,14 @@ export default function SeasonView({ games = [] }) {
             </thead>
             <tbody>
               {STANDINGS.map((row, i) => {
-                const isUs = row.team === 'Fairfax Hawks';
+                const isUs = row.team === team;
                 const displayRow = isUs ? { ...row, w: s.wins, l: s.losses, streak: s.streak } : row;
                 const pct = displayRow.w + displayRow.l > 0
                   ? (displayRow.w / (displayRow.w + displayRow.l)).toFixed(3).replace(/^0/, '')
                   : '.000';
                 const leader = STANDINGS[0];
-                const leaderW = leader.team === 'Fairfax Hawks' ? s.wins : leader.w;
-                const leaderL = leader.team === 'Fairfax Hawks' ? s.losses : leader.l;
+                const leaderW = leader.team === team ? s.wins : leader.w;
+                const leaderL = leader.team === team ? s.losses : leader.l;
                 const gbVal = ((leaderW - displayRow.w) + (displayRow.l - leaderL)) / 2;
                 const gb = i === 0 ? '—' : gbVal === 0 ? '—' : gbVal % 1 === 0 ? String(gbVal) : gbVal.toFixed(1);
                 const isPlayoffCutoff = i === 3;
