@@ -43,7 +43,8 @@ export default function Standings() {
         </div>
 
         {/* Table */}
-        <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+        <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', minWidth: 480 }}>
           {/* Header */}
           <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 56px 56px 56px 56px 64px 64px', gap: 0, padding: '10px 16px', background: 'var(--court-navy)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
             {['#', 'Team', 'W', 'L', 'PF', 'PA', '+/−', 'Streak'].map((h, i) => (
@@ -134,6 +135,7 @@ export default function Standings() {
               </div>
             );
           })}
+        </div>
         </div>
 
         {/* Legend */}

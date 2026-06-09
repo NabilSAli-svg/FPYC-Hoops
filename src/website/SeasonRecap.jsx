@@ -62,9 +62,10 @@ export default function SeasonRecap() {
         </div>
 
         {/* FPYC Teams */}
+        <style>{`@media(max-width:639px){.recap-grid{grid-template-columns:1fr!important}}`}</style>
         <div style={{ marginBottom: 40 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 16 }}>FPYC Teams This Season</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+          <div className="recap-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
             {FPYC_TEAMS.map(t => (
               <div key={t.name} style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${t.playoff ? 'rgba(255,199,44,0.3)' : 'rgba(255,255,255,0.08)'}`, borderLeft: `4px solid ${t.color}`, borderRadius: '0 12px 12px 0', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -85,7 +86,7 @@ export default function SeasonRecap() {
         {/* Awards */}
         <div style={{ marginBottom: 40 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 16 }}>Season Awards</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+          <div className="recap-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
             {AWARDS.map(a => (
               <div key={a.award} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 10, padding: '14px 16px', display: 'flex', gap: 12, alignItems: 'center' }}>
                 <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(255,199,44,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>

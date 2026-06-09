@@ -89,12 +89,13 @@ export default function SeasonCalendar() {
         {/* Timeline */}
         <div style={{ position: 'relative' }}>
           {/* Connecting line */}
-          <div style={{
+          <div className="cal-hline" style={{
             position: 'absolute', top: 28, left: 27, right: 27, height: 2,
             background: 'var(--border)', zIndex: 0,
           }} />
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(9, 1fr)', gap: 12, position: 'relative', zIndex: 1 }}>
+          <style>{`@media(max-width:639px){.cal-grid{display:flex!important;flex-direction:column!important}.cal-hline{display:none!important}}`}</style>
+          <div className="cal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(9, 1fr)', gap: 12, position: 'relative', zIndex: 1 }}>
             {EVENTS.map((e, i) => {
               const c = CAT[e.category];
               return (

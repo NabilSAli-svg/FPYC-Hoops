@@ -26,7 +26,7 @@ function scrollTo(id) {
 
 export default function WebsiteApp() {
   return (
-    <>
+    <div style={{ overflowX: 'clip' }}>
       <Header onJump={scrollTo} />
       <main id="top" style={{ scrollBehavior: 'smooth' }}>
         <Hero onRegister={() => scrollTo('register')} />
@@ -45,6 +45,6 @@ export default function WebsiteApp() {
         <FaqContact />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

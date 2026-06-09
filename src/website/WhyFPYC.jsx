@@ -45,8 +45,9 @@ export default function WhyFPYC() {
   return (
     <section style={{ background: 'var(--bone)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
       {/* Stats strip */}
+      <style>{`@media(max-width:639px){.stats-grid{grid-template-columns:repeat(2,1fr)!important}.stats-grid>div{border-right:none!important;border-bottom:1px solid rgba(255,255,255,0.10)}.pillars-grid{grid-template-columns:1fr!important}}`}</style>
       <div style={{ background: 'var(--court-navy)', backgroundImage: 'radial-gradient(circle at 70% 50%, rgba(255,199,44,0.10), transparent 60%)' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0 }}>
+        <div className="stats-grid" style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0 }}>
           {STATS.map((s, i) => (
             <div key={i} style={{ textAlign: 'center', padding: '0 24px', borderRight: i < STATS.length - 1 ? '1px solid rgba(255,255,255,0.10)' : 'none' }}>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, color: 'var(--varsity-gold)', lineHeight: 1 }}>{s.value}</div>
@@ -63,7 +64,7 @@ export default function WhyFPYC() {
           title="Built for every kid"
           sub="FPYC Basketball is Fairfax County's largest youth basketball program — from first-time players to competitive travel teams."
         />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginTop: 44 }}>
+        <div className="pillars-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginTop: 44 }}>
           {PILLARS.map((p, i) => (
             <div key={i} style={{
               background: '#fff',
