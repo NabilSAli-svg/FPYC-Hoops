@@ -2,7 +2,6 @@ import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
 import { usePlayers, useStats } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
-import { useIsMobile } from '../shared/useIsMobile.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
