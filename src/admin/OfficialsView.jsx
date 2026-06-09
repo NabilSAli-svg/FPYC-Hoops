@@ -424,7 +424,7 @@ export default function OfficialsView() {
             </div>
           </div>
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: isMobile ? 500 : 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: isMobile ? 'auto' : 500 }}>
               <thead>
                 <tr style={{ background: 'var(--bone)' }}>
                   {['Official', 'Cert', 'Games', 'Rate', 'Amount due', 'Status', ''].map(h => (

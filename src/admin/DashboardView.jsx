@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, Pill, Button, Icon, Eyebrow, Display, Skeleton } from '../shared/index.js';
 import { usePractices, useAnnouncements } from '../shared/store.js';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
+import { useIsMobile } from '../shared/useIsMobile.js';
 
 export default function DashboardView({ team, players, games, onGo }) {
   const [loading, setLoading] = useState(true);
@@ -18,6 +19,7 @@ function DashboardContent({ team, players, games, onGo }) {
   const [practices]     = usePractices();
   const [announcements] = useAnnouncements();
   const [attendance]    = useLocalStorage('fpyc-attendance', {});
+  const isMobile        = useIsMobile();
 
   const next   = games.find(g => g.status === 'scheduled');
   const recent = games.filter(g => g.status === 'final').slice(0, 3);
@@ -46,7 +48,7 @@ function DashboardContent({ team, players, games, onGo }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
       {/* Season quick stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12 }}>
         {[
           { label: 'Record',        value: `${wins}–${finalGames.length - wins}`, icon: 'bar-chart-2',   color: 'var(--court-navy)'        },
           { label: 'Avg score',     value: ppg,                                   icon: 'trending-up',   color: 'var(--status-win)'        },
@@ -71,8 +73,8 @@ function DashboardContent({ team, players, games, onGo }) {
           color: '#fff',
           padding: '22px 26px',
           display: 'grid',
-          gridTemplateColumns: '1fr auto 1fr',
-          gap: 28,
+          gridTemplateColumns: isMobile ? '1fr' : '1fr auto 1fr',
+          gap: isMobile ? 16 : 28,
           alignItems: 'center',
           backgroundImage: 'radial-gradient(circle at 92% 10%, rgba(255,199,44,0.12), transparent 50%), radial-gradient(circle at 8% 90%, rgba(232,119,34,0.10), transparent 55%)',
         }}>

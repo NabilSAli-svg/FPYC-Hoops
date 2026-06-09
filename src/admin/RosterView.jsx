@@ -180,9 +180,11 @@ export default function RosterView({ team, players, setPlayers }) {
 
       {/* Table */}
       <Card padding={0}>
+        <div style={{ overflowX: 'auto' }}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.7fr auto',
+          minWidth: 680,
           padding: '12px 18px',
           background: 'var(--bone)', borderBottom: '1px solid var(--border)',
           fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700,
@@ -244,6 +246,7 @@ export default function RosterView({ team, players, setPlayers }) {
             </div>
           </div>
         ))}
+        </div>
       </Card>
 
       {/* Add / Edit Modal */}
