@@ -1,3 +1,4 @@
+import { cloneElement } from 'react';
 import { Icon, Display } from '../shared/index.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 
@@ -91,7 +92,9 @@ export default function TopBar({ title, breadcrumb, action, onMenuToggle }) {
         }} />
       </button>
 
-      {action}
+      {action && (isMobile
+        ? cloneElement(action, { style: { ...action.props.style, padding: '0 10px', width: 36, height: 36, justifyContent: 'center' }, children: null })
+        : action)}
     </header>
   );
 }

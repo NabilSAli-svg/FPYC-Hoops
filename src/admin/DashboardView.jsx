@@ -73,7 +73,7 @@ function DashboardContent({ team, players, games, onGo }) {
         ))}
       </div>
 
-    <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 20 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.6fr 1fr', gap: 20 }}>
       {/* Next game hero */}
       {!next ? (
         <Card padding="32px 26px" style={{ gridColumn: '1 / -1', textAlign: 'center' }}>
