@@ -156,6 +156,14 @@ function GameCard({ game: g, variant }) {
           <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: isLive ? 'var(--varsity-gold)' : 'rgba(255,255,255,0.4)' }}>
             {isLive ? 'In Progress' : isFinal ? 'Final' : g.time}
           </span>
+          {isLive && (
+            <span style={{
+              fontSize: 9, fontWeight: 900,
+              padding: '2px 7px', borderRadius: 999,
+              background: 'var(--varsity-gold)', color: 'var(--court-navy)',
+              letterSpacing: '0.08em',
+            }}>LIVE</span>
+          )}
           {isScheduled && (
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>· {g.day}</span>
           )}
