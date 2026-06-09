@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
 import { useGames, usePlayers, useStats } from '../shared/store.js';
+import { useIsMobile } from '../shared/useIsMobile.js';
 
 const CREDENTIALS = { username: 'scorekeeper', password: 'fpyc2025' };
 
@@ -109,9 +110,7 @@ function ScorekeeperMain() {
   const [stats, setStats] = useStats();
   const [selectedId, setSelectedId] = useState(null);
   const [saved, setSaved] = useState(false);
-
-  const gameTeam = selectedGame?.team || 'Fairfax Hawks';
-  const rosterPlayers = players.filter(p => p.team === gameTeam && p.status !== 'inactive');
+  const isMobile = useIsMobile();
 
   const scheduled = games.filter(g => g.status === 'scheduled' || g.status === 'live').sort((a, b) => {
     const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
@@ -123,6 +122,8 @@ function ScorekeeperMain() {
   });
 
   const selectedGame = selectedId ? games.find(g => g.id === selectedId) : null;
+  const gameTeam = selectedGame?.team || 'Fairfax Hawks';
+  const rosterPlayers = players.filter(p => p.team === gameTeam && p.status !== 'inactive');
 
   function selectGame(game) {
     setSelectedId(game.id);
@@ -185,7 +186,7 @@ function ScorekeeperMain() {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 24, alignItems: 'start' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '320px 1fr', gap: 24, alignItems: 'start' }}>
 
       {/* Game list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -252,6 +253,7 @@ function ScorekeeperMain() {
 // ── Score entry panel ─────────────────────────────────────────────────────────
 
 function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, setScoreThem, playerStats, setPlayerStat, scoreError, onSave, onGoLive, saved, setSaved }) {
+  const gameTeam = game?.team || 'Fairfax Hawks';
   const playerTotal = Object.values(playerStats).reduce((sum, s) => sum + (parseInt(s.pts) || 0), 0);
   const teamScore = parseInt(scoreUs) || 0;
   const ptsMismatch = teamScore > 0 && playerTotal !== teamScore;
