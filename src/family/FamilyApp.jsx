@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
-import { useMessages, useGames } from '../shared/store.js';
+import { useMessages, useGames, useAnnouncements } from '../shared/store.js';
 import Icon from '../shared/Icon.jsx';
 import FamilyLogin from './FamilyLogin.jsx';
 import HomeTab from './HomeTab.jsx';
@@ -53,10 +53,17 @@ export default function FamilyApp() {
   const [notifBusy, setNotifBusy] = useState(false);
 
   const [readIdsArr, setReadIdsArr] = useLocalStorage('fpyc-read-msgs', []);
-  const [messages] = useMessages();
-  const [games]    = useGames();
+  const [seenAnnIds, setSeenAnnIds] = useLocalStorage('fpyc-seen-announcements', []);
+  const [messages]      = useMessages();
+  const [games]         = useGames();
+  const [announcements] = useAnnouncements();
   const readIds = new Set(readIdsArr);
   const markRead = (id) => setReadIdsArr(arr => arr.includes(id) ? arr : [...arr, id]);
+  const markAnnouncementsSeen = (ids) => setSeenAnnIds(arr => {
+    const s = new Set(arr);
+    ids.forEach(id => s.add(id));
+    return [...s];
+  });
 
   const handleBell = useCallback(async () => {
     if (notifBusy || notifPerm === 'denied' || notifPerm === 'unsupported') return;
@@ -70,6 +77,12 @@ export default function FamilyApp() {
 
   const unread = messages.filter(m => m.unread && !readIds.has(m.id)).length;
   const family = user;
+
+  // Count unseen announcements relevant to this family
+  const seenSet = new Set(seenAnnIds);
+  const unseenAnnouncements = announcements.filter(
+    a => (a.target === 'All families' || a.target === family.child.team) && !seenSet.has(a.id)
+  ).length;
 
   return (
     <div style={{
@@ -121,7 +134,7 @@ export default function FamilyApp() {
 
       {/* Content */}
       <div style={{ flex: 1, maxWidth: 640, width: '100%', margin: '0 auto', padding: '20px 16px', paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))' }}>
-        {tab === 'home'     && <HomeTab family={family} messages={messages} onTabChange={setTab} />}
+        {tab === 'home'     && <HomeTab family={family} messages={messages} onTabChange={setTab} onAnnouncementsSeen={markAnnouncementsSeen} />}
         {tab === 'schedule' && <ScheduleTab familyKey={userKey} childTeam={family.child.team} />}
         {tab === 'stats'    && <StatsTab family={family} />}
         {tab === 'bracket'  && <BracketTab childTeam={family.child.team} />}
@@ -140,7 +153,7 @@ export default function FamilyApp() {
       }}>
         {TABS.map(t => {
           const active = tab === t.id;
-          const showBadge = t.id === 'messages' && unread > 0;
+          const showBadge = (t.id === 'messages' && unread > 0) || (t.id === 'home' && unseenAnnouncements > 0);
           return (
             <button key={t.id} onClick={() => setTab(t.id)} style={{
               flex: 1, padding: '10px 8px 12px', background: 'none', border: 'none', cursor: 'pointer',
@@ -156,7 +169,7 @@ export default function FamilyApp() {
                 <Icon name={t.icon} size={22} color={active ? 'var(--court-navy)' : '#9CA3AF'} />
                 {showBadge && (
                   <span style={{ position: 'absolute', top: -4, right: -6, width: 16, height: 16, borderRadius: '50%', background: 'var(--basketball-orange)', color: '#fff', fontSize: 9, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {unread}
+                    {t.id === 'messages' ? unread : unseenAnnouncements}
                   </span>
                 )}
               </div>
