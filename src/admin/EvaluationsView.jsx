@@ -170,7 +170,7 @@ export default function EvaluationsView({ players }) {
                 <Jersey number={p.number} size={28} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--court-navy)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                    {p.name.split(' ')[1]}
+                    {(p.name || '').split(' ')[1] || p.name}
                     {dirty && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--basketball-orange)', display: 'inline-block', flexShrink: 0 }} />}
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.position}</div>

@@ -69,7 +69,7 @@ export default function RosterView({ team, players, setPlayers }) {
   }
 
   function openEdit(p) {
-    const [firstName, ...rest] = p.name.split(' ');
+    const [firstName, ...rest] = (p.name || '').split(' ');
     setForm({
       firstName,
       lastName: rest.join(' '),

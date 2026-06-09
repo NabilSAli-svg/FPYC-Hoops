@@ -169,7 +169,7 @@ function GameCard({ game: g, variant }) {
           )}
         </div>
         <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'right', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {g.location}
+          {g.location || 'Location TBD'}
         </span>
       </div>
 

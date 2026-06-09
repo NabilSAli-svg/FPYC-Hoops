@@ -101,7 +101,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
     }
   }, [openNewGame]);
 
-  if (loading) return <ScheduleSkeleton tab={tab} setTab={setTab} games={games} />;
+  if (loading) return <ScheduleSkeleton tab={tab} setTab={setTab} games={games} practices={practices} />;
   return (
     <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Tab bar */}
@@ -169,6 +169,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="map-pin" size={12} />{g.location}</span>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="user-check" size={12} />{g.refs || 'Refs TBD'}</span>
                       {!isFinal && !isLive && (() => { const n = countRsvps(rsvps, g.id); return n > 0 ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name="check-circle" size={12} color="var(--status-win)" />{n} confirmed</span> : null; })()}
+                      {g.score_pin && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 7px', borderRadius: 6, background: 'rgba(10,31,61,0.07)', fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 11, color: 'var(--court-navy)', letterSpacing: '0.12em' }} title="Scorekeeper PIN"><Icon name="key" size={11} color="var(--court-navy)" />PIN: {g.score_pin}</span>}
                     </div>
                   </div>
 
@@ -240,7 +241,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
                     <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--court-navy)', textTransform: 'uppercase', lineHeight: 1.1, textAlign: 'center', marginTop: 2 }}>
                       {p.date.split(', ')[1]}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--fg-soft)', fontWeight: 500, marginTop: 2 }}>{p.time.split('–')[0]}</div>
+                    <div style={{ fontSize: 11, color: 'var(--fg-soft)', fontWeight: 500, marginTop: 2 }}>{(p.time || '').split('–')[0]}</div>
                   </div>
 
                   <div>
@@ -375,6 +376,9 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
             <FormField label="Notes (optional)">
               <input placeholder="Carpool, jersey color, etc." value={newGame.notes} onChange={e => setNewGame(g => ({ ...g, notes: e.target.value }))} style={inputStyle} />
             </FormField>
+            <FormField label="Scorekeeper PIN (4 digits)">
+              <input placeholder="e.g. 4821" value={newGame.score_pin || ''} onChange={e => setNewGame(g => ({ ...g, score_pin: e.target.value.replace(/\D/g, '').slice(0, 4) }))} maxLength={4} inputMode="numeric" style={{ ...inputStyle, fontFamily: 'var(--font-mono)', letterSpacing: '0.15em' }} />
+            </FormField>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
             <Button kind="ghost" onClick={() => setShowNewGame(false)}>Cancel</Button>
@@ -400,9 +404,10 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
                 location: newGame.location,
                 home: newGame.home,
                 note: newGame.notes || undefined,
+                score_pin: newGame.score_pin || undefined,
                 confirmed: 0,
               });
-              setNewGame({ date: '', time: '', opponent: '', location: '', home: true, notes: '' });
+              setNewGame({ date: '', time: '', opponent: '', location: '', home: true, notes: '', score_pin: '' });
               setShowNewGame(false);
             }}>Add game</Button>
           </div>
@@ -550,7 +555,7 @@ function FormField({ label, children, style }) {
 
 const inputStyle = { padding: '9px 12px', borderRadius: 7, border: '1.5px solid var(--border)', fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none', width: '100%', boxSizing: 'border-box', color: 'var(--fg)' };
 
-function ScheduleSkeleton({ tab, setTab, games }) {
+function ScheduleSkeleton({ tab, setTab, games, practices = [] }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Tab bar — shown as-is */}

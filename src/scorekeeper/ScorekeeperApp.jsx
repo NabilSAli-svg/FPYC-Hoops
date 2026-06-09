@@ -1,17 +1,9 @@
 import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
-import { useGames, usePlayers, useStats } from '../shared/store.js';
-import { useIsMobile } from '../shared/useIsMobile.js';
-
-const CREDENTIALS = { username: 'scorekeeper', password: 'fpyc2025' };
+import { usePlayers, useStats } from '../shared/store.js';
+import { supabase } from '../shared/supabase.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-function blankPlayerStats(playerIds) {
-  const s = {};
-  playerIds.forEach(id => { s[id] = { pts: '', reb: '', ast: '', fls: '' }; });
-  return s;
-}
 
 function totalPts(playerStats) {
   return Object.values(playerStats).reduce((sum, s) => sum + (parseInt(s.pts) || 0), 0);
@@ -20,59 +12,67 @@ function totalPts(playerStats) {
 // ── Main app ──────────────────────────────────────────────────────────────────
 
 export default function ScorekeeperApp() {
-  const [authed, setAuthed] = useState(false);
-  const [form, setForm] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
-  const [showPw, setShowPw] = useState(false);
+  const [game, setGame] = useState(null);
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  function handleLogin(e) {
+  async function handlePinSubmit(e) {
     e.preventDefault();
-    if (form.username === CREDENTIALS.username && form.password === CREDENTIALS.password) {
-      setAuthed(true);
-    } else {
-      setError('Invalid credentials.');
-    }
+    if (pin.length !== 4) { setPinError('PIN must be 4 digits.'); return; }
+    setLoading(true); setPinError('');
+    const { data, error } = await supabase
+      .from('games')
+      .select('*')
+      .eq('score_pin', pin.trim())
+      .neq('status', 'cancelled')
+      .single();
+    setLoading(false);
+    if (error || !data) { setPinError('No game found for that PIN. Check with the commissioner.'); return; }
+    setGame(data);
   }
 
-  if (!authed) {
+  function handleSignOut() {
+    setGame(null);
+    setPin('');
+    setPinError('');
+  }
+
+  if (!game) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-body)', padding: 24 }}>
         <div style={{ background: '#fff', borderRadius: 16, padding: '36px 32px', width: '100%', maxWidth: 380, boxShadow: '0 24px 64px rgba(0,0,0,0.35)' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: 28 }}>
             <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 44, objectFit: 'contain', marginBottom: 4 }} />
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, textTransform: 'uppercase', color: 'var(--court-navy)', letterSpacing: '0.04em' }}>Scorekeeper</div>
-            <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 600 }}>Post-game score & stat entry</div>
+            <div style={{ fontSize: 12, color: '#6B7280', fontWeight: 600 }}>Enter game PIN to begin</div>
           </div>
 
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <LoginField label="Username">
-              <input value={form.username} onChange={e => { setForm(f => ({ ...f, username: e.target.value })); setError(''); }}
-                placeholder="scorekeeper" autoComplete="username" style={inputSt} />
-            </LoginField>
-            <LoginField label="Password">
-              <div style={{ position: 'relative' }}>
-                <input type={showPw ? 'text' : 'password'} value={form.password}
-                  onChange={e => { setForm(f => ({ ...f, password: e.target.value })); setError(''); }}
-                  placeholder="••••••••" autoComplete="current-password" style={{ ...inputSt, paddingRight: 44 }} />
-                <button type="button" onClick={() => setShowPw(v => !v)}
-                  style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                  <Icon name={showPw ? 'eye-off' : 'eye'} size={17} color="#9CA3AF" />
-                </button>
-              </div>
-            </LoginField>
-            {error && (
+          <form onSubmit={handlePinSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Game PIN</label>
+              <input
+                value={pin}
+                onChange={e => { setPin(e.target.value.replace(/\D/g, '').slice(0, 4)); setPinError(''); }}
+                placeholder="4-digit PIN"
+                inputMode="numeric"
+                maxLength={4}
+                style={{ ...inputSt, fontSize: 28, textAlign: 'center', letterSpacing: '0.3em', fontFamily: 'var(--font-display)' }}
+              />
+            </div>
+            {pinError && (
               <div style={{ fontSize: 13, color: 'var(--foul-red)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Icon name="alert-circle" size={14} color="var(--foul-red)" /> {error}
+                <Icon name="alert-circle" size={14} color="var(--foul-red)" /> {pinError}
               </div>
             )}
-            <button type="submit" style={{ marginTop: 4, padding: '12px', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--court-navy)', color: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15 }}>
-              Sign in
+            <button type="submit" disabled={loading} style={{ marginTop: 4, padding: '12px', borderRadius: 8, border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: loading ? '#9CA3AF' : 'var(--court-navy)', color: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              {loading ? <><Spinner /> Checking…</> : <><Icon name="unlock" size={16} color="#fff" /> Access Game</>}
             </button>
           </form>
 
           <div style={{ marginTop: 20, padding: '12px 16px', borderRadius: 8, background: 'rgba(10,31,61,0.05)', border: '1px solid #E5E7EB' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Demo credentials</div>
-            <div style={{ fontSize: 12, color: '#374151', fontFamily: 'var(--font-mono)' }}>scorekeeper · fpyc2025</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>How to get your PIN</div>
+            <div style={{ fontSize: 12, color: '#374151', lineHeight: 1.5 }}>Ask the commissioner for the 4-digit PIN assigned to today's game.</div>
           </div>
         </div>
       </div>
@@ -87,16 +87,18 @@ export default function ScorekeeperApp() {
             <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 32, objectFit: 'contain' }} />
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#fff', lineHeight: 1 }}>Scorekeeper</div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.04em', marginTop: 2 }}>FPYC Basketball · Season 2025–26</div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.04em', marginTop: 2 }}>
+                {game.home ? 'vs.' : '@'} {game.opponent} · {game.day}
+              </div>
             </div>
           </div>
-          <button onClick={() => setAuthed(false)} style={{ all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.65)' }}>
-            <Icon name="log-out" size={15} color="rgba(255,255,255,0.55)" /> Sign out
+          <button onClick={handleSignOut} style={{ all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.65)' }}>
+            <Icon name="log-out" size={15} color="rgba(255,255,255,0.55)" /> Exit
           </button>
         </div>
       </header>
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
-        <ScorekeeperMain />
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 24px' }}>
+        <ScorekeeperMain game={game} setGame={setGame} pin={pin} />
       </div>
     </div>
   );
@@ -104,82 +106,82 @@ export default function ScorekeeperApp() {
 
 // ── Main scoring view ─────────────────────────────────────────────────────────
 
-function ScorekeeperMain() {
-  const [games, setGames] = useGames();
+function ScorekeeperMain({ game, setGame, pin }) {
   const [players] = usePlayers();
   const [stats, setStats] = useStats();
-  const [selectedId, setSelectedId] = useState(null);
   const [saved, setSaved] = useState(false);
-  const isMobile = useIsMobile();
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
-  const scheduled = games.filter(g => g.status === 'scheduled' || g.status === 'live').sort((a, b) => {
-    const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
-    return (months[a.month] * 100 + (a.date || 0)) - (months[b.month] * 100 + (b.date || 0));
-  });
-  const finals = games.filter(g => g.status === 'final').sort((a, b) => {
-    const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
-    return (months[b.month] * 100 + (b.date || 0)) - (months[a.month] * 100 + (a.date || 0));
-  });
+  const rosterPlayers = players.filter(p => p.team === (game.team || 'Fairfax Hawks') && p.status !== 'inactive');
 
-  const selectedGame = selectedId ? games.find(g => g.id === selectedId) : null;
-  const gameTeam = selectedGame?.team || 'Fairfax Hawks';
-  const rosterPlayers = players.filter(p => p.team === gameTeam && p.status !== 'inactive');
-
-  function selectGame(game) {
-    setSelectedId(game.id);
-    setSaved(false);
-    // Pre-populate player stats from existing data
+  const [scoreUs, setScoreUs] = useState(game.us != null ? String(game.us) : '');
+  const [scoreThem, setScoreThem] = useState(game.them != null ? String(game.them) : '');
+  const [playerStats, setPlayerStats] = useState(() => {
     const existing = stats[game.id] || {};
-    setPlayerStats(
-      rosterPlayers.reduce((acc, p) => {
-        acc[p.id] = existing[p.id]
-          ? { pts: existing[p.id].pts ?? '', reb: existing[p.id].reb ?? '', ast: existing[p.id].ast ?? '', fls: existing[p.id].fls ?? '' }
-          : { pts: '', reb: '', ast: '', fls: '' };
-        return acc;
-      }, {})
-    );
-    setScoreUs(game.us ?? '');
-    setScoreThem(game.them ?? '');
-  }
-
-  const [scoreUs, setScoreUs] = useState('');
-  const [scoreThem, setScoreThem] = useState('');
-  const [playerStats, setPlayerStats] = useState({});
+    return rosterPlayers.reduce((acc, p) => {
+      acc[p.id] = existing[p.id]
+        ? { pts: existing[p.id].pts ?? '', reb: existing[p.id].reb ?? '', ast: existing[p.id].ast ?? '', fls: existing[p.id].fls ?? '' }
+        : { pts: '', reb: '', ast: '', fls: '' };
+      return acc;
+    }, {});
+  });
   const [scoreError, setScoreError] = useState('');
 
   function setPlayerStat(pid, field, val) {
     setPlayerStats(prev => ({ ...prev, [pid]: { ...prev[pid], [field]: val } }));
   }
 
-  function handleGoLive() {
+  async function callRpc(us, them, status, quarter = null) {
+    const { data } = await supabase.rpc('update_game_score', {
+      p_game_id: game.id,
+      p_pin: pin,
+      p_us: us,
+      p_them: them,
+      p_status: status,
+      p_quarter: quarter,
+    });
+    return data;
+  }
+
+  async function handleGoLive() {
     const us = scoreUs !== '' ? parseInt(scoreUs) : 0;
     const them = scoreThem !== '' ? parseInt(scoreThem) : 0;
     if (isNaN(us) || isNaN(them) || us < 0 || them < 0) { setScoreError('Scores must be non-negative numbers.'); return; }
-    setScoreError('');
+    setScoreError(''); setSaving(true);
+    const result = await callRpc(us, them, 'live');
+    setSaving(false);
+    if (!result?.ok) { setSaveError(result?.error || 'Failed to push score.'); return; }
+    setGame(g => ({ ...g, status: 'live', us, them }));
     setScoreUs(String(us));
     setScoreThem(String(them));
-    setGames(prev => prev.map(g => g.id === selectedId ? { ...g, status: 'live', us, them } : g));
     setSaved(false);
   }
 
-  function handleIncrement(team, delta) {
-    const game = games.find(g => g.id === selectedId);
-    if (!game) return;
+  async function handleIncrement(team, delta) {
     const newUs   = team === 'us'   ? Math.max(0, (game.us   ?? 0) + delta) : (game.us   ?? 0);
     const newThem = team === 'them' ? Math.max(0, (game.them ?? 0) + delta) : (game.them ?? 0);
-    setGames(prev => prev.map(g => g.id === selectedId ? { ...g, us: newUs, them: newThem } : g));
+    setSaving(true);
+    const result = await callRpc(newUs, newThem, 'live');
+    setSaving(false);
+    if (!result?.ok) return;
+    setGame(g => ({ ...g, us: newUs, them: newThem }));
     setScoreUs(String(newUs));
     setScoreThem(String(newThem));
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (scoreUs === '' || scoreThem === '') { setScoreError('Both scores are required.'); return; }
     const us = parseInt(scoreUs);
     const them = parseInt(scoreThem);
     if (isNaN(us) || isNaN(them) || us < 0 || them < 0) { setScoreError('Scores must be non-negative numbers.'); return; }
-    setScoreError('');
+    setScoreError(''); setSaving(true); setSaveError('');
 
-    setGames(prev => prev.map(g => g.id === selectedId ? { ...g, status: 'final', us, them } : g));
+    const result = await callRpc(us, them, 'final');
+    setSaving(false);
+    if (!result?.ok) { setSaveError(result?.error || 'Failed to save score. Check PIN.'); return; }
+
+    setGame(g => ({ ...g, status: 'final', us, them }));
 
     const gamePlayerStats = {};
     rosterPlayers.forEach(p => {
@@ -191,80 +193,34 @@ function ScorekeeperMain() {
         fls: parseInt(s.fls) || 0,
       };
     });
-    setStats(prev => ({ ...prev, [selectedId]: gamePlayerStats }));
-
+    setStats(prev => ({ ...prev, [game.id]: gamePlayerStats }));
     setSaved(true);
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '320px 1fr', gap: 24, alignItems: 'start' }}>
-
-      {/* Game list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-        {scheduled.length > 0 && (
-          <div>
-            <SectionLabel icon="clock" label="Pending score entry" color="var(--basketball-orange)" />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
-              {scheduled.map(g => (
-                <GameCard key={g.id} game={g} selected={selectedId === g.id} onClick={() => selectGame(g)} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {finals.length > 0 && (
-          <div>
-            <SectionLabel icon="check-circle" label="Completed games" color="#059669" />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
-              {finals.map(g => (
-                <GameCard key={g.id} game={g} selected={selectedId === g.id} onClick={() => selectGame(g)} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {games.filter(g => g.status === 'cancelled').length > 0 && (
-          <div style={{ fontSize: 12, color: '#9CA3AF', textAlign: 'center', paddingTop: 4 }}>
-            {games.filter(g => g.status === 'cancelled').length} cancelled game(s) not shown
-          </div>
-        )}
-      </div>
-
-      {/* Score entry panel */}
-      <div>
-        {!selectedGame ? (
-          <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, padding: '60px 24px', textAlign: 'center' }}>
-            <Icon name="clipboard" size={40} color="#E5E7EB" />
-            <div style={{ fontWeight: 700, fontSize: 15, color: '#374151', marginTop: 16, marginBottom: 6 }}>Select a game to enter scores</div>
-            <div style={{ fontSize: 13, color: '#9CA3AF' }}>Choose from the list on the left to record the final score and individual stats.</div>
-          </div>
-        ) : (
-          <ScoreEntryPanel
-            game={selectedGame}
-            rosterPlayers={rosterPlayers}
-            scoreUs={scoreUs}
-            scoreThem={scoreThem}
-            setScoreUs={v => { setScoreUs(v); setScoreError(''); }}
-            setScoreThem={v => { setScoreThem(v); setScoreError(''); }}
-            playerStats={playerStats}
-            setPlayerStat={setPlayerStat}
-            scoreError={scoreError}
-            onSave={handleSave}
-            onGoLive={handleGoLive}
-            onIncrement={handleIncrement}
-            saved={saved}
-            setSaved={setSaved}
-          />
-        )}
-      </div>
-    </div>
+    <ScoreEntryPanel
+      game={game}
+      rosterPlayers={rosterPlayers}
+      scoreUs={scoreUs}
+      scoreThem={scoreThem}
+      setScoreUs={v => { setScoreUs(v); setScoreError(''); }}
+      setScoreThem={v => { setScoreThem(v); setScoreError(''); }}
+      playerStats={playerStats}
+      setPlayerStat={setPlayerStat}
+      scoreError={scoreError}
+      saveError={saveError}
+      onSave={handleSave}
+      onGoLive={handleGoLive}
+      onIncrement={handleIncrement}
+      saved={saved}
+      saving={saving}
+    />
   );
 }
 
 // ── Score entry panel ─────────────────────────────────────────────────────────
 
-function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, setScoreThem, playerStats, setPlayerStat, scoreError, onSave, onGoLive, onIncrement, saved, setSaved }) {
+function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, setScoreThem, playerStats, setPlayerStat, scoreError, saveError, onSave, onGoLive, onIncrement, saved, saving }) {
   const gameTeam = game?.team || 'Fairfax Hawks';
   const isLive = game.status === 'live';
   const playerTotal = Object.values(playerStats).reduce((sum, s) => sum + (parseInt(s.pts) || 0), 0);
@@ -304,14 +260,14 @@ function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, 
             Live Score
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 16, alignItems: 'center' }}>
-            <LiveScoreColumn label={`${gameTeam} (Us)`} score={parseInt(scoreUs) || 0} team="us" onIncrement={onIncrement} color="var(--court-navy)" />
+            <LiveScoreColumn label={`${gameTeam} (Us)`} score={parseInt(scoreUs) || 0} team="us" onIncrement={onIncrement} color="var(--court-navy)" saving={saving} />
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: '#D1D5DB', userSelect: 'none' }}>–</div>
-            <LiveScoreColumn label={`${game.opponent} (Them)`} score={parseInt(scoreThem) || 0} team="them" onIncrement={onIncrement} color="#6B7280" />
+            <LiveScoreColumn label={`${game.opponent} (Them)`} score={parseInt(scoreThem) || 0} team="them" onIncrement={onIncrement} color="#6B7280" saving={saving} />
           </div>
         </div>
       )}
 
-      {/* Post-game score entry (shown when not yet live or editing) */}
+      {/* Post-game score entry */}
       {!isLive && (
         <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, padding: '20px 24px' }}>
           <div style={{ fontWeight: 800, fontSize: 14, color: '#111', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -385,20 +341,24 @@ function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, 
 
       {/* Save buttons */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        {saveError && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#DC2626', fontWeight: 700 }}>
+            <Icon name="alert-circle" size={15} color="#DC2626" /> {saveError}
+          </div>
+        )}
         {saved && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#059669', fontWeight: 700 }}>
             <Icon name="check-circle" size={15} color="#059669" /> Saved successfully
           </div>
         )}
         {game.status !== 'final' && (
-          <button onClick={onGoLive} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px', borderRadius: 10, border: '1.5px solid var(--basketball-orange)', background: 'rgba(232,119,34,0.08)', color: 'var(--basketball-orange)', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+          <button onClick={onGoLive} disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px', borderRadius: 10, border: '1.5px solid var(--basketball-orange)', background: 'rgba(232,119,34,0.08)', color: 'var(--basketball-orange)', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--basketball-orange)', flexShrink: 0 }} />
             Push to Scoreboard
           </button>
         )}
-        <button onClick={onSave} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px', borderRadius: 10, border: 'none', background: 'var(--court-navy)', color: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
-          <Icon name="save" size={16} color="#fff" />
-          {game.status === 'final' ? 'Update Score' : 'Submit Final Score'}
+        <button onClick={onSave} disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px', borderRadius: 10, border: 'none', background: saving ? '#9CA3AF' : 'var(--court-navy)', color: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15, cursor: saving ? 'not-allowed' : 'pointer' }}>
+          {saving ? <><Spinner /> Saving…</> : <><Icon name="save" size={16} color="#fff" />{game.status === 'final' ? 'Update Score' : 'Submit Final Score'}</>}
         </button>
       </div>
     </div>
@@ -407,87 +367,37 @@ function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, 
 
 // ── Live score column ─────────────────────────────────────────────────────────
 
-function LiveScoreColumn({ label, score, team, onIncrement, color }) {
+function LiveScoreColumn({ label, score, team, onIncrement, color, saving }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
       <div style={{ fontSize: 11, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center' }}>{label}</div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 56, lineHeight: 1, color, fontWeight: 700, minWidth: 64, textAlign: 'center' }}>{score}</div>
       <div style={{ display: 'flex', gap: 6 }}>
         {[1, 2, 3].map(n => (
-          <button key={n} onClick={() => onIncrement(team, n)} style={{
-            width: 44, height: 44, borderRadius: 10, border: 'none', cursor: 'pointer',
+          <button key={n} onClick={() => onIncrement(team, n)} disabled={saving} style={{
+            width: 44, height: 44, borderRadius: 10, border: 'none', cursor: saving ? 'not-allowed' : 'pointer',
             background: color === 'var(--court-navy)' ? 'var(--court-navy)' : '#6B7280',
             color: '#fff', fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: saving ? 0.5 : 1,
           }}>+{n}</button>
         ))}
       </div>
-      <button onClick={() => onIncrement(team, -1)} style={{
-        padding: '4px 14px', borderRadius: 8, border: '1.5px solid #E5E7EB', cursor: 'pointer',
-        background: '#F9FAFB', color: '#6B7280', fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-body)',
+      <button onClick={() => onIncrement(team, -1)} disabled={saving} style={{
+        padding: '4px 14px', borderRadius: 8, border: '1.5px solid #E5E7EB', cursor: saving ? 'not-allowed' : 'pointer',
+        background: '#F9FAFB', color: '#6B7280', fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-body)', opacity: saving ? 0.5 : 1,
       }}>−1 Undo</button>
     </div>
   );
 }
 
-// ── Game card ─────────────────────────────────────────────────────────────────
-
-function GameCard({ game, selected, onClick }) {
-  const isFinal = game.status === 'final';
-  const win = isFinal && game.us > game.them;
-  return (
-    <button onClick={onClick} style={{
-      all: 'unset', cursor: 'pointer', display: 'block', width: '100%', boxSizing: 'border-box',
-      background: selected ? 'var(--court-navy)' : '#fff',
-      border: `${selected ? 2 : 1}px solid ${selected ? 'var(--court-navy)' : '#E5E7EB'}`,
-      borderLeft: `4px solid ${isFinal ? (win ? '#059669' : '#DC2626') : 'var(--basketball-orange)'}`,
-      borderRadius: '0 10px 10px 0',
-      padding: '12px 14px',
-      transition: 'all 140ms',
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 12, color: selected ? 'rgba(255,255,255,0.65)' : '#9CA3AF', marginBottom: 2 }}>{game.day}</div>
-          <div style={{ fontWeight: 700, fontSize: 14, color: selected ? '#fff' : '#111' }}>
-            {game.home ? 'vs.' : '@'} {game.opponent}
-          </div>
-          <div style={{ fontSize: 11, color: selected ? 'rgba(255,255,255,0.5)' : '#9CA3AF', marginTop: 2 }}>{game.time}</div>
-        </div>
-        {isFinal && (
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, lineHeight: 1, color: selected ? '#fff' : (win ? '#059669' : '#DC2626') }}>{game.us}–{game.them}</div>
-            <div style={{ fontSize: 10, fontWeight: 800, color: selected ? 'rgba(255,255,255,0.6)' : (win ? '#059669' : '#DC2626') }}>{win ? 'WIN' : 'LOSS'}</div>
-          </div>
-        )}
-        {!isFinal && (
-          <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6, background: selected ? 'rgba(232,119,34,0.25)' : 'rgba(232,119,34,0.10)', color: selected ? '#FDE68A' : 'var(--basketball-orange)' }}>
-            PENDING
-          </span>
-        )}
-      </div>
-    </button>
-  );
-}
-
 // ── Shared UI ─────────────────────────────────────────────────────────────────
 
-function SectionLabel({ icon, label, color }) {
+function Spinner() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <Icon name={icon} size={13} color={color} />
-      <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color }}>
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function LoginField({ label, children }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>{label}</label>
-      {children}
-    </div>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ animation: 'spin 0.8s linear infinite' }}>
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </svg>
   );
 }
 

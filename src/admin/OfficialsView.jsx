@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 import { csvDownload } from '../shared/csvDownload.js';
+import { useGames, useOfficialAssignments } from '../shared/store.js';
 
 function exportPaymentsCSV(refs) {
   const headers = ['Name', 'Certification', 'Phone', 'Email', 'Games', 'Rate/Game', 'Total Owed', 'Paid'];
@@ -21,13 +22,6 @@ const REFS_INITIAL = [
   { id: 'r6', name: 'Leon Baptiste', cert: 'VBOS Level 3', phone: '(703) 555-0259', email: 'l.baptiste@email.com', games: 11, rate: 45, paid: false, available: true  },
 ];
 
-const ASSIGNMENTS_INITIAL = [
-  { id: 'g1', game: 'Hawks vs. Vienna Storm',   day: 'Sat Dec 7',  time: '10:00 AM', location: 'FPYC Gym A',     home: true,  refs: ['James Park', 'Marcus Lee'],    status: 'confirmed'  },
-  { id: 'g2', game: 'Hawks @ Reston Wolves',    day: 'Sat Dec 14', time: '11:30 AM', location: 'Reston Rec Center', home: false, refs: ['Leon Baptiste', 'Devon Tyler'], status: 'confirmed'  },
-  { id: 'g3', game: 'Hawks @ Burke Lakers',     day: 'Sat Dec 21', time: '9:00 AM',  location: 'Burke Lake Park Gym', home: false, refs: ['James Park', 'TBD'],       status: 'partial'    },
-  { id: 'g4', game: 'Hawks vs. McLean Mustangs',day: 'Sat Jan 4',  time: '10:00 AM', location: 'FPYC Gym B',     home: true,  refs: ['TBD', 'TBD'],                  status: 'unassigned' },
-  { id: 'g5', game: 'Hawks vs. Springfield Bulls', day: 'Sat Jan 11', time: '1:00 PM', location: 'FPYC Gym A',   home: true,  refs: ['TBD', 'TBD'],                  status: 'unassigned' },
-];
 
 const CERT_COLOR = {
   'VBOS Level 3': 'var(--varsity-gold)',
@@ -47,12 +41,24 @@ export default function OfficialsView() {
   const isMobile = useIsMobile();
   const [tab, setTab] = useState('dashboard');
   const [refs, setRefs] = useState(REFS_INITIAL);
-  const [assignments, setAssignments] = useState(ASSIGNMENTS_INITIAL);
+  const [assignmentMap, setAssignmentMap] = useOfficialAssignments();
+  const [games] = useGames();
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(emptyForm());
   const [assignGame, setAssignGame] = useState(null);
   const [selectedRefs, setSelectedRefs] = useState([]);
   const [toast, setToast] = useState('');
+
+  // Build assignment view from real games + persistent assignment map
+  const assignments = games
+    .filter(g => g.status !== 'final')
+    .map(g => {
+      const saved = assignmentMap[g.id];
+      const label = g.home ? `Hawks vs. ${g.opponent}` : `Hawks @ ${g.opponent}`;
+      const refs  = saved?.refs ?? ['TBD', 'TBD'];
+      const status = saved?.status ?? 'unassigned';
+      return { id: g.id, game: label, day: g.day, time: g.time, location: g.location, home: !!g.home, refs, status };
+    });
 
   const totalOwed = refs.filter(r => !r.paid).reduce((s, r) => s + r.games * r.rate, 0);
   const unpaidCount = refs.filter(r => !r.paid).length;
@@ -114,7 +120,7 @@ export default function OfficialsView() {
     const filled = [...selectedRefs];
     while (filled.length < 2) filled.push('TBD');
     const status = filled.every(r => r !== 'TBD') ? 'confirmed' : filled.some(r => r !== 'TBD') ? 'partial' : 'unassigned';
-    setAssignments(as => as.map(a => a.id === assignGame.id ? { ...a, refs: filled, status } : a));
+    setAssignmentMap(prev => ({ ...prev, [assignGame.id]: { refs: filled, status } }));
     showToast(`Officials assigned to ${assignGame.game}`);
     setAssignGame(null);
     setSelectedRefs([]);
@@ -255,7 +261,7 @@ export default function OfficialsView() {
               {refs.map(r => (
                 <Card key={r.id} padding={14} style={{ display: 'flex', alignItems: 'center', gap: 12, opacity: r.available ? 1 : 0.5 }}>
                   <div style={{ width: 36, height: 36, borderRadius: '50%', background: r.available ? 'var(--court-navy)' : 'var(--fg-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 13, color: 'var(--varsity-gold)', flexShrink: 0 }}>
-                    {r.name.split(' ').map(n => n[0]).join('')}
+                    {(r.name || '?').split(' ').map(n => n[0]).join('')}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
@@ -279,7 +285,7 @@ export default function OfficialsView() {
               <Card key={r.id} padding={16}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                   <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--varsity-gold)', flexShrink: 0 }}>
-                    {r.name.split(' ').map(n => n[0]).join('')}
+                    {(r.name || '?').split(' ').map(n => n[0]).join('')}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: 14 }}>{r.name}</div>
@@ -321,7 +327,7 @@ export default function OfficialsView() {
                     <td style={{ padding: '13px 16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--varsity-gold)', flexShrink: 0 }}>
-                          {r.name.split(' ').map(n => n[0]).join('')}
+                          {(r.name || '?').split(' ').map(n => n[0]).join('')}
                         </div>
                         <div style={{ fontWeight: 700, fontSize: 14 }}>{r.name}</div>
                       </div>
@@ -440,7 +446,7 @@ export default function OfficialsView() {
                       <td style={{ padding: '12px 16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 11, color: 'var(--varsity-gold)', flexShrink: 0 }}>
-                            {r.name.split(' ').map(n => n[0]).join('')}
+                            {(r.name || '?').split(' ').map(n => n[0]).join('')}
                           </div>
                           <span style={{ fontWeight: 700, fontSize: 14 }}>{r.name}</span>
                         </div>

@@ -1,4 +1,5 @@
 import { useLocalStorage } from './useLocalStorage.js';
+import { useSupabaseTable, useSupabaseAssignments } from './useSupabaseTable.js';
 
 export const TEAM_INFO = {
   name: 'Fairfax Hawks',
@@ -106,15 +107,15 @@ export const INITIAL_MESSAGES = [
 ];
 
 export function usePlayers() {
-  return useLocalStorage('fpyc-players', INITIAL_PLAYERS);
+  return useSupabaseTable('players', INITIAL_PLAYERS);
 }
 
 export function useGames() {
-  return useLocalStorage('fpyc-games', INITIAL_GAMES);
+  return useSupabaseTable('games', INITIAL_GAMES);
 }
 
 export function usePractices() {
-  return useLocalStorage('fpyc-practices', INITIAL_PRACTICES);
+  return useSupabaseTable('practices', INITIAL_PRACTICES);
 }
 
 export function useMessages() {
@@ -381,7 +382,16 @@ export const INITIAL_ANNOUNCEMENTS = [
 ];
 
 export function useAnnouncements() {
-  return useLocalStorage('fpyc-announcements', INITIAL_ANNOUNCEMENTS);
+  return useSupabaseTable('announcements', INITIAL_ANNOUNCEMENTS);
+}
+
+// ─── Official Assignments ─────────────────────────────────────────────────────
+// Shape: { [gameId]: { refs: string[], status: 'confirmed'|'partial'|'unassigned' } }
+
+export const INITIAL_OFFICIAL_ASSIGNMENTS = {};
+
+export function useOfficialAssignments() {
+  return useSupabaseAssignments();
 }
 
 // Derive family-facing event list from admin games + practices

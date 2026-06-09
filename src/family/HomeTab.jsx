@@ -4,7 +4,7 @@ import Skeleton from '../shared/Skeleton.jsx';
 import { useGames, usePractices, usePlayers, deriveEvents, TEAM_INFO, useAnnouncements } from '../shared/store.js';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
 
-export default function HomeTab({ family, messages, onTabChange }) {
+export default function HomeTab({ family, messages, onTabChange, onAnnouncementsSeen }) {
   const [games]         = useGames();
   const [practices]     = usePractices();
   const [players]       = usePlayers();
@@ -13,6 +13,7 @@ export default function HomeTab({ family, messages, onTabChange }) {
   const TEAM = TEAM_INFO;
 
   const [attendance] = useLocalStorage('fpyc-attendance', {});
+  const [showAllAnnouncements, setShowAllAnnouncements] = useState(false);
 
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -23,6 +24,22 @@ export default function HomeTab({ family, messages, onTabChange }) {
   if (loading) return <HomeSkeleton />;
 
   const { child } = family;
+
+  // Merge all-families + team-specific, pinned first
+  const relevantAnnouncements = announcements
+    .filter(a => a.target === 'All families' || a.target === child.team)
+    .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+  const visibleAnnouncements = showAllAnnouncements
+    ? relevantAnnouncements
+    : relevantAnnouncements.slice(0, 3);
+
+  // Mark announcements as seen when rendered
+  useEffect(() => {
+    if (!loading && onAnnouncementsSeen && relevantAnnouncements.length > 0) {
+      onAnnouncementsSeen(relevantAnnouncements.map(a => a.id));
+    }
+  }, [loading]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const nextGame = EVENTS.find(e => e.type === 'game' && e.status === 'upcoming');
   const nextPractice = EVENTS.find(e => e.type === 'practice' && e.status === 'upcoming');
   const lastGame = EVENTS.find(e => e.type === 'game' && e.status === 'final');
@@ -32,7 +49,7 @@ export default function HomeTab({ family, messages, onTabChange }) {
   // Derive attendance stats for this child
   const allSessions = [
     ...games.filter(g => g.status === 'final').map(g => ({ id: g.id, type: 'game', label: `${g.month} ${g.date}` })),
-    ...practices.map(p => ({ id: p.id, type: 'practice', label: p.date.split(', ')[1] || p.date })),
+    ...practices.map(p => ({ id: p.id, type: 'practice', label: (p.date || '').split(', ')[1] || p.date })),
   ];
   const player = players.find(p => p.number === child.number);
   const pid = player?.id;
@@ -95,21 +112,50 @@ export default function HomeTab({ family, messages, onTabChange }) {
       )}
 
       {/* Commissioner announcements */}
-      {announcements.filter(a => a.target === 'All families').slice(0, 3).map(a => {
-        const color = a.type === 'urgent' ? '#DC2626' : a.type === 'info' ? 'var(--court-navy)' : '#D97706';
-        const bg    = a.type === 'urgent' ? 'rgba(220,38,38,0.06)' : a.type === 'info' ? 'rgba(10,31,61,0.05)' : 'rgba(217,119,6,0.07)';
-        const iconName = a.type === 'urgent' ? 'alert-circle' : a.type === 'info' ? 'info' : 'megaphone';
-        return (
-          <div key={a.id} style={{ background: bg, border: `1px solid ${color}30`, borderLeft: `3px solid ${color}`, borderRadius: '0 10px 10px 0', padding: '11px 14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-            <Icon name={iconName} size={15} color={color} style={{ flexShrink: 0, marginTop: 1 }} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 700, fontSize: 13, color: '#111827' }}>{a.title}</div>
-              <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2, lineHeight: 1.5 }}>{a.body}</div>
-              <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4, fontWeight: 600 }}>{a.date} · Commissioner</div>
+      {relevantAnnouncements.length > 0 && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#374151' }}>Announcements</div>
+              {relevantAnnouncements.some(a => a.type === 'urgent') && (
+                <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 7px', borderRadius: 999, background: '#DC2626', color: '#fff', letterSpacing: '0.06em' }}>URGENT</span>
+              )}
             </div>
+            {relevantAnnouncements.length > 3 && (
+              <button onClick={() => setShowAllAnnouncements(v => !v)} style={{ all: 'unset', cursor: 'pointer', fontSize: 12, fontWeight: 700, color: 'var(--court-navy)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                {showAllAnnouncements ? 'Show less' : `Show all (${relevantAnnouncements.length})`}
+                <Icon name={showAllAnnouncements ? 'chevron-up' : 'chevron-down'} size={13} />
+              </button>
+            )}
           </div>
-        );
-      })}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {visibleAnnouncements.map(a => {
+              const color    = a.type === 'urgent' ? '#DC2626' : a.type === 'info' ? 'var(--court-navy)' : '#D97706';
+              const bg       = a.type === 'urgent' ? 'rgba(220,38,38,0.06)' : a.type === 'info' ? 'rgba(10,31,61,0.05)' : 'rgba(217,119,6,0.07)';
+              const iconName = a.type === 'urgent' ? 'alert-circle' : a.type === 'info' ? 'info' : 'megaphone';
+              const isTeamSpecific = a.target !== 'All families';
+              return (
+                <div key={a.id} style={{ background: bg, border: `1px solid ${color}30`, borderLeft: `3px solid ${color}`, borderRadius: '0 10px 10px 0', padding: '11px 14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                  <Icon name={iconName} size={15} color={color} style={{ flexShrink: 0, marginTop: 1 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: 700, fontSize: 13, color: '#111827' }}>{a.title}</span>
+                      {isTeamSpecific && (
+                        <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: `${color}18`, color, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{a.target}</span>
+                      )}
+                      {a.pinned && (
+                        <Icon name="pin" size={11} color={color} />
+                      )}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2, lineHeight: 1.5 }}>{a.body}</div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4, fontWeight: 600 }}>{a.date} · {a.author || 'Commissioner'}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Next game */}
       {nextGame && (
