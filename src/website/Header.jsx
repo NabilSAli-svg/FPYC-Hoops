@@ -67,7 +67,7 @@ export default function Header({ onJump }) {
           textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap',
         }}>Coach login</a>
 
-        <a href="/register" style={{
+        <a href="/register" className="mob-hide" style={{
           background: 'var(--varsity-gold)', color: 'var(--court-navy)',
           padding: '10px 16px', borderRadius: 8, textDecoration: 'none',
           fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
