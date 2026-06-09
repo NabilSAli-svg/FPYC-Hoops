@@ -94,7 +94,7 @@ export default function HowToRegister() {
       </div>
 
       {/* Step grid — 4 columns × 2 rows */}
-      <style>{`@media(max-width:639px){.reg-grid{grid-template-columns:repeat(2,1fr)!important}}`}</style>
+      <style>{`@media(max-width:768px){.reg-grid{grid-template-columns:repeat(2,1fr)!important}}`}</style>
       <div className="reg-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
         {STEPS.map((s, i) => (
           <div key={i} style={{

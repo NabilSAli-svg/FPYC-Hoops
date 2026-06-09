@@ -62,7 +62,7 @@ export default function SeasonRecap() {
         </div>
 
         {/* FPYC Teams */}
-        <style>{`@media(max-width:639px){.recap-grid{grid-template-columns:1fr!important}}`}</style>
+        <style>{`@media(max-width:768px){.recap-grid{grid-template-columns:1fr!important}}`}</style>
         <div style={{ marginBottom: 40 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: 16 }}>FPYC Teams This Season</div>
           <div className="recap-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>

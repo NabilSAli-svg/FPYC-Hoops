@@ -45,7 +45,7 @@ export default function WhyFPYC() {
   return (
     <section style={{ background: 'var(--bone)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
       {/* Stats strip */}
-      <style>{`@media(max-width:639px){.stats-grid{grid-template-columns:repeat(2,1fr)!important}.stats-grid>div{border-right:none!important;border-bottom:1px solid rgba(255,255,255,0.10)}.pillars-grid{grid-template-columns:1fr!important}}`}</style>
+      <style>{`@media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)!important}.stats-grid>div{border-right:none!important;border-bottom:1px solid rgba(255,255,255,0.10)}.pillars-grid{grid-template-columns:1fr!important}}`}</style>
       <div style={{ background: 'var(--court-navy)', backgroundImage: 'radial-gradient(circle at 70% 50%, rgba(255,199,44,0.10), transparent 60%)' }}>
         <div className="stats-grid" style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0 }}>
           {STATS.map((s, i) => (
