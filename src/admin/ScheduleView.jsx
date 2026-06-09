@@ -101,7 +101,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
     }
   }, [openNewGame]);
 
-  if (loading) return <ScheduleSkeleton tab={tab} setTab={setTab} games={games} />;
+  if (loading) return <ScheduleSkeleton tab={tab} setTab={setTab} games={games} practices={practices} />;
   return (
     <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Tab bar */}
@@ -555,7 +555,7 @@ function FormField({ label, children, style }) {
 
 const inputStyle = { padding: '9px 12px', borderRadius: 7, border: '1.5px solid var(--border)', fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none', width: '100%', boxSizing: 'border-box', color: 'var(--fg)' };
 
-function ScheduleSkeleton({ tab, setTab, games }) {
+function ScheduleSkeleton({ tab, setTab, games, practices = [] }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Tab bar — shown as-is */}
