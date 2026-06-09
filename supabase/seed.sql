@@ -1,62 +1,131 @@
 -- ============================================================
--- FPYC Hoops — seed data + schema alignment
--- Run AFTER schema.sql in the Supabase SQL Editor.
--- Safe to re-run (upserts on conflict).
+-- FPYC Hoops — rebuild data tables + seed demo data
+-- Run in the Supabase SQL Editor. Safe to re-run.
+-- DROPS and recreates the data tables (players, games, practices,
+-- announcements, official_assignments) with the app's exact shape.
+-- Does NOT touch profiles or auth — your login stays intact.
 -- ============================================================
 
--- ── Align columns with the app's data shape ─────────────────────────────────
+drop table if exists public.players              cascade;
+drop table if exists public.games                cascade;
+drop table if exists public.practices            cascade;
+drop table if exists public.announcements        cascade;
+drop table if exists public.official_assignments cascade;
 
-alter table public.players
-  add column if not exists number   int,
-  add column if not exists name     text,
-  add column if not exists grade    text,
-  add column if not exists school   text,
-  add column if not exists guardian text,
-  add column if not exists phone    text,
-  add column if not exists position text,
-  add column if not exists status   text default 'active',
-  add column if not exists waiver   boolean default false,
-  add column if not exists program  text,
-  add column if not exists division text,
-  add column if not exists team     text;
+create table public.players (
+  id        text primary key,
+  number    int,
+  name      text not null,
+  grade     text,
+  school    text,
+  guardian  text,
+  phone     text,
+  position  text,
+  status    text default 'active',
+  waiver    boolean default false,
+  program   text,
+  division  text,
+  team      text
+);
 
-alter table public.games
-  add column if not exists team      text,
-  add column if not exists opponent  text,
-  add column if not exists day       text,
-  add column if not exists date      int,
-  add column if not exists month     text,
-  add column if not exists "time"    text,
-  add column if not exists location  text,
-  add column if not exists home      boolean default true,
-  add column if not exists status    text default 'scheduled',
-  add column if not exists us        int,
-  add column if not exists them      int,
-  add column if not exists quarter   int,
-  add column if not exists note      text,
-  add column if not exists confirmed int default 0,
-  add column if not exists score_pin text,
-  add column if not exists weekday   text,
-  add column if not exists refs      text,
-  add column if not exists countdown int;
+create table public.games (
+  id         text primary key,
+  team       text,
+  opponent   text,
+  day        text,
+  date       int,
+  month      text,
+  weekday    text,
+  "time"     text,
+  location   text,
+  home       boolean default true,
+  status     text default 'scheduled',
+  us         int,
+  them       int,
+  quarter    int,
+  note       text,
+  refs       text,
+  countdown  int,
+  confirmed  int default 0,
+  score_pin  text
+);
 
-alter table public.practices
-  add column if not exists team   text,
-  add column if not exists date   text,
-  add column if not exists "time" text,
-  add column if not exists notes  text,
-  add column if not exists gym    text,
-  add column if not exists "type" text,
-  add column if not exists rsvp   int default 0;
+create table public.practices (
+  id      text primary key,
+  team    text,
+  date    text,
+  "time"  text,
+  gym     text,
+  "type"  text,
+  rsvp    int default 0,
+  notes   text
+);
 
-alter table public.announcements
-  add column if not exists "type" text default 'info',
-  add column if not exists title  text,
-  add column if not exists body   text,
-  add column if not exists target text default 'All families',
-  add column if not exists date   text,
-  add column if not exists pinned boolean default false,
-  add column if not exists author text default 'Commissioner';
+create table public.announcements (
+  id      text primary key,
+  "type"  text default 'info',
+  title   text not null,
+  body    text,
+  target  text default 'All families',
+  date    text,
+  pinned  boolean default false,
+  author  text default 'Commissioner'
+);
+
+create table public.official_assignments (
+  game_id text primary key,
+  refs    text[] not null default '{"TBD","TBD"}',
+  status  text not null default 'unassigned'
+);
+
+-- ── Row Level Security ───────────────────────────────────────────────────────
+
+alter table public.players              enable row level security;
+alter table public.games                enable row level security;
+alter table public.practices            enable row level security;
+alter table public.announcements        enable row level security;
+alter table public.official_assignments enable row level security;
+
+create policy "players_read"       on public.players              for select using (auth.role() = 'authenticated');
+create policy "practices_read"     on public.practices            for select using (auth.role() = 'authenticated');
+create policy "assignments_read"   on public.official_assignments for select using (auth.role() = 'authenticated');
+create policy "games_public_read"  on public.games                for select using (true);
+create policy "ann_public_read"    on public.announcements        for select using (true);
+
+create policy "games_commissioner_write"       on public.games                for all using (public.is_commissioner());
+create policy "practices_commissioner_write"   on public.practices            for all using (public.is_commissioner());
+create policy "ann_commissioner_write"         on public.announcements        for all using (public.is_commissioner());
+create policy "players_commissioner_write"     on public.players              for all using (public.is_commissioner());
+create policy "assignments_commissioner_write" on public.official_assignments for all using (public.is_commissioner());
+
+-- ── Score PIN RPC (recreated since games table was dropped) ──────────────────
+
+create or replace function public.update_game_score(
+  p_game_id text,
+  p_pin     text,
+  p_us      int,
+  p_them    int,
+  p_status  text default 'live',
+  p_quarter int default null
+)
+returns json language plpgsql security definer as $$
+declare
+  v_pin text;
+begin
+  select score_pin into v_pin from public.games where id = p_game_id;
+  if v_pin is null or v_pin <> p_pin then
+    return json_build_object('ok', false, 'error', 'Invalid PIN');
+  end if;
+
+  update public.games
+  set us = p_us, them = p_them, status = p_status, quarter = p_quarter
+  where id = p_game_id;
+
+  return json_build_object('ok', true);
+end;
+$$;
+
+grant execute on function public.update_game_score to anon, authenticated;
 
 -- ── Players ──────────────────────────────────────────────────────────────────
 
