@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
 import { useMessages, useGames, useAnnouncements } from '../shared/store.js';
+import { supabase } from '../shared/supabase.js';
 import Icon from '../shared/Icon.jsx';
 import FamilyLogin from './FamilyLogin.jsx';
 import HomeTab from './HomeTab.jsx';
@@ -10,7 +11,6 @@ import MessagesTab from './MessagesTab.jsx';
 import PaymentsTab from './PaymentsTab.jsx';
 import StatsTab from './StatsTab.jsx';
 import BracketTab from './BracketTab.jsx';
-import { FAMILIES } from './data.js';
 
 async function requestAndNotify(games) {
   if (!('Notification' in window)) return 'unsupported';
@@ -43,10 +43,86 @@ const TABS = [
   { id: 'messages', label: 'Messages', icon: 'message-square' },
 ];
 
+// Build the family object shape the rest of the app expects
+function profileToFamily(profile, player) {
+  return {
+    parent:     profile.parent_name || profile.email,
+    firstName:  profile.first_name  || (profile.parent_name || profile.email).split(' ')[0],
+    email:      profile.email,
+    child: player ? {
+      name:     player.name,
+      number:   player.number,
+      position: player.position || 'Player',
+      grade:    player.grade    || '',
+      status:   player.status   || 'active',
+      team:     player.team     || 'FPYC',
+    } : {
+      name: 'Player', number: '?', position: '', grade: '', status: 'active', team: 'FPYC',
+    },
+  };
+}
+
 export default function FamilyApp() {
-  const [user, setUser] = useState(null);
-  const [userKey, setUserKey] = useState(null);
+  const [family, setFamily] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [playerLinked, setPlayerLinked] = useState(true);
   const [tab, setTab] = useState('home');
+  const [userKey, setUserKey] = useState(null);
+
+  // Load session on mount, listen for auth changes
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) loadFamily(session.user);
+      else setAuthLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) loadFamily(session.user);
+      else { setFamily(null); setAuthLoading(false); }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function loadFamily(authUser) {
+    setAuthLoading(true);
+    // Fetch profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authUser.id)
+      .single();
+
+    if (!profile) {
+      // Profile not yet created (trigger may not have fired) — create it
+      await supabase.from('profiles').insert({
+        id: authUser.id,
+        email: authUser.email,
+        parent_name: authUser.user_metadata?.parent_name || '',
+        first_name:  authUser.user_metadata?.first_name  || '',
+      });
+      setFamily(profileToFamily({ email: authUser.email, parent_name: authUser.user_metadata?.parent_name || '' }, null));
+      setPlayerLinked(false);
+      setAuthLoading(false);
+      return;
+    }
+
+    setUserKey(authUser.id);
+
+    // Fetch linked player if any
+    let player = null;
+    if (profile.player_id) {
+      const { data } = await supabase.from('players').select('*').eq('id', profile.player_id).single();
+      player = data;
+    }
+
+    setPlayerLinked(!!player);
+    setFamily(profileToFamily(profile, player));
+    setAuthLoading(false);
+  }
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+  }
   const [notifPerm, setNotifPerm] = useState(() =>
     'Notification' in window ? Notification.permission : 'unsupported'
   );
@@ -73,10 +149,20 @@ export default function FamilyApp() {
     setNotifBusy(false);
   }, [notifBusy, notifPerm, games]);
 
-  if (!user) return <FamilyLogin onLogin={who => { setUser(FAMILIES[who]); setUserKey(who); }} />;
+  if (authLoading) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--court-navy)' }}>
+      <div style={{ textAlign: 'center' }}>
+        <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 48, objectFit: 'contain', marginBottom: 16, opacity: 0.8 }} />
+        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>Loading…</div>
+      </div>
+    </div>
+  );
+
+  if (!family) return <FamilyLogin />;
+
+  if (!playerLinked) return <LinkPlayerScreen family={family} onLinked={player => { setFamily(profileToFamily({ ...family, player_id: player.id }, player)); setPlayerLinked(true); }} onSignOut={handleSignOut} />;
 
   const unread = messages.filter(m => m.unread && !readIds.has(m.id)).length;
-  const family = user;
 
   // Count unseen announcements relevant to this family
   const seenSet = new Set(seenAnnIds);
@@ -125,7 +211,7 @@ export default function FamilyApp() {
                 )}
               </button>
             )}
-            <button onClick={() => setUser(null)} style={{ all: 'unset', cursor: 'pointer' }}>
+            <button onClick={handleSignOut} style={{ all: 'unset', cursor: 'pointer' }}>
               <Icon name="log-out" size={16} color="rgba(255,255,255,0.5)" />
             </button>
           </div>
@@ -178,6 +264,103 @@ export default function FamilyApp() {
           );
         })}
       </nav>
+    </div>
+  );
+}
+
+// ── Link Player Screen ────────────────────────────────────────────────────────
+// Shown after sign-up when no player is linked to the account yet.
+
+function LinkPlayerScreen({ family, onLinked, onSignOut }) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [linking, setLinking] = useState(false);
+  const [error, setError] = useState('');
+
+  async function search(q) {
+    setQuery(q);
+    if (q.trim().length < 2) { setResults([]); return; }
+    setSearching(true);
+    const { data } = await supabase
+      .from('players')
+      .select('id, name, number, team, grade, position')
+      .ilike('name', `%${q.trim()}%`)
+      .limit(8);
+    setResults(data || []);
+    setSearching(false);
+  }
+
+  async function linkPlayer(player) {
+    setLinking(true); setError('');
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error: err } = await supabase
+      .from('profiles')
+      .update({ player_id: player.id })
+      .eq('id', user.id);
+    setLinking(false);
+    if (err) { setError('Could not link player — try again or contact your commissioner.'); return; }
+    onLinked(player);
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--court-navy)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'var(--font-body)' }}>
+      <div style={{ width: '100%', maxWidth: 400 }}>
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 48, objectFit: 'contain', marginBottom: 12 }} />
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', textTransform: 'uppercase' }}>Find your player</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 6 }}>Search by your child's name to link their roster spot to your account.</div>
+        </div>
+
+        <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 20px 60px rgba(0,0,0,0.35)' }}>
+          <div style={{ position: 'relative', marginBottom: 16 }}>
+            <Icon name="search" size={16} color="#9CA3AF" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              value={query}
+              onChange={e => search(e.target.value)}
+              placeholder="Search player name…"
+              autoFocus
+              style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px 10px 38px', borderRadius: 8, border: '1.5px solid #E2E5EA', fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none' }}
+            />
+          </div>
+
+          {error && <div style={{ fontSize: 13, color: '#DC2626', marginBottom: 12 }}>{error}</div>}
+
+          {searching && <div style={{ fontSize: 13, color: '#9CA3AF', textAlign: 'center', padding: 12 }}>Searching…</div>}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {results.map(p => (
+              <button key={p.id} onClick={() => linkPlayer(p)} disabled={linking} style={{
+                all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12,
+                padding: '10px 12px', borderRadius: 10, border: '1.5px solid #E2E5EA',
+                background: '#F9FAFB', transition: 'border-color 120ms',
+              }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--court-navy)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#E2E5EA'}
+              >
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--varsity-gold)', flexShrink: 0 }}>
+                  {p.number}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--court-navy)' }}>{p.name}</div>
+                  <div style={{ fontSize: 12, color: '#9CA3AF' }}>{p.team} · {p.grade} · {p.position}</div>
+                </div>
+                <Icon name="arrow-right" size={14} color="#9CA3AF" />
+              </button>
+            ))}
+          </div>
+
+          {query.length >= 2 && !searching && results.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '16px 0', fontSize: 13, color: '#9CA3AF' }}>
+              No players found. Your commissioner may need to add your child to the roster.
+            </div>
+          )}
+        </div>
+
+        <button onClick={onSignOut} style={{ all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, margin: '20px auto 0', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
+          <Icon name="log-out" size={13} color="rgba(255,255,255,0.4)" /> Sign out
+        </button>
+      </div>
     </div>
   );
 }

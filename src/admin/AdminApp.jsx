@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGames, usePlayers, TEAM_INFO, TEAMS_INFO } from '../shared/store.js';
+import { supabase } from '../shared/supabase.js';
 import Sidebar from './Sidebar.jsx';
 import TopBar from './TopBar.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
@@ -22,6 +23,18 @@ const ALL_TEAM_NAMES = Object.keys(TEAMS_INFO);
 
 export default function AdminApp() {
   const isMobile = useIsMobile();
+  const [authReady, setAuthReady] = useState(false);
+  const [isCommissioner, setIsCommissioner] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) { setAuthReady(true); return; }
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+      setIsCommissioner(profile?.role === 'commissioner' || profile?.role === 'coach');
+      setAuthReady(true);
+    });
+  }, []);
+
   const [view, setView] = useState('dashboard');
   const [scheduleInitialTab, setScheduleInitialTab] = useState('games');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -88,6 +101,14 @@ export default function AdminApp() {
               ? <Button kind="gold" icon="save">Finalize teams</Button>
               : null;
 
+  if (!authReady) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bone)' }}>
+      <div style={{ fontSize: 14, color: 'var(--fg-muted)' }}>Loading…</div>
+    </div>
+  );
+
+  if (!isCommissioner) return <AdminLogin onSuccess={() => setIsCommissioner(true)} />;
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bone)' }}>
       <Sidebar
@@ -134,6 +155,56 @@ export default function AdminApp() {
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} />}
           {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} />}
           {view === 'settings'    && <SettingsView />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminLogin({ onSuccess }) {
+  const [email, setEmail]       = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true); setError('');
+    const { error: authErr } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (authErr) { setLoading(false); setError(authErr.message); return; }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    setLoading(false);
+    if (profile?.role === 'commissioner' || profile?.role === 'coach') {
+      onSuccess();
+    } else {
+      setError('Your account does not have admin access. Contact the commissioner.');
+      await supabase.auth.signOut();
+    }
+  }
+
+  const inp = { width: '100%', boxSizing: 'border-box', padding: '10px 14px', borderRadius: 8, border: '1.5px solid var(--border)', fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none', marginTop: 6 };
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'var(--font-body)' }}>
+      <div style={{ width: '100%', maxWidth: 380 }}>
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 48, objectFit: 'contain', marginBottom: 12 }} />
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', textTransform: 'uppercase' }}>Coach Console</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>Commissioner / Coach access only</div>
+        </div>
+        <div style={{ background: '#fff', borderRadius: 16, padding: '28px 24px', boxShadow: '0 20px 60px rgba(0,0,0,0.35)' }}>
+          {error && (
+            <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#DC2626' }}>{error}</div>
+          )}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div><label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="coach@fpyc.org" style={inp} /></div>
+            <div><label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" style={inp} /></div>
+            <button type="submit" disabled={loading} style={{ padding: '12px', borderRadius: 10, border: 'none', background: loading ? '#9CA3AF' : 'var(--court-navy)', color: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer', marginTop: 4 }}>
+              {loading ? 'Signing in…' : 'Sign in'}
+            </button>
+          </form>
         </div>
       </div>
     </div>
