@@ -152,13 +152,24 @@ function ScorekeeperMain() {
   }
 
   function handleGoLive() {
-    if (scoreUs === '' || scoreThem === '') { setScoreError('Enter both scores to push live.'); return; }
-    const us = parseInt(scoreUs);
-    const them = parseInt(scoreThem);
+    const us = scoreUs !== '' ? parseInt(scoreUs) : 0;
+    const them = scoreThem !== '' ? parseInt(scoreThem) : 0;
     if (isNaN(us) || isNaN(them) || us < 0 || them < 0) { setScoreError('Scores must be non-negative numbers.'); return; }
     setScoreError('');
+    setScoreUs(String(us));
+    setScoreThem(String(them));
     setGames(prev => prev.map(g => g.id === selectedId ? { ...g, status: 'live', us, them } : g));
     setSaved(false);
+  }
+
+  function handleIncrement(team, delta) {
+    const game = games.find(g => g.id === selectedId);
+    if (!game) return;
+    const newUs   = team === 'us'   ? Math.max(0, (game.us   ?? 0) + delta) : (game.us   ?? 0);
+    const newThem = team === 'them' ? Math.max(0, (game.them ?? 0) + delta) : (game.them ?? 0);
+    setGames(prev => prev.map(g => g.id === selectedId ? { ...g, us: newUs, them: newThem } : g));
+    setScoreUs(String(newUs));
+    setScoreThem(String(newThem));
   }
 
   function handleSave() {
@@ -241,6 +252,7 @@ function ScorekeeperMain() {
             scoreError={scoreError}
             onSave={handleSave}
             onGoLive={handleGoLive}
+            onIncrement={handleIncrement}
             saved={saved}
             setSaved={setSaved}
           />
@@ -252,8 +264,9 @@ function ScorekeeperMain() {
 
 // ── Score entry panel ─────────────────────────────────────────────────────────
 
-function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, setScoreThem, playerStats, setPlayerStat, scoreError, onSave, onGoLive, saved, setSaved }) {
+function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, setScoreThem, playerStats, setPlayerStat, scoreError, onSave, onGoLive, onIncrement, saved, setSaved }) {
   const gameTeam = game?.team || 'Fairfax Hawks';
+  const isLive = game.status === 'live';
   const playerTotal = Object.values(playerStats).reduce((sum, s) => sum + (parseInt(s.pts) || 0), 0);
   const teamScore = parseInt(scoreUs) || 0;
   const ptsMismatch = teamScore > 0 && playerTotal !== teamScore;
@@ -263,8 +276,12 @@ function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, 
 
       {/* Game header */}
       <div style={{ background: 'var(--court-navy)', borderRadius: 14, padding: '20px 24px', color: '#fff' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.5)', marginBottom: 6 }}>
-          {game.day} · {game.time}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+          {isLive && <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--basketball-orange)', flexShrink: 0, boxShadow: '0 0 0 3px rgba(232,119,34,0.3)' }} />}
+          <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: isLive ? 'var(--varsity-gold)' : 'rgba(255,255,255,0.5)' }}>
+            {isLive ? 'Live now' : `${game.day} · ${game.time}`}
+          </span>
+          {isLive && <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 7px', borderRadius: 999, background: 'var(--varsity-gold)', color: 'var(--court-navy)', letterSpacing: '0.08em' }}>LIVE</span>}
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, textTransform: 'uppercase', lineHeight: 1.1, marginBottom: 4 }}>
           {game.home ? `vs. ${game.opponent}` : `@ ${game.opponent}`}
@@ -279,44 +296,47 @@ function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, 
         )}
       </div>
 
-      {/* Final score entry */}
-      <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, padding: '20px 24px' }}>
-        <div style={{ fontWeight: 800, fontSize: 14, color: '#111', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Icon name="hash" size={15} color="var(--court-navy)" /> Final Score
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 16, alignItems: 'center', marginBottom: 16 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              {gameTeam} (Us)
-            </label>
-            <input
-              type="number" min="0" max="200" value={scoreUs}
-              onChange={e => setScoreUs(e.target.value)}
-              placeholder="0"
-              style={{ ...numInput, textAlign: 'center', fontSize: 32, fontFamily: 'var(--font-display)', height: 64, color: 'var(--court-navy)' }}
-            />
+      {/* Live score increment UI */}
+      {isLive && (
+        <div style={{ background: '#fff', border: '2px solid rgba(232,119,34,0.3)', borderRadius: 14, padding: '20px 24px' }}>
+          <div style={{ fontWeight: 800, fontSize: 14, color: '#111', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--basketball-orange)', flexShrink: 0 }} />
+            Live Score
           </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: '#D1D5DB', paddingTop: 24 }}>–</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              {game.opponent} (Them)
-            </label>
-            <input
-              type="number" min="0" max="200" value={scoreThem}
-              onChange={e => setScoreThem(e.target.value)}
-              placeholder="0"
-              style={{ ...numInput, textAlign: 'center', fontSize: 32, fontFamily: 'var(--font-display)', height: 64, color: '#6B7280' }}
-            />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 16, alignItems: 'center' }}>
+            <LiveScoreColumn label={`${gameTeam} (Us)`} score={parseInt(scoreUs) || 0} team="us" onIncrement={onIncrement} color="var(--court-navy)" />
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: '#D1D5DB', userSelect: 'none' }}>–</div>
+            <LiveScoreColumn label={`${game.opponent} (Them)`} score={parseInt(scoreThem) || 0} team="them" onIncrement={onIncrement} color="#6B7280" />
           </div>
         </div>
+      )}
 
-        {scoreError && (
-          <div style={{ fontSize: 13, color: '#DC2626', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-            <Icon name="alert-circle" size={14} color="#DC2626" /> {scoreError}
+      {/* Post-game score entry (shown when not yet live or editing) */}
+      {!isLive && (
+        <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, padding: '20px 24px' }}>
+          <div style={{ fontWeight: 800, fontSize: 14, color: '#111', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Icon name="hash" size={15} color="var(--court-navy)" /> Final Score
           </div>
-        )}
-      </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 16, alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{gameTeam} (Us)</label>
+              <input type="number" min="0" max="200" value={scoreUs} onChange={e => setScoreUs(e.target.value)} placeholder="0"
+                style={{ ...numInput, textAlign: 'center', fontSize: 32, fontFamily: 'var(--font-display)', height: 64, color: 'var(--court-navy)' }} />
+            </div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: '#D1D5DB', paddingTop: 24 }}>–</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{game.opponent} (Them)</label>
+              <input type="number" min="0" max="200" value={scoreThem} onChange={e => setScoreThem(e.target.value)} placeholder="0"
+                style={{ ...numInput, textAlign: 'center', fontSize: 32, fontFamily: 'var(--font-display)', height: 64, color: '#6B7280' }} />
+            </div>
+          </div>
+          {scoreError && (
+            <div style={{ fontSize: 13, color: '#DC2626', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <Icon name="alert-circle" size={14} color="#DC2626" /> {scoreError}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Player stats */}
       <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, overflow: 'hidden' }}>
@@ -381,6 +401,31 @@ function ScoreEntryPanel({ game, rosterPlayers, scoreUs, scoreThem, setScoreUs, 
           {game.status === 'final' ? 'Update Score' : 'Submit Final Score'}
         </button>
       </div>
+    </div>
+  );
+}
+
+// ── Live score column ─────────────────────────────────────────────────────────
+
+function LiveScoreColumn({ label, score, team, onIncrement, color }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center' }}>{label}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 56, lineHeight: 1, color, fontWeight: 700, minWidth: 64, textAlign: 'center' }}>{score}</div>
+      <div style={{ display: 'flex', gap: 6 }}>
+        {[1, 2, 3].map(n => (
+          <button key={n} onClick={() => onIncrement(team, n)} style={{
+            width: 44, height: 44, borderRadius: 10, border: 'none', cursor: 'pointer',
+            background: color === 'var(--court-navy)' ? 'var(--court-navy)' : '#6B7280',
+            color: '#fff', fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>+{n}</button>
+        ))}
+      </div>
+      <button onClick={() => onIncrement(team, -1)} style={{
+        padding: '4px 14px', borderRadius: 8, border: '1.5px solid #E5E7EB', cursor: 'pointer',
+        background: '#F9FAFB', color: '#6B7280', fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-body)',
+      }}>−1 Undo</button>
     </div>
   );
 }
