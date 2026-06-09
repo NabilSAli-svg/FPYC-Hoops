@@ -13,9 +13,10 @@ const NAV_ITEMS = [
 ];
 
 const SECONDARY = [
-  { id: 'draftboard', icon: 'shuffle', label: 'Draft Board' },
-  { id: 'season',     icon: 'trophy',  label: 'Season' },
-  { id: 'settings',   icon: 'settings',label: 'Settings' },
+  { id: 'playoffs',  icon: 'trophy',   label: 'Playoffs'   },
+  { id: 'draftboard',icon: 'shuffle',  label: 'Draft Board'},
+  { id: 'season',    icon: 'bar-chart',label: 'Season'     },
+  { id: 'settings',  icon: 'settings', label: 'Settings'   },
 ];
 
 export default function Sidebar({ active, onNav, team, isMobile, sidebarOpen, onClose }) {
