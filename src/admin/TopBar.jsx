@@ -7,12 +7,12 @@ export default function TopBar({ title, breadcrumb, action, onMenuToggle }) {
 
   return (
     <header style={{
-      height: 64,
+      minHeight: 64,
       background: '#fff',
       borderBottom: '1px solid var(--border)',
-      padding: isMobile ? '0 16px' : '0 28px',
+      padding: isMobile ? '12px 16px' : '0 28px',
       display: 'flex',
-      alignItems: 'center',
+      alignItems: isMobile ? 'flex-start' : 'center',
       gap: isMobile ? 12 : 18,
       flexShrink: 0,
     }}>
