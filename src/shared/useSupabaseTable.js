@@ -23,9 +23,10 @@ export function useSupabaseTable(tableName, initial = []) {
         if (rows) setDataLocal(rows);
       });
 
-    // Realtime subscription
+    // Realtime subscription — channel name must be unique per hook instance,
+    // otherwise a second component subscribing to the same table throws
     const channel = supabase
-      .channel(`rt-${tableName}`)
+      .channel(`rt-${tableName}-${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: tableName },
@@ -92,7 +93,7 @@ export function useSupabaseAssignments() {
       });
 
     const channel = supabase
-      .channel('rt-official_assignments')
+      .channel(`rt-official_assignments-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'official_assignments' },
         ({ eventType, new: newRow, old: oldRow }) => {
           setRowsLocal(prev => {

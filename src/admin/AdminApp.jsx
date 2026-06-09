@@ -18,6 +18,7 @@ import StatsView from './StatsView.jsx';
 import AnnouncementsView from './AnnouncementsView.jsx';
 import PlayoffsView from './PlayoffsView.jsx';
 import { Button } from '../shared/index.js';
+import ErrorBoundary from '../shared/ErrorBoundary.jsx';
 
 const ALL_TEAM_NAMES = Object.keys(TEAMS_INFO);
 
@@ -147,6 +148,7 @@ export default function AdminApp() {
           </div>
         </div>
         <div style={{ padding: '24px 28px 64px', flex: 1 }}>
+          <ErrorBoundary resetKey={view + selectedTeamName}>
           {view === 'dashboard'   && <DashboardView team={TEAM} players={teamPlayers} games={teamGames} onGo={handleGo} />}
           {view === 'roster'      && <RosterView team={TEAM} players={teamPlayers} setPlayers={setPlayers} />}
           {view === 'schedule'    && <ScheduleView games={teamGames} onScoreSave={saveScore} onGameUpdate={updateGame} onGameAdd={addGame} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} />}
@@ -160,6 +162,7 @@ export default function AdminApp() {
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} />}
           {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} />}
           {view === 'settings'    && <SettingsView />}
+          </ErrorBoundary>
         </div>
       </div>
     </div>
