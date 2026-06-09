@@ -94,7 +94,7 @@ export default function SeasonCalendar() {
             background: 'var(--border)', zIndex: 0,
           }} />
 
-          <style>{`@media(max-width:639px){.cal-grid{display:flex!important;flex-direction:column!important}.cal-hline{display:none!important}}`}</style>
+          <style>{`@media(max-width:768px){.cal-grid{display:flex!important;flex-direction:column!important}.cal-hline{display:none!important}}`}</style>
           <div className="cal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(9, 1fr)', gap: 12, position: 'relative', zIndex: 1 }}>
             {EVENTS.map((e, i) => {
               const c = CAT[e.category];
