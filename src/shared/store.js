@@ -384,6 +384,15 @@ export function useAnnouncements() {
   return useLocalStorage('fpyc-announcements', INITIAL_ANNOUNCEMENTS);
 }
 
+// ─── Official Assignments ─────────────────────────────────────────────────────
+// Shape: { [gameId]: { refs: string[], status: 'confirmed'|'partial'|'unassigned' } }
+
+export const INITIAL_OFFICIAL_ASSIGNMENTS = {};
+
+export function useOfficialAssignments() {
+  return useLocalStorage('fpyc-official-assignments', INITIAL_OFFICIAL_ASSIGNMENTS);
+}
+
 // Derive family-facing event list from admin games + practices
 export function deriveEvents(games, practices) {
   const gameEvents = games.map(g => ({

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
-import { useGames, usePractices, deriveEvents, TEAM_INFO, useRsvps } from '../shared/store.js';
+import { useGames, usePractices, deriveEvents, TEAM_INFO, useRsvps, useOfficialAssignments } from '../shared/store.js';
 
 const MONTH_NUM = { Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12' };
 
@@ -27,6 +27,8 @@ export default function ScheduleTab({ familyKey, childTeam = 'Fairfax Hawks' }) 
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [rsvps, setRsvps] = useRsvps();
+  const [assignmentMap] = useOfficialAssignments();
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   const myRsvp = (gameId) => rsvps[gameId]?.[familyKey];
   const setMyRsvp = (gameId, val) =>
@@ -56,6 +58,15 @@ export default function ScheduleTab({ familyKey, childTeam = 'Fairfax Hawks' }) 
 
   return (
     <div className="skel-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {selectedEvent && (
+        <GameDetailSheet
+          event={selectedEvent}
+          officials={assignmentMap[selectedEvent.id]}
+          rsvp={myRsvp(selectedEvent.id)}
+          onRsvp={val => setMyRsvp(selectedEvent.id, val)}
+          onClose={() => setSelectedEvent(null)}
+        />
+      )}
 
       {/* Live game hero — takes priority over next game banner */}
       {liveGame && filter === 'all' && <LiveGameBanner game={liveGame} />}
@@ -102,7 +113,7 @@ export default function ScheduleTab({ familyKey, childTeam = 'Fairfax Hawks' }) 
             </span>
           </SectionLabel>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {live.map(e => <EventCard key={e.id} event={e} />)}
+            {live.map(e => <EventCard key={e.id} event={e} onClick={() => setSelectedEvent(e)} />)}
           </div>
         </div>
       )}
@@ -118,6 +129,7 @@ export default function ScheduleTab({ familyKey, childTeam = 'Fairfax Hawks' }) 
                 event={e}
                 rsvp={myRsvp(e.id)}
                 onRsvp={val => setMyRsvp(e.id, val)}
+                onClick={() => setSelectedEvent(e)}
               />
             ))}
           </div>
@@ -139,7 +151,7 @@ export default function ScheduleTab({ familyKey, childTeam = 'Fairfax Hawks' }) 
         <div>
           <SectionLabel>Past results</SectionLabel>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {past.map(e => <EventCard key={e.id} event={e} />)}
+            {past.map(e => <EventCard key={e.id} event={e} onClick={() => setSelectedEvent(e)} />)}
           </div>
         </div>
       )}
@@ -304,7 +316,7 @@ function SectionLabel({ children }) {
   );
 }
 
-function EventCard({ event: e, rsvp, onRsvp }) {
+function EventCard({ event: e, rsvp, onRsvp, onClick }) {
   const isGame    = e.type === 'game';
   const isPractice = e.type === 'practice';
   const isFinal   = e.status === 'final';
@@ -312,11 +324,15 @@ function EventCard({ event: e, rsvp, onRsvp }) {
   const win       = isFinal && e.us > e.them;
 
   return (
-    <div style={{
-      background: '#fff',
-      border: isLive ? '1.5px solid #DC2626' : '1px solid #E2E5EA',
-      borderRadius: 12, overflow: 'hidden', opacity: isFinal ? 0.78 : 1,
-    }}>
+    <div
+      onClick={onClick}
+      style={{
+        background: '#fff',
+        border: isLive ? '1.5px solid #DC2626' : '1px solid #E2E5EA',
+        borderRadius: 12, overflow: 'hidden', opacity: isFinal ? 0.78 : 1,
+        cursor: onClick ? 'pointer' : 'default',
+      }}
+    >
       <div style={{ display: 'flex', gap: 0 }}>
         {/* Date tile */}
         <div style={{
@@ -442,6 +458,193 @@ function EventCard({ event: e, rsvp, onRsvp }) {
           ) : null}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Game Detail Sheet ────────────────────────────────────────────────────────
+
+function GameDetailSheet({ event: e, officials, rsvp, onRsvp, onClose }) {
+  const isGame     = e.type === 'game';
+  const isPractice = e.type === 'practice';
+  const isFinal    = e.status === 'final';
+  const isLive     = e.status === 'live';
+  const win        = isFinal && e.us > e.them;
+  const loss       = isFinal && e.them > e.us;
+
+  const assignedRefs = officials?.refs?.filter(r => r !== 'TBD') ?? [];
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 100 }}
+      />
+      {/* Sheet */}
+      <div style={{
+        position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 101,
+        background: '#fff', borderRadius: '20px 20px 0 0',
+        maxHeight: '88vh', overflowY: 'auto',
+        boxShadow: '0 -8px 40px rgba(0,0,0,0.18)',
+      }}>
+        {/* Drag handle */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0' }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: '#E2E5EA' }} />
+        </div>
+
+        {/* Header */}
+        <div style={{ background: isLive ? '#DC2626' : isFinal ? '#F9FAFB' : 'var(--court-navy)', padding: '16px 20px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                {isLive && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: 'rgba(255,255,255,0.25)', color: '#fff', letterSpacing: '0.08em' }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'inline-block' }} />
+                    LIVE{e.quarter ? ` · Q${e.quarter}` : ''}
+                  </span>
+                )}
+                {isFinal && (
+                  <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: win ? 'rgba(5,150,105,0.12)' : 'rgba(220,38,38,0.10)', color: win ? '#059669' : '#DC2626', letterSpacing: '0.08em' }}>
+                    {win ? 'Win' : loss ? 'Loss' : 'Tie'} · Final
+                  </span>
+                )}
+                {isGame && !isFinal && !isLive && (
+                  <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: 'rgba(255,255,255,0.15)', color: '#fff', letterSpacing: '0.08em' }}>
+                    {e.home ? 'Home' : 'Away'}
+                  </span>
+                )}
+              </div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.1, color: isFinal ? '#111827' : '#fff' }}>
+                {e.label}
+              </div>
+              <div style={{ fontSize: 13, color: isFinal ? '#6B7280' : 'rgba(255,255,255,0.70)', marginTop: 4 }}>
+                {e.date} · {e.time}
+              </div>
+            </div>
+            <button onClick={onClose} style={{ all: 'unset', cursor: 'pointer', padding: 4, flexShrink: 0 }}>
+              <Icon name="x" size={20} color={isFinal ? '#6B7280' : 'rgba(255,255,255,0.7)'} />
+            </button>
+          </div>
+
+          {/* Live or final score */}
+          {(isLive || isFinal) && isGame && (
+            <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: isLive ? 'rgba(255,255,255,0.65)' : '#9CA3AF', marginBottom: 4 }}>Hawks</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 56, lineHeight: 1, color: isLive ? '#fff' : win ? 'var(--court-navy)' : '#9CA3AF' }}>{e.us ?? 0}</div>
+              </div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: isLive ? 'rgba(255,255,255,0.3)' : '#D1D5DB' }}>–</div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: isLive ? 'rgba(255,255,255,0.65)' : '#9CA3AF', marginBottom: 4 }}>{e.opponent}</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 56, lineHeight: 1, color: isLive ? '#fff' : loss ? 'var(--court-navy)' : '#9CA3AF' }}>{e.them ?? 0}</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '20px 20px 40px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+          {/* Location */}
+          <DetailRow icon="map-pin" label="Location">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+              <span style={{ fontWeight: 600, fontSize: 14, color: '#111827' }}>{e.location}</span>
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(e.location + ', Fairfax VA')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={ev => ev.stopPropagation()}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: 'var(--court-navy)', textDecoration: 'none', background: 'rgba(10,31,61,0.07)', padding: '5px 12px', borderRadius: 999, flexShrink: 0 }}
+              >
+                <Icon name="navigation" size={12} color="var(--court-navy)" /> Directions
+              </a>
+            </div>
+          </DetailRow>
+
+          {/* Jersey color — upcoming games only */}
+          {isGame && !isFinal && !isLive && (
+            <DetailRow icon="shirt" label="Jerseys">
+              <span style={{ fontWeight: 600, fontSize: 14, color: '#111827' }}>{e.home ? 'Navy (home game)' : 'White (away game)'}</span>
+            </DetailRow>
+          )}
+
+          {/* Coach note */}
+          {e.note && (
+            <DetailRow icon="message-circle" label="Coach note">
+              <span style={{ fontSize: 14, color: '#374151', lineHeight: 1.5 }}>{e.note}</span>
+            </DetailRow>
+          )}
+
+          {/* Practice notes */}
+          {isPractice && e.notes && (
+            <DetailRow icon="clipboard" label="Notes">
+              <span style={{ fontSize: 14, color: '#374151', lineHeight: 1.5 }}>{e.notes}</span>
+            </DetailRow>
+          )}
+
+          {/* Officials */}
+          {isGame && assignedRefs.length > 0 && (
+            <DetailRow icon="user-check" label="Officials">
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {assignedRefs.map((name, i) => (
+                  <span key={i} style={{ fontSize: 13, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: 'rgba(10,31,61,0.07)', color: 'var(--court-navy)' }}>{name}</span>
+                ))}
+              </div>
+            </DetailRow>
+          )}
+
+          {/* RSVP — upcoming games */}
+          {isGame && !isFinal && !isLive && (
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 800, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>RSVP</div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                {[
+                  { id: 'yes', icon: 'check', label: "We're going",   c: '#059669', bg: 'rgba(5,150,105,0.10)'  },
+                  { id: 'no',  icon: 'x',     label: "Can't make it", c: '#DC2626', bg: 'rgba(220,38,38,0.08)'  },
+                ].map(opt => (
+                  <button key={opt.id} onClick={() => onRsvp(opt.id)} style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    padding: '11px 16px', borderRadius: 10, cursor: 'pointer',
+                    border: `1.5px solid ${rsvp === opt.id ? opt.c : '#E2E5EA'}`,
+                    background: rsvp === opt.id ? opt.bg : '#fff',
+                    fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
+                    color: rsvp === opt.id ? opt.c : '#9CA3AF',
+                    transition: 'all 120ms',
+                  }}>
+                    <Icon name={opt.icon} size={14} /> {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Add to calendar — upcoming games */}
+          {isGame && !isFinal && !isLive && e.month && (
+            <a
+              href={gCalLink(e)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={ev => ev.stopPropagation()}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px', borderRadius: 10, border: '1px solid #E2E5EA', color: '#6B7280', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}
+            >
+              <Icon name="calendar-plus" size={16} color="#9CA3AF" /> Add to calendar
+            </a>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function DetailRow({ icon, label, children }) {
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <Icon name={icon} size={13} color="#9CA3AF" />
+        <span style={{ fontSize: 11, fontWeight: 800, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
+      </div>
+      {children}
     </div>
   );
 }
