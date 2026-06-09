@@ -36,7 +36,7 @@ function deriveSessions(games, practices) {
   const practiceSessions = practices
     .map(p => ({
       id: p.id, type: 'practice',
-      label: p.date.split(', ')[1] || p.date,
+      label: (p.date || '').split(', ')[1] || p.date,
       day: p.date.split(',')[0].trim(),
       location: p.gym,
     }));

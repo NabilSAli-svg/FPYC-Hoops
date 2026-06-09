@@ -342,13 +342,13 @@ function EventCard({ event: e, rsvp, onRsvp, onClick }) {
           borderRight: '1px solid #E2E5EA',
         }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: isLive ? 'rgba(255,255,255,0.75)' : isFinal ? '#9CA3AF' : isGame ? 'rgba(255,255,255,0.6)' : '#6B7280' }}>
-            {e.date.split(',')[0]}
+            {(e.date || '').split(',')[0]}
           </div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, lineHeight: 1, marginTop: 2, color: (isLive || isGame) && !isFinal ? '#fff' : isFinal ? '#9CA3AF' : 'var(--court-navy)' }}>
-            {e.date.split(' ').slice(-1)[0]}
+            {(e.date || '').split(' ').slice(-1)[0]}
           </div>
           <div style={{ fontSize: 10, color: isLive ? 'rgba(255,255,255,0.65)' : isFinal ? '#9CA3AF' : isGame ? 'rgba(255,255,255,0.55)' : '#9CA3AF', marginTop: 2 }}>
-            {e.date.split(' ').slice(1, 2)[0]}
+            {(e.date || '').split(' ').slice(1, 2)[0]}
           </div>
         </div>
 

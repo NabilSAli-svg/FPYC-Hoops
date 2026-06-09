@@ -24,13 +24,13 @@ const ALL_TEAM_NAMES = Object.keys(TEAMS_INFO);
 export default function AdminApp() {
   const isMobile = useIsMobile();
   const [authReady, setAuthReady] = useState(false);
-  const [isCommissioner, setIsCommissioner] = useState(false);
+  const [role, setRole] = useState(null); // 'commissioner' | 'coach' | null
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { setAuthReady(true); return; }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
-      setIsCommissioner(profile?.role === 'commissioner' || profile?.role === 'coach');
+      if (profile?.role === 'commissioner' || profile?.role === 'coach') setRole(profile.role);
       setAuthReady(true);
     });
   }, []);
@@ -83,7 +83,7 @@ export default function AdminApp() {
     draftboard:  { title: 'Draft Board',        breadcrumb: `${activeTeam.division} · Season 2025–26` },
     season:      { title: 'Season',             breadcrumb: `${activeTeam.division} · Season 2025–26` },
     stats:       { title: 'Player Stats',       breadcrumb: `${activeTeam.name} · Season 2025–26` },
-    settings:    { title: 'Settings',           breadcrumb: 'FPYC Basketball · Coach console' },
+    settings:    { title: 'Settings',           breadcrumb: `FPYC Basketball · ${role === 'commissioner' ? 'Commissioner' : 'Coach'} console` },
   };
   const t = titleMap[view] || titleMap.dashboard;
 
@@ -107,7 +107,7 @@ export default function AdminApp() {
     </div>
   );
 
-  if (!isCommissioner) return <AdminLogin onSuccess={() => setIsCommissioner(true)} />;
+  if (!role) return <AdminLogin onSuccess={r => setRole(r)} />;
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bone)' }}>
@@ -124,6 +124,11 @@ export default function AdminApp() {
         {/* Team selector strip */}
         <div style={{ borderBottom: '1px solid var(--border)', background: '#fff', padding: '8px 28px', display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>Team</span>
+          {role === 'commissioner' && (
+            <span style={{ marginLeft: 'auto', flexShrink: 0, fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: 'var(--varsity-gold)', color: 'var(--court-navy)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Commissioner
+            </span>
+          )}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {ALL_TEAM_NAMES.map(name => {
               const ti = TEAMS_INFO[name];
@@ -177,7 +182,7 @@ function AdminLogin({ onSuccess }) {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
     setLoading(false);
     if (profile?.role === 'commissioner' || profile?.role === 'coach') {
-      onSuccess();
+      onSuccess(profile.role);
     } else {
       setError('Your account does not have admin access. Contact the commissioner.');
       await supabase.auth.signOut();
@@ -191,7 +196,7 @@ function AdminLogin({ onSuccess }) {
       <div style={{ width: '100%', maxWidth: 380 }}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 48, objectFit: 'contain', marginBottom: 12 }} />
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', textTransform: 'uppercase' }}>Coach Console</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', textTransform: 'uppercase' }}>Admin Console</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>Commissioner / Coach access only</div>
         </div>
         <div style={{ background: '#fff', borderRadius: 16, padding: '28px 24px', boxShadow: '0 20px 60px rgba(0,0,0,0.35)' }}>

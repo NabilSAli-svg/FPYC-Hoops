@@ -103,7 +103,7 @@ export default function LineupView({ players, games }) {
                 background: gameIdx === i ? 'var(--court-navy)' : 'transparent',
                 color: gameIdx === i ? '#fff' : 'var(--fg-soft)',
                 fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12, transition: 'all 120ms',
-              }}>{g.month} {g.date} · {g.opponent.split(' ').slice(-1)[0]}</button>
+              }}>{g.month} {g.date} · {(g.opponent || '').split(' ').slice(-1)[0]}</button>
             ))}
           </div>
         )}
@@ -115,7 +115,7 @@ export default function LineupView({ players, games }) {
               <Eyebrow color="var(--varsity-gold)">Starting Five · {game?.day}</Eyebrow>
               <Display size={26} color="#fff" style={{ marginTop: 4 }}>{game?.home ? 'vs.' : '@'} {game?.opponent}</Display>
             </div>
-            {game && <Pill kind="gold">{game.location.split('·')[0].trim()}</Pill>}
+            {game && <Pill kind="gold">{(game.location || 'TBD').split('·')[0].trim()}</Pill>}
           </div>
 
           <div style={{ position: 'relative', height: 320, background: 'linear-gradient(180deg, #C2A876 0%, #B89863 100%)', overflow: 'hidden' }}>

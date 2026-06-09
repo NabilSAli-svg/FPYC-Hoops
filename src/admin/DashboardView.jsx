@@ -37,7 +37,7 @@ function DashboardContent({ team, players, games, onGo }) {
   const recentPractices = [...practices].slice(-4);
   const practiceAttendance = recentPractices.map(p => {
     const present = activePlayers.filter(pl => (attendance[pl.id]?.[p.id] ?? 'none') === 'present').length;
-    return { label: p.date.split(', ')[1] || p.date, value: present, id: p.id };
+    return { label: (p.date || '').split(', ')[1] || p.date, value: present, id: p.id };
   });
   const avgAtt = practiceAttendance.length
     ? Math.round(practiceAttendance.reduce((s, p) => s + p.value, 0) / practiceAttendance.length)

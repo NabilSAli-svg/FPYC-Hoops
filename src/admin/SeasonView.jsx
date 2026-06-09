@@ -22,7 +22,7 @@ function ScoringChart({ games }) {
             <text x={x + barW + gap + barW / 2} y={H - themH - 4} textAnchor="middle" style={{ fontSize: 10, fill: '#9CA3AF', fontFamily: 'Arial,sans-serif' }}>{g.them}</text>
             <text x={x + barW + gap / 2} y={H + 14} textAnchor="middle" style={{ fontSize: 11, fontWeight: 800, fill: win ? '#059669' : '#DC2626', fontFamily: 'Arial,sans-serif' }}>{win ? 'W' : 'L'}</text>
             <text x={x + barW + gap / 2} y={H + 27} textAnchor="middle" style={{ fontSize: 9, fill: '#9CA3AF', fontFamily: 'Arial,sans-serif' }}>{g.month} {g.date}</text>
-            <text x={x + barW + gap / 2} y={H + 39} textAnchor="middle" style={{ fontSize: 9, fill: '#6B7280', fontFamily: 'Arial,sans-serif' }}>{g.opponent.split(' ').slice(-1)[0]}</text>
+            <text x={x + barW + gap / 2} y={H + 39} textAnchor="middle" style={{ fontSize: 9, fill: '#6B7280', fontFamily: 'Arial,sans-serif' }}>{(g.opponent || '').split(' ').slice(-1)[0]}</text>
           </g>
         );
       })}

@@ -125,7 +125,7 @@ export default function StatsView({ teamFilter }) {
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--court-navy)', lineHeight: 1 }}>{stat}</div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginTop: 2 }}>{unit}</div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--fg)', marginTop: 8 }}>
-                  #{player.number} {player.name.split(' ')[0]}
+                  #{player.number} {(player.name || '').split(' ')[0]}
                 </div>
               </>
             ) : (

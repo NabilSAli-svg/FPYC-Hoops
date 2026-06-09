@@ -49,7 +49,7 @@ export default function HomeTab({ family, messages, onTabChange, onAnnouncements
   // Derive attendance stats for this child
   const allSessions = [
     ...games.filter(g => g.status === 'final').map(g => ({ id: g.id, type: 'game', label: `${g.month} ${g.date}` })),
-    ...practices.map(p => ({ id: p.id, type: 'practice', label: p.date.split(', ')[1] || p.date })),
+    ...practices.map(p => ({ id: p.id, type: 'practice', label: (p.date || '').split(', ')[1] || p.date })),
   ];
   const player = players.find(p => p.number === child.number);
   const pid = player?.id;

@@ -261,7 +261,7 @@ export default function OfficialsView() {
               {refs.map(r => (
                 <Card key={r.id} padding={14} style={{ display: 'flex', alignItems: 'center', gap: 12, opacity: r.available ? 1 : 0.5 }}>
                   <div style={{ width: 36, height: 36, borderRadius: '50%', background: r.available ? 'var(--court-navy)' : 'var(--fg-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 13, color: 'var(--varsity-gold)', flexShrink: 0 }}>
-                    {r.name.split(' ').map(n => n[0]).join('')}
+                    {(r.name || '?').split(' ').map(n => n[0]).join('')}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
@@ -285,7 +285,7 @@ export default function OfficialsView() {
               <Card key={r.id} padding={16}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                   <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--varsity-gold)', flexShrink: 0 }}>
-                    {r.name.split(' ').map(n => n[0]).join('')}
+                    {(r.name || '?').split(' ').map(n => n[0]).join('')}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: 14 }}>{r.name}</div>
@@ -327,7 +327,7 @@ export default function OfficialsView() {
                     <td style={{ padding: '13px 16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--varsity-gold)', flexShrink: 0 }}>
-                          {r.name.split(' ').map(n => n[0]).join('')}
+                          {(r.name || '?').split(' ').map(n => n[0]).join('')}
                         </div>
                         <div style={{ fontWeight: 700, fontSize: 14 }}>{r.name}</div>
                       </div>
@@ -446,7 +446,7 @@ export default function OfficialsView() {
                       <td style={{ padding: '12px 16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 11, color: 'var(--varsity-gold)', flexShrink: 0 }}>
-                            {r.name.split(' ').map(n => n[0]).join('')}
+                            {(r.name || '?').split(' ').map(n => n[0]).join('')}
                           </div>
                           <span style={{ fontWeight: 700, fontSize: 14 }}>{r.name}</span>
                         </div>

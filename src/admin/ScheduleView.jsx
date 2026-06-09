@@ -241,7 +241,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
                     <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--court-navy)', textTransform: 'uppercase', lineHeight: 1.1, textAlign: 'center', marginTop: 2 }}>
                       {p.date.split(', ')[1]}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--fg-soft)', fontWeight: 500, marginTop: 2 }}>{p.time.split('–')[0]}</div>
+                    <div style={{ fontSize: 11, color: 'var(--fg-soft)', fontWeight: 500, marginTop: 2 }}>{(p.time || '').split('–')[0]}</div>
                   </div>
 
                   <div>
