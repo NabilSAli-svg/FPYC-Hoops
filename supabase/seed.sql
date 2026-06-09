@@ -6,15 +6,57 @@
 
 -- ── Align columns with the app's data shape ─────────────────────────────────
 
+alter table public.players
+  add column if not exists number   int,
+  add column if not exists name     text,
+  add column if not exists grade    text,
+  add column if not exists school   text,
+  add column if not exists guardian text,
+  add column if not exists phone    text,
+  add column if not exists position text,
+  add column if not exists status   text default 'active',
+  add column if not exists waiver   boolean default false,
+  add column if not exists program  text,
+  add column if not exists division text,
+  add column if not exists team     text;
+
 alter table public.games
+  add column if not exists team      text,
+  add column if not exists opponent  text,
+  add column if not exists day       text,
+  add column if not exists date      int,
+  add column if not exists month     text,
+  add column if not exists "time"    text,
+  add column if not exists location  text,
+  add column if not exists home      boolean default true,
+  add column if not exists status    text default 'scheduled',
+  add column if not exists us        int,
+  add column if not exists them      int,
+  add column if not exists quarter   int,
+  add column if not exists note      text,
+  add column if not exists confirmed int default 0,
+  add column if not exists score_pin text,
   add column if not exists weekday   text,
   add column if not exists refs      text,
   add column if not exists countdown int;
 
 alter table public.practices
+  add column if not exists team   text,
+  add column if not exists date   text,
+  add column if not exists "time" text,
+  add column if not exists notes  text,
   add column if not exists gym    text,
   add column if not exists "type" text,
   add column if not exists rsvp   int default 0;
+
+alter table public.announcements
+  add column if not exists "type" text default 'info',
+  add column if not exists title  text,
+  add column if not exists body   text,
+  add column if not exists target text default 'All families',
+  add column if not exists date   text,
+  add column if not exists pinned boolean default false,
+  add column if not exists author text default 'Commissioner';
 
 -- ── Players ──────────────────────────────────────────────────────────────────
 
