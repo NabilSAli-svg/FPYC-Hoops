@@ -22,6 +22,14 @@ function DashboardContent({ team, players, games, onGo }) {
   const isMobile        = useIsMobile();
 
   const next   = games.find(g => g.status === 'scheduled');
+  const countdown = next?.countdown ?? (() => {
+    if (!next?.month || !next?.date) return '—';
+    const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
+    const now = new Date();
+    let gameDate = new Date(now.getFullYear(), months[next.month], next.date);
+    if (gameDate < now && now - gameDate > 1000 * 60 * 60 * 24 * 180) gameDate.setFullYear(gameDate.getFullYear() + 1);
+    return Math.max(0, Math.ceil((gameDate - now) / (1000 * 60 * 60 * 24)));
+  })();
   const recent = games.filter(g => g.status === 'final').slice(0, 3);
 
   // Compute real attendance per practice session
@@ -67,6 +75,14 @@ function DashboardContent({ team, players, games, onGo }) {
 
     <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 20 }}>
       {/* Next game hero */}
+      {!next ? (
+        <Card padding="32px 26px" style={{ gridColumn: '1 / -1', textAlign: 'center' }}>
+          <Icon name="calendar" size={32} color="var(--border)" />
+          <div style={{ fontWeight: 700, fontSize: 15, marginTop: 12, color: 'var(--fg)' }}>No upcoming games scheduled</div>
+          <div style={{ fontSize: 13, color: 'var(--fg-soft)', marginTop: 4, marginBottom: 16 }}>Add games to the schedule to see the next matchup here.</div>
+          <Button kind="gold" icon="plus" onClick={() => onGo('schedule')}>Add a game</Button>
+        </Card>
+      ) : (
       <Card padding={0} style={{ overflow: 'hidden', gridColumn: '1 / -1' }}>
         <div style={{
           background: 'var(--court-navy)',
@@ -96,7 +112,7 @@ function DashboardContent({ team, players, games, onGo }) {
             padding: '0 24px', borderLeft: '1px solid rgba(255,255,255,0.10)', borderRight: '1px solid rgba(255,255,255,0.10)',
           }}>
             <Eyebrow color="rgba(255,255,255,0.5)">Tip-off in</Eyebrow>
-            <Display size={56} color="var(--varsity-gold)">{next.countdown}</Display>
+            <Display size={56} color="var(--varsity-gold)">{countdown}</Display>
             <Eyebrow color="rgba(255,255,255,0.5)">days</Eyebrow>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-end' }}>
@@ -129,6 +145,7 @@ function DashboardContent({ team, players, games, onGo }) {
           )}
         </div>
       </Card>
+      )}
 
       {/* Recent results */}
       <Card>
