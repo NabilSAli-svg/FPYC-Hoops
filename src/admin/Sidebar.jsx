@@ -1,14 +1,15 @@
 import { Icon, Avatar, Jersey } from '../shared/index.js';
 
 const NAV_ITEMS = [
-  { id: 'dashboard',   icon: 'layout-dashboard', label: 'Dashboard' },
-  { id: 'roster',      icon: 'users',             label: 'Roster' },
-  { id: 'schedule',    icon: 'calendar',          label: 'Schedule' },
-  { id: 'lineup',      icon: 'clipboard-list',    label: 'Lineup' },
-  { id: 'attendance',  icon: 'check-square',      label: 'Attendance' },
-  { id: 'messages',    icon: 'message-square',    label: 'Messages', badge: 3 },
-  { id: 'evaluations', icon: 'star',              label: 'Evaluations' },
-  { id: 'stats',       icon: 'bar-chart-2',      label: 'Stats' },
+  { id: 'dashboard',     icon: 'layout-dashboard', label: 'Dashboard' },
+  { id: 'roster',        icon: 'users',             label: 'Roster' },
+  { id: 'schedule',      icon: 'calendar',          label: 'Schedule' },
+  { id: 'lineup',        icon: 'clipboard-list',    label: 'Lineup' },
+  { id: 'attendance',    icon: 'check-square',      label: 'Attendance' },
+  { id: 'messages',      icon: 'message-square',    label: 'Messages', badge: 3 },
+  { id: 'announcements', icon: 'megaphone',         label: 'Announcements' },
+  { id: 'evaluations',   icon: 'star',              label: 'Evaluations' },
+  { id: 'stats',         icon: 'bar-chart-2',       label: 'Stats' },
 ];
 
 const SECONDARY = [

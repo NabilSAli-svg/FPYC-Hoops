@@ -1,0 +1,296 @@
+import { useState } from 'react';
+import { useAnnouncements, TEAMS_INFO } from '../shared/store.js';
+import { Button, Icon } from '../shared/index.js';
+
+const TARGET_OPTIONS = [
+  'All families',
+  ...Object.keys(TEAMS_INFO),
+];
+
+const TYPE_META = {
+  info:    { label: 'Info',    color: 'var(--court-navy)', bg: 'rgba(10,31,61,0.06)',   icon: 'info'         },
+  general: { label: 'General', color: '#D97706',           bg: 'rgba(217,119,6,0.07)',  icon: 'megaphone'    },
+  urgent:  { label: 'Urgent',  color: '#DC2626',           bg: 'rgba(220,38,38,0.06)',  icon: 'alert-circle' },
+};
+
+const TODAY = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+function makeId() {
+  return 'ann-' + Math.random().toString(36).slice(2, 9);
+}
+
+export default function AnnouncementsView() {
+  const [announcements, setAnnouncements] = useAnnouncements();
+  const [composing, setComposing] = useState(false);
+  const [editId, setEditId]       = useState(null);
+  const [deleteId, setDeleteId]   = useState(null);
+  const [draft, setDraft]         = useState(emptyDraft);
+
+  function emptyDraft() {
+    return { type: 'info', title: '', body: '', target: 'All families', pinned: false };
+  }
+
+  function openNew() {
+    setDraft(emptyDraft());
+    setEditId(null);
+    setComposing(true);
+  }
+
+  function openEdit(a) {
+    setDraft({ type: a.type, title: a.title, body: a.body, target: a.target, pinned: a.pinned });
+    setEditId(a.id);
+    setComposing(true);
+  }
+
+  function handleSave() {
+    if (!draft.title.trim()) return;
+    if (editId) {
+      setAnnouncements(prev => prev.map(a =>
+        a.id === editId ? { ...a, ...draft, date: TODAY } : a
+      ));
+    } else {
+      setAnnouncements(prev => [
+        { id: makeId(), ...draft, date: TODAY, author: 'Commissioner' },
+        ...prev,
+      ]);
+    }
+    setComposing(false);
+    setEditId(null);
+  }
+
+  function handleDelete(id) {
+    setAnnouncements(prev => prev.filter(a => a.id !== id));
+    setDeleteId(null);
+  }
+
+  function togglePin(id) {
+    setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, pinned: !a.pinned } : a));
+  }
+
+  const pinned   = announcements.filter(a => a.pinned);
+  const unpinned = announcements.filter(a => !a.pinned);
+
+  return (
+    <div style={{ maxWidth: 740, display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+      {/* Header row */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div>
+          <div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>
+            {announcements.length} announcement{announcements.length !== 1 ? 's' : ''} · families see them in real time
+          </div>
+        </div>
+        <Button kind="gold" icon="plus" onClick={openNew}>New announcement</Button>
+      </div>
+
+      {/* Compose / Edit panel */}
+      {composing && (
+        <div style={{ background: '#fff', border: '1.5px solid var(--court-navy)', borderRadius: 14, overflow: 'hidden' }}>
+          <div style={{ background: 'var(--court-navy)', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Icon name="edit-3" size={15} color="var(--varsity-gold)" />
+            <span style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>
+              {editId ? 'Edit announcement' : 'New announcement'}
+            </span>
+          </div>
+          <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {/* Type + Target row */}
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <FieldGroup label="Type" style={{ minWidth: 130 }}>
+                <select value={draft.type} onChange={e => setDraft(d => ({ ...d, type: e.target.value }))} style={selectStyle}>
+                  {Object.entries(TYPE_META).map(([k, v]) => (
+                    <option key={k} value={k}>{v.label}</option>
+                  ))}
+                </select>
+              </FieldGroup>
+              <FieldGroup label="Audience" style={{ flex: 1, minWidth: 160 }}>
+                <select value={draft.target} onChange={e => setDraft(d => ({ ...d, target: e.target.value }))} style={selectStyle}>
+                  {TARGET_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </FieldGroup>
+              <FieldGroup label="" style={{ alignSelf: 'flex-end' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600, color: 'var(--fg)' }}>
+                  <input
+                    type="checkbox"
+                    checked={draft.pinned}
+                    onChange={e => setDraft(d => ({ ...d, pinned: e.target.checked }))}
+                    style={{ accentColor: 'var(--court-navy)', width: 15, height: 15 }}
+                  />
+                  Pin to top
+                </label>
+              </FieldGroup>
+            </div>
+
+            {/* Title */}
+            <FieldGroup label="Title">
+              <input
+                value={draft.title}
+                onChange={e => setDraft(d => ({ ...d, title: e.target.value }))}
+                placeholder="Short, clear subject line"
+                style={inputStyle}
+                maxLength={80}
+              />
+            </FieldGroup>
+
+            {/* Body */}
+            <FieldGroup label="Message">
+              <textarea
+                value={draft.body}
+                onChange={e => setDraft(d => ({ ...d, body: e.target.value }))}
+                placeholder="Full announcement details…"
+                rows={3}
+                style={{ ...inputStyle, resize: 'vertical', minHeight: 72 }}
+              />
+            </FieldGroup>
+
+            {/* Preview */}
+            {draft.title && (
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Preview</div>
+                <AnnouncementCard a={{ ...draft, date: TODAY, author: 'Commissioner' }} preview />
+              </div>
+            )}
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4 }}>
+              <button onClick={() => setComposing(false)} style={{ ...ghostBtn }}>Cancel</button>
+              <Button kind="gold" onClick={handleSave} disabled={!draft.title.trim()}>
+                {editId ? 'Save changes' : 'Post announcement'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirm */}
+      {deleteId && (
+        <div style={{ background: 'rgba(220,38,38,0.06)', border: '1.5px solid rgba(220,38,38,0.3)', borderRadius: 12, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+          <Icon name="alert-circle" size={18} color="#DC2626" />
+          <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: '#7F1D1D' }}>Delete this announcement? Families will no longer see it.</span>
+          <button onClick={() => setDeleteId(null)} style={ghostBtn}>Keep it</button>
+          <Button kind="danger" onClick={() => handleDelete(deleteId)}>Delete</Button>
+        </div>
+      )}
+
+      {/* Pinned */}
+      {pinned.length > 0 && (
+        <Section label="Pinned">
+          {pinned.map(a => (
+            <AnnouncementCard key={a.id} a={a} onEdit={() => openEdit(a)} onDelete={() => setDeleteId(a.id)} onTogglePin={() => togglePin(a.id)} />
+          ))}
+        </Section>
+      )}
+
+      {/* All others */}
+      {unpinned.length > 0 && (
+        <Section label={pinned.length > 0 ? 'All others' : 'All announcements'}>
+          {unpinned.map(a => (
+            <AnnouncementCard key={a.id} a={a} onEdit={() => openEdit(a)} onDelete={() => setDeleteId(a.id)} onTogglePin={() => togglePin(a.id)} />
+          ))}
+        </Section>
+      )}
+
+      {announcements.length === 0 && !composing && (
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--fg-muted)' }}>
+          <Icon name="megaphone" size={36} color="#CBD5E1" />
+          <div style={{ fontWeight: 700, fontSize: 16, marginTop: 12, color: '#374151' }}>No announcements yet</div>
+          <div style={{ fontSize: 13, marginTop: 4 }}>Post one — families see it instantly in the family portal.</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Section({ label, children }) {
+  return (
+    <div>
+      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--fg-muted)', marginBottom: 10 }}>{label}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>{children}</div>
+    </div>
+  );
+}
+
+function AnnouncementCard({ a, onEdit, onDelete, onTogglePin, preview }) {
+  const meta = TYPE_META[a.type] || TYPE_META.info;
+  return (
+    <div style={{
+      background: preview ? meta.bg : '#fff',
+      border: `1px solid ${meta.color}25`,
+      borderLeft: `3px solid ${meta.color}`,
+      borderRadius: '0 10px 10px 0',
+      padding: '12px 14px',
+      display: 'flex',
+      gap: 12,
+      alignItems: 'flex-start',
+    }}>
+      <Icon name={meta.icon} size={15} color={meta.color} style={{ flexShrink: 0, marginTop: 2 }} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <span style={{ fontWeight: 700, fontSize: 13, color: '#111827' }}>{a.title}</span>
+          {a.target !== 'All families' && (
+            <span style={{ fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: `${meta.color}18`, color: meta.color, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{a.target}</span>
+          )}
+          {a.pinned && <Icon name="pin" size={11} color={meta.color} />}
+        </div>
+        {a.body && <div style={{ fontSize: 12, color: '#6B7280', marginTop: 3, lineHeight: 1.5 }}>{a.body}</div>}
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, fontWeight: 600 }}>{a.date} · {a.author || 'Commissioner'}</div>
+      </div>
+      {!preview && (
+        <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+          <IconBtn name="pin" title={a.pinned ? 'Unpin' : 'Pin'} active={a.pinned} onClick={onTogglePin} />
+          <IconBtn name="edit-2" title="Edit" onClick={onEdit} />
+          <IconBtn name="trash-2" title="Delete" danger onClick={onDelete} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function IconBtn({ name, title, onClick, active, danger }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      style={{
+        all: 'unset', cursor: 'pointer',
+        width: 28, height: 28, borderRadius: 6,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: active ? 'rgba(10,31,61,0.10)' : danger ? 'transparent' : 'transparent',
+        transition: 'background 120ms',
+      }}
+      onMouseEnter={e => e.currentTarget.style.background = danger ? 'rgba(220,38,38,0.08)' : 'rgba(10,31,61,0.08)'}
+      onMouseLeave={e => e.currentTarget.style.background = active ? 'rgba(10,31,61,0.10)' : 'transparent'}
+    >
+      <Icon name={name} size={14} color={danger ? '#DC2626' : active ? 'var(--court-navy)' : '#6B7280'} />
+    </button>
+  );
+}
+
+function FieldGroup({ label, children, style }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 5, ...style }}>
+      {label && <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</label>}
+      {children}
+    </div>
+  );
+}
+
+const inputStyle = {
+  width: '100%', boxSizing: 'border-box',
+  padding: '9px 12px', borderRadius: 8,
+  border: '1.5px solid var(--border)',
+  fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--fg)',
+  background: '#FAFAFA', outline: 'none',
+};
+
+const selectStyle = {
+  ...inputStyle,
+  appearance: 'none', cursor: 'pointer',
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+  backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center', paddingRight: 30,
+};
+
+const ghostBtn = {
+  padding: '8px 16px', borderRadius: 8, border: '1.5px solid var(--border)',
+  background: '#fff', color: 'var(--fg)', fontFamily: 'var(--font-body)',
+  fontWeight: 600, fontSize: 13, cursor: 'pointer',
+};

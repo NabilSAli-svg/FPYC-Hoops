@@ -14,6 +14,7 @@ import DraftBoardView from './DraftBoardView.jsx';
 import SeasonView from './SeasonView.jsx';
 import SettingsView from './SettingsView.jsx';
 import StatsView from './StatsView.jsx';
+import AnnouncementsView from './AnnouncementsView.jsx';
 import { Button } from '../shared/index.js';
 
 const ALL_TEAM_NAMES = Object.keys(TEAMS_INFO);
@@ -61,8 +62,9 @@ export default function AdminApp() {
     schedule:    { title: 'Schedule',           breadcrumb: `${activeTeam.name} · ${activeTeam.division}` },
     lineup:      { title: 'Lineup Builder',     breadcrumb: 'Sat, Dec 7 · vs. Vienna Storm' },
     attendance:  { title: 'Attendance',         breadcrumb: `${activeTeam.name} · Season 2025–26` },
-    messages:    { title: 'Messages',           breadcrumb: '3 unread' },
-    evaluations: { title: 'Evaluations',        breadcrumb: `${activeTeam.name} · ${activeTeam.division}` },
+    messages:      { title: 'Messages',       breadcrumb: '3 unread' },
+    announcements: { title: 'Announcements', breadcrumb: 'Families see these in real time' },
+    evaluations:   { title: 'Evaluations',   breadcrumb: `${activeTeam.name} · ${activeTeam.division}` },
     draftboard:  { title: 'Draft Board',        breadcrumb: `${activeTeam.division} · Season 2025–26` },
     season:      { title: 'Season',             breadcrumb: `${activeTeam.division} · Season 2025–26` },
     stats:       { title: 'Player Stats',       breadcrumb: `${activeTeam.name} · Season 2025–26` },
@@ -76,7 +78,9 @@ export default function AdminApp() {
       ? <Button kind="gold" icon="calendar-plus" onClick={() => setOpenNewGame(true)}>New game</Button>
       : view === 'lineup'
         ? <Button kind="primary" icon="save">Save lineup</Button>
-        : view === 'messages'
+        : view === 'announcements'
+          ? null
+          : view === 'messages'
           ? <Button kind="gold" icon="edit-3" onClick={() => setMessagesAutoCompose(true)}>Compose</Button>
           : view === 'draftboard'
               ? <Button kind="gold" icon="save">Finalize teams</Button>
@@ -120,7 +124,8 @@ export default function AdminApp() {
           {view === 'schedule'    && <ScheduleView games={teamGames} onScoreSave={saveScore} onGameUpdate={updateGame} onGameAdd={addGame} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} />}
           {view === 'lineup'      && <LineupView players={teamPlayers.filter(p => p.status === 'active')} games={teamGames} />}
           {view === 'attendance'  && <AttendanceView players={teamPlayers} />}
-          {view === 'messages'    && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} />}
+          {view === 'messages'       && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} />}
+          {view === 'announcements'  && <AnnouncementsView />}
           {view === 'evaluations' && <EvaluationsView players={teamPlayers.filter(p => p.status !== 'inactive')} />}
           {view === 'draftboard'  && <DraftBoardView />}
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} />}
