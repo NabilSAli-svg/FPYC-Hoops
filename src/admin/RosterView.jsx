@@ -48,13 +48,45 @@ export default function RosterView({ team, players, setPlayers }) {
   }, []);
 
   const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState(null);
+  const [sortDir, setSortDir] = useState('asc');
   const [modal, setModal] = useState(null); // null | { mode: 'add' } | { mode: 'edit', player }
   const [form, setForm] = useState(emptyForm());
   const [errors, setErrors] = useState({});
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [toast, setToast] = useState('');
 
-  const filtered = filter === 'all' ? players : players.filter(p => p.status === filter);
+  const statusFiltered = filter === 'all' ? players : players.filter(p => p.status === filter);
+
+  const term = search.trim().toLowerCase();
+  const searched = term
+    ? statusFiltered.filter(p =>
+        (p.name || '').toLowerCase().includes(term) ||
+        (p.school || '').toLowerCase().includes(term) ||
+        (p.guardian || '').toLowerCase().includes(term) ||
+        (p.team || '').toLowerCase().includes(term) ||
+        String(p.number ?? '').includes(term)
+      )
+    : statusFiltered;
+
+  function toggleSort(key) {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
+
+  const filtered = !sortKey ? searched : [...searched].sort((a, b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (sortKey === 'number') { av = av ?? -Infinity; bv = bv ?? -Infinity; }
+    else { av = (av ?? '').toString().toLowerCase(); bv = (bv ?? '').toString().toLowerCase(); }
+    if (av < bv) return sortDir === 'asc' ? -1 : 1;
+    if (av > bv) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
 
   function showToast(msg) {
     setToast(msg);
@@ -171,6 +203,18 @@ export default function RosterView({ team, players, setPlayers }) {
             }}>{t.label}</button>
           ))}
         </div>
+        <div style={{ position: 'relative' }}>
+          <Icon name="search" size={14} color="var(--fg-muted)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search players…"
+            style={{
+              padding: '8px 12px 8px 32px', borderRadius: 8, border: '1px solid var(--border)',
+              fontSize: 13, fontFamily: 'var(--font-body)', outline: 'none', minWidth: 200,
+            }}
+          />
+        </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <Button kind="ghost" icon="printer" size="sm" onClick={() => printRoster(players, TEAM_INFO)}>Print</Button>
           <Button kind="ghost" icon="download" size="sm" onClick={() => exportRosterCSV(players)}>Export CSV</Button>
@@ -189,13 +233,19 @@ export default function RosterView({ team, players, setPlayers }) {
           background: 'var(--bone)', borderBottom: '1px solid var(--border)',
           fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700,
         }}>
-          <div>#</div><div>Player</div><div>Grade</div><div>School</div>
-          <div>Guardian</div><div>Waiver</div><div>Status</div><div />
+          <SortHeader label="#" sortKey="number" current={sortKey} dir={sortDir} onClick={toggleSort} />
+          <SortHeader label="Player" sortKey="name" current={sortKey} dir={sortDir} onClick={toggleSort} />
+          <SortHeader label="Grade" sortKey="grade" current={sortKey} dir={sortDir} onClick={toggleSort} />
+          <SortHeader label="School" sortKey="school" current={sortKey} dir={sortDir} onClick={toggleSort} />
+          <SortHeader label="Guardian" sortKey="guardian" current={sortKey} dir={sortDir} onClick={toggleSort} />
+          <div>Waiver</div>
+          <SortHeader label="Status" sortKey="status" current={sortKey} dir={sortDir} onClick={toggleSort} />
+          <div />
         </div>
 
         {filtered.length === 0 && (
           <EmptyState icon="users" title="No players"
-            message={filter === 'all' ? 'Add your first player to get started.' : `No ${filter} players.`}
+            message={search ? `No players match "${search}".` : filter === 'all' ? 'Add your first player to get started.' : `No ${filter} players.`}
             onAction={openAdd} actionLabel="Add player" />
         )}
 
@@ -389,6 +439,20 @@ export default function RosterView({ team, players, setPlayers }) {
         </div>
       )}
     </div>
+  );
+}
+
+function SortHeader({ label, sortKey, current, dir, onClick }) {
+  const active = current === sortKey;
+  return (
+    <button onClick={() => onClick(sortKey)} style={{
+      all: 'unset', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4,
+      fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase', fontWeight: 700,
+      color: active ? 'var(--court-navy)' : 'var(--fg-muted)',
+    }}>
+      {label}
+      <Icon name={active ? (dir === 'asc' ? 'chevron-up' : 'chevron-down') : 'chevrons-up-down'} size={12} color="currentColor" />
+    </button>
   );
 }
 
