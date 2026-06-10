@@ -157,6 +157,29 @@ export const INITIAL_PRACTICES = [
   { id: 'pda6_4', date: 'Mon, Jul 27', time: '7:00-8:00 PM', gym: 'Fairfax HS', type: 'Player Development', rsvp: 0, notes: "Player Development - Intermediate/Advanced group", team: 'Rising 6th-8th Boys' },
 ];
 
+export const INITIAL_MESSAGES = [
+  {
+    id: 'm1', from: 'Coach M. Davis', time: '2h ago', unread: true,
+    subject: 'Game day info — Dec 7 vs. Vienna Storm',
+    body: `Hawks family!\n\nJust a reminder that this Saturday's game is at Robinson Secondary, Gym B at 10:00 AM. Please arrive by 9:30 for warm-ups.\n\nWe'll be wearing our NAVY jerseys (home game). If you need a carpool, check the sheet in your email — 3 families already volunteered.\n\nLet's go Hawks!\n— Coach Davis`,
+  },
+  {
+    id: 'm2', from: 'Coach M. Davis', time: 'Yesterday', unread: true,
+    subject: 'Practice update — Monday @ Daniels Run',
+    body: `Quick note: Monday's practice is confirmed at Daniels Run ES, starting at 6:00 PM sharp. We'll be working on our pick-and-roll defense and transition offense.\n\nPlease bring water and sneakers. See you there!\n— Coach Davis`,
+  },
+  {
+    id: 'm3', from: 'FPYC Commissioner', time: '3 days ago', unread: false,
+    subject: 'Season standings update',
+    body: `The Fairfax Hawks are currently 2nd in the division at 6–3. Top 4 teams advance to playoffs. Keep up the great work!\n\nFull standings are available at fpycsports.org.`,
+  },
+  {
+    id: 'm4', from: 'Coach M. Davis', time: 'Nov 30', unread: false,
+    subject: 'Great win today! 48–39',
+    body: `Proud of the team today — that was a great defensive effort in the second half. Jordan had a fantastic game.\n\nNext up: Reston Wolves on Dec 14. Enjoy your week!\n— Coach Davis`,
+  },
+];
+
 export function usePlayers() {
   return useSupabaseTable('players', INITIAL_PLAYERS);
 }
