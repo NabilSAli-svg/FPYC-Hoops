@@ -9,7 +9,7 @@ export default function TeamSpotlight() {
   const isMobile = useIsMobile();
   const [games] = useGames();
   const [standings] = useStandings();
-  const STANDINGS = standings[TEAM_INFO.division] || INITIAL_STANDINGS[TEAM_INFO.division];
+  const STANDINGS = standings[TEAM_INFO.division] || INITIAL_STANDINGS[TEAM_INFO.division] || [];
 
   const liveGame   = games.find(g => g.status === 'live');
   const nextGame   = games.find(g => g.status === 'scheduled');
