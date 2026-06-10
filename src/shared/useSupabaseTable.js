@@ -20,7 +20,7 @@ export function useSupabaseTable(tableName, initial = []) {
       .select('*')
       .then(({ data: rows, error }) => {
         if (error) { console.error(`[supabase] fetch ${tableName}:`, error.message); return; }
-        if (rows) setDataLocal(rows);
+        if (rows && rows.length > 0) setDataLocal(rows);
       });
 
     // Realtime subscription — channel name must be unique per hook instance,

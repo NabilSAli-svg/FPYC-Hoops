@@ -494,7 +494,7 @@ export function deriveEvents(games, practices) {
     id: p.id,
     type: 'practice',
     date: p.date,
-    time: p.time.split('–')[0].trim(),
+    time: p.time.split(/[–-]/)[0].trim(),
     timeRange: p.time,
     label: p.type === 'Scrimmage' ? 'Scrimmage' : 'Practice',
     practiceType: p.type,
