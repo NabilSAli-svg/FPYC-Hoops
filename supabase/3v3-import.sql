@@ -144,3 +144,5 @@ insert into public.practices (id, team, date, "time", gym, type, rsvp, notes) va
 ('pda6_2', 'Girls 3v3 (2nd-8th)', 'Mon, Jul 27', '7:00-8:00 PM', 'Fairfax HS', 'Player Development', 0, 'Player Development - Intermediate/Advanced group'),
 ('pda6_3', 'Rising 4th-5th Boys', 'Mon, Jul 27', '7:00-8:00 PM', 'Fairfax HS', 'Player Development', 0, 'Player Development - Intermediate/Advanced group'),
 ('pda6_4', 'Rising 6th-8th Boys', 'Mon, Jul 27', '7:00-8:00 PM', 'Fairfax HS', 'Player Development', 0, 'Player Development - Intermediate/Advanced group');
+
+update public.players set program = 'Recreation' where program = '3v3 Summer Cup';

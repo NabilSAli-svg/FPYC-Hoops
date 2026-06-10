@@ -9,11 +9,20 @@ const POSITIONS = ['Guard', 'Forward', 'Center'];
 const SCHOOLS   = ['Daniels Run ES', 'Providence ES', 'Lanier MS', 'Mosby Woods ES', 'Robinson Secondary', 'Fairfax HS', 'Other'];
 const STATUSES  = ['active', 'pending', 'inactive'];
 
-const PROGRAMS = ['3v3 Summer Cup', 'Unassigned'];
+const PROGRAMS = ['Recreation', 'Select', 'Training', 'Unassigned'];
 
 const DIVISIONS_BY_PROGRAM = {
-  '3v3 Summer Cup': ['3v3 Summer Cup'],
-  'Unassigned':     ['—'],
+  'Recreation': ['3v3 Summer Cup'],
+  'Select':     ['—'],
+  'Training':   ['Beginner', 'Intermediate/Advanced'],
+  'Unassigned': ['—'],
+};
+
+const TEAMS_BY_PROGRAM = {
+  'Recreation': ['Rising 2nd-3rd Boys', 'Girls 3v3 (2nd-8th)', 'Rising 4th-5th Boys', 'Rising 6th-8th Boys'],
+  'Select':     ['Unassigned'],
+  'Training':   ['Training - Beginner', 'Training - Intermediate/Advanced'],
+  'Unassigned': ['Unassigned'],
 };
 
 const TEAMS = [...Object.keys(TEAMS_INFO), 'Unassigned'];
@@ -21,7 +30,7 @@ const TEAMS = [...Object.keys(TEAMS_INFO), 'Unassigned'];
 const STATUS_KIND = { active: 'navy', pending: 'warn', neutral: 'neutral' };
 
 function emptyForm() {
-  return { firstName: '', lastName: '', number: '', grade: '5th', position: 'Guard', school: '', guardian: '', phone: '', status: 'active', waiver: false, program: '3v3 Summer Cup', division: '3v3 Summer Cup', team: TEAMS[0] };
+  return { firstName: '', lastName: '', number: '', grade: '5th', position: 'Guard', school: '', guardian: '', phone: '', status: 'active', waiver: false, program: 'Recreation', division: '3v3 Summer Cup', team: TEAMS[0] };
 }
 
 function exportRosterCSV(players) {
@@ -107,7 +116,7 @@ export default function RosterView({ team, players, setPlayers }) {
       phone: p.phone || '',
       status: p.status,
       waiver: p.waiver,
-      program: p.program || '3v3 Summer Cup',
+      program: p.program || 'Recreation',
       division: p.division || '3v3 Summer Cup',
       team: p.team || 'Unassigned',
     });
@@ -371,8 +380,8 @@ export default function RosterView({ team, players, setPlayers }) {
                   <select value={form.program} onChange={e => {
                     const prog = e.target.value;
                     const divs = DIVISIONS_BY_PROGRAM[prog] || [];
-                    set('program', prog);
-                    setForm(f => ({ ...f, program: prog, division: divs[0] || '—' }));
+                    const teams = TEAMS_BY_PROGRAM[prog] || ['Unassigned'];
+                    setForm(f => ({ ...f, program: prog, division: divs[0] || '—', team: teams[0] }));
                   }} style={inputStyle()}>
                     {PROGRAMS.map(p => <option key={p}>{p}</option>)}
                   </select>
@@ -384,7 +393,7 @@ export default function RosterView({ team, players, setPlayers }) {
                 </F>
                 <F label="Team">
                   <select value={form.team} onChange={e => set('team', e.target.value)} style={inputStyle()}>
-                    {TEAMS.map(t => <option key={t}>{t}</option>)}
+                    {(TEAMS_BY_PROGRAM[form.program] || TEAMS).map(t => <option key={t}>{t}</option>)}
                   </select>
                 </F>
               </div>
