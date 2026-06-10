@@ -9,6 +9,7 @@ import CoachApp from './coach/CoachApp.jsx';
 import SchedulerApp from './scheduler/SchedulerApp.jsx';
 import ScorekeeperApp from './scorekeeper/ScorekeeperApp.jsx';
 import ScoreboardApp from './scoreboard/ScoreboardApp.jsx';
+import BoardCoaches from './website/BoardCoaches.jsx';
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
       <Route path="/scheduler" element={<SchedulerApp />} />
       <Route path="/scorekeeper" element={<ScorekeeperApp />} />
       <Route path="/scoreboard" element={<ScoreboardApp />} />
+      <Route path="/board" element={<BoardCoaches />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

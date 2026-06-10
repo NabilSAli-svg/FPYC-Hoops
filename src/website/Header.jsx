@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { id: 'standings', label: 'Standings' },
   { id: 'schedule',  label: 'Schedule' },
   { id: 'news',      label: 'News' },
+  { id: 'board',     label: 'Board & Coaches', href: '/board' },
   { id: 'volunteer', label: 'Volunteer' },
   { id: 'contact',   label: 'Contact' },
 ];
@@ -38,7 +39,7 @@ export default function Header({ onJump }) {
 
         <nav className="desk-hide" style={{ display: 'flex', gap: 4, marginLeft: 24 }}>
           {NAV_ITEMS.map(it => (
-            <a key={it.id} href={`#${it.id}`} onClick={(e) => { e.preventDefault(); onJump(it.id); }} style={{
+            <a key={it.id} href={it.href || `#${it.id}`} onClick={it.href ? undefined : (e) => { e.preventDefault(); onJump(it.id); }} style={{
               color: 'rgba(255,255,255,0.85)', textDecoration: 'none',
               fontFamily: 'var(--font-body)', fontWeight: 500, fontSize: 14,
               padding: '8px 12px', borderRadius: 6,
@@ -96,7 +97,7 @@ export default function Header({ onJump }) {
           display: 'flex', flexDirection: 'column',
         }}>
           {NAV_ITEMS.map(it => (
-            <a key={it.id} href={`#${it.id}`} onClick={(e) => { e.preventDefault(); onJump(it.id); closeMenu(); }} style={{
+            <a key={it.id} href={it.href || `#${it.id}`} onClick={it.href ? closeMenu : (e) => { e.preventDefault(); onJump(it.id); closeMenu(); }} style={{
               color: 'var(--court-navy)', textDecoration: 'none',
               fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 15,
               padding: '16px 24px', borderBottom: '1px solid var(--border)',
