@@ -4,11 +4,13 @@ import Icon from '../shared/Icon.jsx';
 import { SectionHead } from './Programs.jsx';
 
 const BOARD = [
-  { name: 'TBD', role: 'President' },
-  { name: 'TBD', role: 'Vice President' },
-  { name: 'TBD', role: 'Treasurer' },
-  { name: 'TBD', role: 'Secretary' },
-  { name: 'TBD', role: 'Scheduler / Admin Operations' },
+  { name: 'Nabil Ali', role: 'Basketball Director' },
+  { name: 'TBD', role: 'Recreation Director' },
+  { name: 'George Ragan', role: 'Select Director' },
+  { name: 'TBD', role: 'Player Development Director' },
+  { name: 'TBD', role: 'Operations Director' },
+  { name: 'Russell Finelson', role: 'Referee Development Director' },
+  { name: 'TBD', role: 'Community/Sponsorship Director' },
 ];
 
 const COACHES = [
