@@ -2,32 +2,26 @@ import { useState, useEffect } from 'react';
 import { Card, Pill, Button, Icon, Jersey, EmptyState, Skeleton } from '../shared/index.js';
 import { csvDownload } from '../shared/csvDownload.js';
 import { printRoster } from '../shared/printSheet.js';
-import { TEAM_INFO } from '../shared/store.js';
+import { TEAM_INFO, TEAMS_INFO } from '../shared/store.js';
 
 const GRADES    = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
 const POSITIONS = ['Guard', 'Forward', 'Center'];
 const SCHOOLS   = ['Daniels Run ES', 'Providence ES', 'Lanier MS', 'Mosby Woods ES', 'Robinson Secondary', 'Fairfax HS', 'Other'];
 const STATUSES  = ['active', 'pending', 'inactive'];
 
-const PROGRAMS = ['House League', 'Select Travel', 'Summer League', 'Summer Training', 'Unassigned'];
+const PROGRAMS = ['3v3 Summer Cup', 'Unassigned'];
 
 const DIVISIONS_BY_PROGRAM = {
-  'House League':    ['Boys 3–4 House', 'Girls 3–4 House', 'Boys 5–6 House', 'Girls 5–6 House', 'Boys 7–8 House', 'Girls 7–8 House'],
-  'Select Travel':   ['Boys 7–8 Select', 'Girls 7–8 Select', 'Boys 9–10 Select', 'Girls 9–10 Select'],
-  'Summer League':   ['Boys 5–6 Summer', 'Girls 5–6 Summer', 'Boys 7–8 Summer', 'Girls 7–8 Summer'],
-  'Summer Training': ['All divisions'],
-  'Unassigned':      ['—'],
+  '3v3 Summer Cup': ['3v3 Summer Cup'],
+  'Unassigned':     ['—'],
 };
 
-const TEAMS = [
-  'Fairfax Hawks', 'Fairfax Wolves', 'Fairfax Eagles', 'Fairfax Cougars',
-  'Fairfax Thunder', 'Fairfax Storm', 'Fairfax Lightning', 'Unassigned',
-];
+const TEAMS = [...Object.keys(TEAMS_INFO), 'Unassigned'];
 
 const STATUS_KIND = { active: 'navy', pending: 'warn', neutral: 'neutral' };
 
 function emptyForm() {
-  return { firstName: '', lastName: '', number: '', grade: '5th', position: 'Guard', school: '', guardian: '', phone: '', status: 'active', waiver: false, program: 'House League', division: 'Boys 5–6 House', team: 'Unassigned' };
+  return { firstName: '', lastName: '', number: '', grade: '5th', position: 'Guard', school: '', guardian: '', phone: '', status: 'active', waiver: false, program: '3v3 Summer Cup', division: '3v3 Summer Cup', team: TEAMS[0] };
 }
 
 function exportRosterCSV(players) {
@@ -113,8 +107,8 @@ export default function RosterView({ team, players, setPlayers }) {
       phone: p.phone || '',
       status: p.status,
       waiver: p.waiver,
-      program: p.program || 'House League',
-      division: p.division || 'Boys 5–6 House',
+      program: p.program || '3v3 Summer Cup',
+      division: p.division || '3v3 Summer Cup',
       team: p.team || 'Unassigned',
     });
     setErrors({});
