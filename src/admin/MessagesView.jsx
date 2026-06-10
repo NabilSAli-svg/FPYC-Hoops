@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, Button, Icon, Display, Pill, Avatar, EmptyState, Skeleton } from '../shared/index.js';
-import { useMessages, TEAM_INFO } from '../shared/store.js';
+import { useMessages, usePlayers, TEAM_INFO } from '../shared/store.js';
+import { supabase } from '../shared/supabase.js';
 
 const THREADS = [
   {
@@ -67,29 +68,58 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed })
   }, []);
 
   const [, setMessages] = useMessages();
+  const [players] = usePlayers();
   const [tab, setTab] = useState('inbox');
   const [selected, setSelected] = useState(THREADS[0].id);
   const [showCompose, setShowCompose] = useState(autoCompose);
   const [composeChannel, setComposeChannel] = useState('email');
   const [sentToast, setSentToast] = useState('');
+  const [sending, setSending] = useState(false);
 
   function handleCloseCompose() {
     setShowCompose(false);
     onAutoComposeUsed?.();
   }
 
-  function handleSend(subject, body, channel) {
-    setMessages(ms => [{
-      id: 'm' + Date.now(),
-      from: TEAM_INFO.coach,
-      time: 'Just now',
-      unread: true,
-      subject: subject || '(No subject)',
-      body: body || '',
-    }, ...ms]);
-    setSentToast(channel === 'email' ? 'Email sent to team!' : 'Text sent to team!');
-    setTimeout(() => setSentToast(''), 3000);
-    handleCloseCompose();
+  async function handleSend(subject, body, channel, recipients) {
+    setSending(true);
+    try {
+      let result;
+      if (channel === 'email') {
+        const { data, error } = await supabase.functions.invoke('send-email', {
+          body: { to: recipients, subject: subject || '(No subject)', text: body },
+        });
+        result = { data, error };
+      } else {
+        const { data, error } = await supabase.functions.invoke('send-sms', {
+          body: { to: recipients, body },
+        });
+        result = { data, error };
+      }
+
+      if (result.error || result.data?.error) {
+        const detail = result.error?.message || JSON.stringify(result.data?.error);
+        setSentToast(`Failed to send: ${detail}`);
+      } else {
+        setMessages(ms => [{
+          id: 'm' + Date.now(),
+          from: TEAM_INFO.coach,
+          time: 'Just now',
+          unread: true,
+          subject: subject || '(No subject)',
+          body: body || '',
+        }, ...ms]);
+        setSentToast(channel === 'email'
+          ? `Email sent to ${recipients.length} recipient${recipients.length === 1 ? '' : 's'}!`
+          : `Text sent to ${recipients.length} recipient${recipients.length === 1 ? '' : 's'}!`);
+        handleCloseCompose();
+      }
+    } catch (err) {
+      setSentToast(`Failed to send: ${err.message}`);
+    } finally {
+      setSending(false);
+      setTimeout(() => setSentToast(''), 4000);
+    }
   }
 
   const thread = THREADS.find(t => t.id === selected);
@@ -201,7 +231,7 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed })
         </div>
       )}
 
-      {showCompose && <ComposeModal channel={composeChannel} onClose={handleCloseCompose} onSend={handleSend} />}
+      {showCompose && <ComposeModal channel={composeChannel} players={players} sending={sending} onClose={handleCloseCompose} onSend={handleSend} />}
 
       {sentToast && (
         <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', background: 'var(--court-navy)', color: '#fff', padding: '12px 24px', borderRadius: 999, fontWeight: 700, fontSize: 14, boxShadow: '0 8px 24px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: 8, zIndex: 300 }}>
@@ -236,10 +266,11 @@ function NotificationsPanel() {
   );
 }
 
-function ComposeModal({ channel, onClose, onSend }) {
+function ComposeModal({ channel, players, sending, onClose, onSend }) {
   const isEmail = channel === 'email';
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
+  const [recipients, setRecipients] = useState([]);
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
       <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 560, boxShadow: 'var(--shadow-3)' }}>
@@ -251,7 +282,7 @@ function ComposeModal({ channel, onClose, onSend }) {
           <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><Icon name="x" size={20} color="var(--fg-muted)" /></button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <RecipientField />
+          <RecipientField channel={channel} players={players} onChange={setRecipients} />
           {isEmail && <div>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subject</div>
             <input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Subject line…" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, outline: 'none', background: 'var(--bone)', boxSizing: 'border-box' }} />
@@ -263,8 +294,8 @@ function ComposeModal({ channel, onClose, onSend }) {
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 20, justifyContent: 'flex-end' }}>
           <Button kind="ghost" onClick={onClose}>Cancel</Button>
-          <Button kind={isEmail ? 'primary' : 'gold'} icon="send" onClick={() => onSend(isEmail ? subject : `[Text] ${subject}`, body, channel)} disabled={!body.trim()}>
-            Send {isEmail ? 'email' : 'text'}
+          <Button kind={isEmail ? 'primary' : 'gold'} icon="send" onClick={() => onSend(subject, body, channel, recipients)} disabled={!body.trim() || recipients.length === 0 || sending}>
+            {sending ? 'Sending…' : `Send ${isEmail ? 'email' : 'text'} (${recipients.length})`}
           </Button>
         </div>
       </div>
@@ -329,21 +360,48 @@ function MessagesSkeleton({ tab, setTab }) {
   );
 }
 
-function RecipientField() {
-  const options = ['Entire team (12)', 'Parents only', 'Active players only', 'Custom…'];
-  const [val, setVal] = useState('Entire team (12)');
+function RecipientField({ channel, players, onChange }) {
+  const teamPlayers = players.filter(p => p.team === TEAM_INFO.name);
+  const activePlayers = teamPlayers.filter(p => p.status === 'active');
+
+  const field = channel === 'email' ? 'guardian' : 'phone';
+  const valueOf = p => (p[field] || '').trim();
+
+  const groups = [
+    { id: 'team', label: `Entire team (${teamPlayers.length})`, players: teamPlayers },
+    { id: 'active', label: `Active players only (${activePlayers.length})`, players: activePlayers },
+  ];
+
+  const [selectedId, setSelectedId] = useState('team');
+
+  useEffect(() => {
+    const group = groups.find(g => g.id === selectedId) || groups[0];
+    const recipients = [...new Set(group.players.map(valueOf).filter(Boolean))];
+    onChange(recipients);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId, players, channel]);
+
+  const recipientCount = (groups.find(g => g.id === selectedId) || groups[0]).players.filter(p => valueOf(p)).length;
+  const totalCount = (groups.find(g => g.id === selectedId) || groups[0]).players.length;
+  const missing = totalCount - recipientCount;
+
   return (
     <div>
       <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>To</div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        {options.map(o => (
-          <button key={o} onClick={() => setVal(o)} style={{
+        {groups.map(g => (
+          <button key={g.id} onClick={() => setSelectedId(g.id)} style={{
             padding: '7px 12px', borderRadius: 999, border: '1px solid var(--border)', cursor: 'pointer',
-            background: val === o ? 'var(--court-navy)' : 'var(--bone)', color: val === o ? '#fff' : 'var(--fg)',
+            background: selectedId === g.id ? 'var(--court-navy)' : 'var(--bone)', color: selectedId === g.id ? '#fff' : 'var(--fg)',
             fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12,
-          }}>{o}</button>
+          }}>{g.label}</button>
         ))}
       </div>
+      {missing > 0 && (
+        <div style={{ marginTop: 8, fontSize: 12, color: 'var(--status-warning)' }}>
+          {missing} guardian{missing === 1 ? '' : 's'} missing a {channel === 'email' ? 'email address' : 'phone number'} and won't receive this message.
+        </div>
+      )}
     </div>
   );
 }
