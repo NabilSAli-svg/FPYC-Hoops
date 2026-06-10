@@ -10,7 +10,7 @@ const BOARD = [
   { name: 'Shaun Ali', role: 'Player Development Director' },
   { name: 'Rubaat Ali', role: 'Operations Director' },
   { name: 'Russell Finelson', role: 'Referee Development Director' },
-  { name: 'TBD', role: 'Community/Sponsorship Director' },
+  { name: 'Kesara Liyanage', role: 'Community/Sponsorship Director' },
 ];
 
 const COACHES = [
