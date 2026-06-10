@@ -8,7 +8,7 @@ const BOARD = [
   { name: 'TBD', role: 'Recreation Director' },
   { name: 'George Ragan', role: 'Select Director' },
   { name: 'TBD', role: 'Player Development Director' },
-  { name: 'TBD', role: 'Operations Director' },
+  { name: 'Rubaat Ali', role: 'Operations Director' },
   { name: 'Russell Finelson', role: 'Referee Development Director' },
   { name: 'TBD', role: 'Community/Sponsorship Director' },
 ];
