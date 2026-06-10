@@ -8,6 +8,7 @@ const BOARD = [
   { name: 'TBD', role: 'Vice President' },
   { name: 'TBD', role: 'Treasurer' },
   { name: 'TBD', role: 'Secretary' },
+  { name: 'TBD', role: 'Scheduler / Admin Operations' },
 ];
 
 const COACHES = [
@@ -61,7 +62,7 @@ export default function BoardCoaches() {
 
           <div style={{ marginTop: 48 }}>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, textTransform: 'uppercase', color: 'var(--court-navy)', marginBottom: 16 }}>Board</div>
-            <div className="mob-grid-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+            <div className="mob-grid-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
               {BOARD.map((p, i) => <PersonCard key={i} name={p.name} role={p.role} />)}
             </div>
           </div>
