@@ -170,14 +170,26 @@ export default function AdminApp() {
 }
 
 function AdminLogin({ onSuccess }) {
+  const [mode, setMode]         = useState('signin'); // 'signin' | 'signup'
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
+  const [info, setInfo]         = useState('');
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true); setError('');
+    setLoading(true); setError(''); setInfo('');
+
+    if (mode === 'signup') {
+      const { error: signUpErr } = await supabase.auth.signUp({ email: email.trim(), password });
+      setLoading(false);
+      if (signUpErr) { setError(signUpErr.message); return; }
+      setInfo('Account created. Ask the commissioner to grant admin access, then sign in below.');
+      setMode('signin');
+      return;
+    }
+
     const { error: authErr } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (authErr) { setLoading(false); setError(authErr.message); return; }
 
@@ -206,13 +218,23 @@ function AdminLogin({ onSuccess }) {
           {error && (
             <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#DC2626' }}>{error}</div>
           )}
+          {info && (
+            <div style={{ background: 'rgba(31,138,91,0.08)', border: '1px solid rgba(31,138,91,0.25)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#1F8A5B' }}>{info}</div>
+          )}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div><label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="coach@fpyc.org" style={inp} /></div>
             <div><label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" style={inp} /></div>
             <button type="submit" disabled={loading} style={{ padding: '12px', borderRadius: 10, border: 'none', background: loading ? '#9CA3AF' : 'var(--court-navy)', color: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer', marginTop: 4 }}>
-              {loading ? 'Signing in…' : 'Sign in'}
+              {loading ? (mode === 'signup' ? 'Creating account…' : 'Signing in…') : (mode === 'signup' ? 'Create account' : 'Sign in')}
             </button>
           </form>
+          <div style={{ textAlign: 'center', marginTop: 16, fontSize: 13 }}>
+            {mode === 'signin' ? (
+              <span style={{ color: '#6B7280' }}>New admin? <button type="button" onClick={() => { setMode('signup'); setError(''); setInfo(''); }} style={{ border: 'none', background: 'none', color: 'var(--court-navy)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: 13 }}>Create an account</button></span>
+            ) : (
+              <span style={{ color: '#6B7280' }}>Already have an account? <button type="button" onClick={() => { setMode('signin'); setError(''); setInfo(''); }} style={{ border: 'none', background: 'none', color: 'var(--court-navy)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: 13 }}>Sign in</button></span>
+            )}
+          </div>
         </div>
       </div>
     </div>
