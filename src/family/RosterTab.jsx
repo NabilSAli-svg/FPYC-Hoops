@@ -17,7 +17,7 @@ export default function RosterTab({ family }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Team header */}
       <div style={{ background: 'var(--court-navy)', borderRadius: 14, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
-        <img src="/assets/logo-fpyc-basketball.png" alt="" style={{ height: 48, objectFit: 'contain' }} />
+        <img src="/assets/logo-fpyc-basketball-v2.png" alt="" style={{ height: 48, objectFit: 'contain' }} />
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', textTransform: 'uppercase', lineHeight: 1 }}>{TEAM.name}</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>{TEAM.division} · {TEAM.record} · {TEAM.seed} in division</div>

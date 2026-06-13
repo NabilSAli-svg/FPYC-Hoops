@@ -30,7 +30,7 @@ export default function Header({ onJump }) {
     }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 72, display: 'flex', alignItems: 'center', gap: 24 }}>
         <a href="#top" onClick={(e) => { e.preventDefault(); onJump('top'); closeMenu(); }} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#fff', textDecoration: 'none', flexShrink: 0 }}>
-          <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 60, objectFit: 'contain' }} />
+          <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 60, objectFit: 'contain' }} />
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1, whiteSpace: 'nowrap' }}>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: '0.04em', textTransform: 'uppercase' }}>FPYC Basketball</span>
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.62)', marginTop: 4 }}>Fairfax Police Youth Club</span>

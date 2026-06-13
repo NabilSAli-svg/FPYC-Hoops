@@ -65,7 +65,7 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
       <aside style={asideStyle}>
       {/* Brand */}
       <div style={{ padding: '18px 18px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ width: 36, height: 36, objectFit: 'contain' }} />
+        <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ width: 36, height: 36, objectFit: 'contain' }} />
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{activeSport.tagline}</span>
           <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>Coach console</span>

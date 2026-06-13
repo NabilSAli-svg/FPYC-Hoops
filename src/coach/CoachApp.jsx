@@ -41,7 +41,7 @@ export default function CoachApp() {
         <div style={{ width: '100%', maxWidth: 400 }}>
           {/* Logo + title */}
           <div style={{ textAlign: 'center', marginBottom: 36 }}>
-            <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 56, objectFit: 'contain', marginBottom: 16 }} />
+            <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 56, objectFit: 'contain', marginBottom: 16 }} />
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.06em', lineHeight: 1 }}>
               Coach Portal
             </div>
@@ -127,7 +127,7 @@ export default function CoachApp() {
       }}>
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 32, objectFit: 'contain' }} />
+            <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 32, objectFit: 'contain' }} />
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#fff', lineHeight: 1 }}>
                 {team.name}
