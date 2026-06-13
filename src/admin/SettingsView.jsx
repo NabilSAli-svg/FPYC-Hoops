@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill, Avatar } from '../shared/index.js';
 import { TEAM_INFO } from '../shared/store.js';
+import { supabase } from '../shared/supabase.js';
 
 const COACHES = [
   { id: 'c1', name: 'M. Davis', role: 'Head Coach', email: 'mdavis@example.com', phone: '(703) 555-0210', perms: { roster: true,  lineup: true,  schedule: true, evaluations: true,  messages: true,  settings: false } },
@@ -401,6 +402,70 @@ function CoachesTab() {
   );
 }
 
+function TestSendCard() {
+  const [testEmail, setTestEmail] = useState('');
+  const [testPhone, setTestPhone] = useState('');
+  const [status, setStatus] = useState({ email: '', sms: '' });
+  const [busy, setBusy] = useState({ email: false, sms: false });
+
+  async function sendTestEmail() {
+    if (!testEmail.trim()) return;
+    setBusy(b => ({ ...b, email: true }));
+    setStatus(s => ({ ...s, email: '' }));
+    try {
+      const { data, error } = await supabase.functions.invoke('send-email', {
+        body: { to: testEmail.trim(), subject: 'FPYC Hoops test email', text: 'This is a test email from the FPYC Hoops admin console.' },
+      });
+      if (error || data?.success === false) throw error || new Error('Send failed');
+      setStatus(s => ({ ...s, email: 'Test email sent!' }));
+    } catch (err) {
+      setStatus(s => ({ ...s, email: `Failed: ${err.message || err}` }));
+    } finally {
+      setBusy(b => ({ ...b, email: false }));
+    }
+  }
+
+  async function sendTestSms() {
+    if (!testPhone.trim()) return;
+    setBusy(b => ({ ...b, sms: true }));
+    setStatus(s => ({ ...s, sms: '' }));
+    try {
+      const { data, error } = await supabase.functions.invoke('send-sms', {
+        body: { to: testPhone.trim(), body: 'This is a test text from the FPYC Hoops admin console.' },
+      });
+      if (error || data?.success === false) throw error || new Error('Send failed');
+      setStatus(s => ({ ...s, sms: 'Test text sent!' }));
+    } catch (err) {
+      setStatus(s => ({ ...s, sms: `Failed: ${err.message || err}` }));
+    } finally {
+      setBusy(b => ({ ...b, sms: false }));
+    }
+  }
+
+  return (
+    <Card>
+      <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Send a test message</div>
+      <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginBottom: 12 }}>Verify your email and SMS providers are working.</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+        <div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input style={{ flex: 1, padding: '8px 10px', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }} placeholder="test@example.com" value={testEmail} onChange={e => setTestEmail(e.target.value)} />
+            <Button kind="quiet" icon="mail" disabled={busy.email || !testEmail.trim()} onClick={sendTestEmail}>{busy.email ? 'Sending…' : 'Send test email'}</Button>
+          </div>
+          {status.email && <div style={{ fontSize: 12, marginTop: 6, color: status.email.startsWith('Failed') ? 'var(--basketball-orange)' : 'var(--fg-muted)' }}>{status.email}</div>}
+        </div>
+        <div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input style={{ flex: 1, padding: '8px 10px', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }} placeholder="(703) 555-0123" value={testPhone} onChange={e => setTestPhone(e.target.value)} />
+            <Button kind="quiet" icon="message-circle" disabled={busy.sms || !testPhone.trim()} onClick={sendTestSms}>{busy.sms ? 'Sending…' : 'Send test text'}</Button>
+          </div>
+          {status.sms && <div style={{ fontSize: 12, marginTop: 6, color: status.sms.startsWith('Failed') ? 'var(--basketball-orange)' : 'var(--fg-muted)' }}>{status.sms}</div>}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function NotificationsTab() {
   const [prefs, setPrefs] = useState(() => {
     const map = {};
@@ -444,6 +509,8 @@ function NotificationsTab() {
           </div>
         </Card>
       </div>
+
+      <TestSendCard />
 
       {/* Preference table */}
       {NOTIF_GROUPS.map(group => (

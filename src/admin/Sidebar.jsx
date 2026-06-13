@@ -13,6 +13,7 @@ const NAV_ITEMS = [
 ];
 
 const SECONDARY = [
+  { id: 'staff',     icon: 'shield-check', label: 'Staff & Volunteers' },
   { id: 'playoffs',  icon: 'trophy',   label: 'Playoffs'   },
   { id: 'draftboard',icon: 'shuffle',  label: 'Draft Board'},
   { id: 'season',    icon: 'bar-chart',label: 'Season'     },

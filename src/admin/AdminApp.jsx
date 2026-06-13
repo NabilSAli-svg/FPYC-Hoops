@@ -17,6 +17,7 @@ import SettingsView from './SettingsView.jsx';
 import StatsView from './StatsView.jsx';
 import AnnouncementsView from './AnnouncementsView.jsx';
 import PlayoffsView from './PlayoffsView.jsx';
+import StaffView from './StaffView.jsx';
 import { Button } from '../shared/index.js';
 import ErrorBoundary from '../shared/ErrorBoundary.jsx';
 
@@ -80,6 +81,7 @@ export default function AdminApp() {
     messages:      { title: 'Messages',       breadcrumb: '3 unread' },
     announcements: { title: 'Announcements', breadcrumb: 'Families see these in real time' },
     evaluations:   { title: 'Evaluations',   breadcrumb: `${activeTeam.name} · ${activeTeam.division}` },
+    staff:       { title: 'Staff & Volunteers', breadcrumb: 'Coaches, board members & volunteers · all leagues' },
     playoffs:    { title: 'Playoffs',            breadcrumb: 'Manage brackets · Enter scores' },
     draftboard:  { title: 'Draft Board',        breadcrumb: `${activeTeam.division} · Season 2025–26` },
     season:      { title: 'Season',             breadcrumb: `${activeTeam.division} · Season 2025–26` },
@@ -157,6 +159,7 @@ export default function AdminApp() {
           {view === 'messages'       && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} />}
           {view === 'announcements'  && <AnnouncementsView />}
           {view === 'evaluations' && <EvaluationsView players={teamPlayers.filter(p => p.status !== 'inactive')} />}
+          {view === 'staff'       && <StaffView />}
           {view === 'playoffs'    && <PlayoffsView />}
           {view === 'draftboard'  && <DraftBoardView />}
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} />}
