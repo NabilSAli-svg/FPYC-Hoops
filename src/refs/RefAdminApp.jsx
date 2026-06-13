@@ -62,7 +62,7 @@ export default function RefAdminApp() {
       <div style={{ minHeight: '100vh', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-body)', padding: 24 }}>
         <div style={{ width: '100%', maxWidth: 460 }}>
           <div style={{ textAlign: 'center', marginBottom: 36 }}>
-            <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 48, objectFit: 'contain', marginBottom: 12 }} />
+            <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 48, objectFit: 'contain', marginBottom: 12 }} />
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, textTransform: 'uppercase', color: '#fff', letterSpacing: '0.04em', lineHeight: 1 }}>Officials Portal</div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginTop: 6 }}>FPYC Basketball · Season 2025–26</div>
           </div>
@@ -178,7 +178,7 @@ function AdminDashboard({ onSignOut }) {
       <header style={{ background: 'var(--court-navy)', borderBottom: '3px solid var(--varsity-gold)', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 30, objectFit: 'contain' }} />
+            <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 30, objectFit: 'contain' }} />
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#fff', lineHeight: 1 }}>Officials Admin</div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', marginTop: 1 }}>FPYC Basketball · Season 2025–26</div>
@@ -605,7 +605,7 @@ function RefMyView({ ref: currentRef, onSignOut }) {
       <header style={{ background: 'var(--court-navy)', borderBottom: '3px solid var(--varsity-gold)', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 24px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 30, objectFit: 'contain' }} />
+            <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 30, objectFit: 'contain' }} />
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#fff', lineHeight: 1 }}>Officials Portal</div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', marginTop: 1 }}>{currentRef.name} · {currentRef.cert}</div>

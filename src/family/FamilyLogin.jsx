@@ -68,7 +68,7 @@ export default function FamilyLogin({ onLogin }) {
       <div style={{ width: '100%', maxWidth: 400, position: 'relative' }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ height: 60, objectFit: 'contain', marginBottom: 12, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))' }} />
+          <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 60, objectFit: 'contain', marginBottom: 12, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))' }} />
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1 }}>FPYC Basketball</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 5, letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 600 }}>Family Portal</div>
         </div>
