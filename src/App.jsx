@@ -10,6 +10,7 @@ import SchedulerApp from './scheduler/SchedulerApp.jsx';
 import ScorekeeperApp from './scorekeeper/ScorekeeperApp.jsx';
 import ScoreboardApp from './scoreboard/ScoreboardApp.jsx';
 import BoardCoaches from './website/BoardCoaches.jsx';
+import SoccerPage from './website/SoccerPage.jsx';
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
       <Route path="/scorekeeper" element={<ScorekeeperApp />} />
       <Route path="/scoreboard" element={<ScoreboardApp />} />
       <Route path="/board" element={<BoardCoaches />} />
+      <Route path="/sports/soccer" element={<SoccerPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
