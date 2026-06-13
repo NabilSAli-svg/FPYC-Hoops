@@ -1,4 +1,5 @@
 import { Icon, Avatar, Jersey } from '../shared/index.js';
+import { SPORTS } from '../shared/store.js';
 
 const NAV_ITEMS = [
   { id: 'dashboard',     icon: 'layout-dashboard', label: 'Dashboard' },
@@ -20,7 +21,8 @@ const SECONDARY = [
   { id: 'settings',  icon: 'settings', label: 'Settings'   },
 ];
 
-export default function Sidebar({ active, onNav, team, isMobile, sidebarOpen, onClose }) {
+export default function Sidebar({ active, onNav, team, sport, onSportChange, isMobile, sidebarOpen, onClose }) {
+  const activeSport = SPORTS.find(s => s.id === sport) || SPORTS[0];
   const asideStyle = isMobile ? {
     position: 'fixed',
     top: 0,
@@ -65,9 +67,32 @@ export default function Sidebar({ active, onNav, team, isMobile, sidebarOpen, on
       <div style={{ padding: '18px 18px 14px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ width: 36, height: 36, objectFit: 'contain' }} />
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: '0.04em', textTransform: 'uppercase' }}>FPYC Basketball</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{activeSport.tagline}</span>
           <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>Coach console</span>
         </div>
+      </div>
+
+      {/* Sport switcher */}
+      <div style={{ display: 'flex', gap: 6, padding: '12px 12px 0' }}>
+        {SPORTS.map(s => {
+          const isActive = s.id === sport;
+          return (
+            <button key={s.id} onClick={() => onSportChange?.(s.id)} style={{
+              flex: 1,
+              padding: '8px 6px',
+              borderRadius: 8,
+              border: `1px solid ${isActive ? 'var(--varsity-gold)' : 'rgba(255,255,255,0.10)'}`,
+              background: isActive ? 'rgba(255,199,44,0.12)' : 'rgba(255,255,255,0.04)',
+              color: isActive ? '#fff' : 'rgba(255,255,255,0.7)',
+              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              cursor: 'pointer',
+            }}>
+              <Icon name={s.icon} size={14} />
+              {s.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Team switcher */}
