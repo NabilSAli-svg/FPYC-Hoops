@@ -61,13 +61,20 @@ function computeStats(games) {
   };
 }
 
-const LEADERS = [
+const LEADERS_BASKETBALL = [
   { stat: 'Points', leaders: [{ name: 'Jordan Reeves', value: '18.4', team: 'Fairfax Hawks' }, { name: 'Tariq Singh', value: '16.2', team: 'Fairfax Hawks' }, { name: 'Devon Brooks', value: '14.8', team: 'Fairfax Hawks' }] },
   { stat: 'Rebounds', leaders: [{ name: 'Tariq Singh', value: '9.1', team: 'Fairfax Hawks' }, { name: 'Devon Brooks', value: '7.4', team: 'Fairfax Hawks' }, { name: 'Sam Whitaker', value: '6.8', team: 'Fairfax Hawks' }] },
   { stat: 'Assists', leaders: [{ name: 'Maya Chen', value: '6.3', team: 'Fairfax Hawks' }, { name: 'Alex Romero', value: '5.1', team: 'Fairfax Hawks' }, { name: 'Jordan Reeves', value: '4.7', team: 'Fairfax Hawks' }] },
 ];
 
-export default function SeasonView({ games = [], team = 'Fairfax Hawks', division = 'Boys 5–6 House' }) {
+const LEADERS_SOCCER = [
+  { stat: 'Goals', leaders: [{ name: 'Chloe Davis', value: '4', team: 'U12 Fairfax FC' }, { name: 'Maya Singh', value: '3', team: 'U9 Fairfax FC' }, { name: 'Ava Thompson', value: '3', team: 'U9 Fairfax FC' }] },
+  { stat: 'Assists', leaders: [{ name: 'Ethan Brooks', value: '2', team: 'U12 Fairfax FC' }, { name: 'Noah Kim', value: '2', team: 'U9 Fairfax FC' }, { name: 'Maya Singh', value: '1', team: 'U9 Fairfax FC' }] },
+];
+
+export default function SeasonView({ games = [], team = 'Fairfax Hawks', division = 'Boys 5–6 House', sport = 'basketball' }) {
+  const isSoccer = sport === 'soccer';
+  const LEADERS = isSoccer ? LEADERS_SOCCER : LEADERS_BASKETBALL;
   const s = computeStats(games);
   const [standings] = useStandings();
   const STANDINGS = standings[division] || INITIAL_STANDINGS[division];
@@ -87,11 +94,11 @@ export default function SeasonView({ games = [], team = 'Fairfax Hawks', divisio
           <div style={{ borderRight: '1px solid rgba(255,255,255,0.10)', paddingRight: 24 }}>
             <Eyebrow color="rgba(255,255,255,0.55)">Season</Eyebrow>
             <Display size={28} color="#fff" style={{ marginTop: 6 }}>2025–26</Display>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 4 }}>Boys 5–6 House</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 4 }}>{division}</div>
           </div>
           <StatCell label="Record" value={s.record} sub="2nd in division" gold />
-          <StatCell label="Points for" value={s.pf} sub={`${s.ppg} per game`} />
-          <StatCell label="Points against" value={s.pa} sub={`${s.papg} per game`} />
+          <StatCell label={isSoccer ? 'Goals for' : 'Points for'} value={s.pf} sub={`${s.ppg} per game`} />
+          <StatCell label={isSoccer ? 'Goals against' : 'Points against'} value={s.pa} sub={`${s.papg} per game`} />
           <StatCell label="Games left" value={s.gamesLeft} sub="remaining this season" />
         </div>
         <div style={{ padding: '12px 28px', background: 'var(--bone)', borderTop: '1px solid var(--border)', display: 'flex', gap: 20, fontSize: 13 }}>
@@ -111,7 +118,7 @@ export default function SeasonView({ games = [], team = 'Fairfax Hawks', divisio
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <Display size={20}>Scoring trend</Display>
             <div style={{ display: 'flex', gap: 14, fontSize: 11, color: 'var(--fg-muted)' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--varsity-gold)', display: 'inline-block' }} /> Hawks</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--varsity-gold)', display: 'inline-block' }} /> {team.split(' ').slice(-1)[0]}</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 2, background: '#D1D5DB', display: 'inline-block' }} /> Opponent</span>
             </div>
           </div>

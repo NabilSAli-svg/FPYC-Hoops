@@ -176,7 +176,7 @@ export default function AdminApp() {
           {view === 'playoffs'    && <PlayoffsView />}
           {view === 'draftboard'  && <DraftBoardView />}
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} sport={sport} />}
-          {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} />}
+          {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} sport={sport} />}
           {view === 'settings'    && <SettingsView />}
           </ErrorBoundary>
         </div>

@@ -190,7 +190,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
                   </div>
 
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                    <Button kind="ghost" size="sm" icon="printer" onClick={() => printGameDay(g, players, TEAM_INFO)}>Print</Button>
+                    <Button kind="ghost" size="sm" icon="printer" onClick={() => printGameDay(g, players, TEAM_INFO, sport)}>Print</Button>
                     {isFinal ? (
                       <Button kind="ghost" size="sm" icon="edit-3" onClick={() => openScore(g)}>Edit score</Button>
                     ) : isLive ? (
@@ -281,7 +281,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
                   </div>
 
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <Button kind="ghost" size="sm" icon="printer" onClick={() => printPractice(p, players, TEAM_INFO)}>Print</Button>
+                    <Button kind="ghost" size="sm" icon="printer" onClick={() => printPractice(p, players, TEAM_INFO, sport)}>Print</Button>
                     {isPast
                       ? <Button kind="ghost" size="sm" icon="check-square" onClick={() => onGo && onGo('attendance')}>Attendance</Button>
                       : <>

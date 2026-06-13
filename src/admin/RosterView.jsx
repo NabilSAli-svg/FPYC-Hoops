@@ -224,7 +224,7 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
           />
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Button kind="ghost" icon="printer" size="sm" onClick={() => printRoster(players, TEAM_INFO)}>Print</Button>
+          <Button kind="ghost" icon="printer" size="sm" onClick={() => printRoster(players, TEAM_INFO, sport)}>Print</Button>
           <Button kind="ghost" icon="download" size="sm" onClick={() => exportRosterCSV(players)}>Export CSV</Button>
           <Button kind="gold" icon="user-plus" onClick={openAdd}>Add player</Button>
         </div>
