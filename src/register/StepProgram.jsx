@@ -1,6 +1,6 @@
 import Icon from '../shared/Icon.jsx';
 
-const PROGRAMS = [
+const BASKETBALL_PROGRAMS = [
   {
     id: 'house',
     tag: 'Most popular',
@@ -53,15 +53,72 @@ const PROGRAMS = [
   },
 ];
 
+const SOCCER_PROGRAMS = [
+  {
+    id: 'mini-mighty',
+    tag: 'Youngest players',
+    title: 'Mini & Mighty Academy',
+    price: 145,
+    grades: 'U4 – U5',
+    icon: 'zap',
+    color: 'var(--basketball-orange)',
+    desc: 'Saturday academy-style training and small-sided games. A fun, low-pressure introduction to soccer.',
+    details: [
+      { icon: 'calendar', text: 'Saturday sessions, April – June' },
+      { icon: 'map-pin', text: 'Local Fairfax fields' },
+      { icon: 'package', text: 'Equipment provided' },
+      { icon: 'smile', text: 'Coach-led, noncompetitive environment' },
+    ],
+  },
+  {
+    id: 'powerrec',
+    tag: 'Most popular',
+    title: 'PowerRec Youth',
+    price: 195,
+    grades: 'U7 – U10',
+    icon: 'home',
+    color: 'var(--court-navy)',
+    desc: '1–2 practices per week, 1 hour each. Saturday small-sided games for U6–U8, and 8v8 games for U9–U10.',
+    details: [
+      { icon: 'calendar', text: '8-game season, Saturdays' },
+      { icon: 'clock', text: '1–2 practices per week' },
+      { icon: 'map-pin', text: 'City of Fairfax & County fields' },
+      { icon: 'users', text: 'No tryouts — every kid gets placed' },
+    ],
+    featured: true,
+  },
+  {
+    id: 'ncsl',
+    tag: 'Competitive',
+    title: 'NCSL Rec',
+    price: 245,
+    grades: 'U11 – U19',
+    icon: 'trophy',
+    color: 'var(--varsity-gold)',
+    colorText: 'var(--court-navy)',
+    desc: 'Minimum 2 practices per week, 1.5 hours each. Games scheduled by NCSL, played Saturdays with some Sundays possible.',
+    details: [
+      { icon: 'target', text: 'NCSL games across NoVa' },
+      { icon: 'dumbbell', text: 'Minimum 2 practices per week' },
+      { icon: 'map-pin', text: 'City of Fairfax & County fields' },
+      { icon: 'award', text: 'Boys and girls divisions' },
+    ],
+  },
+];
+
 export default function StepProgram({ data, update, next, isMobile }) {
   const selected = data.program;
+  const isSoccer = data.sport === 'soccer';
+  const PROGRAMS = isSoccer ? SOCCER_PROGRAMS : BASKETBALL_PROGRAMS;
 
   return (
     <div>
       <StepHeader
-        eyebrow="Step 1 of 6"
+        eyebrow="Step 2 of 7"
         title="Choose your program"
-        sub="All three programs are run by volunteer coaches and follow FPYC's sportsmanship values."
+        sub={isSoccer
+          ? 'All FPYC Soccer programs are run by volunteer coaches and follow FPYC\'s sportsmanship values.'
+          : "All three programs are run by volunteer coaches and follow FPYC's sportsmanship values."}
       />
 
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>

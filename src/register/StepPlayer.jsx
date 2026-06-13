@@ -28,7 +28,7 @@ export default function StepPlayer({ data, update, next, back, isMobile }) {
   return (
     <div>
       <StepHeader
-        eyebrow="Step 2 of 6"
+        eyebrow="Step 3 of 7"
         title="Your player"
         sub="Tell us about the child you're registering."
       />

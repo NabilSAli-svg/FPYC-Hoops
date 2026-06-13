@@ -55,7 +55,7 @@ export default function StepDonation({ data, update, next, back, isMobile }) {
   return (
     <div>
       <StepHeader
-        eyebrow="Step 5 of 6 · Optional"
+        eyebrow="Step 6 of 7 · Optional"
         title="Support FPYC"
         sub="FPYC is a 501(c)3 non-profit. Your donation funds scholarships, uniforms, gym maintenance, and field development for all kids in our community."
       />

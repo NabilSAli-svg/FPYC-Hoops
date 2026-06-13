@@ -8,7 +8,7 @@ export default function StepWaivers({ data, update, next, back, isMobile: _isMob
   return (
     <div>
       <StepHeader
-        eyebrow="Step 4 of 6"
+        eyebrow="Step 5 of 7"
         title="Health & waivers"
         sub="These agreements are required before your child can participate in any FPYC activity."
       />

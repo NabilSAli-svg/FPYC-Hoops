@@ -9,7 +9,7 @@ function scrollTo(id) {
   window.location.href = `/#${id}`;
 }
 
-const BYLAWS_URL = 'https://cdn2.ottosport.ai/_deimos/_public_files/0vbqi1323b4m7/sports/soccer/fpyc-soccer-bylaws/FPYC-BYLAWS-2004.pdf?CacheKey=1474031008';
+const BYLAWS_URL = '/assets/fpyc-soccer-bylaws-2004.pdf';
 
 export default function SoccerBylaws() {
   return (
