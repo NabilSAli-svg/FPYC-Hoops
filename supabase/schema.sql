@@ -99,6 +99,20 @@ create table if not exists public.announcements (
   author  text default 'Commissioner'
 );
 
+-- ── Staff & Volunteers ───────────────────────────────────────────────────────
+
+create table if not exists public.staff (
+  id             text primary key,
+  name           text not null,
+  role           text,
+  program        text,  -- Recreation | Select | Training
+  team           text,
+  email          text,
+  phone          text,
+  bg_check_status text default 'Not Started',  -- Not Started | Pending | Cleared | Expired | Failed
+  bg_check_date  text
+);
+
 -- ── Official Assignments ─────────────────────────────────────────────────────
 
 create table if not exists public.official_assignments (
@@ -117,6 +131,7 @@ alter table public.games                enable row level security;
 alter table public.practices            enable row level security;
 alter table public.announcements        enable row level security;
 alter table public.official_assignments enable row level security;
+alter table public.staff                enable row level security;
 
 -- Profiles: users see only their own row; commissioner sees all
 create policy "profiles_self_read"    on public.profiles for select using (auth.uid() = id);
@@ -128,6 +143,7 @@ create policy "practices_read"     on public.practices           for select usin
 create policy "announcements_read" on public.announcements       for select using (auth.role() = 'authenticated');
 create policy "players_read"       on public.players             for select using (auth.role() = 'authenticated');
 create policy "assignments_read"   on public.official_assignments for select using (auth.role() = 'authenticated');
+create policy "staff_read"         on public.staff                for select using (auth.role() = 'authenticated');
 
 -- Public read for games/announcements (scoreboard + website are unauthenticated)
 create policy "games_public_read"   on public.games         for select using (true);
@@ -147,6 +163,7 @@ create policy "practices_commissioner_write" on public.practices          for al
 create policy "ann_commissioner_write"      on public.announcements       for all using (public.is_commissioner());
 create policy "players_commissioner_write"  on public.players             for all using (public.is_commissioner());
 create policy "assignments_commissioner_write" on public.official_assignments for all using (public.is_commissioner());
+create policy "staff_commissioner_write"    on public.staff               for all using (public.is_commissioner());
 
 -- ── Score PIN update (no auth needed — scorekeeper uses PIN only) ─────────────
 
