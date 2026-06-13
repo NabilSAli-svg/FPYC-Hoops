@@ -198,7 +198,7 @@ export default function LineupView({ players, games, sport = 'basketball' }) {
               {savedAt && <span style={{ marginLeft: 8, color: 'var(--fg-muted)' }}>· saved {savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
             </span>
             <div style={{ display: 'flex', gap: 8 }}>
-              <Button kind="ghost" size="sm" icon="printer" onClick={() => game && printLineup(game, startersList, posMap, bench, TEAM_INFO)}>Print</Button>
+              <Button kind="ghost" size="sm" icon="printer" onClick={() => game && printLineup(game, startersList, posMap, bench, TEAM_INFO, sport)}>Print</Button>
               <Button kind="ghost" size="sm" icon="rotate-ccw" onClick={handleReset}>Reset</Button>
               <Button kind="gold" size="sm" icon="save" onClick={handleSave}>Save lineup</Button>
             </div>

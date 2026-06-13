@@ -260,13 +260,13 @@ export const INITIAL_GAMES = [
   { id: 'g685', status: 'scheduled', month: 'Jul', date: 16, weekday: 'Thu', day: 'Thu, Jul 16', time: '7:30 PM - 8:30 PM', opponent: 'Week 5: All-Star Challenge', location: 'TBD', home: true, team: 'Rising 6th-8th Boys' },
   { id: 'g686', status: 'scheduled', month: 'Jul', date: 23, weekday: 'Thu', day: 'Thu, Jul 23', time: '7:30 PM - 8:30 PM', opponent: 'Week 6: Summer Cup Finals', location: 'TBD', home: true, team: 'Rising 6th-8th Boys' },
   // Soccer — Spring 2026
-  { id: 'sg1', status: 'scheduled', month: 'Apr', date: 11, weekday: 'Sat', day: 'Sat, Apr 11', time: '9:00 AM', opponent: 'Vienna Youth SC', location: 'Westmore Park', home: true, team: 'U9 Fairfax FC' },
-  { id: 'sg2', status: 'scheduled', month: 'Apr', date: 18, weekday: 'Sat', day: 'Sat, Apr 18', time: '9:00 AM', opponent: 'Reston Rovers', location: 'Daniels Run Park', home: false, team: 'U9 Fairfax FC' },
-  { id: 'sg3', status: 'scheduled', month: 'Apr', date: 25, weekday: 'Sat', day: 'Sat, Apr 25', time: '9:00 AM', opponent: 'Oakton United', location: 'Westmore Park', home: true, team: 'U9 Fairfax FC' },
+  { id: 'sg1', status: 'final', us: 4, them: 1, month: 'Apr', date: 11, weekday: 'Sat', day: 'Sat, Apr 11', time: '9:00 AM', opponent: 'Vienna Youth SC', location: 'Westmore Park', home: true, team: 'U9 Fairfax FC' },
+  { id: 'sg2', status: 'final', us: 1, them: 2, month: 'Apr', date: 18, weekday: 'Sat', day: 'Sat, Apr 18', time: '9:00 AM', opponent: 'Reston Rovers', location: 'Daniels Run Park', home: false, team: 'U9 Fairfax FC' },
+  { id: 'sg3', status: 'final', us: 3, them: 0, month: 'Apr', date: 25, weekday: 'Sat', day: 'Sat, Apr 25', time: '9:00 AM', opponent: 'Oakton United', location: 'Westmore Park', home: true, team: 'U9 Fairfax FC' },
   { id: 'sg4', status: 'scheduled', month: 'May', date: 2, weekday: 'Sat', day: 'Sat, May 2', time: '9:00 AM', opponent: 'Centreville SC', location: 'Greenbriar Park', home: false, team: 'U9 Fairfax FC' },
-  { id: 'sg11', status: 'scheduled', month: 'Apr', date: 11, weekday: 'Sat', day: 'Sat, Apr 11', time: '11:00 AM', opponent: 'Annandale SC', location: 'Westmore Park', home: true, team: 'U12 Fairfax FC' },
-  { id: 'sg12', status: 'scheduled', month: 'Apr', date: 18, weekday: 'Sat', day: 'Sat, Apr 18', time: '12:30 PM', opponent: 'Burke United', location: 'Burke Lake Park', home: false, team: 'U12 Fairfax FC' },
-  { id: 'sg13', status: 'scheduled', month: 'Apr', date: 25, weekday: 'Sat', day: 'Sat, Apr 25', time: '11:00 AM', opponent: 'Springfield FC', location: 'Westmore Park', home: true, team: 'U12 Fairfax FC' },
+  { id: 'sg11', status: 'final', us: 2, them: 1, month: 'Apr', date: 11, weekday: 'Sat', day: 'Sat, Apr 11', time: '11:00 AM', opponent: 'Annandale SC', location: 'Westmore Park', home: true, team: 'U12 Fairfax FC' },
+  { id: 'sg12', status: 'final', us: 0, them: 3, month: 'Apr', date: 18, weekday: 'Sat', day: 'Sat, Apr 18', time: '12:30 PM', opponent: 'Burke United', location: 'Burke Lake Park', home: false, team: 'U12 Fairfax FC' },
+  { id: 'sg13', status: 'final', us: 5, them: 2, month: 'Apr', date: 25, weekday: 'Sat', day: 'Sat, Apr 25', time: '11:00 AM', opponent: 'Springfield FC', location: 'Westmore Park', home: true, team: 'U12 Fairfax FC' },
   { id: 'sg14', status: 'scheduled', month: 'May', date: 2, weekday: 'Sat', day: 'Sat, May 2', time: '1:00 PM', opponent: 'Vienna Youth SC', location: 'James Madison HS', home: false, team: 'U12 Fairfax FC' },
 ];
 
@@ -618,6 +618,47 @@ export const INITIAL_STATS = {
   gc6: { // L 17–35 vs Arlington Aces
     p17: { pts:  4, ast: 1, reb: 3, fls: 3 },
     p18: { pts:  2, ast: 0, reb: 5, fls: 2 },
+  },
+  // U9 Fairfax FC — Soccer (sp1-sp5)
+  sg1: { // W 4-1 vs Vienna Youth SC
+    sp2: { gls: 2, ast: 1, yc: 0, rc: 0 },
+    sp4: { gls: 2, ast: 0, yc: 0, rc: 0 },
+    sp5: { gls: 0, ast: 2, yc: 0, rc: 0 },
+    sp1: { gls: 0, ast: 0, yc: 1, rc: 0 },
+    sp3: { gls: 0, ast: 0, yc: 0, rc: 0 },
+  },
+  sg2: { // L 1-2 @ Reston Rovers
+    sp2: { gls: 1, ast: 0, yc: 0, rc: 0 },
+    sp4: { gls: 0, ast: 1, yc: 0, rc: 0 },
+    sp5: { gls: 0, ast: 0, yc: 1, rc: 0 },
+    sp1: { gls: 0, ast: 0, yc: 0, rc: 0 },
+    sp3: { gls: 0, ast: 0, yc: 0, rc: 0 },
+  },
+  sg3: { // W 3-0 vs Oakton United
+    sp4: { gls: 1, ast: 1, yc: 0, rc: 0 },
+    sp2: { gls: 1, ast: 1, yc: 0, rc: 0 },
+    sp5: { gls: 1, ast: 0, yc: 0, rc: 0 },
+    sp1: { gls: 0, ast: 0, yc: 0, rc: 0 },
+    sp3: { gls: 0, ast: 0, yc: 0, rc: 0 },
+  },
+  // U12 Fairfax FC — Soccer (sp11-sp14)
+  sg11: { // W 2-1 vs Annandale SC
+    sp13: { gls: 1, ast: 1, yc: 0, rc: 0 },
+    sp12: { gls: 1, ast: 0, yc: 1, rc: 0 },
+    sp11: { gls: 0, ast: 0, yc: 0, rc: 0 },
+    sp14: { gls: 0, ast: 0, yc: 0, rc: 0 },
+  },
+  sg12: { // L 0-3 @ Burke United
+    sp13: { gls: 0, ast: 0, yc: 0, rc: 0 },
+    sp12: { gls: 0, ast: 0, yc: 1, rc: 0 },
+    sp11: { gls: 0, ast: 0, yc: 0, rc: 1 },
+    sp14: { gls: 0, ast: 0, yc: 0, rc: 0 },
+  },
+  sg13: { // W 5-2 vs Springfield FC
+    sp13: { gls: 3, ast: 1, yc: 0, rc: 0 },
+    sp12: { gls: 1, ast: 2, yc: 0, rc: 0 },
+    sp11: { gls: 1, ast: 0, yc: 0, rc: 0 },
+    sp14: { gls: 0, ast: 0, yc: 0, rc: 0 },
   },
 };
 

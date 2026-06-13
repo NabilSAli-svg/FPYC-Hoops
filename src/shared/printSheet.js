@@ -57,7 +57,8 @@ function nowStamp() {
 }
 
 // ── Roster contact sheet ────────────────────────────────────────────────────
-export function printRoster(players, team) {
+export function printRoster(players, team, sport = 'basketball') {
+  const isSoccer = sport === 'soccer';
   const active = players.filter(p => p.status !== 'inactive');
   const rows = active.map(p => `
     <tr>
@@ -80,7 +81,7 @@ export function printRoster(players, team) {
       <div class="header-right">
         Printed ${nowStamp()}<br>
         ${active.length} active players<br>
-        FPYC Basketball
+        FPYC ${isSoccer ? 'Soccer' : 'Basketball'}
       </div>
     </div>
     <table>
@@ -94,20 +95,29 @@ export function printRoster(players, team) {
     </table>
     <div class="footer">
       <span>${team.name} · ${team.division}</span>
-      <span>FPYC Basketball · fpycsports.org</span>
+      <span>FPYC ${isSoccer ? 'Soccer' : 'Basketball'} · fpycsports.org</span>
     </div>
   `);
 }
 
 // ── Game day card ───────────────────────────────────────────────────────────
-export function printGameDay(game, players, team) {
+export function printGameDay(game, players, team, sport = 'basketball') {
+  const isSoccer = sport === 'soccer';
   const available = players.filter(p => p.status === 'active');
   const byPos = pos => available.filter(p => p.position === pos);
-  const posGroups = [
-    { label: 'Guards',   players: byPos('Guard')   },
-    { label: 'Forwards', players: byPos('Forward') },
-    { label: 'Centers',  players: byPos('Center')  },
-  ].filter(g => g.players.length > 0);
+  const posGroups = (isSoccer
+    ? [
+        { label: 'Goalkeepers', players: byPos('Goalkeeper') },
+        { label: 'Defenders',   players: byPos('Defender')   },
+        { label: 'Midfielders', players: byPos('Midfielder') },
+        { label: 'Forwards',    players: byPos('Forward')    },
+      ]
+    : [
+        { label: 'Guards',   players: byPos('Guard')   },
+        { label: 'Forwards', players: byPos('Forward') },
+        { label: 'Centers',  players: byPos('Center')  },
+      ]
+  ).filter(g => g.players.length > 0);
 
   const checkRows = posGroups.map(g => `
     <div class="section">${g.label}</div>
@@ -132,7 +142,7 @@ export function printGameDay(game, players, team) {
         <div class="team">${team.name}</div>
         <div class="sub">Game day sheet · ${team.division}</div>
       </div>
-      <div class="header-right">Printed ${nowStamp()}<br>FPYC Basketball</div>
+      <div class="header-right">Printed ${nowStamp()}<br>FPYC ${isSoccer ? 'Soccer' : 'Basketball'}</div>
     </div>
 
     <div class="game-card">
@@ -173,13 +183,14 @@ export function printGameDay(game, players, team) {
 
     <div class="footer">
       <span>${team.name} · ${game.day}</span>
-      <span>FPYC Basketball · fpycsports.org</span>
+      <span>FPYC ${isSoccer ? 'Soccer' : 'Basketball'} · fpycsports.org</span>
     </div>
   `);
 }
 
 // ── Lineup card ─────────────────────────────────────────────────────────────
-export function printLineup(game, starters, posMap, bench, team) {
+export function printLineup(game, starters, posMap, bench, team, sport = 'basketball') {
+  const isSoccer = sport === 'soccer';
   const starterRows = starters.map(p => `
     <tr>
       <td class="num">${p.number}</td>
@@ -209,7 +220,7 @@ export function printLineup(game, starters, posMap, bench, team) {
       </div>
     </div>
 
-    <div class="section">Starting five</div>
+    <div class="section">${isSoccer ? 'Starting lineup' : 'Starting five'}</div>
     <table>
       <thead><tr><th>#</th><th>Player</th><th style="text-align:center">Pos</th><th>Grade · Natural pos</th></tr></thead>
       <tbody>${starterRows}</tbody>
@@ -228,13 +239,14 @@ export function printLineup(game, starters, posMap, bench, team) {
 
     <div class="footer">
       <span>${team.name} · ${game.day}</span>
-      <span>FPYC Basketball · fpycsports.org</span>
+      <span>FPYC ${isSoccer ? 'Soccer' : 'Basketball'} · fpycsports.org</span>
     </div>
   `);
 }
 
 // ── Practice sheet ──────────────────────────────────────────────────────────
-export function printPractice(practice, players, team) {
+export function printPractice(practice, players, team, sport = 'basketball') {
+  const isSoccer = sport === 'soccer';
   const active = players.filter(p => p.status === 'active');
   const rows = active.map((p, i) => `
     <div class="check-row" style="${i % 2 === 0 ? '' : 'background:#f9fafb;'}">
@@ -250,7 +262,7 @@ export function printPractice(practice, players, team) {
         <div class="team">${team.name}</div>
         <div class="sub">Practice sheet · ${practice.type}</div>
       </div>
-      <div class="header-right">Printed ${nowStamp()}<br>FPYC Basketball</div>
+      <div class="header-right">Printed ${nowStamp()}<br>FPYC ${isSoccer ? 'Soccer' : 'Basketball'}</div>
     </div>
 
     <div class="game-card">
@@ -283,7 +295,7 @@ export function printPractice(practice, players, team) {
 
     <div class="footer">
       <span>${team.name} · ${practice.date}</span>
-      <span>FPYC Basketball · fpycsports.org</span>
+      <span>FPYC ${isSoccer ? 'Soccer' : 'Basketball'} · fpycsports.org</span>
     </div>
   `);
 }
