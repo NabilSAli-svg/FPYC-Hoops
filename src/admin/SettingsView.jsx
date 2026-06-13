@@ -408,6 +408,19 @@ function TestSendCard() {
   const [status, setStatus] = useState({ email: '', sms: '' });
   const [busy, setBusy] = useState({ email: false, sms: false });
 
+  async function describeError(error, data) {
+    if (error?.context) {
+      try {
+        const body = await error.context.clone().json();
+        return JSON.stringify(body.error || body);
+      } catch {
+        try { return await error.context.clone().text(); } catch { /* fall through */ }
+      }
+    }
+    if (data?.error) return JSON.stringify(data.error);
+    return error?.message || 'Send failed';
+  }
+
   async function sendTestEmail() {
     if (!testEmail.trim()) return;
     setBusy(b => ({ ...b, email: true }));
@@ -416,7 +429,7 @@ function TestSendCard() {
       const { data, error } = await supabase.functions.invoke('send-email', {
         body: { to: testEmail.trim(), subject: 'FPYC Hoops test email', text: 'This is a test email from the FPYC Hoops admin console.' },
       });
-      if (error || data?.success === false) throw error || new Error('Send failed');
+      if (error || data?.success === false) throw new Error(await describeError(error, data));
       setStatus(s => ({ ...s, email: 'Test email sent!' }));
     } catch (err) {
       setStatus(s => ({ ...s, email: `Failed: ${err.message || err}` }));
@@ -433,7 +446,7 @@ function TestSendCard() {
       const { data, error } = await supabase.functions.invoke('send-sms', {
         body: { to: testPhone.trim(), body: 'This is a test text from the FPYC Hoops admin console.' },
       });
-      if (error || data?.success === false) throw error || new Error('Send failed');
+      if (error || data?.success === false) throw new Error(await describeError(error, data));
       setStatus(s => ({ ...s, sms: 'Test text sent!' }));
     } catch (err) {
       setStatus(s => ({ ...s, sms: `Failed: ${err.message || err}` }));
