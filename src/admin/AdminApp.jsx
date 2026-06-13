@@ -226,7 +226,7 @@ function AdminLogin({ onSuccess }) {
     <div style={{ minHeight: '100vh', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'var(--font-body)' }}>
       <div style={{ width: '100%', maxWidth: 380 }}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 48, objectFit: 'contain', marginBottom: 12 }} />
+          <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 64, objectFit: 'contain', marginBottom: 12 }} />
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', textTransform: 'uppercase' }}>Admin Console</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>Commissioner / Coach access only</div>
         </div>

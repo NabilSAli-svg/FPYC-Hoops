@@ -52,7 +52,7 @@ export default function Footer() {
         {!isMobile && (
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-              <img src="/assets/logo-fpyc-basketball-v2.png" alt="" style={{ height: 52 }} />
+              <img src="/assets/logo-fpyc-basketball-v2.png" alt="" style={{ height: 68 }} />
               <div>
                 <div style={{ fontFamily: 'var(--font-display)', textTransform: 'uppercase', fontSize: 20, letterSpacing: '0.04em', color: '#fff' }}>FPYC Basketball</div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>est. 1963 · Fairfax, Virginia</div>
