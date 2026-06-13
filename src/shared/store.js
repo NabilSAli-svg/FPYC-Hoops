@@ -524,6 +524,20 @@ export const INITIAL_STANDINGS = {
     { rank: 5, team: 'Fairfax Cougars',     fpyc: true,  w: 3, l: 6, pf: 261, pa: 324, streak: 'L3' },
     { rank: 6, team: 'Herndon Comets',      fpyc: false, w: 1, l: 8, pf: 234, pa: 342, streak: 'L4' },
   ],
+  'PowerRec U9-U10': [
+    { rank: 1, team: 'Reston Rovers',     fpyc: false, w: 3, l: 1, pf: 9, pa: 6, streak: 'W1' },
+    { rank: 2, team: 'U9 Fairfax FC',     fpyc: true,  w: 2, l: 1, pf: 8, pa: 3, streak: 'W1' },
+    { rank: 3, team: 'Oakton United',     fpyc: false, w: 1, l: 2, pf: 5, pa: 6, streak: 'L1' },
+    { rank: 4, team: 'Vienna Youth SC',   fpyc: false, w: 1, l: 2, pf: 4, pa: 7, streak: 'L2' },
+    { rank: 5, team: 'Centreville SC',    fpyc: false, w: 1, l: 2, pf: 4, pa: 8, streak: 'L1' },
+  ],
+  'NCSL Rec U11-U19': [
+    { rank: 1, team: 'U12 Fairfax FC',    fpyc: true,  w: 2, l: 1, pf: 7, pa: 4, streak: 'W1' },
+    { rank: 2, team: 'Springfield FC',    fpyc: false, w: 2, l: 1, pf: 6, pa: 6, streak: 'L1' },
+    { rank: 3, team: 'Annandale SC',      fpyc: false, w: 1, l: 1, pf: 3, pa: 3, streak: 'L1' },
+    { rank: 4, team: 'Burke United',      fpyc: false, w: 1, l: 1, pf: 3, pa: 2, streak: 'W1' },
+    { rank: 5, team: 'Vienna Youth SC',   fpyc: false, w: 0, l: 2, pf: 2, pa: 6, streak: 'L2' },
+  ],
 };
 
 export function useStandings() {
