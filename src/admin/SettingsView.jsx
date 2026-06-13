@@ -455,7 +455,6 @@ function TestSendCard() {
     }
   }
 
-
   return (
     <Card>
       <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Send a test message</div>
