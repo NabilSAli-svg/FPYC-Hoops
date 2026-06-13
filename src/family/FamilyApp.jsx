@@ -25,8 +25,8 @@ async function requestAndNotify(games) {
       body: next
         ? `Next game: ${next.day} at ${next.time} · ${next.opponent}`
         : 'Notifications are on — you\'ll be the first to know!',
-      icon: '/assets/logo-fpyc-basketball-v2.png',
-      badge: '/assets/logo-fpyc-basketball-v2.png',
+      icon: '/assets/logo-fpyc-basketball-v3.png',
+      badge: '/assets/logo-fpyc-basketball-v3.png',
       tag: 'fpyc-test',
       data: { url: '/family' },
     });
@@ -152,7 +152,7 @@ export default function FamilyApp() {
   if (authLoading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--court-navy)' }}>
       <div style={{ textAlign: 'center' }}>
-        <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 48, objectFit: 'contain', marginBottom: 16, opacity: 0.8 }} />
+        <img src="/assets/logo-fpyc-basketball-v3.png" alt="FPYC" style={{ height: 48, objectFit: 'contain', marginBottom: 16, opacity: 0.8 }} />
         <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>Loading…</div>
       </div>
     </div>
@@ -184,7 +184,7 @@ export default function FamilyApp() {
       }}>
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 32, objectFit: 'contain' }} />
+            <img src="/assets/logo-fpyc-basketball-v3.png" alt="FPYC" style={{ height: 32, objectFit: 'contain' }} />
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1 }}>{family.child.team}</div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.04em' }}>Family Portal</div>
@@ -307,7 +307,7 @@ function LinkPlayerScreen({ family, onLinked, onSignOut }) {
     <div style={{ minHeight: '100vh', background: 'var(--court-navy)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'var(--font-body)' }}>
       <div style={{ width: '100%', maxWidth: 400 }}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 48, objectFit: 'contain', marginBottom: 12 }} />
+          <img src="/assets/logo-fpyc-basketball-v3.png" alt="FPYC" style={{ height: 48, objectFit: 'contain', marginBottom: 12 }} />
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', textTransform: 'uppercase' }}>Find your player</div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 6 }}>Search by your child's name to link their roster spot to your account.</div>
         </div>

@@ -48,7 +48,7 @@ export default function RegisterApp() {
       }}>
         <div style={{ maxWidth: 880, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
           <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ width: 32, height: 32, objectFit: 'contain' }} />
+            <img src="/assets/logo-fpyc-basketball-v3.png" alt="FPYC" style={{ width: 32, height: 32, objectFit: 'contain' }} />
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1 }}>
                 FPYC {data.sport === 'soccer' ? 'Soccer' : data.sport === 'basketball' ? 'Basketball' : ''}

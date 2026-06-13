@@ -35,7 +35,7 @@ export default function ScoreboardApp() {
         gap: 12,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 36, objectFit: 'contain' }} />
+          <img src="/assets/logo-fpyc-basketball-v3.png" alt="FPYC" style={{ height: 36, objectFit: 'contain' }} />
           <div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1 }}>
               Live Scoreboard
