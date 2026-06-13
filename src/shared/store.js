@@ -10,14 +10,22 @@ export const TEAM_INFO = {
   coachEmail: '',
 };
 
+export const SPORTS = [
+  { id: 'basketball', label: 'Basketball', tagline: 'FPYC Basketball', icon: 'circle-dot' },
+  { id: 'soccer',     label: 'Soccer',     tagline: 'FPYC Soccer',     icon: 'circle' },
+];
+
 export const TEAMS_INFO = {
-  'Rising 2nd-3rd Boys': { id: '23boys', name: 'Rising 2nd-3rd Boys', division: '3v3 Summer Cup', coach: 'Nick Blessing', color: 'var(--court-navy)' },
-  'Girls 3v3 (2nd-8th)': { id: 'girls',  name: 'Girls 3v3 (2nd-8th)', division: '3v3 Summer Cup', coach: 'Coach', color: '#1F8A5B' },
-  'Rising 4th-5th Boys': { id: '45boys', name: 'Rising 4th-5th Boys', division: '3v3 Summer Cup', coach: 'Joshua Nehr, Jim Quinn & Shaun Ali', color: '#C8102E' },
-  'Rising 6th-8th Boys': { id: '68boys', name: 'Rising 6th-8th Boys', division: '3v3 Summer Cup', coach: 'Coach', color: 'var(--basketball-orange)' },
-  'Training - Beginner':              { id: 'trainbeg', name: 'Training - Beginner',              division: 'Training', coach: 'Coach', color: '#6B7280' },
-  'Training - Intermediate/Advanced': { id: 'trainadv', name: 'Training - Intermediate/Advanced', division: 'Training', coach: 'Coach', color: '#374151' },
+  'Rising 2nd-3rd Boys': { id: '23boys', name: 'Rising 2nd-3rd Boys', division: '3v3 Summer Cup', coach: 'Nick Blessing', color: 'var(--court-navy)', sport: 'basketball' },
+  'Girls 3v3 (2nd-8th)': { id: 'girls',  name: 'Girls 3v3 (2nd-8th)', division: '3v3 Summer Cup', coach: 'Coach', color: '#1F8A5B', sport: 'basketball' },
+  'Rising 4th-5th Boys': { id: '45boys', name: 'Rising 4th-5th Boys', division: '3v3 Summer Cup', coach: 'Joshua Nehr, Jim Quinn & Shaun Ali', color: '#C8102E', sport: 'basketball' },
+  'Rising 6th-8th Boys': { id: '68boys', name: 'Rising 6th-8th Boys', division: '3v3 Summer Cup', coach: 'Coach', color: 'var(--basketball-orange)', sport: 'basketball' },
+  'Training - Beginner':              { id: 'trainbeg', name: 'Training - Beginner',              division: 'Training', coach: 'Coach', color: '#6B7280', sport: 'basketball' },
+  'Training - Intermediate/Advanced': { id: 'trainadv', name: 'Training - Intermediate/Advanced', division: 'Training', coach: 'Coach', color: '#374151', sport: 'basketball' },
+  'U9 Fairfax FC':  { id: 'soccer-u9',  name: 'U9 Fairfax FC',  division: 'PowerRec U9-U10',  coach: 'Rich Crowder', color: '#1F8A5B', sport: 'soccer' },
+  'U12 Fairfax FC': { id: 'soccer-u12', name: 'U12 Fairfax FC', division: 'NCSL Rec U11-U19', coach: 'Coach', color: '#C8102E', sport: 'soccer' },
 };
+
 
 export const INITIAL_PLAYERS = [
   { id: 'p1', number: null, name: "Ishaaq Adam", grade: "2nd & 3rd", school: "Eagle View", guardian: "adamfamily0312@gmail.com", phone: "(703) 338-9601", position: '', status: 'active', waiver: true, program: 'Recreation', division: "Rising 2nd-3rd Boys", team: "Rising 2nd-3rd Boys" },
@@ -214,6 +222,16 @@ export const INITIAL_PLAYERS = [
   { id: 'p192', number: null, name: "Lucas Saal", grade: "4th", school: "", guardian: "b_saal@yahoo.com", phone: "(703) 609-4998", position: '', status: 'active', waiver: true, program: 'Training', division: "Beginner", team: "Training - Beginner" },
   { id: 'p193', number: null, name: "James Coscia", grade: "1st", school: "", guardian: "shelleythomp@gmail.com", phone: "(805)698-1220", position: '', status: 'active', waiver: true, program: 'Training', division: "Beginner", team: "Training - Beginner" },
   { id: 'p194', number: null, name: "Antony Bustamante", grade: "8th", school: "", guardian: "kbustamante@cox.net", phone: "7037950345", position: '', status: 'active', waiver: true, program: 'Training', division: "Intermediate/Advanced", team: "Training - Intermediate/Advanced" },
+  // Soccer — Spring 2026
+  { id: 'sp1', number: 2,  name: "Owen Carter",    grade: "3rd", school: "Daniels Run", guardian: "carterfamily@example.com", phone: "(703) 555-1101", position: 'Defender', status: 'active', waiver: true, program: 'Recreation', division: "PowerRec U9-U10", team: "U9 Fairfax FC" },
+  { id: 'sp2', number: 7,  name: "Maya Singh",     grade: "4th", school: "Mantua",      guardian: "singhfamily@example.com",  phone: "(703) 555-1102", position: 'Forward',  status: 'active', waiver: true, program: 'Recreation', division: "PowerRec U9-U10", team: "U9 Fairfax FC" },
+  { id: 'sp3', number: 1,  name: "Leo Martinez",   grade: "4th", school: "Eagle View",  guardian: "martinezfamily@example.com", phone: "(703) 555-1103", position: 'Goalkeeper', status: 'active', waiver: true, program: 'Recreation', division: "PowerRec U9-U10", team: "U9 Fairfax FC" },
+  { id: 'sp4', number: 9,  name: "Ava Thompson",   grade: "3rd", school: "Greenbriar East", guardian: "thompsonfamily@example.com", phone: "(703) 555-1104", position: 'Forward', status: 'active', waiver: true, program: 'Recreation', division: "PowerRec U9-U10", team: "U9 Fairfax FC" },
+  { id: 'sp5', number: 4,  name: "Noah Kim",       grade: "5th", school: "Woodson",     guardian: "kimfamily@example.com", phone: "(703) 555-1105", position: 'Midfielder', status: 'active', waiver: true, program: 'Recreation', division: "PowerRec U9-U10", team: "U9 Fairfax FC" },
+  { id: 'sp11', number: 5, name: "Sofia Hernandez", grade: "6th", school: "Lanier MS",  guardian: "hernandezfamily@example.com", phone: "(703) 555-1111", position: 'Defender', status: 'active', waiver: true, program: 'Select', division: "NCSL Rec U11-U19", team: "U12 Fairfax FC" },
+  { id: 'sp12', number: 10, name: "Ethan Brooks",  grade: "6th", school: "Lanier MS",  guardian: "brooksfamily@example.com", phone: "(703) 555-1112", position: 'Midfielder', status: 'active', waiver: true, program: 'Select', division: "NCSL Rec U11-U19", team: "U12 Fairfax FC" },
+  { id: 'sp13', number: 11, name: "Chloe Davis",   grade: "7th", school: "Frost MS",    guardian: "davisfamily@example.com", phone: "(703) 555-1113", position: 'Forward', status: 'active', waiver: true, program: 'Select', division: "NCSL Rec U11-U19", team: "U12 Fairfax FC" },
+  { id: 'sp14', number: 12, name: "Mason Lee",     grade: "7th", school: "Frost MS",    guardian: "leefamily@example.com", phone: "(703) 555-1114", position: 'Goalkeeper', status: 'active', waiver: true, program: 'Select', division: "NCSL Rec U11-U19", team: "U12 Fairfax FC" },
 ];
 
 export const INITIAL_GAMES = [
@@ -241,6 +259,15 @@ export const INITIAL_GAMES = [
   { id: 'g684', status: 'scheduled', month: 'Jul', date: 9, weekday: 'Thu', day: 'Thu, Jul 9', time: '7:30 PM - 8:30 PM', opponent: 'Week 4: Rivalry Night', location: 'TBD', home: true, team: 'Rising 6th-8th Boys' },
   { id: 'g685', status: 'scheduled', month: 'Jul', date: 16, weekday: 'Thu', day: 'Thu, Jul 16', time: '7:30 PM - 8:30 PM', opponent: 'Week 5: All-Star Challenge', location: 'TBD', home: true, team: 'Rising 6th-8th Boys' },
   { id: 'g686', status: 'scheduled', month: 'Jul', date: 23, weekday: 'Thu', day: 'Thu, Jul 23', time: '7:30 PM - 8:30 PM', opponent: 'Week 6: Summer Cup Finals', location: 'TBD', home: true, team: 'Rising 6th-8th Boys' },
+  // Soccer — Spring 2026
+  { id: 'sg1', status: 'scheduled', month: 'Apr', date: 11, weekday: 'Sat', day: 'Sat, Apr 11', time: '9:00 AM', opponent: 'Vienna Youth SC', location: 'Westmore Park', home: true, team: 'U9 Fairfax FC' },
+  { id: 'sg2', status: 'scheduled', month: 'Apr', date: 18, weekday: 'Sat', day: 'Sat, Apr 18', time: '9:00 AM', opponent: 'Reston Rovers', location: 'Daniels Run Park', home: false, team: 'U9 Fairfax FC' },
+  { id: 'sg3', status: 'scheduled', month: 'Apr', date: 25, weekday: 'Sat', day: 'Sat, Apr 25', time: '9:00 AM', opponent: 'Oakton United', location: 'Westmore Park', home: true, team: 'U9 Fairfax FC' },
+  { id: 'sg4', status: 'scheduled', month: 'May', date: 2, weekday: 'Sat', day: 'Sat, May 2', time: '9:00 AM', opponent: 'Centreville SC', location: 'Greenbriar Park', home: false, team: 'U9 Fairfax FC' },
+  { id: 'sg11', status: 'scheduled', month: 'Apr', date: 11, weekday: 'Sat', day: 'Sat, Apr 11', time: '11:00 AM', opponent: 'Annandale SC', location: 'Westmore Park', home: true, team: 'U12 Fairfax FC' },
+  { id: 'sg12', status: 'scheduled', month: 'Apr', date: 18, weekday: 'Sat', day: 'Sat, Apr 18', time: '12:30 PM', opponent: 'Burke United', location: 'Burke Lake Park', home: false, team: 'U12 Fairfax FC' },
+  { id: 'sg13', status: 'scheduled', month: 'Apr', date: 25, weekday: 'Sat', day: 'Sat, Apr 25', time: '11:00 AM', opponent: 'Springfield FC', location: 'Westmore Park', home: true, team: 'U12 Fairfax FC' },
+  { id: 'sg14', status: 'scheduled', month: 'May', date: 2, weekday: 'Sat', day: 'Sat, May 2', time: '1:00 PM', opponent: 'Vienna Youth SC', location: 'James Madison HS', home: false, team: 'U12 Fairfax FC' },
 ];
 
 export const INITIAL_PRACTICES = [

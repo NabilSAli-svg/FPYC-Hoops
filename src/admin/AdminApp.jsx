@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useGames, usePlayers, TEAM_INFO, TEAMS_INFO } from '../shared/store.js';
+import { useGames, usePlayers, TEAM_INFO, TEAMS_INFO, SPORTS } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
 import Sidebar from './Sidebar.jsx';
 import TopBar from './TopBar.jsx';
@@ -21,7 +21,10 @@ import StaffView from './StaffView.jsx';
 import { Button } from '../shared/index.js';
 import ErrorBoundary from '../shared/ErrorBoundary.jsx';
 
-const ALL_TEAM_NAMES = Object.keys(TEAMS_INFO);
+const TEAM_NAMES_BY_SPORT = SPORTS.reduce((acc, s) => {
+  acc[s.id] = Object.keys(TEAMS_INFO).filter(name => (TEAMS_INFO[name].sport || 'basketball') === s.id);
+  return acc;
+}, {});
 
 export default function AdminApp() {
   const isMobile = useIsMobile();
@@ -42,9 +45,17 @@ export default function AdminApp() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openNewGame, setOpenNewGame] = useState(false);
   const [messagesAutoCompose, setMessagesAutoCompose] = useState(false);
+  const [sport, setSport] = useState('basketball');
   const [selectedTeamName, setSelectedTeamName] = useState(TEAM_INFO.name);
   const [players, setPlayers] = usePlayers();
   const [games, setGames] = useGames();
+
+  const ALL_TEAM_NAMES = TEAM_NAMES_BY_SPORT[sport] || [];
+
+  function handleSportChange(newSport) {
+    setSport(newSport);
+    setSelectedTeamName(TEAM_NAMES_BY_SPORT[newSport]?.[0] || '');
+  }
 
   const teamPlayers = players.filter(p => p.team === selectedTeamName || p.team === 'Unassigned');
   const teamGames   = games.filter(g => !g.team || g.team === selectedTeamName);
@@ -86,7 +97,7 @@ export default function AdminApp() {
     draftboard:  { title: 'Draft Board',        breadcrumb: `${activeTeam.division} · Season 2025–26` },
     season:      { title: 'Season',             breadcrumb: `${activeTeam.division} · Season 2025–26` },
     stats:       { title: 'Player Stats',       breadcrumb: `${activeTeam.name} · Season 2025–26` },
-    settings:    { title: 'Settings',           breadcrumb: `FPYC Basketball · ${role === 'commissioner' ? 'Commissioner' : 'Coach'} console` },
+    settings:    { title: 'Settings',           breadcrumb: `${(SPORTS.find(s => s.id === sport) || SPORTS[0]).tagline} · ${role === 'commissioner' ? 'Commissioner' : 'Coach'} console` },
   };
   const t = titleMap[view] || titleMap.dashboard;
 
@@ -118,6 +129,8 @@ export default function AdminApp() {
         active={view}
         onNav={v => { setView(v); setScheduleInitialTab('games'); if (isMobile) setSidebarOpen(false); }}
         team={TEAM}
+        sport={sport}
+        onSportChange={handleSportChange}
         isMobile={isMobile}
         sidebarOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
