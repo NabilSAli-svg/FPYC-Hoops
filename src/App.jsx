@@ -11,6 +11,10 @@ import ScorekeeperApp from './scorekeeper/ScorekeeperApp.jsx';
 import ScoreboardApp from './scoreboard/ScoreboardApp.jsx';
 import BoardCoaches from './website/BoardCoaches.jsx';
 import SoccerPage from './website/SoccerPage.jsx';
+import SoccerAgeGroups from './website/SoccerAgeGroups.jsx';
+import SoccerFields from './website/SoccerFields.jsx';
+import SoccerResources from './website/SoccerResources.jsx';
+import SoccerBylaws from './website/SoccerBylaws.jsx';
 
 export default function App() {
   return (
@@ -27,6 +31,10 @@ export default function App() {
       <Route path="/scoreboard" element={<ScoreboardApp />} />
       <Route path="/board" element={<BoardCoaches />} />
       <Route path="/sports/soccer" element={<SoccerPage />} />
+      <Route path="/sports/soccer/age-groups" element={<SoccerAgeGroups />} />
+      <Route path="/sports/soccer/fields" element={<SoccerFields />} />
+      <Route path="/sports/soccer/resources" element={<SoccerResources />} />
+      <Route path="/sports/soccer/bylaws" element={<SoccerBylaws />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

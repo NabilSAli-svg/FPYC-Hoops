@@ -2,6 +2,7 @@ import Header from './Header.jsx';
 import Footer from './Footer.jsx';
 import Icon from '../shared/Icon.jsx';
 import { SectionHead } from './Programs.jsx';
+import SoccerSubNav from './SoccerSubNav.jsx';
 
 function scrollTo(id) {
   if (id === 'top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
@@ -50,6 +51,7 @@ export default function SoccerPage() {
   return (
     <div style={{ overflowX: 'clip' }}>
       <Header onJump={scrollTo} />
+      <SoccerSubNav active="" />
       <main>
         {/* Hero */}
         <section style={{ background: 'var(--court-navy)', color: '#fff', padding: '96px 24px 64px' }}>
