@@ -5,7 +5,10 @@ import { printRoster } from '../shared/printSheet.js';
 import { TEAM_INFO, TEAMS_INFO } from '../shared/store.js';
 
 const GRADES    = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
-const POSITIONS = ['Guard', 'Forward', 'Center'];
+const POSITIONS_BY_SPORT = {
+  basketball: ['Guard', 'Forward', 'Center'],
+  soccer:     ['Goalkeeper', 'Defender', 'Midfielder', 'Forward'],
+};
 const SCHOOLS   = ['Daniels Run ES', 'Providence ES', 'Lanier MS', 'Mosby Woods ES', 'Robinson Secondary', 'Fairfax HS', 'Other'];
 const STATUSES  = ['active', 'pending', 'inactive'];
 
@@ -29,8 +32,8 @@ const TEAMS = [...Object.keys(TEAMS_INFO), 'Unassigned'];
 
 const STATUS_KIND = { active: 'navy', pending: 'warn', neutral: 'neutral' };
 
-function emptyForm() {
-  return { firstName: '', lastName: '', number: '', grade: '5th', position: 'Guard', school: '', guardian: '', phone: '', status: 'active', waiver: false, program: 'Recreation', division: '3v3 Summer Cup', team: TEAMS[0] };
+function emptyForm(sport) {
+  return { firstName: '', lastName: '', number: '', grade: '5th', position: (POSITIONS_BY_SPORT[sport] || POSITIONS_BY_SPORT.basketball)[0], school: '', guardian: '', phone: '', status: 'active', waiver: false, program: 'Recreation', division: '3v3 Summer Cup', team: TEAMS[0] };
 }
 
 function exportRosterCSV(players) {
@@ -43,7 +46,9 @@ function exportRosterCSV(players) {
   csvDownload('fpyc-roster.csv', [headers, ...rows]);
 }
 
-export default function RosterView({ team, players, setPlayers }) {
+export default function RosterView({ team, players, setPlayers, sport = 'basketball' }) {
+  const POSITIONS = POSITIONS_BY_SPORT[sport] || POSITIONS_BY_SPORT.basketball;
+  const numberLabel = sport === 'soccer' ? 'Number' : 'Jersey #';
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 700);
@@ -55,7 +60,7 @@ export default function RosterView({ team, players, setPlayers }) {
   const [sortKey, setSortKey] = useState(null);
   const [sortDir, setSortDir] = useState('asc');
   const [modal, setModal] = useState(null); // null | { mode: 'add' } | { mode: 'edit', player }
-  const [form, setForm] = useState(emptyForm());
+  const [form, setForm] = useState(emptyForm(sport));
   const [errors, setErrors] = useState({});
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [toast, setToast] = useState('');
@@ -97,7 +102,7 @@ export default function RosterView({ team, players, setPlayers }) {
   }
 
   function openAdd() {
-    setForm(emptyForm());
+    setForm(emptyForm(sport));
     setErrors({});
     setConfirmRemove(false);
     setModal({ mode: 'add' });
@@ -324,7 +329,7 @@ export default function RosterView({ team, players, setPlayers }) {
               <F label="Last name" required error={errors.lastName}>
                 <input value={form.lastName} onChange={e => set('lastName', e.target.value)} placeholder="Last name" style={inputStyle(errors.lastName)} />
               </F>
-              <F label="Jersey #" required error={errors.number}>
+              <F label={numberLabel} required error={errors.number}>
                 <input type="number" min="0" max="99" value={form.number} onChange={e => set('number', e.target.value)} placeholder="e.g. 23" style={inputStyle(errors.number)} />
               </F>
               <F label="Grade">

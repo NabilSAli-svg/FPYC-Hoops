@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
+import StepSport from './StepSport.jsx';
 import StepProgram from './StepProgram.jsx';
 import StepPlayer from './StepPlayer.jsx';
 import StepParents from './StepParents.jsx';
@@ -9,6 +10,7 @@ import StepDonation from './StepDonation.jsx';
 import StepReview from './StepReview.jsx';
 
 const STEPS = [
+  { id: 'sport',    label: 'Sport',    icon: 'circle-dot' },
   { id: 'program',  label: 'Program',  icon: 'layout-grid' },
   { id: 'player',   label: 'Player',   icon: 'user' },
   { id: 'parents',  label: 'Parents',  icon: 'users' },
@@ -21,6 +23,7 @@ export default function RegisterApp() {
   const [step, setStep] = useState(0);
   const isMobile = useIsMobile();
   const [data, setData] = useState({
+    sport: null,
     program: null,
     player: {},
     parents: { p1: {}, p2: {} },
@@ -47,7 +50,9 @@ export default function RegisterApp() {
           <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
             <img src="/assets/logo-fpyc-basketball.png" alt="FPYC" style={{ width: 32, height: 32, objectFit: 'contain' }} />
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1 }}>FPYC Basketball</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1 }}>
+                FPYC {data.sport === 'soccer' ? 'Soccer' : data.sport === 'basketball' ? 'Basketball' : ''}
+              </div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Registration 2025–26</div>
             </div>
           </a>
@@ -145,12 +150,13 @@ export default function RegisterApp() {
 
       {/* Step content */}
       <div style={{ maxWidth: 880, margin: '0 auto', padding: isMobile ? '24px 16px 60px' : '40px 24px 80px' }}>
-        {step === 0 && <StepProgram {...stepProps} />}
-        {step === 1 && <StepPlayer {...stepProps} />}
-        {step === 2 && <StepParents {...stepProps} />}
-        {step === 3 && <StepWaivers {...stepProps} />}
-        {step === 4 && <StepDonation {...stepProps} />}
-        {step === 5 && <StepReview {...stepProps} />}
+        {step === 0 && <StepSport {...stepProps} />}
+        {step === 1 && <StepProgram {...stepProps} />}
+        {step === 2 && <StepPlayer {...stepProps} />}
+        {step === 3 && <StepParents {...stepProps} />}
+        {step === 4 && <StepWaivers {...stepProps} />}
+        {step === 5 && <StepDonation {...stepProps} />}
+        {step === 6 && <StepReview {...stepProps} />}
       </div>
     </div>
   );

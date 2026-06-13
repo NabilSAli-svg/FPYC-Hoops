@@ -3,7 +3,7 @@ import { Card, Button, Icon, Display, Eyebrow } from '../shared/index.js';
 import { useStats, useGames, usePlayers } from '../shared/store.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 
-const STAT_COLS = [
+const STAT_COLS_BASKETBALL = [
   { key: 'gp',  label: 'GP',  title: 'Games played',  mono: true },
   { key: 'pts', label: 'PTS', title: 'Total points',   mono: true },
   { key: 'ast', label: 'AST', title: 'Total assists',  mono: true },
@@ -14,32 +14,58 @@ const STAT_COLS = [
   { key: 'apg', label: 'APG', title: 'Assists per game',  mono: true },
 ];
 
-function computeSeasonStats(players, stats, games) {
+const STAT_COLS_SOCCER = [
+  { key: 'gp',  label: 'GP',  title: 'Games played',  mono: true },
+  { key: 'gls', label: 'G',   title: 'Total goals',   mono: true },
+  { key: 'ast', label: 'A',   title: 'Total assists', mono: true },
+  { key: 'yc',  label: 'YC',  title: 'Yellow cards',  mono: true },
+  { key: 'rc',  label: 'RC',  title: 'Red cards',     mono: true },
+  { key: 'gpg', label: 'GPG', title: 'Goals per game',   mono: true },
+  { key: 'apg', label: 'APG', title: 'Assists per game', mono: true },
+];
+
+const STAT_FIELDS_BASKETBALL = ['pts', 'ast', 'reb', 'fls'];
+const STAT_FIELDS_SOCCER     = ['gls', 'ast', 'yc', 'rc'];
+
+function computeSeasonStats(players, stats, games, sport) {
   const finalGames = games.filter(g => g.status === 'final');
+  const fields = sport === 'soccer' ? STAT_FIELDS_SOCCER : STAT_FIELDS_BASKETBALL;
   return players.map(p => {
-    let pts = 0, ast = 0, reb = 0, fls = 0, gp = 0;
+    const totals = Object.fromEntries(fields.map(f => [f, 0]));
+    let gp = 0;
     finalGames.forEach(g => {
       const gs = stats[g.id]?.[p.id];
-      if (gs) { pts += gs.pts; ast += gs.ast; reb += gs.reb; fls += gs.fls; gp++; }
+      if (gs) { fields.forEach(f => totals[f] += gs[f] || 0); gp++; }
     });
+    if (sport === 'soccer') {
+      return {
+        ...p, gp, ...totals,
+        gpg: gp ? (totals.gls / gp).toFixed(1) : '—',
+        apg: gp ? (totals.ast / gp).toFixed(1) : '—',
+        gpgNum: gp ? totals.gls / gp : 0,
+      };
+    }
     return {
-      ...p,
-      gp,
-      pts, ast, reb, fls,
-      ppg: gp ? (pts / gp).toFixed(1) : '—',
-      rpg: gp ? (reb / gp).toFixed(1) : '—',
-      apg: gp ? (ast / gp).toFixed(1) : '—',
-      ppgNum: gp ? pts / gp : 0,
+      ...p, gp, ...totals,
+      ppg: gp ? (totals.pts / gp).toFixed(1) : '—',
+      rpg: gp ? (totals.reb / gp).toFixed(1) : '—',
+      apg: gp ? (totals.ast / gp).toFixed(1) : '—',
+      ppgNum: gp ? totals.pts / gp : 0,
     };
   });
 }
 
-export default function StatsView({ teamFilter }) {
+export default function StatsView({ teamFilter, sport = 'basketball' }) {
   const isMobile = useIsMobile();
+  const isSoccer = sport === 'soccer';
+  const STAT_COLS = isSoccer ? STAT_COLS_SOCCER : STAT_COLS_BASKETBALL;
+  const STAT_FIELDS = isSoccer ? STAT_FIELDS_SOCCER : STAT_FIELDS_BASKETBALL;
+  const STAT_HEADERS = isSoccer ? ['G','A','YC','RC'] : ['PTS','AST','REB','FLS'];
+  const primaryKey = isSoccer ? 'gls' : 'pts';
   const [stats, setStats] = useStats();
   const [games]   = useGames();
   const [players] = usePlayers();
-  const [sortKey, setSortKey] = useState('pts');
+  const [sortKey, setSortKey] = useState(primaryKey);
   const [sortDir, setSortDir] = useState('desc');
   const [logModal, setLogModal] = useState(false);
   const [logGameId, setLogGameId] = useState('');
@@ -49,7 +75,7 @@ export default function StatsView({ teamFilter }) {
   const teamGames     = games.filter(g => !teamFilter || !g.team || g.team === teamFilter);
   const finalGames    = teamGames.filter(g => g.status === 'final');
 
-  const seasonStats = computeSeasonStats(activePlayers, stats, teamGames);
+  const seasonStats = computeSeasonStats(activePlayers, stats, teamGames, sport);
 
   function handleSort(key) {
     if (sortKey === key) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
@@ -64,7 +90,12 @@ export default function StatsView({ teamFilter }) {
 
   // Leaders
   const withGames = seasonStats.filter(p => p.gp > 0);
-  const leaders = {
+  const leaders = isSoccer ? {
+    gls: withGames.reduce((best, p) => p.gls > (best?.gls ?? -1) ? p : best, null),
+    ast: withGames.reduce((best, p) => p.ast > (best?.ast ?? -1) ? p : best, null),
+    yc:  withGames.reduce((best, p) => p.yc > (best?.yc ?? -1) ? p : best, null),
+    gpg: withGames.filter(p => p.gp >= 2).reduce((best, p) => p.gpgNum > (best?.gpgNum ?? -1) ? p : best, null),
+  } : {
     pts: withGames.reduce((best, p) => p.pts > (best?.pts ?? -1) ? p : best, null),
     reb: withGames.reduce((best, p) => p.reb > (best?.reb ?? -1) ? p : best, null),
     ast: withGames.reduce((best, p) => p.ast > (best?.ast ?? -1) ? p : best, null),
@@ -76,7 +107,7 @@ export default function StatsView({ teamFilter }) {
     const existing = stats[gameId] || {};
     const draft = {};
     activePlayers.forEach(p => {
-      draft[p.id] = { pts: existing[p.id]?.pts ?? '', ast: existing[p.id]?.ast ?? '', reb: existing[p.id]?.reb ?? '', fls: existing[p.id]?.fls ?? '' };
+      draft[p.id] = Object.fromEntries(STAT_FIELDS.map(f => [f, existing[p.id]?.[f] ?? '']));
     });
     setLogGameId(gameId);
     setLogDraft(draft);
@@ -87,12 +118,7 @@ export default function StatsView({ teamFilter }) {
     const cleaned = {};
     activePlayers.forEach(p => {
       const d = logDraft[p.id] || {};
-      cleaned[p.id] = {
-        pts: parseInt(d.pts) || 0,
-        ast: parseInt(d.ast) || 0,
-        reb: parseInt(d.reb) || 0,
-        fls: parseInt(d.fls) || 0,
-      };
+      cleaned[p.id] = Object.fromEntries(STAT_FIELDS.map(f => [f, parseInt(d[f]) || 0]));
     });
     setStats(s => ({ ...s, [logGameId]: cleaned }));
     setLogModal(false);
@@ -109,12 +135,17 @@ export default function StatsView({ teamFilter }) {
 
       {/* Leaders strip */}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 14 }}>
-        {[
+        {(isSoccer ? [
+          { icon: 'zap',      label: 'Goals leader',     player: leaders.gls, stat: leaders.gls?.gls,  unit: 'G' },
+          { icon: 'git-merge',label: 'Assists leader',   player: leaders.ast, stat: leaders.ast?.ast,  unit: 'A' },
+          { icon: 'alert-triangle', label: 'Yellow cards', player: leaders.yc, stat: leaders.yc?.yc,   unit: 'YC' },
+          { icon: 'trending-up', label: 'Top scorer/gm', player: leaders.gpg, stat: leaders.gpg?.gpg,  unit: 'GPG' },
+        ] : [
           { icon: 'zap',      label: 'Points leader',    player: leaders.pts, stat: leaders.pts?.pts,   unit: 'PTS' },
           { icon: 'activity', label: 'Rebounds leader',  player: leaders.reb, stat: leaders.reb?.reb,   unit: 'REB' },
           { icon: 'git-merge',label: 'Assists leader',   player: leaders.ast, stat: leaders.ast?.ast,   unit: 'AST' },
           { icon: 'trending-up', label: 'Top scorer/gm', player: leaders.ppg, stat: leaders.ppg?.ppg,   unit: 'PPG' },
-        ].map(({ icon, label, player, stat, unit }) => (
+        ]).map(({ icon, label, player, stat, unit }) => (
           <Card key={label} padding="18px 20px">
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
               <Eyebrow>{label}</Eyebrow>
@@ -224,7 +255,7 @@ export default function StatsView({ teamFilter }) {
                         <thead>
                           <tr style={{ borderBottom: '1px solid var(--border)' }}>
                             <th style={{ padding: '7px 20px', textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--fg-muted)' }}>Player</th>
-                            {['PTS','AST','REB','FLS'].map(h => (
+                            {STAT_HEADERS.map(h => (
                               <th key={h} style={{ padding: '7px 14px', textAlign: 'center', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--fg-muted)' }}>{h}</th>
                             ))}
                           </tr>
@@ -232,7 +263,7 @@ export default function StatsView({ teamFilter }) {
                         <tbody>
                           {activePlayers
                             .filter(p => gameStats[p.id])
-                            .sort((a, b) => (gameStats[b.id]?.pts ?? 0) - (gameStats[a.id]?.pts ?? 0))
+                            .sort((a, b) => (gameStats[b.id]?.[primaryKey] ?? 0) - (gameStats[a.id]?.[primaryKey] ?? 0))
                             .map((p, pi, arr) => {
                               const gs = gameStats[p.id];
                               return (
@@ -243,7 +274,7 @@ export default function StatsView({ teamFilter }) {
                                       <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--fg)' }}>{p.name}</span>
                                     </div>
                                   </td>
-                                  {[gs.pts, gs.ast, gs.reb, gs.fls].map((v, vi) => (
+                                  {STAT_FIELDS.map(f => gs[f]).map((v, vi) => (
                                     <td key={vi} style={{ padding: '8px 14px', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--fg)' }}>{v}</td>
                                   ))}
                                 </tr>
@@ -297,7 +328,7 @@ export default function StatsView({ teamFilter }) {
                   <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
                     <tr style={{ background: 'var(--court-navy)' }}>
                       <th style={{ padding: '10px 20px', textAlign: 'left', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.65)' }}>Player</th>
-                      {['PTS','AST','REB','FLS'].map(h => (
+                      {STAT_HEADERS.map(h => (
                         <th key={h} style={{ padding: '10px 14px', textAlign: 'center', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.65)', width: 80 }}>{h}</th>
                       ))}
                     </tr>
@@ -316,7 +347,7 @@ export default function StatsView({ teamFilter }) {
                               </div>
                             </div>
                           </td>
-                          {['pts','ast','reb','fls'].map(field => (
+                          {STAT_FIELDS.map(field => (
                             <td key={field} style={{ padding: '8px 10px', textAlign: 'center' }}>
                               <input
                                 type="number"
@@ -339,22 +370,19 @@ export default function StatsView({ teamFilter }) {
 
                 {/* Team totals preview */}
                 {(() => {
-                  const totals = { pts: 0, ast: 0, reb: 0, fls: 0 };
+                  const totals = Object.fromEntries(STAT_FIELDS.map(f => [f, 0]));
                   activePlayers.forEach(p => {
                     const d = logDraft[p.id] || {};
-                    totals.pts += parseInt(d.pts) || 0;
-                    totals.ast += parseInt(d.ast) || 0;
-                    totals.reb += parseInt(d.reb) || 0;
-                    totals.fls += parseInt(d.fls) || 0;
+                    STAT_FIELDS.forEach(f => { totals[f] += parseInt(d[f]) || 0; });
                   });
                   const gamePts = logGame?.us ?? 0;
-                  const diff = totals.pts - gamePts;
+                  const diff = totals[primaryKey] - gamePts;
                   return (
                     <div style={{ padding: '14px 20px', borderTop: '2px solid var(--border)', background: 'var(--bone)', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
                       <Eyebrow>Team totals</Eyebrow>
-                      {[['PTS', totals.pts], ['AST', totals.ast], ['REB', totals.reb], ['FLS', totals.fls]].map(([label, val]) => (
+                      {STAT_HEADERS.map((label, hi) => [label, totals[STAT_FIELDS[hi]]]).map(([label, val]) => (
                         <span key={label} style={{ fontSize: 13, fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--court-navy)' }}>
-                          {label}: <span style={{ color: label === 'PTS' && gamePts > 0 && diff !== 0 ? 'var(--basketball-orange)' : 'var(--court-navy)' }}>{val}</span>
+                          {label}: <span style={{ color: label === STAT_HEADERS[0] && gamePts > 0 && diff !== 0 ? 'var(--basketball-orange)' : 'var(--court-navy)' }}>{val}</span>
                         </span>
                       ))}
                       {logGame && gamePts > 0 && diff !== 0 && (

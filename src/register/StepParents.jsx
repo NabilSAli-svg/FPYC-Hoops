@@ -86,7 +86,7 @@ export default function StepParents({ data, update, next, back, isMobile }) {
   return (
     <div>
       <StepHeader
-        eyebrow="Step 3 of 6"
+        eyebrow="Step 4 of 7"
         title="Parent & guardian"
         sub="Both parents/guardians with a valid email will receive household login access and all team communications."
       />

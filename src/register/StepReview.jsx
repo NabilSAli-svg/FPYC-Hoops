@@ -117,7 +117,7 @@ export default function StepReview({ data, back, isMobile }) {
   return (
     <div>
       <div style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--basketball-orange)', marginBottom: 6 }}>Step 6 of 6</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--basketball-orange)', marginBottom: 6 }}>Step 7 of 7</div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, textTransform: 'uppercase', color: 'var(--court-navy)', lineHeight: 1, marginBottom: 10 }}>Review & pay</div>
       </div>
 

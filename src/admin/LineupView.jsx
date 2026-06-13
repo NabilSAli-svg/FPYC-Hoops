@@ -4,7 +4,8 @@ import { Card, Button, Jersey, Eyebrow, Display, Pill } from '../shared/index.js
 import { printLineup } from '../shared/printSheet.js';
 import { TEAM_INFO } from '../shared/store.js';
 
-const POSITIONS = ['PG', 'SG', 'SF', 'PF', 'C'];
+const POSITIONS_BASKETBALL = ['PG', 'SG', 'SF', 'PF', 'C'];
+const POSITIONS_SOCCER = ['GK', 'DEF', 'MID', 'FWD'];
 
 const COURT_SPOTS = [
   { left: '12%', top: '50%', label: 'PG' },
@@ -14,16 +15,34 @@ const COURT_SPOTS = [
   { left: '60%', top: '70%', label: 'C'  },
 ];
 
-export default function LineupView({ players, games }) {
+const PITCH_SPOTS = [
+  { left: '8%',  top: '50%', label: 'GK'  },
+  { left: '26%', top: '15%', label: 'DEF' },
+  { left: '26%', top: '38%', label: 'DEF' },
+  { left: '26%', top: '62%', label: 'DEF' },
+  { left: '26%', top: '85%', label: 'DEF' },
+  { left: '52%', top: '25%', label: 'MID' },
+  { left: '52%', top: '50%', label: 'MID' },
+  { left: '52%', top: '75%', label: 'MID' },
+  { left: '76%', top: '30%', label: 'FWD' },
+  { left: '76%', top: '50%', label: 'FWD' },
+  { left: '76%', top: '70%', label: 'FWD' },
+];
+
+export default function LineupView({ players, games, sport = 'basketball' }) {
+  const isSoccer = sport === 'soccer';
+  const POSITIONS = isSoccer ? POSITIONS_SOCCER : POSITIONS_BASKETBALL;
+  const SPOTS = isSoccer ? PITCH_SPOTS : COURT_SPOTS;
+  const startCount = isSoccer ? Math.min(11, players.length) : 5;
   const upcoming = (games || []).filter(g => g.status === 'scheduled' || g.status === 'live');
   const [gameIdx, setGameIdx] = useState(0);
   const game = upcoming[gameIdx] ?? games?.[0];
 
-  const [starters, setStarters] = useLocalStorage('fpyc-lineup-starters',
-    () => players.slice(0, 5).map(p => p.id));
-  const [posMap, setPosMap] = useLocalStorage('fpyc-lineup-pos', () => {
+  const [starters, setStarters] = useLocalStorage(`fpyc-lineup-starters-${sport}`,
+    () => players.slice(0, startCount).map(p => p.id));
+  const [posMap, setPosMap] = useLocalStorage(`fpyc-lineup-pos-${sport}`, () => {
     const m = {};
-    players.slice(0, 5).forEach((p, i) => { m[p.id] = POSITIONS[i]; });
+    players.slice(0, startCount).forEach((p, i) => { m[p.id] = POSITIONS[i % POSITIONS.length]; });
     return m;
   });
   const [benchOrder, setBenchOrder] = useLocalStorage('fpyc-lineup-bench', () => []);
@@ -41,8 +60,8 @@ export default function LineupView({ players, games }) {
   function showToast(msg) { setToast(msg); setTimeout(() => setToast(''), 2200); }
 
   function promote(id) {
-    const nextPos = POSITIONS.find(pos => !Object.values(posMap).includes(pos)) || 'PG';
-    if (starters.length < 5) {
+    const nextPos = POSITIONS.find(pos => !Object.values(posMap).includes(pos)) || POSITIONS[0];
+    if (starters.length < startCount) {
       setStarters(s => [...s, id]);
       setPosMap(m => ({ ...m, [id]: nextPos }));
     } else {
@@ -59,7 +78,7 @@ export default function LineupView({ players, games }) {
   }
 
   function cyclePos(id) {
-    const cur = posMap[id] || 'PG';
+    const cur = posMap[id] || POSITIONS[0];
     setPosMap(m => ({ ...m, [id]: POSITIONS[(POSITIONS.indexOf(cur) + 1) % POSITIONS.length] }));
   }
 
@@ -78,9 +97,9 @@ export default function LineupView({ players, games }) {
 
   function handleSave() { setSavedAt(new Date()); showToast('Lineup saved!'); }
   function handleReset() {
-    const ids = players.slice(0, 5).map(p => p.id);
+    const ids = players.slice(0, startCount).map(p => p.id);
     setStarters(ids);
-    const m = {}; ids.forEach((id, i) => { m[id] = POSITIONS[i]; }); setPosMap(m);
+    const m = {}; ids.forEach((id, i) => { m[id] = POSITIONS[i % POSITIONS.length]; }); setPosMap(m);
     setBenchOrder([]);
     setFouls(Object.fromEntries(players.map(p => [p.id, 0])));
   }
@@ -112,29 +131,41 @@ export default function LineupView({ players, games }) {
         <Card padding={0} style={{ overflow: 'hidden' }}>
           <div style={{ background: 'var(--court-navy)', color: '#fff', padding: '16px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <Eyebrow color="var(--varsity-gold)">Starting Five · {game?.day}</Eyebrow>
+              <Eyebrow color="var(--varsity-gold)">{isSoccer ? 'Starting Lineup' : 'Starting Five'} · {game?.day}</Eyebrow>
               <Display size={26} color="#fff" style={{ marginTop: 4 }}>{game?.home ? 'vs.' : '@'} {game?.opponent}</Display>
             </div>
             {game && <Pill kind="gold">{(game.location || 'TBD').split('·')[0].trim()}</Pill>}
           </div>
 
-          <div style={{ position: 'relative', height: 320, background: 'linear-gradient(180deg, #C2A876 0%, #B89863 100%)', overflow: 'hidden' }}>
+          <div style={{ position: 'relative', height: 320, background: isSoccer ? 'linear-gradient(180deg, #5DA85C 0%, #4E9650 100%)' : 'linear-gradient(180deg, #C2A876 0%, #B89863 100%)', overflow: 'hidden' }}>
             <svg viewBox="0 0 400 320" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-              <g fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2">
-                <rect x="20" y="20" width="360" height="280" />
-                <line x1="20" y1="160" x2="380" y2="160" />
-                <circle cx="200" cy="160" r="36" />
-                <rect x="20" y="100" width="80" height="120" />
-                <rect x="20" y="130" width="40" height="60" />
-                <circle cx="100" cy="160" r="36" />
-                <rect x="300" y="100" width="80" height="120" />
-                <rect x="340" y="130" width="40" height="60" />
-                <circle cx="300" cy="160" r="36" />
-                <path d="M20,75 C120,20 280,20 380,75" strokeDasharray="5 4" opacity="0.5" />
-              </g>
+              {isSoccer ? (
+                <g fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2">
+                  <rect x="20" y="20" width="360" height="280" />
+                  <line x1="200" y1="20" x2="200" y2="300" />
+                  <circle cx="200" cy="160" r="36" />
+                  <rect x="20" y="80" width="44" height="160" />
+                  <rect x="20" y="125" width="18" height="70" />
+                  <rect x="336" y="80" width="44" height="160" />
+                  <rect x="362" y="125" width="18" height="70" />
+                </g>
+              ) : (
+                <g fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2">
+                  <rect x="20" y="20" width="360" height="280" />
+                  <line x1="20" y1="160" x2="380" y2="160" />
+                  <circle cx="200" cy="160" r="36" />
+                  <rect x="20" y="100" width="80" height="120" />
+                  <rect x="20" y="130" width="40" height="60" />
+                  <circle cx="100" cy="160" r="36" />
+                  <rect x="300" y="100" width="80" height="120" />
+                  <rect x="340" y="130" width="40" height="60" />
+                  <circle cx="300" cy="160" r="36" />
+                  <path d="M20,75 C120,20 280,20 380,75" strokeDasharray="5 4" opacity="0.5" />
+                </g>
+              )}
             </svg>
 
-            {COURT_SPOTS.map((spot, i) => {
+            {SPOTS.map((spot, i) => {
               const p = startersList[i];
               const fc = p ? (fouls[p.id] || 0) : 0;
               const borderColor = fc >= 4 ? '#DC2626' : 'var(--varsity-gold)';
@@ -163,7 +194,7 @@ export default function LineupView({ players, games }) {
 
           <div style={{ padding: '12px 22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)' }}>
             <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>
-              <strong style={{ color: starters.length === 5 ? 'var(--status-win)' : 'var(--status-warning)' }}>{starters.length}/5</strong> starters
+              <strong style={{ color: starters.length === startCount ? 'var(--status-win)' : 'var(--status-warning)' }}>{starters.length}/{startCount}</strong> starters
               {savedAt && <span style={{ marginLeft: 8, color: 'var(--fg-muted)' }}>· saved {savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
             </span>
             <div style={{ display: 'flex', gap: 8 }}>

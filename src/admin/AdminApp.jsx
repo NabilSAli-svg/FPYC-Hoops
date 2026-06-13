@@ -165,17 +165,17 @@ export default function AdminApp() {
         <div style={{ padding: '24px 28px 64px', flex: 1 }}>
           <ErrorBoundary resetKey={view + selectedTeamName}>
           {view === 'dashboard'   && <DashboardView team={TEAM} players={teamPlayers} games={teamGames} onGo={handleGo} />}
-          {view === 'roster'      && <RosterView team={TEAM} players={teamPlayers} setPlayers={setPlayers} />}
-          {view === 'schedule'    && <ScheduleView games={teamGames} onScoreSave={saveScore} onGameUpdate={updateGame} onGameAdd={addGame} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} />}
-          {view === 'lineup'      && <LineupView players={teamPlayers.filter(p => p.status === 'active')} games={teamGames} />}
+          {view === 'roster'      && <RosterView team={TEAM} players={teamPlayers} setPlayers={setPlayers} sport={sport} />}
+          {view === 'schedule'    && <ScheduleView games={teamGames} onScoreSave={saveScore} onGameUpdate={updateGame} onGameAdd={addGame} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} sport={sport} />}
+          {view === 'lineup'      && <LineupView players={teamPlayers.filter(p => p.status === 'active')} games={teamGames} sport={sport} />}
           {view === 'attendance'  && <AttendanceView players={teamPlayers} />}
           {view === 'messages'       && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} />}
           {view === 'announcements'  && <AnnouncementsView />}
-          {view === 'evaluations' && <EvaluationsView players={teamPlayers.filter(p => p.status !== 'inactive')} />}
+          {view === 'evaluations' && <EvaluationsView players={teamPlayers.filter(p => p.status !== 'inactive')} sport={sport} />}
           {view === 'staff'       && <StaffView />}
           {view === 'playoffs'    && <PlayoffsView />}
           {view === 'draftboard'  && <DraftBoardView />}
-          {view === 'stats'       && <StatsView teamFilter={selectedTeamName} />}
+          {view === 'stats'       && <StatsView teamFilter={selectedTeamName} sport={sport} />}
           {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} />}
           {view === 'settings'    && <SettingsView />}
           </ErrorBoundary>
