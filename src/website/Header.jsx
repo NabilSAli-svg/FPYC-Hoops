@@ -28,9 +28,9 @@ export default function Header({ onJump }) {
       position: 'sticky', top: 0, zIndex: 50,
       borderBottom: '1px solid rgba(255,255,255,0.08)',
     }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 72, display: 'flex', alignItems: 'center', gap: 24 }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 84, display: 'flex', alignItems: 'center', gap: 24 }}>
         <a href="#top" onClick={(e) => { e.preventDefault(); onJump('top'); closeMenu(); }} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#fff', textDecoration: 'none', flexShrink: 0 }}>
-          <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 60, objectFit: 'contain' }} />
+          <img src="/assets/logo-fpyc-basketball-v2.png" alt="FPYC" style={{ height: 76, objectFit: 'contain' }} />
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1, whiteSpace: 'nowrap' }}>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, letterSpacing: '0.04em', textTransform: 'uppercase' }}>FPYC Basketball</span>
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.62)', marginTop: 4 }}>Fairfax Police Youth Club</span>
@@ -92,7 +92,7 @@ export default function Header({ onJump }) {
 
       {menuOpen && (
         <div style={{
-          position: 'absolute', top: 72, left: 0, right: 0, zIndex: 49,
+          position: 'absolute', top: 84, left: 0, right: 0, zIndex: 49,
           background: '#fff', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
           display: 'flex', flexDirection: 'column',
         }}>
