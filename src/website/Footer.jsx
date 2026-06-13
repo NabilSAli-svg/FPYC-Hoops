@@ -82,6 +82,7 @@ export default function Footer() {
           { label: 'Family portal', href: '/family' },
           { label: 'Coach login',   href: '/admin' },
           { label: 'About FPYC',   href: 'https://fpycsports.org', external: true },
+          { label: 'FPYC Soccer', href: '/sports/soccer' },
           { label: 'Other sports', href: 'https://fpycsports.org', external: true },
           { label: 'Contact',      href: '/#contact' },
         ]} />
