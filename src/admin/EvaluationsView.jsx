@@ -3,12 +3,23 @@ import { useLocalStorage } from '../shared/useLocalStorage.js';
 import { Card, Button, Icon, Display, Eyebrow, Jersey } from '../shared/index.js';
 import { csvDownload } from '../shared/csvDownload.js';
 
-const SKILLS = [
+const SKILLS_BASKETBALL = [
   { id: 'shooting',     label: 'Shooting',      icon: 'target'    },
   { id: 'defense',      label: 'Defense',        icon: 'shield'    },
   { id: 'dribbling',    label: 'Handling',       icon: 'activity'  },
   { id: 'passing',      label: 'Passing',        icon: 'send'      },
   { id: 'rebounding',   label: 'Rebounding',     icon: 'arrow-up'  },
+  { id: 'effort',       label: 'Effort',         icon: 'zap'       },
+  { id: 'coachability', label: 'Coachability',   icon: 'heart'     },
+  { id: 'teamwork',     label: 'Teamwork',       icon: 'users'     },
+];
+
+const SKILLS_SOCCER = [
+  { id: 'shooting',     label: 'Shooting',      icon: 'target'    },
+  { id: 'defense',      label: 'Defense',        icon: 'shield'    },
+  { id: 'dribbling',    label: 'Dribbling',      icon: 'activity'  },
+  { id: 'passing',      label: 'Passing',        icon: 'send'      },
+  { id: 'positioning',  label: 'Positioning',    icon: 'map-pin'   },
   { id: 'effort',       label: 'Effort',         icon: 'zap'       },
   { id: 'coachability', label: 'Coachability',   icon: 'heart'     },
   { id: 'teamwork',     label: 'Teamwork',       icon: 'users'     },
@@ -28,7 +39,7 @@ const EVAL_SEED = {
   p11: { shooting: 3, defense: 4, dribbling: 3, passing: 3, rebounding: 5, effort: 4, coachability: 4, teamwork: 3 },
 };
 
-function initEvals(players) {
+function initEvals(players, SKILLS) {
   const map = {};
   players.forEach(p => {
     const seed = EVAL_SEED[p.id];
@@ -39,7 +50,7 @@ function initEvals(players) {
   return map;
 }
 
-function exportEvalsCSV(players, evals, notes) {
+function exportEvalsCSV(players, evals, notes, SKILLS) {
   const headers = ['Name', '#', 'Grade', 'Position', 'Overall', ...SKILLS.map(s => s.label), 'Notes'];
   const rows = players.map(p => {
     const e = evals[p.id] || {};
@@ -55,7 +66,7 @@ function avg(evalsMap, pid) {
   return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '—';
 }
 
-function RadarChart({ evals, teamAvg, size = 220 }) {
+function RadarChart({ evals, teamAvg, size = 220, SKILLS }) {
   const cx = size / 2, cy = size / 2;
   const r = size * 0.34;
   const n = SKILLS.length;
@@ -104,9 +115,10 @@ function RadarChart({ evals, teamAvg, size = 220 }) {
   );
 }
 
-export default function EvaluationsView({ players }) {
+export default function EvaluationsView({ players, sport = 'basketball' }) {
+  const SKILLS = sport === 'soccer' ? SKILLS_SOCCER : SKILLS_BASKETBALL;
   const [selected, setSelected] = useState(players[0]?.id);
-  const [evals, setEvals] = useLocalStorage('fpyc-evals', () => initEvals(players));
+  const [evals, setEvals] = useLocalStorage(`fpyc-evals-${sport}`, () => initEvals(players, SKILLS));
   const [savedEvals, setSavedEvals] = useState(evals);
   const [notes, setNotes] = useLocalStorage('fpyc-notes', {});
   const [savedNotes, setSavedNotes] = useState(notes);
@@ -149,7 +161,7 @@ export default function EvaluationsView({ players }) {
       <Card padding={0} style={{ height: 'fit-content' }}>
         <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Display size={18}>Players</Display>
-          <Button kind="ghost" size="sm" icon="download" onClick={() => exportEvalsCSV(active, evals, notes)}>Export</Button>
+          <Button kind="ghost" size="sm" icon="download" onClick={() => exportEvalsCSV(active, evals, notes, SKILLS)}>Export</Button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {sortedPlayers.map((p, i) => {
@@ -248,7 +260,7 @@ export default function EvaluationsView({ players }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: 260 }}>
               <Card style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                 <Eyebrow>Skill profile</Eyebrow>
-                <RadarChart evals={playerEvals} teamAvg={teamAvgEvals} size={220} />
+                <RadarChart evals={playerEvals} teamAvg={teamAvgEvals} size={220} SKILLS={SKILLS} />
                 <div style={{ display: 'flex', gap: 14, fontSize: 10, color: 'var(--fg-muted)' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                     <span style={{ width: 12, height: 3, background: 'var(--varsity-gold)', borderRadius: 2, display: 'inline-block' }} /> Player

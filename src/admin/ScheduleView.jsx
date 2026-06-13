@@ -3,7 +3,8 @@ import { Card, Pill, Button, Icon, Display, Eyebrow, EmptyState, Skeleton } from
 import { usePractices, usePlayers, TEAM_INFO, useRsvps, countRsvps } from '../shared/store.js';
 import { printGameDay, printPractice } from '../shared/printSheet.js';
 
-const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4', 'OT'];
+const QUARTERS_BASKETBALL = ['Q1', 'Q2', 'Q3', 'Q4', 'OT'];
+const QUARTERS_SOCCER = ['1st Half', '2nd Half', 'OT'];
 
 const PRACTICE_TYPE_COLOR = {
   Regular:      { bg: 'rgba(10,31,61,0.08)',       text: 'var(--court-navy)' },
@@ -11,7 +12,10 @@ const PRACTICE_TYPE_COLOR = {
   Conditioning: { bg: 'rgba(232,119,34,0.12)',     text: 'var(--basketball-orange)' },
 };
 
-export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameAdd, onGo, initialTab = 'games', openNewGame = false, onNewGameClose }) {
+export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameAdd, onGo, initialTab = 'games', openNewGame = false, onNewGameClose, sport = 'basketball' }) {
+  const isSoccer = sport === 'soccer';
+  const QUARTERS = isSoccer ? QUARTERS_SOCCER : QUARTERS_BASKETBALL;
+  const POINT_VALUES = isSoccer ? [1] : [1, 2, 3];
   const [practices, setPractices] = usePractices();
   const [players] = usePlayers();
   const [rsvps] = useRsvps();
@@ -358,7 +362,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
             <FormField label="Date">
               <input type="date" value={newGame.date} onChange={e => setNewGame(g => ({ ...g, date: e.target.value }))} style={inputStyle} />
             </FormField>
-            <FormField label="Tip-off time">
+            <FormField label={isSoccer ? "Kickoff time" : "Tip-off time"}>
               <input type="time" value={newGame.time} onChange={e => setNewGame(g => ({ ...g, time: e.target.value }))} style={inputStyle} />
             </FormField>
             <FormField label="Opponent" style={{ gridColumn: '1 / -1' }}>
@@ -456,7 +460,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
               <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--varsity-gold)', marginBottom: 12 }}>Fairfax Hawks</div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(80px, 15vw, 140px)', color: '#fff', lineHeight: 1 }}>{liveUs}</div>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 28 }}>
-                {[1, 2, 3].map(pts => (
+                {POINT_VALUES.map(pts => (
                   <button key={pts} onClick={() => addPoints('us', pts)} style={{ all: 'unset', cursor: 'pointer', width: 'clamp(52px, 8vw, 72px)', height: 'clamp(52px, 8vw, 72px)', borderRadius: 12, background: 'var(--varsity-gold)', color: 'var(--court-navy)', fontFamily: 'var(--font-display)', fontSize: 'clamp(18px, 3vw, 26px)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 80ms', boxShadow: '0 4px 16px rgba(255,199,44,0.30)' }}
                     onMouseDown={e => e.currentTarget.style.transform = 'scale(0.94)'}
                     onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
@@ -474,7 +478,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
               <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', marginBottom: 12 }}>{liveGame.opponent}</div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(80px, 15vw, 140px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1 }}>{liveThem}</div>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 28 }}>
-                {[1, 2, 3].map(pts => (
+                {POINT_VALUES.map(pts => (
                   <button key={pts} onClick={() => addPoints('them', pts)} style={{ all: 'unset', cursor: 'pointer', width: 'clamp(52px, 8vw, 72px)', height: 'clamp(52px, 8vw, 72px)', borderRadius: 12, background: 'rgba(255,255,255,0.12)', border: '1.5px solid rgba(255,255,255,0.22)', color: '#fff', fontFamily: 'var(--font-display)', fontSize: 'clamp(18px, 3vw, 26px)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 80ms' }}
                     onMouseDown={e => e.currentTarget.style.transform = 'scale(0.94)'}
                     onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
