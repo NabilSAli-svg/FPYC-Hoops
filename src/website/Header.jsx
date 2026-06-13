@@ -28,7 +28,7 @@ export default function Header({ onJump }) {
       position: 'sticky', top: 0, zIndex: 50,
       borderBottom: '1px solid rgba(255,255,255,0.08)',
     }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', height: 116, display: 'flex', alignItems: 'center', gap: 24 }}>
+      <div style={{ maxWidth: 1320, margin: '0 auto', padding: '0 24px', height: 116, display: 'flex', alignItems: 'center', gap: 16 }}>
         <a href="#top" onClick={(e) => { e.preventDefault(); onJump('top'); closeMenu(); }} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#fff', textDecoration: 'none', flexShrink: 0 }}>
           <img src="/assets/logo-fpyc-basketball-v3.png" alt="FPYC" style={{ height: 100, objectFit: 'contain', filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.35))' }} />
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1, whiteSpace: 'nowrap' }}>
@@ -37,12 +37,12 @@ export default function Header({ onJump }) {
           </div>
         </a>
 
-        <nav className="desk-hide" style={{ display: 'flex', gap: 4, marginLeft: 24 }}>
+        <nav className="desk-hide" style={{ display: 'flex', gap: 2, marginLeft: 16, flexWrap: 'wrap' }}>
           {NAV_ITEMS.map(it => (
             <a key={it.id} href={it.href || `#${it.id}`} onClick={it.href ? undefined : (e) => { e.preventDefault(); onJump(it.id); }} style={{
               color: 'rgba(255,255,255,0.85)', textDecoration: 'none',
               fontFamily: 'var(--font-body)', fontWeight: 500, fontSize: 14,
-              padding: '8px 12px', borderRadius: 6,
+              padding: '8px 10px', borderRadius: 6, whiteSpace: 'nowrap',
             }}>{it.label}</a>
           ))}
         </nav>
@@ -51,7 +51,7 @@ export default function Header({ onJump }) {
 
         <a href="/scoreboard" className="desk-hide" style={{
           fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13, color: isLive ? '#fff' : 'rgba(255,255,255,0.75)',
-          textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap',
+          textDecoration: 'none', padding: '8px 10px', whiteSpace: 'nowrap',
           display: 'inline-flex', alignItems: 'center', gap: 7,
         }}>
           {isLive && <span className="pulse-dot" style={{ width: 7, height: 7, borderRadius: '50%', background: '#DC2626', display: 'inline-block', flexShrink: 0 }} />}
@@ -60,19 +60,19 @@ export default function Header({ onJump }) {
 
         <a href="/family" className="desk-hide" style={{
           fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13, color: 'rgba(255,255,255,0.75)',
-          textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap',
+          textDecoration: 'none', padding: '8px 10px', whiteSpace: 'nowrap',
         }}>Family portal</a>
 
         <a href="/admin" className="desk-hide" style={{
           fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13, color: '#fff',
-          textDecoration: 'none', padding: '8px 12px', whiteSpace: 'nowrap',
+          textDecoration: 'none', padding: '8px 10px', whiteSpace: 'nowrap',
         }}>Coach login</a>
 
         <a href="/register" className="mob-hide" style={{
           background: 'var(--varsity-gold)', color: 'var(--court-navy)',
           padding: '10px 16px', borderRadius: 8, textDecoration: 'none',
           fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
-          display: 'inline-flex', alignItems: 'center', gap: 6,
+          display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', flexShrink: 0,
         }}>Register <Icon name="arrow-right" size={14} /></a>
 
         <button
