@@ -325,7 +325,7 @@ function CoachesTab() {
               </div>
               <div>
                 {profile
-                  ? <Pill kind={isAdmin ? 'gold' : 'neutral'}>{profile.role}</Pill>
+                  ? <Pill kind={isAdmin ? 'gold' : 'neutral'}>{isAdmin ? 'admin' : profile.role}</Pill>
                   : <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>No account yet</span>}
               </div>
               <div style={{ display: 'flex', justifyContent: 'center' }}>
