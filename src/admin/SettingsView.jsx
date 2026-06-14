@@ -1,23 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill, Avatar } from '../shared/index.js';
-import { TEAM_INFO } from '../shared/store.js';
+import { TEAM_INFO, TEAMS_INFO, useStaff, usePlayers } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
-
-const COACHES = [
-  { id: 'c1', name: 'M. Davis', role: 'Head Coach', email: 'mdavis@example.com', phone: '(703) 555-0210', perms: { roster: true,  lineup: true,  schedule: true, evaluations: true,  messages: true,  settings: false } },
-  { id: 'c2', name: 'T. Johnson', role: 'Asst. Coach', email: 'tjohn@example.com', phone: '(703) 555-0244', perms: { roster: true,  lineup: true,  schedule: true, evaluations: false, messages: false, settings: false } },
-  { id: 'c3', name: 'R. Patel', role: 'Team Manager', email: 'rpatel@example.com', phone: '(703) 555-0288', perms: { roster: true,  lineup: false, schedule: true, evaluations: false, messages: true,  settings: false } },
-  { id: 'c4', name: 'L. Kim', role: 'Scorekeeper', email: 'lkim@example.com',   phone: '(703) 555-0199', perms: { roster: false, lineup: false, schedule: true, evaluations: false, messages: false, settings: false } },
-];
-
-const PERMS_META = [
-  { id: 'roster',      label: 'Roster',       icon: 'users',          desc: 'View & edit player info' },
-  { id: 'lineup',      label: 'Lineup',       icon: 'clipboard-list', desc: 'Build and save lineups' },
-  { id: 'schedule',    label: 'Schedule',     icon: 'calendar',       desc: 'View and edit schedule' },
-  { id: 'evaluations', label: 'Evaluations',  icon: 'star',           desc: 'Rate and note players' },
-  { id: 'messages',    label: 'Messages',     icon: 'message-square', desc: 'Send email & SMS' },
-  { id: 'settings',    label: 'Settings',     icon: 'settings',       desc: 'Full admin access' },
-];
 
 const NOTIF_GROUPS = [
   {
@@ -43,13 +27,6 @@ const NOTIF_GROUPS = [
       { id: 'schedule_change',label: 'Schedule changes',      sub: 'Location / time updates',    email: true,  sms: true  },
     ],
   },
-];
-
-const TEAMS_LIST = [
-  { id: 'hawks',   name: 'Fairfax Hawks',   division: 'Boys 5–6 House',     coach: 'M. Davis',    players: 12 },
-  { id: 'wolves',  name: 'Fairfax Wolves',  division: 'Girls 5–6 House',    coach: 'S. Thompson', players: 11 },
-  { id: 'eagles',  name: 'Fairfax Eagles',  division: 'Boys 7–8 Select',    coach: 'J. Williams', players: 14 },
-  { id: 'cougars', name: 'Fairfax Cougars', division: 'Girls 3–4 House',    coach: 'D. Park',     players: 10 },
 ];
 
 export default function SettingsView() {
@@ -213,25 +190,18 @@ function TeamInfoTab() {
 }
 
 function TeamsTab() {
-  const [teams, setTeams] = useState(TEAMS_LIST);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newTeam, setNewTeam] = useState({ name: '', division: 'Boys 5–6 House', coach: '', email: '', phone: '' });
+  const [players] = usePlayers();
 
-  function addTeam() {
-    if (!newTeam.name.trim() || !newTeam.coach.trim()) return;
-    setTeams(ts => [...ts, { id: `t${Date.now()}`, name: newTeam.name, division: newTeam.division, coach: newTeam.coach, players: 0 }]);
-    setNewTeam({ name: '', division: 'Boys 5–6 House', coach: '', email: '', phone: '' });
-    setShowAdd(false);
-  }
+  const teams = Object.values(TEAMS_INFO).map(t => ({
+    ...t,
+    players: players.filter(p => p.team === t.name).length,
+  }));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <Display size={22}>My teams</Display>
-          <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>Season 2025–26 · {teams.length} teams registered</div>
-        </div>
-        <Button kind="gold" icon="plus" onClick={() => setShowAdd(true)}>Add team</Button>
+      <div>
+        <Display size={22}>All teams</Display>
+        <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>{teams.length} teams across the program</div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
@@ -242,9 +212,7 @@ function TeamsTab() {
                 <Display size={22}>{team.name}</Display>
                 <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>{team.division}</div>
               </div>
-              <button style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--fg-muted)' }}>
-                <Icon name="more-horizontal" size={18} />
-              </button>
+              <div style={{ width: 14, height: 14, borderRadius: '50%', background: team.color, flexShrink: 0 }} />
             </div>
             <div style={{ display: 'flex', gap: 20, fontSize: 13 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -256,148 +224,132 @@ function TeamsTab() {
                 <span>{team.players} players</span>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Button kind="ghost" size="sm" icon="users">Roster</Button>
-              <Button kind="ghost" size="sm" icon="settings">Manage</Button>
-            </div>
           </Card>
         ))}
-        {/* Add team card */}
-        <button onClick={() => setShowAdd(true)} style={{
-          border: '2px dashed var(--border)', borderRadius: 8, padding: 24,
-          background: 'transparent', cursor: 'pointer', display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', gap: 10, color: 'var(--fg-muted)',
-          transition: 'all 160ms',
-        }}>
-          <Icon name="plus-circle" size={28} color="var(--fg-muted)" />
-          <span style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14 }}>Add new team</span>
-        </button>
       </div>
-
-      {showAdd && <AddTeamModal value={newTeam} onChange={setNewTeam} onSave={addTeam} onClose={() => setShowAdd(false)} />}
     </div>
   );
 }
 
 function CoachesTab() {
-  const [coaches, setCoaches] = useState(COACHES);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newCoach, setNewCoach] = useState({ name: '', email: '', phone: '', role: 'Asst. Coach' });
+  const [staff] = useStaff();
+  const [profiles, setProfiles] = useState({});
+  const [busyEmail, setBusyEmail] = useState(null);
 
-  const togglePerm = (cid, perm) => {
-    setCoaches(prev => prev.map(c =>
-      c.id === cid ? { ...c, perms: { ...c.perms, [perm]: !c.perms[perm] } } : c
-    ));
-  };
+  useEffect(() => {
+    supabase.from('profiles').select('id,email,role').then(({ data, error }) => {
+      if (error) { console.error('[supabase] fetch profiles:', error.message); return; }
+      const map = {};
+      (data || []).forEach(p => { map[(p.email || '').toLowerCase()] = p; });
+      setProfiles(map);
+    });
+  }, []);
 
-  function inviteCoach() {
-    if (!newCoach.name.trim() || !newCoach.email.trim()) return;
-    const defaultPerms = { roster: true, lineup: false, schedule: true, evaluations: false, messages: false, settings: false };
-    setCoaches(cs => [...cs, { id: `c${Date.now()}`, name: newCoach.name, role: newCoach.role, email: newCoach.email, phone: newCoach.phone, perms: defaultPerms }]);
-    setNewCoach({ name: '', email: '', phone: '', role: 'Asst. Coach' });
-    setShowAdd(false);
+  // Group staff rows by email — same person can appear once per team.
+  const people = [];
+  const byEmail = new Map();
+  for (const s of staff) {
+    const key = (s.email || '').toLowerCase();
+    if (byEmail.has(key)) {
+      const existing = byEmail.get(key);
+      if (!existing.roles.includes(s.role)) existing.roles.push(s.role);
+      if (s.team && !existing.teams.includes(s.team)) existing.teams.push(s.team);
+    } else {
+      const entry = { name: s.name, email: s.email, phone: s.phone, roles: [s.role], teams: s.team ? [s.team] : [] };
+      byEmail.set(key, entry);
+      people.push(entry);
+    }
+  }
+
+  async function toggleAdmin(email) {
+    const key = email.toLowerCase();
+    const profile = profiles[key];
+    if (!profile) return;
+    const newRole = profile.role === 'commissioner' ? 'coach' : 'commissioner';
+    setBusyEmail(key);
+    const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', profile.id);
+    if (error) {
+      console.error('[supabase] update profile role:', error.message);
+    } else {
+      setProfiles(p => ({ ...p, [key]: { ...profile, role: newRole } }));
+    }
+    setBusyEmail(null);
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <Display size={22}>Coaches & staff</Display>
-          <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>Manage who can access what in the console</div>
+      <div>
+        <Display size={22}>Coaches & staff</Display>
+        <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>
+          From the active roster — {people.length} {people.length === 1 ? 'person' : 'people'}. Admin access controls who can edit league-wide settings.
         </div>
-        <Button kind="gold" icon="user-plus" onClick={() => setShowAdd(true)}>Invite coach</Button>
       </div>
 
       <Card padding={0}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: `180px 140px ${PERMS_META.map(() => '1fr').join(' ')}`,
+          gridTemplateColumns: `220px 1fr 160px 140px`,
           padding: '10px 18px',
           background: 'var(--bone)',
           borderBottom: '1px solid var(--border)',
           fontSize: 10, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700, gap: 8,
         }}>
-          <div>Coach</div>
-          <div>Role</div>
-          {PERMS_META.map(p => (
-            <div key={p.id} style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
-              <Icon name={p.icon} size={14} />
-              <span>{p.label}</span>
-            </div>
-          ))}
+          <div>Name</div>
+          <div>Role & team</div>
+          <div>Account</div>
+          <div style={{ textAlign: 'center' }}>Admin access</div>
         </div>
 
-        {coaches.map((coach, i) => (
-          <div key={coach.id} style={{
-            display: 'grid',
-            gridTemplateColumns: `180px 140px ${PERMS_META.map(() => '1fr').join(' ')}`,
-            padding: '14px 18px',
-            borderBottom: i < coaches.length - 1 ? '1px solid var(--border)' : 'none',
-            alignItems: 'center', gap: 8,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Avatar name={coach.name} size={32} />
+        {people.map((person, i) => {
+          const key = (person.email || '').toLowerCase();
+          const profile = profiles[key];
+          const isAdmin = profile?.role === 'commissioner';
+          return (
+            <div key={key || i} style={{
+              display: 'grid',
+              gridTemplateColumns: `220px 1fr 160px 140px`,
+              padding: '14px 18px',
+              borderBottom: i < people.length - 1 ? '1px solid var(--border)' : 'none',
+              alignItems: 'center', gap: 8,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Avatar name={person.name} size={32} />
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 13 }}>{person.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{person.email}</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {person.roles.map(r => <Pill key={r} kind="neutral">{r}</Pill>)}
+                {person.teams.map(t => <Pill key={t} kind="navy">{t}</Pill>)}
+              </div>
               <div>
-                <div style={{ fontWeight: 700, fontSize: 13 }}>{coach.name}</div>
-                <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{coach.email}</div>
+                {profile
+                  ? <Pill kind={isAdmin ? 'gold' : 'neutral'}>{profile.role}</Pill>
+                  : <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>No account yet</span>}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <button
+                  onClick={() => toggleAdmin(person.email)}
+                  disabled={!profile || busyEmail === key}
+                  title={profile ? `${isAdmin ? 'Revoke' : 'Grant'} admin access` : 'User must create an account first'}
+                  style={{
+                    width: 32, height: 32, borderRadius: 8, border: 'none',
+                    cursor: (!profile || busyEmail === key) ? 'default' : 'pointer',
+                    background: isAdmin ? 'rgba(31,138,91,0.12)' : 'var(--bone)',
+                    color: isAdmin ? 'var(--status-win)' : 'var(--fg-muted)',
+                    opacity: profile ? 1 : 0.4,
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 120ms',
+                  }}
+                >
+                  <Icon name={isAdmin ? 'check' : 'minus'} size={14} />
+                </button>
               </div>
             </div>
-            <div>
-              <Pill kind={coach.role === 'Head Coach' ? 'navy' : 'neutral'}>{coach.role}</Pill>
-            </div>
-            {PERMS_META.map(p => {
-              const on = coach.perms[p.id];
-              const isHead = coach.role === 'Head Coach';
-              return (
-                <div key={p.id} style={{ display: 'flex', justifyContent: 'center' }}>
-                  <button
-                    onClick={() => !isHead && togglePerm(coach.id, p.id)}
-                    title={`${on ? 'Revoke' : 'Grant'} ${p.label} access`}
-                    style={{
-                      width: 32, height: 32, borderRadius: 8, border: 'none', cursor: isHead ? 'default' : 'pointer',
-                      background: on ? (isHead ? 'rgba(31,138,91,0.15)' : 'rgba(31,138,91,0.12)') : 'var(--bone)',
-                      color: on ? 'var(--status-win)' : 'var(--fg-muted)',
-                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                      transition: 'all 120ms',
-                    }}
-                  >
-                    <Icon name={on ? 'check' : 'minus'} size={14} />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        ))}
+          );
+        })}
       </Card>
-
-      {showAdd && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}
-          onClick={e => e.target === e.currentTarget && setShowAdd(false)}>
-          <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 440, boxShadow: 'var(--shadow-3)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <Display size={22}>Invite coach</Display>
-              <button onClick={() => setShowAdd(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><Icon name="x" size={20} color="var(--fg-muted)" /></button>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <InputField label="Full name" placeholder="Coach name" value={newCoach.name} onChange={e => setNewCoach(c => ({ ...c, name: e.target.value }))} />
-              <InputField label="Email address" placeholder="coach@example.com" type="email" value={newCoach.email} onChange={e => setNewCoach(c => ({ ...c, email: e.target.value }))} />
-              <InputField label="Phone (for SMS)" placeholder="(703) 555-0000" type="tel" value={newCoach.phone} onChange={e => setNewCoach(c => ({ ...c, phone: e.target.value }))} />
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Role</div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {['Head Coach', 'Asst. Coach', 'Team Manager', 'Scorekeeper'].map(r => (
-                    <button key={r} onClick={() => setNewCoach(c => ({ ...c, role: r }))} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid var(--border)', background: newCoach.role === r ? 'var(--court-navy)' : 'transparent', color: newCoach.role === r ? '#fff' : 'var(--fg)', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>{r}</button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 24, justifyContent: 'flex-end' }}>
-              <Button kind="ghost" onClick={() => setShowAdd(false)}>Cancel</Button>
-              <Button kind="gold" icon="send" onClick={inviteCoach} disabled={!newCoach.name.trim() || !newCoach.email.trim()}>Send invite</Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -641,32 +593,3 @@ function InputField({ label, value, placeholder, type = 'text', onChange }) {
   );
 }
 
-function AddTeamModal({ value, onChange, onSave, onClose }) {
-  return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}
-      onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 480, boxShadow: 'var(--shadow-3)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <Display size={22}>Add team</Display>
-          <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><Icon name="x" size={20} color="var(--fg-muted)" /></button>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <InputField label="Team name" placeholder="e.g. Fairfax Hawks" value={value.name} onChange={e => onChange(v => ({ ...v, name: e.target.value }))} />
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Division</div>
-            <select value={value.division} onChange={e => onChange(v => ({ ...v, division: e.target.value }))} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, background: 'var(--bone)', color: 'var(--fg)', outline: 'none' }}>
-              {DIVISIONS.map(d => <option key={d}>{d}</option>)}
-            </select>
-          </div>
-          <InputField label="Head coach name" placeholder="Coach name" value={value.coach} onChange={e => onChange(v => ({ ...v, coach: e.target.value }))} />
-          <InputField label="Head coach email" placeholder="coach@example.com" type="email" value={value.email} onChange={e => onChange(v => ({ ...v, email: e.target.value }))} />
-          <InputField label="Head coach phone" placeholder="(703) 555-0000" type="tel" value={value.phone} onChange={e => onChange(v => ({ ...v, phone: e.target.value }))} />
-        </div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 24, justifyContent: 'flex-end' }}>
-          <Button kind="ghost" onClick={onClose}>Cancel</Button>
-          <Button kind="gold" icon="shield" onClick={onSave} disabled={!value.name.trim() || !value.coach.trim()}>Create team</Button>
-        </div>
-      </div>
-    </div>
-  );
-}

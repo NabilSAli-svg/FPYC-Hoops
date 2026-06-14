@@ -164,6 +164,8 @@ create policy "ann_commissioner_write"      on public.announcements       for al
 create policy "players_commissioner_write"  on public.players             for all using (public.is_commissioner());
 create policy "assignments_commissioner_write" on public.official_assignments for all using (public.is_commissioner());
 create policy "staff_commissioner_write"    on public.staff               for all using (public.is_commissioner());
+create policy "profiles_commissioner_read"  on public.profiles            for select using (public.is_commissioner());
+create policy "profiles_commissioner_write" on public.profiles            for update using (public.is_commissioner());
 
 -- ── Score PIN update (no auth needed — scorekeeper uses PIN only) ─────────────
 
