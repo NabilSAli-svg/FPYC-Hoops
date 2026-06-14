@@ -430,6 +430,7 @@ export const INITIAL_STAFF = [
   { id: 'st9', name: "Adam Schrecengost", role: "Assistant Coach", program: 'Recreation', team: "Rising 4th-5th Boys", email: "schreckdc@gmail.com", phone: "(202)937-5119", bgCheckStatus: "Not Started", bgCheckDate: '' },
   { id: 'st10', name: "Adam Schrecengost", role: "Assistant Coach", program: 'Recreation', team: "Girls 3v3 (2nd-8th)", email: "schreckdc@gmail.com", phone: "(202)937-5119", bgCheckStatus: "Not Started", bgCheckDate: '' },
   { id: 'st11', name: "Dale Van Wagner", role: "Assistant Coach", program: 'Recreation', team: "Unassigned", email: "dale.vanwagner@gmail.com", phone: "(215) 499-5165", bgCheckStatus: "Not Started", bgCheckDate: '' },
+  { id: 'st12', name: "Kesara Liyanage", role: "Coach", program: 'Recreation', team: "Rising 4th-5th Boys", email: "kliyanage30@gmail.com", phone: "", bgCheckStatus: "Not Started", bgCheckDate: '' },
 ];
 
 export function useStaff() {
