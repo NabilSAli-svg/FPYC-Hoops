@@ -420,16 +420,16 @@ export const INITIAL_MESSAGES = [
 
 export const INITIAL_STAFF = [
   { id: 'st1', name: "Joshua Nehr", role: "Coach", program: 'Recreation', team: "Rising 4th-5th Boys", email: "joshuanehr@gmail.com", phone: "(720) 532-5737", bgCheckStatus: "Expired", bgCheckDate: '' },
-  { id: 'st2', name: "Artemus Gwynn", role: "Scorekeeper", program: 'Recreation', team: "Unassigned", email: "artemus.gwynn@gmail.com", phone: "(336) 577-4105", bgCheckStatus: "Not Started", bgCheckDate: '' },
+  { id: 'st2', name: "Artemus Gwynn", role: "Scorekeeper", program: 'Recreation', team: "Rising 2nd-3rd Boys", email: "artemus.gwynn@gmail.com", phone: "(336) 577-4105", bgCheckStatus: "Not Started", bgCheckDate: '' },
   { id: 'st3', name: "Nabil Ali", role: "League Director", program: 'Recreation', team: "Rising 4th-5th Boys", email: "syednabilali@gmail.com", phone: "(703) 994-2211", bgCheckStatus: "Expired", bgCheckDate: '' },
   { id: 'st4', name: "Gene Kintgen", role: "Assistant Coach", program: 'Recreation', team: "Rising 4th-5th Boys", email: "ekintgen@gmail.com", phone: "(812) 340-4749", bgCheckStatus: "Expired", bgCheckDate: '' },
-  { id: 'st5', name: "Braylen Coleman", role: "Scorekeeper", program: 'Recreation', team: "Unassigned", email: "braylenjcoleman@icloud.com", phone: "(571) 221-2134", bgCheckStatus: "Not Started", bgCheckDate: '' },
+  { id: 'st5', name: "Braylen Coleman", role: "Scorekeeper", program: 'Recreation', team: "Girls 3v3 (2nd-8th)", email: "braylenjcoleman@icloud.com", phone: "(571) 221-2134", bgCheckStatus: "Not Started", bgCheckDate: '' },
   { id: 'st6', name: "Nick Blessing", role: "Coach", program: 'Recreation', team: "Rising 2nd-3rd Boys", email: "n.blessing33@gmail.com", phone: "7034479462", bgCheckStatus: "Not Started", bgCheckDate: '' },
   { id: 'st7', name: "Jim Quinn", role: "Coach", program: 'Recreation', team: "Rising 4th-5th Boys", email: "james.john.quinn@gmail.com", phone: "(201)951-2824", bgCheckStatus: "Not Started", bgCheckDate: '' },
   { id: 'st8', name: "Shaun Ali", role: "Coach", program: 'Recreation', team: "Rising 4th-5th Boys", email: "shaunali34@gmail.com", phone: "(703) 989-0847", bgCheckStatus: "Expired", bgCheckDate: '' },
   { id: 'st9', name: "Adam Schrecengost", role: "Assistant Coach", program: 'Recreation', team: "Rising 4th-5th Boys", email: "schreckdc@gmail.com", phone: "(202)937-5119", bgCheckStatus: "Not Started", bgCheckDate: '' },
   { id: 'st10', name: "Adam Schrecengost", role: "Assistant Coach", program: 'Recreation', team: "Girls 3v3 (2nd-8th)", email: "schreckdc@gmail.com", phone: "(202)937-5119", bgCheckStatus: "Not Started", bgCheckDate: '' },
-  { id: 'st11', name: "Dale Van Wagner", role: "Assistant Coach", program: 'Recreation', team: "Unassigned", email: "dale.vanwagner@gmail.com", phone: "(215) 499-5165", bgCheckStatus: "Not Started", bgCheckDate: '' },
+  { id: 'st11', name: "Dale Van Wagner", role: "Assistant Coach", program: 'Recreation', team: "Rising 6th-8th Boys", email: "dale.vanwagner@gmail.com", phone: "(215) 499-5165", bgCheckStatus: "Not Started", bgCheckDate: '' },
   { id: 'st12', name: "Kesara Liyanage", role: "Coach", program: 'Recreation', team: "Rising 4th-5th Boys", email: "kliyanage30@gmail.com", phone: "", bgCheckStatus: "Not Started", bgCheckDate: '' },
 ];
 
