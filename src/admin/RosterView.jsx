@@ -17,14 +17,14 @@ const PROGRAMS = ['Recreation', 'Select', 'Training', 'Unassigned'];
 const DIVISIONS_BY_PROGRAM = {
   'Recreation': ['3v3 Summer Cup'],
   'Select':     ['—'],
-  'Training':   ['Beginner', 'Intermediate/Advanced'],
+  'Training':   ['Beginner', 'Intermediate', 'Advanced'],
   'Unassigned': ['—'],
 };
 
 const TEAMS_BY_PROGRAM = {
   'Recreation': ['Rising 2nd-3rd Boys', 'Girls 3v3 (2nd-8th)', 'Rising 4th-5th Boys', 'Rising 6th-8th Boys'],
   'Select':     ['Unassigned'],
-  'Training':   ['Training - Beginner', 'Training - Intermediate/Advanced'],
+  'Training':   ['Training - Beginner', 'Training - Intermediate', 'Training - Advanced'],
   'Unassigned': ['Unassigned'],
 };
 
