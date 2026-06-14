@@ -44,7 +44,7 @@ insert into public.players (id, number, name, grade, school, guardian, phone, po
 ('p33', null, 'BRUCE LEE', '6th-8th', '', 'blee5451@gmail.com', '', '', 'active', true, '3v3 Summer Cup', 'Rising 6th-8th Boys', 'Rising 6th-8th Boys'),
 ('p34', null, 'Kenson Lee', '6th-8th', '', 'maziejae@aol.com', '', '', 'active', true, '3v3 Summer Cup', 'Rising 6th-8th Boys', 'Rising 6th-8th Boys'),
 ('p35', null, 'Abu Bakr Lodin', '4th & 5th', '', 'shukriahd@gmail.com', '', '', 'active', true, '3v3 Summer Cup', 'Rising 4th-5th Boys', 'Rising 4th-5th Boys'),
-('p36', null, 'Rhys Mancil', '6th-8th', '', 'mancl.amy@gmail.com', '', '', 'active', true, '3v3 Summer Cup', 'Rising 6th-8th Boys', 'Rising 6th-8th Boys'),
+('p36', null, 'Rhys Mancl', '6th-8th', '', 'mancl.amy@gmail.com', '', '', 'active', true, '3v3 Summer Cup', 'Rising 6th-8th Boys', 'Rising 6th-8th Boys'),
 ('p37', null, 'Avery McCray', '4th & 5th', '', 'rj.mccray@irs.gov', '', '', 'active', true, '3v3 Summer Cup', 'Girls 3v3 (2nd-8th)', 'Girls 3v3 (2nd-8th)'),
 ('p38', null, 'Levi McCray', '2nd & 3rd', '', 'rj.mccray@irs.gov', '', '', 'active', true, '3v3 Summer Cup', 'Rising 2nd-3rd Boys', 'Rising 2nd-3rd Boys'),
 ('p39', null, 'Aditya Menon', '6th-8th', '', 'binds29@gmail.com', '', '', 'active', true, '3v3 Summer Cup', 'Rising 6th-8th Boys', 'Rising 6th-8th Boys'),
@@ -67,7 +67,21 @@ insert into public.players (id, number, name, grade, school, guardian, phone, po
 ('p56', null, 'Philip Tran', '4th & 5th', '', 'marwei.tam@gmail.com', '', '', 'active', true, '3v3 Summer Cup', 'Rising 4th-5th Boys', 'Rising 4th-5th Boys'),
 ('p57', null, 'Chase Vadakedathu', '6th-8th', '', 'linandcass@gmail.com', '', '', 'active', true, '3v3 Summer Cup', 'Rising 6th-8th Boys', 'Rising 6th-8th Boys'),
 ('p58', null, 'Sarah Vadakedathu', '6th-8th', '', 'linandcass@gmail.com', '', '', 'active', true, '3v3 Summer Cup', 'Girls 3v3 (2nd-8th)', 'Girls 3v3 (2nd-8th)'),
-('p59', null, 'Kyrie Varela', '4th & 5th', '', 'zelda.varela@gmail.com', '', '', 'active', true, '3v3 Summer Cup', 'Girls 3v3 (2nd-8th)', 'Girls 3v3 (2nd-8th)');
+('p59', null, 'Kyrie Varela', '4th & 5th', '', 'zelda.varela@gmail.com', '', '', 'active', true, '3v3 Summer Cup', 'Girls 3v3 (2nd-8th)', 'Girls 3v3 (2nd-8th)'),
+('p195', null, 'Anna Arshad', '4th & 5th', 'Saint Leo the Great Catholic School', 'l.richardson17@gmail.com', '(202)718-7188', '', 'active', true, '3v3 Summer Cup', 'Rising 4th-5th Boys', 'Rising 4th-5th Boys'),
+('p196', null, 'David Sparling', '4th & 5th', 'Providence elementary', 'yvonnemsparling@gmail.com', '(703) 927-1062', '', 'active', true, '3v3 Summer Cup', 'Rising 4th-5th Boys', 'Rising 4th-5th Boys'),
+('p197', null, 'AARON Guison-Dowdy', '4th & 5th', 'Fairhill ES', 'xai2k@hotmail.com', '(703)280-0970', '', 'active', true, '3v3 Summer Cup', 'Rising 4th-5th Boys', 'Rising 4th-5th Boys'),
+('p198', null, 'Cru Tarugsa', '2nd & 3rd', 'Greenbriar West', 'natee.tarugsa@gmail.com', '(818) 388-9426', '', 'active', true, '3v3 Summer Cup', 'Rising 2nd-3rd Boys', 'Rising 2nd-3rd Boys'),
+('p199', null, 'Zach Ali', '4th & 5th', 'Willow Springs', 'shaunali34@gmail.com', '(703) 989-0847', '', 'active', true, '3v3 Summer Cup', 'Rising 4th-5th Boys', 'Rising 4th-5th Boys'),
+('p200', null, 'Dean Ali', '4th & 5th', 'Willow Springs', 'shaunali34@gmail.com', '(703) 989-0847', '', 'active', true, '3v3 Summer Cup', 'Rising 4th-5th Boys', 'Rising 4th-5th Boys'),
+('p201', null, 'Amen Emun', '6th-8th', 'Mosaic Elementary school', 'hilawemun@gmail.com', '(571)685-0566', '', 'active', true, '3v3 Summer Cup', 'Rising 6th-8th Boys', 'Rising 6th-8th Boys'),
+('p202', null, 'Taye Olibah', '4th & 5th', 'Willow Springs Elementary School', 'bzolibah@gmail.com', '(571) 214-1701', '', 'active', true, '3v3 Summer Cup', 'Rising 4th-5th Boys', 'Rising 4th-5th Boys'),
+('p203', null, 'James Schrecengost', '4th & 5th', 'Louise Archer Elementary', 'rosengost.family@gmail.com', '(202) 937-5119', '', 'active', true, '3v3 Summer Cup', 'Rising 4th-5th Boys', 'Rising 4th-5th Boys'),
+('p204', null, 'Jordan Schrecengost', '2nd & 3rd', 'Flint Hill Elementary', 'rosengost.family@gmail.com', '(202) 937-5119', '', 'active', true, '3v3 Summer Cup', 'Girls 3v3 (2nd-8th)', 'Girls 3v3 (2nd-8th)'),
+('p205', null, 'Linus Lee', '4th & 5th', 'Fairhill Elementary School', 'kkiang@gmail.com', '(970) 623-9363', '', 'active', true, '3v3 Summer Cup', 'Rising 4th-5th Boys', 'Rising 4th-5th Boys'),
+('p206', null, 'Luke Tran', '4th & 5th', 'Providence Elementary School', 'dltran1216@gmail.com', '(540) 797-4777', '', 'active', true, '3v3 Summer Cup', 'Rising 4th-5th Boys', 'Rising 4th-5th Boys'),
+('p207', null, 'Arantza Rivera Garcia', '6th-8th', 'Fairfax Villa', 'ngarcia9680@hotmail.com', '(703) 899-0013', '', 'active', true, '3v3 Summer Cup', 'Girls 3v3 (2nd-8th)', 'Girls 3v3 (2nd-8th)'),
+('p208', null, 'Anibal Rivera Garcia', '6th-8th', 'Fairfax Villa', 'ngarcia9680@hotmail.com', '(703) 899-0013', '', 'active', true, '3v3 Summer Cup', 'Rising 6th-8th Boys', 'Rising 6th-8th Boys');
 
 insert into public.games (id, team, opponent, day, date, month, weekday, "time", location, home, status, score_pin) values
 ('g231', 'Rising 2nd-3rd Boys', 'Week 1: Opening Night Tournament', 'Tue, Jun 16', 16, 'Jun', 'Tue', '6:30 PM - 7:30 PM', 'TBD', true, 'scheduled', '2824'),
