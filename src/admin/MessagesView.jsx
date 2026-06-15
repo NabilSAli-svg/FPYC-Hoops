@@ -106,6 +106,7 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed })
           from: TEAM_INFO.coach,
           time: 'Just now',
           unread: true,
+          target: TEAM_INFO.name,
           subject: subject || '(No subject)',
           body: body || '',
         }, ...ms]);
