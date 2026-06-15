@@ -1,4 +1,4 @@
-const CACHE = 'fpyc-v1';
+const CACHE = 'fpyc-v2';
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => {
@@ -28,8 +28,8 @@ self.addEventListener('push', e => {
   e.waitUntil(
     self.registration.showNotification(data.title ?? 'FPYC Basketball', {
       body:  data.body  ?? '',
-      icon:  '/assets/logo-fpyc-basketball.png',
-      badge: '/assets/logo-fpyc-basketball.png',
+      icon:  '/assets/logo-fpyc-basketball-v3.png',
+      badge: '/assets/logo-fpyc-basketball-v3.png',
       tag:   data.tag   ?? 'fpyc',
       data:  { url: data.url ?? '/family' },
     })
