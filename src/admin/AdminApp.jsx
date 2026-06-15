@@ -31,13 +31,15 @@ export default function AdminApp() {
   const [authReady, setAuthReady] = useState(false);
   const [role, setRole] = useState(null); // 'commissioner' | 'coach' | null
   const [coachTeam, setCoachTeam] = useState(null);
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { setAuthReady(true); return; }
-      const { data: profile } = await supabase.from('profiles').select('role, team').eq('id', session.user.id).single();
+      const { data: profile } = await supabase.from('profiles').select('role, team, first_name, parent_name, email').eq('id', session.user.id).single();
       if (profile?.role === 'commissioner' || profile?.role === 'coach') {
         setRole(profile.role);
+        setProfile(profile);
         if (profile.role === 'coach' && profile.team) setCoachTeam(profile.team);
       }
       setAuthReady(true);
@@ -148,6 +150,7 @@ export default function AdminApp() {
         sidebarOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         role={role}
+        profile={profile}
       />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <TopBar title={t.title} breadcrumb={t.breadcrumb} action={topAction} onMenuToggle={() => setSidebarOpen(o => !o)} />
