@@ -149,6 +149,22 @@ create table if not exists public.attendance (
   status     text not null      -- present | absent | excused
 );
 
+-- ── Registrations ────────────────────────────────────────────────────────────
+
+create table if not exists public.registrations (
+  id          text primary key,
+  parent      text,
+  player      text,
+  grade       text,
+  division    text,
+  date        text,
+  paid        boolean default false,
+  waiver      boolean default false,
+  status      text default 'pending',  -- pending | approved | waitlisted
+  player_id   text,
+  confirm_num text
+);
+
 -- ── Officials (referees) ─────────────────────────────────────────────────────
 
 create table if not exists public.officials (
@@ -186,6 +202,7 @@ alter table public.messages             enable row level security;
 alter table public.payments             enable row level security;
 alter table public.attendance           enable row level security;
 alter table public.officials             enable row level security;
+alter table public.registrations          enable row level security;
 
 -- Profiles: users see only their own row; commissioner sees all
 create policy "profiles_self_read"    on public.profiles for select using (auth.uid() = id);
@@ -233,6 +250,11 @@ create policy "attendance_staff_all" on public.attendance for all using (public.
 
 -- Officials: staff (commissioners/coaches) manage the referee roster & payments
 create policy "officials_staff_all" on public.officials for all using (public.is_staff());
+
+-- Registrations: public registration form can insert; staff manage all
+create policy "registrations_public_insert" on public.registrations for insert with check (true);
+create policy "registrations_staff_all" on public.registrations for all using (public.is_staff());
+grant insert on public.registrations to anon, authenticated;
 
 -- Public read for games/announcements (scoreboard + website are unauthenticated)
 create policy "games_public_read"   on public.games         for select using (true);
