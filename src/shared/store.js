@@ -13,6 +13,7 @@ export const TEAM_INFO = {
 export const SPORTS = [
   { id: 'basketball', label: 'Basketball', tagline: 'FPYC Basketball', icon: 'circle-dot' },
   { id: 'soccer',     label: 'Soccer',     tagline: 'FPYC Soccer',     icon: 'circle' },
+  { id: 'football',   label: 'Football',   tagline: 'FPYC Lions Football', icon: 'shield' },
 ];
 
 export const TEAMS_INFO = {
