@@ -1,8 +1,14 @@
 import Icon from '../shared/Icon.jsx';
-import { PAYMENTS, BALANCE } from './data.js';
-import { TEAM_INFO as TEAM } from '../shared/store.js';
+import { usePayments, TEAM_INFO as TEAM } from '../shared/store.js';
 
 export default function PaymentsTab({ family }) {
+  const [allPayments] = usePayments();
+  const PAYMENTS = allPayments.filter(p => p.player_id === family.child.id);
+
+  const due = PAYMENTS.filter(p => p.status === 'due').reduce((s, p) => s + p.amount, 0);
+  const paid = PAYMENTS.filter(p => p.status === 'paid' || p.status === 'applied').reduce((s, p) => s + p.amount, 0);
+  const nextDue = PAYMENTS.find(p => p.status === 'due')?.date ?? null;
+  const BALANCE = { due, paid, nextDue };
   const allPaid = BALANCE.due === 0;
 
   return (
@@ -77,6 +83,9 @@ export default function PaymentsTab({ family }) {
           Payment history
         </div>
         <div>
+          {PAYMENTS.length === 0 && (
+            <div style={{ padding: '18px', fontSize: 13, color: '#9CA3AF' }}>No payment records yet.</div>
+          )}
           {PAYMENTS.map((p, i) => (
             <div key={p.id} style={{
               display: 'flex', alignItems: 'center', gap: 14,

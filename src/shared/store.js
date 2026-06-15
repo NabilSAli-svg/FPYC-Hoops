@@ -454,6 +454,10 @@ export function useMessages() {
   return useSupabaseTable('messages', INITIAL_MESSAGES);
 }
 
+export function usePayments() {
+  return useSupabaseTable('payments', []);
+}
+
 // ─── Draft Board ──────────────────────────────────────────────────────────────
 
 export const DRAFT_PLAYERS = [
