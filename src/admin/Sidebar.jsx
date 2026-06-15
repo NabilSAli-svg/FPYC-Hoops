@@ -21,7 +21,9 @@ const SECONDARY = [
   { id: 'settings',  icon: 'settings', label: 'Settings'   },
 ];
 
-export default function Sidebar({ active, onNav, team, sport, onSportChange, isMobile, sidebarOpen, onClose, role }) {
+export default function Sidebar({ active, onNav, team, sport, onSportChange, isMobile, sidebarOpen, onClose, role, profile }) {
+  const displayName = profile?.parent_name || profile?.first_name || profile?.email || 'Coach';
+  const roleLabel = role === 'commissioner' ? 'Commissioner' : 'Volunteer Coach';
   const activeSport = SPORTS.find(s => s.id === sport) || SPORTS[0];
   const secondaryItems = role === 'coach'
     ? SECONDARY.filter(it => it.id === 'settings')
@@ -133,10 +135,10 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
 
       {/* Coach footer */}
       <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <Avatar name="Coach Davis" size={32} color="var(--varsity-gold)" />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 13 }}>Coach M. Davis</div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>Volunteer · 5–6 House</div>
+        <Avatar name={displayName} size={32} color="var(--varsity-gold)" />
+        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+          <div style={{ fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>{roleLabel}</div>
         </div>
         <Icon name="log-out" size={16} color="rgba(255,255,255,0.5)" />
       </div>
