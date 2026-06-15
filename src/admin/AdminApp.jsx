@@ -30,12 +30,16 @@ export default function AdminApp() {
   const isMobile = useIsMobile();
   const [authReady, setAuthReady] = useState(false);
   const [role, setRole] = useState(null); // 'commissioner' | 'coach' | null
+  const [coachTeam, setCoachTeam] = useState(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { setAuthReady(true); return; }
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
-      if (profile?.role === 'commissioner' || profile?.role === 'coach') setRole(profile.role);
+      const { data: profile } = await supabase.from('profiles').select('role, team').eq('id', session.user.id).single();
+      if (profile?.role === 'commissioner' || profile?.role === 'coach') {
+        setRole(profile.role);
+        if (profile.role === 'coach' && profile.team) setCoachTeam(profile.team);
+      }
       setAuthReady(true);
     });
   }, []);
@@ -50,9 +54,18 @@ export default function AdminApp() {
   const [players, setPlayers] = usePlayers();
   const [games, setGames] = useGames();
 
-  const ALL_TEAM_NAMES = TEAM_NAMES_BY_SPORT[sport] || [];
+  // Coaches are locked to their own team — sync sport/team selection once known.
+  useEffect(() => {
+    if (role !== 'coach' || !coachTeam) return;
+    const ti = TEAMS_INFO[coachTeam];
+    if (ti?.sport && ti.sport !== sport) setSport(ti.sport);
+    if (selectedTeamName !== coachTeam) setSelectedTeamName(coachTeam);
+  }, [role, coachTeam]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const ALL_TEAM_NAMES = role === 'coach' && coachTeam ? [coachTeam] : (TEAM_NAMES_BY_SPORT[sport] || []);
 
   function handleSportChange(newSport) {
+    if (role === 'coach') return;
     setSport(newSport);
     setSelectedTeamName(TEAM_NAMES_BY_SPORT[newSport]?.[0] || '');
   }
@@ -134,6 +147,7 @@ export default function AdminApp() {
         isMobile={isMobile}
         sidebarOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        role={role}
       />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <TopBar title={t.title} breadcrumb={t.breadcrumb} action={topAction} onMenuToggle={() => setSidebarOpen(o => !o)} />
