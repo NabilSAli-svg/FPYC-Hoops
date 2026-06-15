@@ -44,6 +44,17 @@ export const TEAMS_INFO = {
 
   'Bucs (12U)':      { id: 'fb-12u-bucs',      name: 'Bucs (12U)',      division: '12U Coed Flag', coach: 'Coach Helmstutler', color: '#C8102E', sport: 'football' },
   'Saints (12U)':    { id: 'fb-12u-saints',    name: 'Saints (12U)',    division: '12U Coed Flag', coach: 'Coach Pollack',      color: '#C8102E', sport: 'football' },
+  'Ravens (12U)':    { id: 'fb-12u-ravens',    name: 'Ravens (12U)',    division: '12U Coed Flag', coach: 'Coach Jeffress',     color: '#C8102E', sport: 'football' },
+  'Commanders (12U)':{ id: 'fb-12u-commanders',name: 'Commanders (12U)',division: '12U Coed Flag', coach: 'Coach Komaily',      color: '#C8102E', sport: 'football' },
+  'Steelers (12U)':  { id: 'fb-12u-steelers',  name: 'Steelers (12U)',  division: '12U Coed Flag', coach: 'Coach Vigna',        color: '#C8102E', sport: 'football' },
+  'Eagles (12U)':    { id: 'fb-12u-eagles',    name: 'Eagles (12U)',    division: '12U Coed Flag', coach: 'Coach Millen',       color: '#C8102E', sport: 'football' },
+
+  'Saints (15U)':    { id: 'fb-15u-saints',    name: 'Saints (15U)',    division: '15U Coed Flag', coach: 'Coach Justin',       color: '#C8102E', sport: 'football' },
+  'Eagles (15U)':    { id: 'fb-15u-eagles',    name: 'Eagles (15U)',    division: '15U Coed Flag', coach: 'Coach Vecchione',    color: '#C8102E', sport: 'football' },
+  'Steelers (15U)':  { id: 'fb-15u-steelers',  name: 'Steelers (15U)',  division: '15U Coed Flag', coach: 'Coach Ruiz',         color: '#C8102E', sport: 'football' },
+  'Ravens (15U)':    { id: 'fb-15u-ravens',    name: 'Ravens (15U)',    division: '15U Coed Flag', coach: 'Coach Bruce',        color: '#C8102E', sport: 'football' },
+  'Bucs (15U)':      { id: 'fb-15u-bucs',      name: 'Bucs (15U)',      division: '15U Coed Flag', coach: 'Coach Whitlock',     color: '#C8102E', sport: 'football' },
+  'Commanders (15U)':{ id: 'fb-15u-commanders',name: 'Commanders (15U)',division: '15U Coed Flag', coach: 'Coach Parish',       color: '#C8102E', sport: 'football' },
 };
 
 
