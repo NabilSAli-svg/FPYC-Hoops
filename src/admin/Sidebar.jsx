@@ -21,8 +21,11 @@ const SECONDARY = [
   { id: 'settings',  icon: 'settings', label: 'Settings'   },
 ];
 
-export default function Sidebar({ active, onNav, team, sport, onSportChange, isMobile, sidebarOpen, onClose }) {
+export default function Sidebar({ active, onNav, team, sport, onSportChange, isMobile, sidebarOpen, onClose, role }) {
   const activeSport = SPORTS.find(s => s.id === sport) || SPORTS[0];
+  const secondaryItems = role === 'coach'
+    ? SECONDARY.filter(it => it.id === 'settings')
+    : SECONDARY;
   const asideStyle = isMobile ? {
     position: 'fixed',
     top: 0,
@@ -73,7 +76,7 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
       </div>
 
       {/* Sport switcher */}
-      <div style={{ display: 'flex', gap: 6, padding: '12px 12px 0' }}>
+      {role !== 'coach' && <div style={{ display: 'flex', gap: 6, padding: '12px 12px 0' }}>
         {SPORTS.map(s => {
           const isActive = s.id === sport;
           return (
@@ -93,7 +96,7 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
             </button>
           );
         })}
-      </div>
+      </div>}
 
       {/* Team switcher */}
       <button style={{
@@ -122,7 +125,7 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
           <NavItem key={it.id} {...it} active={active === it.id} onClick={() => onNav(it.id)} />
         ))}
         <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '10px 8px' }} />
-        {SECONDARY.map(it => (
+        {secondaryItems.map(it => (
           <NavItem key={it.id} {...it} active={active === it.id} onClick={() => onNav(it.id)} />
         ))}
       </nav>
