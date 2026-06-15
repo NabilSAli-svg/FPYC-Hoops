@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
-import { useGames, usePractices, usePlayers, deriveEvents, TEAM_INFO, useAnnouncements, useAttendance } from '../shared/store.js';
+import { useGames, usePractices, deriveEvents, TEAM_INFO, useAnnouncements, useAttendance } from '../shared/store.js';
 
 export default function HomeTab({ family, messages, onTabChange, onAnnouncementsSeen }) {
   const [games]         = useGames();
   const [practices]     = usePractices();
-  const [players]       = usePlayers();
   const [announcements] = useAnnouncements();
   const EVENTS = deriveEvents(games, practices);
   const TEAM = TEAM_INFO;
@@ -54,8 +53,7 @@ export default function HomeTab({ family, messages, onTabChange, onAnnouncements
     ...games.filter(g => g.status === 'final').map(g => ({ id: g.id, type: 'game', label: `${g.month} ${g.date}` })),
     ...practices.map(p => ({ id: p.id, type: 'practice', label: (p.date || '').split(', ')[1] || p.date })),
   ];
-  const player = players.find(p => p.number === child.number);
-  const pid = player?.id;
+  const pid = child.id;
   const attended = pid ? allSessions.filter(s => (attendance[pid]?.[s.id] ?? 'none') === 'present').length : 0;
   const attTotal  = allSessions.length;
   const attPct    = attTotal > 0 ? Math.round((attended / attTotal) * 100) : 0;

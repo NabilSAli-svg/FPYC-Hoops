@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Pill, Button, Icon, Eyebrow, Display, Skeleton } from '../shared/index.js';
-import { usePractices, useAnnouncements } from '../shared/store.js';
-import { useLocalStorage } from '../shared/useLocalStorage.js';
+import { usePractices, useAnnouncements, useAttendance } from '../shared/store.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 
 export default function DashboardView({ team, players, games, onGo }) {
@@ -18,7 +17,11 @@ export default function DashboardView({ team, players, games, onGo }) {
 function DashboardContent({ team, players, games, onGo }) {
   const [practices]     = usePractices();
   const [announcements] = useAnnouncements();
-  const [attendance]    = useLocalStorage('fpyc-attendance', {});
+  const [attendanceRows] = useAttendance();
+  const attendance = {};
+  attendanceRows.forEach(r => {
+    (attendance[r.player_id] ??= {})[r.session_id] = r.status;
+  });
   const isMobile        = useIsMobile();
 
   const next   = games.find(g => g.status === 'scheduled');
