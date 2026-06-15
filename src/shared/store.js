@@ -458,6 +458,10 @@ export function usePayments() {
   return useSupabaseTable('payments', []);
 }
 
+export function useAttendance() {
+  return useSupabaseTable('attendance', []);
+}
+
 // ─── Draft Board ──────────────────────────────────────────────────────────────
 
 export const DRAFT_PLAYERS = [

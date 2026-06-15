@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useLocalStorage } from '../shared/useLocalStorage.js';
+import { useState } from 'react';
 import { Card, Button, Icon, Display, Jersey } from '../shared/index.js';
-import { usePractices, useGames } from '../shared/store.js';
+import { usePractices, useGames, useAttendance } from '../shared/store.js';
 import { csvDownload } from '../shared/csvDownload.js';
 
 const STATUS = {
@@ -12,22 +11,6 @@ const STATUS = {
 };
 
 const CYCLE = ['present', 'absent', 'excused', 'none'];
-
-// Seed keyed to actual store IDs (pr1–pr6, g4–g6)
-const SEED = {
-  p1:  { pr1:'present',pr2:'present',pr3:'present',pr4:'present',pr5:'present',pr6:'none',g4:'present',g5:'present',g6:'present' },
-  p2:  { pr1:'present',pr2:'present',pr3:'present',pr4:'present',pr5:'present',pr6:'none',g4:'present',g5:'present',g6:'present' },
-  p3:  { pr1:'present',pr2:'absent', pr3:'present',pr4:'present',pr5:'present',pr6:'none',g4:'present',g5:'present',g6:'present' },
-  p4:  { pr1:'present',pr2:'present',pr3:'excused',pr4:'present',pr5:'present',pr6:'none',g4:'present',g5:'absent', g6:'present' },
-  p5:  { pr1:'present',pr2:'present',pr3:'present',pr4:'absent', pr5:'present',pr6:'none',g4:'present',g5:'present',g6:'present' },
-  p6:  { pr1:'absent', pr2:'absent', pr3:'present',pr4:'present',pr5:'excused',pr6:'none',g4:'present',g5:'excused',g6:'present' },
-  p7:  { pr1:'present',pr2:'present',pr3:'present',pr4:'present',pr5:'present',pr6:'none',g4:'present',g5:'present',g6:'present' },
-  p8:  { pr1:'present',pr2:'present',pr3:'absent', pr4:'absent', pr5:'present',pr6:'none',g4:'present',g5:'present',g6:'present' },
-  p9:  { pr1:'excused',pr2:'present',pr3:'present',pr4:'present',pr5:'absent', pr6:'none',g4:'present',g5:'present',g6:'present' },
-  p10: { pr1:'present',pr2:'present',pr3:'present',pr4:'present',pr5:'present',pr6:'none',g4:'present',g5:'present',g6:'present' },
-  p11: { pr1:'present',pr2:'absent', pr3:'absent', pr4:'present',pr5:'present',pr6:'none',g4:'present',g5:'absent', g6:'present' },
-  p12: { pr1:'absent', pr2:'absent', pr3:'absent', pr4:'absent', pr5:'absent', pr6:'none',g4:'absent', g5:'absent', g6:'absent'  },
-};
 
 function deriveSessions(games, practices) {
   const gameSessions = games
@@ -41,15 +24,6 @@ function deriveSessions(games, practices) {
       location: p.gym,
     }));
   return [...gameSessions, ...practiceSessions];
-}
-
-function initAttendance(players, sessions) {
-  const map = {};
-  players.forEach(p => {
-    map[p.id] = {};
-    sessions.forEach(s => { map[p.id][s.id] = SEED[p.id]?.[s.id] ?? 'none'; });
-  });
-  return map;
 }
 
 function hasConsecutiveAbsences(pid, sessions, attendance, n = 2) {
@@ -78,41 +52,26 @@ export default function AttendanceView({ players }) {
 
   const allSessions = deriveSessions(games, practices);
 
-  const [attendance, setAttendance] = useLocalStorage(
-    'fpyc-attendance',
-    () => initAttendance(players, allSessions),
-  );
-
-  // Ensure new sessions/players always have entries
-  useEffect(() => {
-    setAttendance(prev => {
-      let changed = false;
-      const next = { ...prev };
-      players.forEach(p => {
-        if (!next[p.id]) { next[p.id] = {}; changed = true; }
-        allSessions.forEach(s => {
-          if (next[p.id][s.id] === undefined) {
-            next[p.id] = { ...next[p.id], [s.id]: SEED[p.id]?.[s.id] ?? 'none' };
-            changed = true;
-          }
-        });
-      });
-      return changed ? next : prev;
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allSessions.length, players.length]);
+  const [rows, setRows] = useAttendance();
+  const attendance = {};
+  rows.forEach(r => {
+    (attendance[r.player_id] ??= {})[r.session_id] = r.status;
+  });
 
   const sessions = filter === 'all' ? allSessions
     : allSessions.filter(s => s.type === filter);
 
   const flagged = players.filter(p => hasConsecutiveAbsences(p.id, allSessions, attendance));
 
-  const toggle = (pid, sid) =>
-    setAttendance(prev => {
-      const cur = prev[pid]?.[sid] ?? 'none';
-      const next = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
-      return { ...prev, [pid]: { ...prev[pid], [sid]: next } };
+  const toggle = (pid, sid) => {
+    const cur = attendance[pid]?.[sid] ?? 'none';
+    const next = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
+    const id = `${pid}_${sid}`;
+    setRows(prev => {
+      const without = prev.filter(r => r.id !== id);
+      return next === 'none' ? without : [...without, { id, player_id: pid, session_id: sid, status: next }];
     });
+  };
 
   const countForSession = (sid, status) =>
     players.filter(p => (attendance[p.id]?.[sid] ?? 'none') === status).length;

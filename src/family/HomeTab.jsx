@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
-import { useGames, usePractices, usePlayers, deriveEvents, TEAM_INFO, useAnnouncements } from '../shared/store.js';
-import { useLocalStorage } from '../shared/useLocalStorage.js';
+import { useGames, usePractices, usePlayers, deriveEvents, TEAM_INFO, useAnnouncements, useAttendance } from '../shared/store.js';
 
 export default function HomeTab({ family, messages, onTabChange, onAnnouncementsSeen }) {
   const [games]         = useGames();
@@ -12,7 +11,11 @@ export default function HomeTab({ family, messages, onTabChange, onAnnouncements
   const EVENTS = deriveEvents(games, practices);
   const TEAM = TEAM_INFO;
 
-  const [attendance] = useLocalStorage('fpyc-attendance', {});
+  const [attendanceRows] = useAttendance();
+  const attendance = {};
+  attendanceRows.forEach(r => {
+    (attendance[r.player_id] ??= {})[r.session_id] = r.status;
+  });
   const [showAllAnnouncements, setShowAllAnnouncements] = useState(false);
 
   const [loading, setLoading] = useState(true);
