@@ -26,6 +26,24 @@ export const TEAMS_INFO = {
   'Training - Advanced':               { id: 'trainadv', name: 'Training - Advanced',               division: 'Training', coach: 'Coach', color: '#374151', sport: 'basketball' },
   'U9 Fairfax FC':  { id: 'soccer-u9',  name: 'U9 Fairfax FC',  division: 'PowerRec U9-U10',  coach: 'Rich Crowder', color: '#1F8A5B', sport: 'soccer' },
   'U12 Fairfax FC': { id: 'soccer-u12', name: 'U12 Fairfax FC', division: 'NCSL Rec U11-U19', coach: 'Coach', color: '#C8102E', sport: 'soccer' },
+
+  // FPYC Flag Football — Spring 2026 (scheduler.leaguelobster.com/2636555/fpyc-flag-football)
+  'Steelers (8U)':   { id: 'fb-8u-steelers',   name: 'Steelers (8U)',   division: '8U Coed Flag',  coach: 'Coach Morris',    color: '#C8102E', sport: 'football' },
+  'Bucs (8U)':       { id: 'fb-8u-bucs',       name: 'Bucs (8U)',       division: '8U Coed Flag',  coach: 'Coach Mueller',   color: '#C8102E', sport: 'football' },
+  'Dolphins (8U)':   { id: 'fb-8u-dolphins',   name: 'Dolphins (8U)',   division: '8U Coed Flag',  coach: 'Coach Townes',    color: '#C8102E', sport: 'football' },
+  'Eagles (8U)':     { id: 'fb-8u-eagles',     name: 'Eagles (8U)',     division: '8U Coed Flag',  coach: 'Coach Fiallo',    color: '#C8102E', sport: 'football' },
+
+  'Dolphins (10U)':  { id: 'fb-10u-dolphins',  name: 'Dolphins (10U)',  division: '10U Coed Flag', coach: 'Coach Pollack',   color: '#C8102E', sport: 'football' },
+  'Broncos (10U)':   { id: 'fb-10u-broncos',   name: 'Broncos (10U)',   division: '10U Coed Flag', coach: 'Coach Greenberg', color: '#C8102E', sport: 'football' },
+  'Commanders (10U)':{ id: 'fb-10u-commanders',name: 'Commanders (10U)',division: '10U Coed Flag', coach: 'Coach Turner',    color: '#C8102E', sport: 'football' },
+  'Saints (10U)':    { id: 'fb-10u-saints',    name: 'Saints (10U)',    division: '10U Coed Flag', coach: 'Coach Rossman',   color: '#C8102E', sport: 'football' },
+  'Ravens (10U)':    { id: 'fb-10u-ravens',    name: 'Ravens (10U)',    division: '10U Coed Flag', coach: 'Coach Ali',       color: '#C8102E', sport: 'football' },
+  'Steelers (10U)':  { id: 'fb-10u-steelers',  name: 'Steelers (10U)',  division: '10U Coed Flag', coach: 'Coach Nehr',      color: '#C8102E', sport: 'football' },
+  'Bucs (10U)':      { id: 'fb-10u-bucs',      name: 'Bucs (10U)',      division: '10U Coed Flag', coach: 'Coach Nishanov',  color: '#C8102E', sport: 'football' },
+  'Eagles (10U)':    { id: 'fb-10u-eagles',    name: 'Eagles (10U)',    division: '10U Coed Flag', coach: 'Coach Vilasi',    color: '#C8102E', sport: 'football' },
+
+  'Bucs (12U)':      { id: 'fb-12u-bucs',      name: 'Bucs (12U)',      division: '12U Coed Flag', coach: 'Coach Helmstutler', color: '#C8102E', sport: 'football' },
+  'Saints (12U)':    { id: 'fb-12u-saints',    name: 'Saints (12U)',    division: '12U Coed Flag', coach: 'Coach Pollack',      color: '#C8102E', sport: 'football' },
 };
 
 
