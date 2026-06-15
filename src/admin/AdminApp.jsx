@@ -36,7 +36,7 @@ export default function AdminApp() {
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { setAuthReady(true); return; }
-      const { data: profile } = await supabase.from('profiles').select('role, team, first_name, parent_name, email').eq('id', session.user.id).single();
+      const { data: profile } = await supabase.from('profiles').select('id, role, team, first_name, parent_name, email, phone').eq('id', session.user.id).single();
       if (profile?.role === 'commissioner' || profile?.role === 'coach') {
         setRole(profile.role);
         setProfile(profile);
@@ -194,7 +194,7 @@ export default function AdminApp() {
           {view === 'draftboard'  && <DraftBoardView />}
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} sport={sport} />}
           {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} sport={sport} />}
-          {view === 'settings'    && <SettingsView />}
+          {view === 'settings'    && <SettingsView profile={profile} role={role} />}
           </ErrorBoundary>
         </div>
       </div>
