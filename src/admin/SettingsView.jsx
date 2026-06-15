@@ -29,7 +29,7 @@ const NOTIF_GROUPS = [
   },
 ];
 
-export default function SettingsView() {
+export default function SettingsView({ profile, role }) {
   const [tab, setTab] = useState('team');
 
   return (
@@ -61,7 +61,7 @@ export default function SettingsView() {
       {tab === 'teams'   && <TeamsTab />}
       {tab === 'coaches' && <CoachesTab />}
       {tab === 'notifs'  && <NotificationsTab />}
-      {tab === 'account' && <AccountTab />}
+      {tab === 'account' && <AccountTab profile={profile} role={role} />}
     </div>
   );
 }
@@ -505,18 +505,26 @@ function NotificationsTab() {
   );
 }
 
-function AccountTab() {
-  const [profile, setProfile] = useState({ name: 'M. Davis', email: 'mdavis@example.com', phone: '(703) 555-0210' });
+function AccountTab({ profile: authProfile, role }) {
+  const [account, setAccount] = useState({
+    name: authProfile?.parent_name || authProfile?.first_name || '',
+    email: authProfile?.email || '',
+    phone: authProfile?.phone || '',
+  });
   const [passwords, setPasswords] = useState({ current: '', next: '' });
   const [saved, setSaved] = useState(false);
 
-  function handleSave() {
+  async function handleSave() {
+    if (authProfile?.id) {
+      await supabase.from('profiles').update({ parent_name: account.name, phone: account.phone }).eq('id', authProfile.id);
+    }
     setSaved(true);
     setPasswords({ current: '', next: '' });
     setTimeout(() => setSaved(false), 2500);
   }
 
-  const initials = profile.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  const roleLabel = role === 'commissioner' ? 'Commissioner' : 'Volunteer Coach';
+  const initials = (account.name || 'Coach').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 520 }}>
@@ -525,14 +533,14 @@ function AccountTab() {
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--varsity-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, color: 'var(--court-navy)' }}>{initials}</div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 18 }}>{profile.name || 'Coach'}</div>
-            <div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>Head Coach · Volunteer · FPYC Season 2025–26</div>
+            <div style={{ fontWeight: 700, fontSize: 18 }}>{account.name || 'Coach'}</div>
+            <div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>{roleLabel} · FPYC Season 2025–26</div>
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <InputField label="Full name" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} />
-          <InputField label="Email" value={profile.email} onChange={e => setProfile(p => ({ ...p, email: e.target.value }))} type="email" />
-          <InputField label="Phone" value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} type="tel" />
+          <InputField label="Full name" value={account.name} onChange={e => setAccount(p => ({ ...p, name: e.target.value }))} />
+          <InputField label="Email" value={account.email} type="email" disabled />
+          <InputField label="Phone" value={account.phone} onChange={e => setAccount(p => ({ ...p, phone: e.target.value }))} type="tel" />
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>Change password</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -583,12 +591,12 @@ function Toggle({ label, on, onToggle, orange }) {
   );
 }
 
-function InputField({ label, value, placeholder, type = 'text', onChange }) {
+function InputField({ label, value, placeholder, type = 'text', onChange, disabled }) {
   return (
     <div>
       <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
-      <input type={type} value={value ?? ''} placeholder={placeholder} onChange={onChange}
-        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--fg)', outline: 'none', background: 'var(--bone)', boxSizing: 'border-box' }} />
+      <input type={type} value={value ?? ''} placeholder={placeholder} onChange={onChange} disabled={disabled}
+        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, color: disabled ? 'var(--fg-muted)' : 'var(--fg)', outline: 'none', background: disabled ? 'var(--border)' : 'var(--bone)', boxSizing: 'border-box', cursor: disabled ? 'not-allowed' : 'text' }} />
     </div>
   );
 }

@@ -12,7 +12,8 @@ create table if not exists public.profiles (
   first_name  text,
   role        text not null default 'family',  -- 'commissioner' | 'coach' | 'family'
   player_id   text,
-  team        text
+  team        text,
+  phone       text
 );
 
 -- Auto-create a profile row on signup
