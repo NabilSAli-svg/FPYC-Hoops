@@ -357,9 +357,9 @@ function RegistrationsTab({ isMobile }) {
   function updateStatus(id, newStatus) {
     const reg = regs.find(r => r.id === id);
     setRegs(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
-    if (reg?.playerId) {
+    if (reg?.player_id) {
       const playerStatus = newStatus === 'approved' ? 'active' : 'pending';
-      setPlayers(prev => prev.map(p => p.id === reg.playerId ? { ...p, status: playerStatus } : p));
+      setPlayers(prev => prev.map(p => p.id === reg.player_id ? { ...p, status: playerStatus } : p));
     }
   }
 

@@ -102,8 +102,8 @@ export default function StepReview({ data, back, isMobile }) {
           paid: true,
           waiver: waiverSigned,
           status: 'pending',
-          playerId: nextId,
-          confirmNum,
+          player_id: nextId,
+          confirm_num: confirmNum,
         }];
       });
 
