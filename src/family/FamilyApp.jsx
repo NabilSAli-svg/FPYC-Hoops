@@ -136,7 +136,7 @@ export default function FamilyApp() {
         .ilike('guardian', authUser.email);
 
       if (matches && matches.length === 1) {
-        await supabase.from('profiles').update({ player_id: matches[0].id }).eq('id', authUser.id);
+        await supabase.from('profiles').update({ player_id: matches[0].id, team: matches[0].team }).eq('id', authUser.id);
         player = matches[0];
       } else if (matches && matches.length > 1) {
         setSiblingCandidates(matches);
@@ -341,7 +341,7 @@ function LinkPlayerScreen({ family, candidates = [], onLinked, onSignOut }) {
     const { data: { user } } = await supabase.auth.getUser();
     const { error: err } = await supabase
       .from('profiles')
-      .update({ player_id: player.id })
+      .update({ player_id: player.id, team: player.team })
       .eq('id', user.id);
     setLinking(false);
     if (err) { setError('Could not link player — try again or contact your commissioner.'); return; }

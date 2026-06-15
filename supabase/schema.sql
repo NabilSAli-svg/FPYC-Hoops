@@ -155,10 +155,27 @@ create policy "profiles_self_update"  on public.profiles for update using (auth.
 create policy "games_read"         on public.games               for select using (auth.role() = 'authenticated');
 create policy "practices_read"     on public.practices           for select using (auth.role() = 'authenticated');
 create policy "announcements_read" on public.announcements       for select using (auth.role() = 'authenticated');
-create policy "players_read"       on public.players             for select using (auth.role() = 'authenticated');
 create policy "assignments_read"   on public.official_assignments for select using (auth.role() = 'authenticated');
-create policy "staff_read"         on public.staff                for select using (auth.role() = 'authenticated');
 create policy "messages_read"      on public.messages              for select using (auth.role() = 'authenticated');
+
+-- Players & staff contain PII (guardian email/phone). Commissioners and coaches
+-- see everyone; families only see rows for their own child's team.
+create or replace function public.is_staff()
+returns boolean language sql security definer as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role in ('commissioner', 'coach')
+  );
+$$;
+
+create policy "players_staff_read"  on public.players for select using (public.is_staff());
+create policy "players_family_read" on public.players for select using (
+  team = (select team from public.profiles where id = auth.uid())
+);
+create policy "staff_staff_read"  on public.staff for select using (public.is_staff());
+create policy "staff_family_read" on public.staff for select using (
+  team = (select team from public.profiles where id = auth.uid())
+);
 
 -- Public read for games/announcements (scoreboard + website are unauthenticated)
 create policy "games_public_read"   on public.games         for select using (true);
