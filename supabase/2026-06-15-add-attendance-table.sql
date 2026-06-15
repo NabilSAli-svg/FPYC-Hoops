@@ -13,6 +13,6 @@ create table if not exists public.attendance (
 alter table public.attendance enable row level security;
 
 create policy "attendance_own_read" on public.attendance for select using (
-  player_id = (select player_id from public.profiles where id = auth.uid())
+  player_id = (select pr.player_id from public.profiles pr where pr.id = auth.uid())
 );
 create policy "attendance_staff_all" on public.attendance for all using (public.is_staff());

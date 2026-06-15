@@ -149,6 +149,20 @@ create table if not exists public.attendance (
   status     text not null      -- present | absent | excused
 );
 
+-- ── Officials (referees) ─────────────────────────────────────────────────────
+
+create table if not exists public.officials (
+  id        text primary key,
+  name      text not null,
+  cert      text,
+  phone     text,
+  email     text,
+  games     int default 0,
+  rate      int default 0,
+  paid      boolean default true,
+  available boolean default true
+);
+
 -- ── Official Assignments ─────────────────────────────────────────────────────
 
 create table if not exists public.official_assignments (
@@ -171,6 +185,7 @@ alter table public.staff                enable row level security;
 alter table public.messages             enable row level security;
 alter table public.payments             enable row level security;
 alter table public.attendance           enable row level security;
+alter table public.officials             enable row level security;
 
 -- Profiles: users see only their own row; commissioner sees all
 create policy "profiles_self_read"    on public.profiles for select using (auth.uid() = id);
@@ -212,9 +227,12 @@ create policy "payments_staff_read" on public.payments for select using (public.
 -- Attendance: families see only their own linked player's records;
 -- commissioners/coaches see and manage all.
 create policy "attendance_own_read" on public.attendance for select using (
-  player_id = (select player_id from public.profiles where id = auth.uid())
+  player_id = (select pr.player_id from public.profiles pr where pr.id = auth.uid())
 );
 create policy "attendance_staff_all" on public.attendance for all using (public.is_staff());
+
+-- Officials: staff (commissioners/coaches) manage the referee roster & payments
+create policy "officials_staff_all" on public.officials for all using (public.is_staff());
 
 -- Public read for games/announcements (scoreboard + website are unauthenticated)
 create policy "games_public_read"   on public.games         for select using (true);

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 import { csvDownload } from '../shared/csvDownload.js';
-import { useGames, useOfficialAssignments } from '../shared/store.js';
+import { useGames, useOfficialAssignments, useOfficials } from '../shared/store.js';
 
 function exportPaymentsCSV(refs) {
   const headers = ['Name', 'Certification', 'Phone', 'Email', 'Games', 'Rate/Game', 'Total Owed', 'Paid'];
@@ -12,16 +12,6 @@ function exportPaymentsCSV(refs) {
   ]);
   csvDownload('fpyc-officials-payments.csv', [headers, ...rows]);
 }
-
-const REFS_INITIAL = [
-  { id: 'r1', name: 'James Park',    cert: 'VBOS Level 2', phone: '(703) 555-0210', email: 'j.park@email.com',     games: 8,  rate: 35, paid: true,  available: true  },
-  { id: 'r2', name: 'Marcus Lee',    cert: 'VBOS Level 2', phone: '(703) 555-0238', email: 'm.lee@email.com',      games: 6,  rate: 35, paid: false, available: true  },
-  { id: 'r3', name: 'Sara Okafor',   cert: 'VBOS Level 1', phone: '(703) 555-0191', email: 's.okafor@email.com',   games: 4,  rate: 28, paid: true,  available: false },
-  { id: 'r4', name: 'Devon Tyler',   cert: 'VBOS Level 1', phone: '(703) 555-0174', email: 'd.tyler@email.com',    games: 5,  rate: 28, paid: false, available: true  },
-  { id: 'r5', name: 'Priya Nair',    cert: 'Provisional',  phone: '(703) 555-0162', email: 'p.nair@email.com',     games: 2,  rate: 22, paid: true,  available: true  },
-  { id: 'r6', name: 'Leon Baptiste', cert: 'VBOS Level 3', phone: '(703) 555-0259', email: 'l.baptiste@email.com', games: 11, rate: 45, paid: false, available: true  },
-];
-
 
 const CERT_COLOR = {
   'VBOS Level 3': 'var(--varsity-gold)',
@@ -40,7 +30,7 @@ function emptyForm() {
 export default function OfficialsView() {
   const isMobile = useIsMobile();
   const [tab, setTab] = useState('dashboard');
-  const [refs, setRefs] = useState(REFS_INITIAL);
+  const [refs, setRefs] = useOfficials();
   const [assignmentMap, setAssignmentMap] = useOfficialAssignments();
   const [games] = useGames();
   const [showAdd, setShowAdd] = useState(false);
