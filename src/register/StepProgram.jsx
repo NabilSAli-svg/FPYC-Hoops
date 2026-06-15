@@ -106,22 +106,61 @@ const SOCCER_PROGRAMS = [
   },
 ];
 
+const FOOTBALL_PROGRAMS = [
+  {
+    id: 'flag',
+    tag: 'Spring season',
+    title: 'Flag Football',
+    price: 185,
+    grades: 'Ages 7–15 (8U/10U/12U/15U Coed)',
+    icon: 'zap',
+    color: 'var(--basketball-orange)',
+    desc: 'Non-contact, recreational, "Everyone Plays" boys & girls flag football. A fun, low-pressure introduction to the game.',
+    details: [
+      { icon: 'calendar', text: 'Spring season (Jan–Mar registration)' },
+      { icon: 'clock', text: 'About 2 hours/week — practices & games mostly Sundays' },
+      { icon: 'map-pin', text: 'Local Fairfax fields' },
+      { icon: 'users', text: 'Coed age groups: 8U, 10U, 12U, 15U' },
+    ],
+    featured: true,
+  },
+  {
+    id: 'tackle',
+    tag: 'Summer/Fall season',
+    title: 'Tackle Football',
+    price: 245,
+    grades: 'Ages 7–14 (NVYFL)',
+    icon: 'shield',
+    color: '#C8102E',
+    desc: 'FPYC Lions tackle football, part of the Northern Virginia Youth Football League (NVYFL). Full-pads competitive league play.',
+    details: [
+      { icon: 'calendar', text: 'Practice starts August, games start mid-September' },
+      { icon: 'target', text: '7-game season + playoffs' },
+      { icon: 'map-pin', text: 'Practice at Draper Drive Park, home games at Fairfax High School' },
+      { icon: 'clipboard-list', text: 'Requires DMV Child ID for weight certification' },
+    ],
+  },
+];
+
 export default function StepProgram({ data, update, next, isMobile }) {
   const selected = data.program;
   const isSoccer = data.sport === 'soccer';
-  const PROGRAMS = isSoccer ? SOCCER_PROGRAMS : BASKETBALL_PROGRAMS;
+  const isFootball = data.sport === 'football';
+  const PROGRAMS = isFootball ? FOOTBALL_PROGRAMS : isSoccer ? SOCCER_PROGRAMS : BASKETBALL_PROGRAMS;
 
   return (
     <div>
       <StepHeader
         eyebrow="Step 2 of 7"
         title="Choose your program"
-        sub={isSoccer
+        sub={isFootball
+          ? "FPYC Lions Football programs are run by volunteer coaches and follow FPYC's sportsmanship values."
+          : isSoccer
           ? 'All FPYC Soccer programs are run by volunteer coaches and follow FPYC\'s sportsmanship values.'
           : "All three programs are run by volunteer coaches and follow FPYC's sportsmanship values."}
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : `repeat(${PROGRAMS.length}, 1fr)`, gap: 16, marginBottom: 32 }}>
         {PROGRAMS.map(p => {
           const isSelected = selected?.id === p.id;
           return (

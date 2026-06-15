@@ -4,6 +4,7 @@ import { StepHeader, ContinueBtn } from './StepProgram.jsx';
 const SPORTS = [
   { id: 'basketball', title: 'Basketball', icon: 'circle-dot', color: 'var(--basketball-orange)', desc: 'House League, Skills Clinic, and Travel Select — Winter season.' },
   { id: 'soccer', title: 'Soccer', icon: 'circle', color: 'var(--court-navy)', desc: 'Mini & Mighty Academy, PowerRec Youth, and NCSL Rec — Spring season.' },
+  { id: 'football', title: 'Football', icon: 'shield', color: '#C8102E', desc: 'Flag Football (Spring) and Tackle Football (Summer/Fall) — FPYC Lions.' },
 ];
 
 export default function StepSport({ data, update, next, isMobile }) {
