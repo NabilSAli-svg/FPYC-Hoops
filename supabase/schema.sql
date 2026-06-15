@@ -212,7 +212,7 @@ create policy "payments_staff_read" on public.payments for select using (public.
 -- Attendance: families see only their own linked player's records;
 -- commissioners/coaches see and manage all.
 create policy "attendance_own_read" on public.attendance for select using (
-  player_id = (select player_id from public.profiles where id = auth.uid())
+  player_id = (select player_id from public.profiles where id::text = auth.uid()::text)
 );
 create policy "attendance_staff_all" on public.attendance for all using (public.is_staff());
 
