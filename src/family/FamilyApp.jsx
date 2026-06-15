@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
 import { useMessages, useGames, useAnnouncements } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
@@ -11,6 +11,20 @@ import MessagesTab from './MessagesTab.jsx';
 import PaymentsTab from './PaymentsTab.jsx';
 import StatsTab from './StatsTab.jsx';
 import BracketTab from './BracketTab.jsx';
+
+async function notifyNewMessage(msg) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const sw = await navigator.serviceWorker?.ready.catch(() => null);
+  if (sw) {
+    sw.showNotification(`🏀 ${msg.from}`, {
+      body: msg.subject || msg.body?.slice(0, 120) || 'New message from your coaching staff',
+      icon: '/assets/logo-fpyc-basketball-v3.png',
+      badge: '/assets/logo-fpyc-basketball-v3.png',
+      tag: `fpyc-msg-${msg.id}`,
+      data: { url: '/family' },
+    });
+  }
+}
 
 async function requestAndNotify(games) {
   if (!('Notification' in window)) return 'unsupported';
@@ -135,6 +149,23 @@ export default function FamilyApp() {
   const [announcements] = useAnnouncements();
   const readIds = new Set(readIdsArr);
   const markRead = (id) => setReadIdsArr(arr => arr.includes(id) ? arr : [...arr, id]);
+
+  const myTeam = family?.child?.team;
+  const myMessages = messages.filter(
+    m => m.target === 'All families' || m.target === myTeam
+  );
+
+  // Notify on newly-arrived messages (e.g. via realtime insert)
+  const prevMsgIds = useRef(null);
+  useEffect(() => {
+    const ids = new Set(myMessages.map(m => m.id));
+    if (prevMsgIds.current) {
+      for (const m of myMessages) {
+        if (m.unread && !prevMsgIds.current.has(m.id)) notifyNewMessage(m);
+      }
+    }
+    prevMsgIds.current = ids;
+  }, [myMessages]); // eslint-disable-line react-hooks/exhaustive-deps
   const markAnnouncementsSeen = (ids) => setSeenAnnIds(arr => {
     const s = new Set(arr);
     ids.forEach(id => s.add(id));
@@ -162,7 +193,7 @@ export default function FamilyApp() {
 
   if (!playerLinked) return <LinkPlayerScreen family={family} onLinked={player => { setFamily(profileToFamily({ ...family, player_id: player.id }, player)); setPlayerLinked(true); }} onSignOut={handleSignOut} />;
 
-  const unread = messages.filter(m => m.unread && !readIds.has(m.id)).length;
+  const unread = myMessages.filter(m => m.unread && !readIds.has(m.id)).length;
 
   // Count unseen announcements relevant to this family
   const seenSet = new Set(seenAnnIds);
@@ -220,12 +251,12 @@ export default function FamilyApp() {
 
       {/* Content */}
       <div style={{ flex: 1, maxWidth: 640, width: '100%', margin: '0 auto', padding: '20px 16px', paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))' }}>
-        {tab === 'home'     && <HomeTab family={family} messages={messages} onTabChange={setTab} onAnnouncementsSeen={markAnnouncementsSeen} />}
+        {tab === 'home'     && <HomeTab family={family} messages={myMessages} onTabChange={setTab} onAnnouncementsSeen={markAnnouncementsSeen} />}
         {tab === 'schedule' && <ScheduleTab familyKey={userKey} childTeam={family.child.team} />}
         {tab === 'stats'    && <StatsTab family={family} />}
         {tab === 'bracket'  && <BracketTab childTeam={family.child.team} />}
         {tab === 'roster'   && <RosterTab family={family} />}
-        {tab === 'messages' && <MessagesTab messages={messages} readIds={readIds} onMarkRead={markRead} />}
+        {tab === 'messages' && <MessagesTab messages={myMessages} readIds={readIds} onMarkRead={markRead} />}
         {tab === 'payments' && <PaymentsTab family={family} />}
       </div>
 

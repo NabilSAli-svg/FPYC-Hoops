@@ -113,6 +113,19 @@ create table if not exists public.staff (
   bg_check_date  text
 );
 
+-- ── Messages (coach/commissioner → families) ────────────────────────────────
+
+create table if not exists public.messages (
+  id      text primary key,
+  "from"  text not null,
+  "time"  text,
+  subject text,
+  body    text,
+  target  text default 'All families',  -- 'All families' or a team name
+  unread  boolean default true,
+  created_at timestamptz default now()
+);
+
 -- ── Official Assignments ─────────────────────────────────────────────────────
 
 create table if not exists public.official_assignments (
@@ -132,6 +145,7 @@ alter table public.practices            enable row level security;
 alter table public.announcements        enable row level security;
 alter table public.official_assignments enable row level security;
 alter table public.staff                enable row level security;
+alter table public.messages             enable row level security;
 
 -- Profiles: users see only their own row; commissioner sees all
 create policy "profiles_self_read"    on public.profiles for select using (auth.uid() = id);
@@ -144,6 +158,7 @@ create policy "announcements_read" on public.announcements       for select usin
 create policy "players_read"       on public.players             for select using (auth.role() = 'authenticated');
 create policy "assignments_read"   on public.official_assignments for select using (auth.role() = 'authenticated');
 create policy "staff_read"         on public.staff                for select using (auth.role() = 'authenticated');
+create policy "messages_read"      on public.messages              for select using (auth.role() = 'authenticated');
 
 -- Public read for games/announcements (scoreboard + website are unauthenticated)
 create policy "games_public_read"   on public.games         for select using (true);
@@ -164,6 +179,7 @@ create policy "ann_commissioner_write"      on public.announcements       for al
 create policy "players_commissioner_write"  on public.players             for all using (public.is_commissioner());
 create policy "assignments_commissioner_write" on public.official_assignments for all using (public.is_commissioner());
 create policy "staff_commissioner_write"    on public.staff               for all using (public.is_commissioner());
+create policy "messages_commissioner_write" on public.messages             for all using (public.is_commissioner());
 create policy "profiles_commissioner_read"  on public.profiles            for select using (public.is_commissioner());
 create policy "profiles_commissioner_write" on public.profiles            for update using (public.is_commissioner());
 
