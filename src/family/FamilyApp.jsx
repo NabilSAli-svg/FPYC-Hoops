@@ -64,6 +64,7 @@ function profileToFamily(profile, player) {
     firstName:  profile.first_name  || (profile.parent_name || profile.email).split(' ')[0],
     email:      profile.email,
     child: player ? {
+      id:       player.id,
       name:     player.name,
       number:   player.number,
       position: player.position || 'Player',
