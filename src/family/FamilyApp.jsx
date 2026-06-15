@@ -80,6 +80,7 @@ export default function FamilyApp() {
   const [family, setFamily] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [playerLinked, setPlayerLinked] = useState(true);
+  const [siblingCandidates, setSiblingCandidates] = useState([]);
   const [tab, setTab] = useState('home');
   const [userKey, setUserKey] = useState(null);
 
@@ -127,6 +128,19 @@ export default function FamilyApp() {
     if (profile.player_id) {
       const { data } = await supabase.from('players').select('*').eq('id', profile.player_id).single();
       player = data;
+    } else {
+      // Try to auto-match this account's email against a player's guardian email
+      const { data: matches } = await supabase
+        .from('players')
+        .select('*')
+        .ilike('guardian', authUser.email);
+
+      if (matches && matches.length === 1) {
+        await supabase.from('profiles').update({ player_id: matches[0].id }).eq('id', authUser.id);
+        player = matches[0];
+      } else if (matches && matches.length > 1) {
+        setSiblingCandidates(matches);
+      }
     }
 
     setPlayerLinked(!!player);
@@ -191,7 +205,7 @@ export default function FamilyApp() {
 
   if (!family) return <FamilyLogin />;
 
-  if (!playerLinked) return <LinkPlayerScreen family={family} onLinked={player => { setFamily(profileToFamily({ ...family, player_id: player.id }, player)); setPlayerLinked(true); }} onSignOut={handleSignOut} />;
+  if (!playerLinked) return <LinkPlayerScreen family={family} candidates={siblingCandidates} onLinked={player => { setFamily(profileToFamily({ ...family, player_id: player.id }, player)); setPlayerLinked(true); }} onSignOut={handleSignOut} />;
 
   const unread = myMessages.filter(m => m.unread && !readIds.has(m.id)).length;
 
@@ -302,7 +316,7 @@ export default function FamilyApp() {
 // ── Link Player Screen ────────────────────────────────────────────────────────
 // Shown after sign-up when no player is linked to the account yet.
 
-function LinkPlayerScreen({ family, onLinked, onSignOut }) {
+function LinkPlayerScreen({ family, candidates = [], onLinked, onSignOut }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -342,6 +356,34 @@ function LinkPlayerScreen({ family, onLinked, onSignOut }) {
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', textTransform: 'uppercase' }}>Find your player</div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 6 }}>Search by your child's name to link their roster spot to your account.</div>
         </div>
+
+        {candidates.length > 0 && (
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 20px 60px rgba(0,0,0,0.35)', marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--court-navy)', marginBottom: 4 }}>We found these players linked to your email</div>
+            <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14 }}>Select your child below, or search for a different player.</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {candidates.map(p => (
+                <button key={p.id} onClick={() => linkPlayer(p)} disabled={linking} style={{
+                  all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '10px 12px', borderRadius: 10, border: '1.5px solid #E2E5EA',
+                  background: '#F9FAFB', transition: 'border-color 120ms',
+                }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--court-navy)'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = '#E2E5EA'}
+                >
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--varsity-gold)', flexShrink: 0 }}>
+                    {p.number}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--court-navy)' }}>{p.name}</div>
+                    <div style={{ fontSize: 12, color: '#9CA3AF' }}>{p.team} · {p.grade} · {p.position}</div>
+                  </div>
+                  <Icon name="arrow-right" size={14} color="#9CA3AF" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 20px 60px rgba(0,0,0,0.35)' }}>
           <div style={{ position: 'relative', marginBottom: 16 }}>
