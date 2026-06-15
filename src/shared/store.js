@@ -462,6 +462,10 @@ export function useAttendance() {
   return useSupabaseTable('attendance', []);
 }
 
+export function useOfficials() {
+  return useSupabaseTable('officials', []);
+}
+
 // ─── Draft Board ──────────────────────────────────────────────────────────────
 
 export const DRAFT_PLAYERS = [
