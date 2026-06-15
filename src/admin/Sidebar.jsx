@@ -82,17 +82,18 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
           return (
             <button key={s.id} onClick={() => onSportChange?.(s.id)} style={{
               flex: 1,
-              padding: '8px 6px',
+              minWidth: 0,
+              padding: '8px 4px',
               borderRadius: 8,
               border: `1px solid ${isActive ? 'var(--varsity-gold)' : 'rgba(255,255,255,0.10)'}`,
               background: isActive ? 'rgba(255,199,44,0.12)' : 'rgba(255,255,255,0.04)',
               color: isActive ? '#fff' : 'rgba(255,255,255,0.7)',
-              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-              cursor: 'pointer',
+              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+              cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
             }}>
-              <Icon name={s.icon} size={14} />
-              {s.label}
+              <Icon name={s.icon} size={13} style={{ flexShrink: 0 }} />
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.label}</span>
             </button>
           );
         })}
