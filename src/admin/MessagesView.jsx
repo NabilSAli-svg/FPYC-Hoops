@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Button, Icon, Display, Pill, Avatar, EmptyState, Skeleton } from '../shared/index.js';
-import { useMessages, usePlayers, TEAM_INFO } from '../shared/store.js';
+import { useMessages, usePlayers, useStaff, TEAM_INFO } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
 
 const NOTIFICATIONS = [
@@ -26,6 +26,7 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed })
 
   const [messages, setMessages] = useMessages();
   const [players] = usePlayers();
+  const [staff] = useStaff();
   const [tab, setTab] = useState('inbox');
   const sorted = [...messages].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
   const [selected, setSelected] = useState(null);
@@ -223,7 +224,7 @@ function ComposeModal({ channel, players, sending, onClose, onSend }) {
           <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><Icon name="x" size={20} color="var(--fg-muted)" /></button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <RecipientField channel={channel} players={players} onChange={setRecipients} />
+          <RecipientField channel={channel} players={players} staff={staff} onChange={setRecipients} />
           {isEmail && <div>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subject</div>
             <input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Subject line…" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, outline: 'none', background: 'var(--bone)', boxSizing: 'border-box' }} />
@@ -299,35 +300,40 @@ function MessagesSkeleton({ tab, setTab }) {
   );
 }
 
-function RecipientField({ channel, players, onChange }) {
+function RecipientField({ channel, players, staff, onChange }) {
   const teamPlayers = players.filter(p => p.team === TEAM_INFO.name);
   const activePlayers = teamPlayers.filter(p => p.status === 'active');
+  const teamStaff = (staff || []).filter(s => s.team === TEAM_INFO.name);
 
-  const field = channel === 'email' ? 'guardian' : 'phone';
-  const valueOf = p => (p[field] || '').trim();
+  const playerField = channel === 'email' ? 'guardian' : 'phone';
+  const staffField = channel === 'email' ? 'email' : 'phone';
+  const valueOfPlayer = p => (p[playerField] || '').trim();
+  const valueOfStaff = s => (s[staffField] || '').trim();
 
   const groups = [
-    { id: 'team', label: `Entire team (${teamPlayers.length})`, players: teamPlayers },
+    { id: 'team',   label: `Entire team (${teamPlayers.length})`,        players: teamPlayers },
     { id: 'active', label: `Active players only (${activePlayers.length})`, players: activePlayers },
   ];
 
   const [selectedId, setSelectedId] = useState('team');
+  const [includeStaff, setIncludeStaff] = useState(false);
 
   useEffect(() => {
     const group = groups.find(g => g.id === selectedId) || groups[0];
-    const recipients = [...new Set(group.players.map(valueOf).filter(Boolean))];
-    onChange(recipients);
+    const playerEmails = group.players.map(valueOfPlayer).filter(Boolean);
+    const staffEmails = includeStaff ? teamStaff.map(valueOfStaff).filter(Boolean) : [];
+    onChange([...new Set([...playerEmails, ...staffEmails])]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId, players, channel]);
+  }, [selectedId, players, staff, channel, includeStaff]);
 
-  const recipientCount = (groups.find(g => g.id === selectedId) || groups[0]).players.filter(p => valueOf(p)).length;
-  const totalCount = (groups.find(g => g.id === selectedId) || groups[0]).players.length;
-  const missing = totalCount - recipientCount;
+  const group = groups.find(g => g.id === selectedId) || groups[0];
+  const missing = group.players.filter(p => !valueOfPlayer(p)).length;
+  const staffMissing = includeStaff ? teamStaff.filter(s => !valueOfStaff(s)).length : 0;
 
   return (
     <div>
       <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>To</div>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
         {groups.map(g => (
           <button key={g.id} onClick={() => setSelectedId(g.id)} style={{
             padding: '7px 12px', borderRadius: 999, border: '1px solid var(--border)', cursor: 'pointer',
@@ -336,9 +342,21 @@ function RecipientField({ channel, players, onChange }) {
           }}>{g.label}</button>
         ))}
       </div>
-      {missing > 0 && (
+      {/* Staff toggle */}
+      <button onClick={() => setIncludeStaff(v => !v)} style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px',
+        borderRadius: 999, border: `1px solid ${includeStaff ? 'var(--basketball-orange)' : 'var(--border)'}`,
+        background: includeStaff ? 'rgba(234,88,12,0.08)' : 'var(--bone)',
+        cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12,
+        color: includeStaff ? 'var(--basketball-orange)' : 'var(--fg)',
+      }}>
+        <Icon name={includeStaff ? 'check-square' : 'square'} size={14} color={includeStaff ? 'var(--basketball-orange)' : 'var(--fg-muted)'} />
+        Include staff / coaches ({teamStaff.length})
+      </button>
+      {(missing > 0 || staffMissing > 0) && (
         <div style={{ marginTop: 8, fontSize: 12, color: 'var(--status-warning)' }}>
-          {missing} guardian{missing === 1 ? '' : 's'} missing a {channel === 'email' ? 'email address' : 'phone number'} and won't receive this message.
+          {missing > 0 && <div>⚠ {missing} guardian{missing === 1 ? '' : 's'} missing a {channel === 'email' ? 'guardian email' : 'phone number'}.</div>}
+          {staffMissing > 0 && <div>⚠ {staffMissing} staff member{staffMissing === 1 ? '' : 's'} missing a {channel === 'email' ? 'staff email' : 'phone number'}.</div>}
         </div>
       )}
     </div>
