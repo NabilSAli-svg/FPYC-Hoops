@@ -231,13 +231,15 @@ function TeamsTab() {
   );
 }
 
+const ALL_TEAM_OPTIONS = Object.keys(TEAMS_INFO);
+
 function CoachesTab() {
   const [staff] = useStaff();
   const [profiles, setProfiles] = useState({});
   const [busyEmail, setBusyEmail] = useState(null);
 
   useEffect(() => {
-    supabase.from('profiles').select('id,email,role').then(({ data, error }) => {
+    supabase.from('profiles').select('id,email,role,team').then(({ data, error }) => {
       if (error) { console.error('[supabase] fetch profiles:', error.message); return; }
       const map = {};
       (data || []).forEach(p => { map[(p.email || '').toLowerCase()] = p; });
@@ -245,27 +247,26 @@ function CoachesTab() {
     });
   }, []);
 
-  // Group staff rows by email — same person can appear once per team.
+  // Group staff by email; coaches with no email get a unique key per id.
   const people = [];
-  const byEmail = new Map();
+  const seen = new Map();
   for (const s of staff) {
-    const key = (s.email || '').toLowerCase();
-    if (byEmail.has(key)) {
-      const existing = byEmail.get(key);
+    const key = s.email ? s.email.toLowerCase() : `__noemail__${s.id}`;
+    if (seen.has(key)) {
+      const existing = seen.get(key);
       if (!existing.roles.includes(s.role)) existing.roles.push(s.role);
       if (s.team && !existing.teams.includes(s.team)) existing.teams.push(s.team);
     } else {
-      const entry = { name: s.name, email: s.email, phone: s.phone, roles: [s.role], teams: s.team ? [s.team] : [] };
-      byEmail.set(key, entry);
+      const entry = { id: s.id, name: s.name, email: s.email || '', phone: s.phone, roles: [s.role], teams: s.team ? [s.team] : [], program: s.program };
+      seen.set(key, entry);
       people.push(entry);
     }
   }
 
-  async function toggleAdmin(email) {
+  async function setCoachRole(email, newRole) {
     const key = email.toLowerCase();
     const profile = profiles[key];
     if (!profile) return;
-    const newRole = profile.role === 'commissioner' ? 'coach' : 'commissioner';
     setBusyEmail(key);
     const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', profile.id);
     if (error) {
@@ -276,80 +277,138 @@ function CoachesTab() {
     setBusyEmail(null);
   }
 
+  async function setCoachTeam(email, team) {
+    const key = email.toLowerCase();
+    const profile = profiles[key];
+    if (!profile) return;
+    const { error } = await supabase.from('profiles').update({ team, role: 'coach' }).eq('id', profile.id);
+    if (error) {
+      console.error('[supabase] update profile team:', error.message);
+    } else {
+      setProfiles(p => ({ ...p, [key]: { ...profile, team, role: 'coach' } }));
+    }
+  }
+
+  const PROGRAM_ORDER = ['Recreation', 'Select', 'Training'];
+  const grouped = PROGRAM_ORDER.map(prog => ({
+    label: prog,
+    rows: people.filter(p => p.program === prog),
+  })).filter(g => g.rows.length > 0);
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div>
         <Display size={22}>Coaches & staff</Display>
         <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>
-          From the active roster — {people.length} {people.length === 1 ? 'person' : 'people'}. Admin access controls who can edit league-wide settings.
+          Manage coach app access and team assignments. Coaches log in at /admin with their email and password.
         </div>
       </div>
 
-      <Card padding={0}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: `220px 1fr 160px 140px`,
-          padding: '10px 18px',
-          background: 'var(--bone)',
-          borderBottom: '1px solid var(--border)',
-          fontSize: 10, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700, gap: 8,
-        }}>
-          <div>Name</div>
-          <div>Role & team</div>
-          <div>Account</div>
-          <div style={{ textAlign: 'center' }}>Admin access</div>
-        </div>
-
-        {people.map((person, i) => {
-          const key = (person.email || '').toLowerCase();
-          const profile = profiles[key];
-          const isAdmin = profile?.role === 'commissioner';
-          return (
-            <div key={key || i} style={{
+      {grouped.map(group => (
+        <div key={group.label}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', marginBottom: 8 }}>{group.label}</div>
+          <Card padding={0}>
+            <div style={{
               display: 'grid',
-              gridTemplateColumns: `220px 1fr 160px 140px`,
-              padding: '14px 18px',
-              borderBottom: i < people.length - 1 ? '1px solid var(--border)' : 'none',
-              alignItems: 'center', gap: 8,
+              gridTemplateColumns: `220px 1fr 180px 120px 80px`,
+              padding: '10px 18px',
+              background: 'var(--bone)',
+              borderBottom: '1px solid var(--border)',
+              fontSize: 10, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700, gap: 8,
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Avatar name={person.name} size={32} />
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 13 }}>{person.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{person.email}</div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {person.roles.map(r => <Pill key={r} kind="neutral">{r}</Pill>)}
-                {person.teams.map(t => <Pill key={t} kind="navy">{t}</Pill>)}
-              </div>
-              <div>
-                {profile
-                  ? <Pill kind={isAdmin ? 'gold' : 'neutral'}>{isAdmin ? 'admin' : profile.role}</Pill>
-                  : <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>No account yet</span>}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <button
-                  onClick={() => toggleAdmin(person.email)}
-                  disabled={!profile || busyEmail === key}
-                  title={profile ? `${isAdmin ? 'Revoke' : 'Grant'} admin access` : 'User must create an account first'}
-                  style={{
-                    width: 32, height: 32, borderRadius: 8, border: 'none',
-                    cursor: (!profile || busyEmail === key) ? 'default' : 'pointer',
-                    background: isAdmin ? 'rgba(31,138,91,0.12)' : 'var(--bone)',
-                    color: isAdmin ? 'var(--status-win)' : 'var(--fg-muted)',
-                    opacity: profile ? 1 : 0.4,
-                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    transition: 'all 120ms',
-                  }}
-                >
-                  <Icon name={isAdmin ? 'check' : 'minus'} size={14} />
-                </button>
-              </div>
+              <div>Name</div>
+              <div>Role & teams</div>
+              <div>Assigned team</div>
+              <div>Account</div>
+              <div style={{ textAlign: 'center' }}>Admin</div>
             </div>
-          );
-        })}
-      </Card>
+
+            {group.rows.map((person, i) => {
+              const key = person.email ? person.email.toLowerCase() : `__noemail__${person.id}`;
+              const profile = person.email ? profiles[person.email.toLowerCase()] : null;
+              const isAdmin = profile?.role === 'commissioner';
+              const isCoach = profile?.role === 'coach';
+              const hasAccess = isAdmin || isCoach;
+              return (
+                <div key={key} style={{
+                  display: 'grid',
+                  gridTemplateColumns: `220px 1fr 180px 120px 80px`,
+                  padding: '14px 18px',
+                  borderBottom: i < group.rows.length - 1 ? '1px solid var(--border)' : 'none',
+                  alignItems: 'center', gap: 8,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Avatar name={person.name} size={32} />
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 13 }}>{person.name}</div>
+                      <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{person.email || <span style={{ fontStyle: 'italic' }}>no email</span>}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {person.roles.map(r => <Pill key={r} kind="neutral">{r}</Pill>)}
+                    {person.teams.map(t => <Pill key={t} kind="navy">{t}</Pill>)}
+                  </div>
+
+                  {/* Team assignment dropdown — only meaningful if they have/will have coach access */}
+                  <div>
+                    {profile && !isAdmin ? (
+                      <select
+                        value={profile.team || ''}
+                        onChange={e => setCoachTeam(person.email, e.target.value)}
+                        style={{ fontSize: 12, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--fg)', width: '100%' }}
+                      >
+                        <option value="">— unassigned —</option>
+                        {ALL_TEAM_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    ) : profile && isAdmin ? (
+                      <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>All teams</span>
+                    ) : (
+                      <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>—</span>
+                    )}
+                  </div>
+
+                  <div>
+                    {profile
+                      ? <Pill kind={isAdmin ? 'gold' : hasAccess ? 'navy' : 'neutral'}>{isAdmin ? 'admin' : isCoach ? 'coach' : profile.role}</Pill>
+                      : <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>{person.email ? 'No account' : 'Needs email'}</span>}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    {isAdmin ? (
+                      <button
+                        onClick={() => setCoachRole(person.email, 'coach')}
+                        disabled={busyEmail === key}
+                        title="Revoke admin — demote to coach"
+                        style={{ width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'rgba(31,138,91,0.12)', color: 'var(--status-win)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        <Icon name="check" size={14} />
+                      </button>
+                    ) : isCoach ? (
+                      <button
+                        onClick={() => setCoachRole(person.email, 'commissioner')}
+                        disabled={busyEmail === key}
+                        title="Promote to admin"
+                        style={{ width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'rgba(59,130,246,0.12)', color: '#3b82f6', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        <Icon name="chevron-up" size={14} />
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        title={person.email ? 'No account yet — coach must sign up first' : 'Add an email address to enable login'}
+                        style={{ width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'default', background: 'var(--bone)', color: 'var(--fg-muted)', opacity: 0.4, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        <Icon name="minus" size={14} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </Card>
+        </div>
+      ))}
     </div>
   );
 }
