@@ -27,7 +27,7 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
   const roleLabel = role === 'commissioner' ? 'Commissioner' : 'Volunteer Coach';
   const activeSport = SPORTS.find(s => s.id === sport) || SPORTS[0];
   const secondaryItems = role === 'coach'
-    ? SECONDARY.filter(it => it.id === 'settings')
+    ? SECONDARY.filter(it => ['scheduler', 'settings'].includes(it.id))
     : SECONDARY;
   const asideStyle = isMobile ? {
     position: 'fixed',
