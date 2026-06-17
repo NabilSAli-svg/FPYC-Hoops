@@ -2,6 +2,12 @@
 -- Mon/Wed/Fri · 8 weeks (Jun 15–Aug 7)
 -- Week 1: Providence ES · Weeks 2–8: KJMS #1 & #2
 
+-- Remove old placeholder practices (rec-team placeholders loaded before real data)
+delete from public.practices
+where id like 'pdb%' or id like 'pda%'
+   or team in ('Rising 2nd-3rd Boys','Girls 3v3 (2nd-8th)','Rising 4th-5th Boys','Rising 6th-8th Boys')
+      and id not like 'g%';
+
 insert into public.practices (id, date, time, gym, type, rsvp, notes, team) values
 -- Week 1 — Providence ES
 ('ts_ab5_1',  'Mon, Jun 15','6:00-7:30 PM','Providence ES','Practice',0,'','Aidris B5'),
