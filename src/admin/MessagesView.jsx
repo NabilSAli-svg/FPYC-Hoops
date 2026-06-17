@@ -17,7 +17,7 @@ const NOTIF_COLORS = {
   success: { color: 'var(--status-win)',     bg: 'rgba(31,138,91,0.08)' },
 };
 
-export default function MessagesView({ autoCompose = false, onAutoComposeUsed }) {
+export default function MessagesView({ autoCompose = false, onAutoComposeUsed, teamName }) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 700);
@@ -173,7 +173,7 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed })
         </div>
       )}
 
-      {showCompose && <ComposeModal channel={composeChannel} players={players} sending={sending} onClose={handleCloseCompose} onSend={handleSend} />}
+      {showCompose && <ComposeModal channel={composeChannel} players={players} staff={staff} teamName={teamName} sending={sending} onClose={handleCloseCompose} onSend={handleSend} />}
 
       {sentToast && (
         <div style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', background: 'var(--court-navy)', color: '#fff', padding: '12px 24px', borderRadius: 999, fontWeight: 700, fontSize: 14, boxShadow: '0 8px 24px rgba(0,0,0,0.25)', display: 'flex', alignItems: 'center', gap: 8, zIndex: 300 }}>
@@ -208,7 +208,7 @@ function NotificationsPanel() {
   );
 }
 
-function ComposeModal({ channel, players, sending, onClose, onSend }) {
+function ComposeModal({ channel, players, staff, teamName, sending, onClose, onSend }) {
   const isEmail = channel === 'email';
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
@@ -224,7 +224,7 @@ function ComposeModal({ channel, players, sending, onClose, onSend }) {
           <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}><Icon name="x" size={20} color="var(--fg-muted)" /></button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <RecipientField channel={channel} players={players} staff={staff} onChange={setRecipients} />
+          <RecipientField channel={channel} players={players} staff={staff} teamName={teamName} onChange={setRecipients} />
           {isEmail && <div>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg-soft)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Subject</div>
             <input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Subject line…" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 14, outline: 'none', background: 'var(--bone)', boxSizing: 'border-box' }} />
@@ -300,10 +300,11 @@ function MessagesSkeleton({ tab, setTab }) {
   );
 }
 
-function RecipientField({ channel, players, staff, onChange }) {
-  const teamPlayers = players.filter(p => p.team === TEAM_INFO.name);
+function RecipientField({ channel, players, staff, teamName, onChange }) {
+  const team = teamName || TEAM_INFO.name;
+  const teamPlayers = players.filter(p => p.team === team);
   const activePlayers = teamPlayers.filter(p => p.status === 'active');
-  const teamStaff = (staff || []).filter(s => s.team === TEAM_INFO.name);
+  const teamStaff = (staff || []).filter(s => s.team === team);
 
   const playerField = channel === 'email' ? 'guardian' : 'phone';
   const staffField = channel === 'email' ? 'email' : 'phone';
