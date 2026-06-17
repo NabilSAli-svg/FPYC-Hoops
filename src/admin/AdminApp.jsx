@@ -196,7 +196,7 @@ export default function AdminApp() {
           {view === 'draftboard'  && <DraftBoardView />}
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} sport={sport} />}
           {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} sport={sport} />}
-          {view === 'scheduler'   && <MasterSchedulerView />}
+          {view === 'scheduler'   && <MasterSchedulerView role={role} coachTeam={coachTeam} />}
           {view === 'settings'    && <SettingsView profile={profile} role={role} />}
           </ErrorBoundary>
         </div>
