@@ -33,7 +33,7 @@ const TEAMS = [...Object.keys(TEAMS_INFO), 'Unassigned'];
 const STATUS_KIND = { active: 'navy', pending: 'warn', neutral: 'neutral' };
 
 function emptyForm(sport) {
-  return { firstName: '', lastName: '', number: '', grade: '5th', position: (POSITIONS_BY_SPORT[sport] || POSITIONS_BY_SPORT.basketball)[0], school: '', guardian: '', phone: '', status: 'active', waiver: false, program: 'Recreation', division: '3v3 Summer Cup', team: TEAMS[0] };
+  return { firstName: '', lastName: '', number: '', grade: '5th', position: (POSITIONS_BY_SPORT[sport] || POSITIONS_BY_SPORT.basketball)[0], school: '', guardian: '', email: '', phone: '', status: 'active', waiver: false, program: 'Recreation', division: '3v3 Summer Cup', team: TEAMS[0] };
 }
 
 function exportRosterCSV(players) {
@@ -118,6 +118,7 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
       position: p.position,
       school: p.school || '',
       guardian: p.guardian || '',
+      email: p.email || '',
       phone: p.phone || '',
       status: p.status,
       waiver: p.waiver,
@@ -139,10 +140,11 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
     const e = {};
     if (!form.firstName.trim()) e.firstName = 'Required';
     if (!form.lastName.trim()) e.lastName = 'Required';
-    if (!form.number || isNaN(parseInt(form.number))) e.number = 'Required';
-    const num = parseInt(form.number, 10);
-    const taken = players.find(p => p.number === num && (!modal?.player || p.id !== modal.player.id));
-    if (taken) e.number = `#${num} is already taken by ${taken.name}`;
+    if (form.number !== '' && !isNaN(parseInt(form.number))) {
+      const num = parseInt(form.number, 10);
+      const taken = players.find(p => p.number === num && (!modal?.player || p.id !== modal.player.id));
+      if (taken) e.number = `#${num} is already taken by ${taken.name}`;
+    }
     return e;
   }
 
@@ -152,12 +154,13 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
 
     const updated = {
       id: modal.mode === 'edit' ? modal.player.id : 'p' + Date.now(),
-      number: parseInt(form.number, 10),
+      number: form.number !== '' && !isNaN(parseInt(form.number)) ? parseInt(form.number, 10) : null,
       name: `${form.firstName.trim()} ${form.lastName.trim()}`,
       grade: form.grade,
       position: form.position,
       school: form.school,
       guardian: form.guardian,
+      email: form.email,
       phone: form.phone,
       status: form.status,
       waiver: form.waiver,
@@ -329,8 +332,8 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
               <F label="Last name" required error={errors.lastName}>
                 <input value={form.lastName} onChange={e => set('lastName', e.target.value)} placeholder="Last name" style={inputStyle(errors.lastName)} />
               </F>
-              <F label={numberLabel} required error={errors.number}>
-                <input type="number" min="0" max="99" value={form.number} onChange={e => set('number', e.target.value)} placeholder="e.g. 23" style={inputStyle(errors.number)} />
+              <F label={numberLabel} error={errors.number}>
+                <input type="number" min="0" max="99" value={form.number} onChange={e => set('number', e.target.value)} placeholder="Optional" style={inputStyle(errors.number)} />
               </F>
               <F label="Grade">
                 <select value={form.grade} onChange={e => set('grade', e.target.value)} style={inputStyle()}>
@@ -350,6 +353,9 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
               </F>
               <F label="Guardian name">
                 <input value={form.guardian} onChange={e => set('guardian', e.target.value)} placeholder="e.g. A. Reeves" style={inputStyle()} />
+              </F>
+              <F label="Guardian email">
+                <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="parent@email.com" style={inputStyle()} />
               </F>
               <F label="Guardian phone">
                 <input value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="(703) 555-0000" style={inputStyle()} />
