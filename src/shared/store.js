@@ -638,6 +638,15 @@ export const INITIAL_STAFF = [
   { id: 'st10', name: "Adam Schrecengost", role: "Assistant Coach", program: 'Recreation', team: "Girls 3v3 (2nd-8th)", email: "schreckdc@gmail.com", phone: "(202)937-5119", bgCheckStatus: "Not Started", bgCheckDate: '' },
   { id: 'st11', name: "Dale Van Wagner", role: "Assistant Coach", program: 'Recreation', team: "Rising 6th-8th Boys", email: "dale.vanwagner@gmail.com", phone: "(215) 499-5165", bgCheckStatus: "Not Started", bgCheckDate: '' },
   { id: 'st12', name: "Kesara Liyanage", role: "Coach", program: 'Recreation', team: "Rising 4th-5th Boys", email: "kliyanage30@gmail.com", phone: "", bgCheckStatus: "Not Started", bgCheckDate: '' },
+  // Travel Select coaches — Summer 2026
+  // Travel Select coaches — Summer 2026
+  { id: 'ts_c1', name: "Coach Aidris",  role: "Head Coach", program: 'Travel Select', team: "Aidris B5",   email: "", phone: "", bgCheckStatus: "Not Started", bgCheckDate: '' },
+  { id: 'ts_c2', name: "Coach Tom",     role: "Head Coach", program: 'Travel Select', team: "Tom B6",      email: "", phone: "", bgCheckStatus: "Not Started", bgCheckDate: '' },
+  { id: 'ts_c3', name: "Mike Do",       role: "Head Coach", program: 'Travel Select', team: "Mike Do G6",  email: "michaeldo82@gmail.com", phone: "(571) 328-8126", bgCheckStatus: "Not Started", bgCheckDate: '' },
+  { id: 'ts_c4', name: "Coach Earnest", role: "Head Coach", program: 'Travel Select', team: "Earnest G7",  email: "", phone: "", bgCheckStatus: "Not Started", bgCheckDate: '' },
+  { id: 'ts_c5', name: "Coach Rene",    role: "Head Coach", program: 'Travel Select', team: "Rene B7",     email: "", phone: "", bgCheckStatus: "Not Started", bgCheckDate: '' },
+  { id: 'ts_c6', name: "Mike Lee",      role: "Head Coach", program: 'Travel Select', team: "Mike Lee B8", email: "", phone: "", bgCheckStatus: "Not Started", bgCheckDate: '' },
+  { id: 'ts_c7', name: "Coach Keun",    role: "Head Coach", program: 'Travel Select', team: "Keun B8-2",   email: "keunyoo29@gmail.com", phone: "(702) 887-3034", bgCheckStatus: "Not Started", bgCheckDate: '' },
 ];
 
 export function useStaff() {

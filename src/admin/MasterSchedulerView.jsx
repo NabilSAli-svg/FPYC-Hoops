@@ -5,10 +5,10 @@ import { useGames, usePractices, useGymPermits, useBlackoutDates, TEAMS_INFO } f
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const SEASONS = [
-  { id: 'fall',   label: 'Fall',   range: 'Aug – Nov', months: [7,8,9,10],  color: '#C8102E'                   },
-  { id: 'winter', label: 'Winter', range: 'Dec – Mar', months: [11,0,1,2],  color: 'var(--court-navy)'         },
-  { id: 'spring', label: 'Spring', range: 'Apr – Jun', months: [3,4,5],     color: '#1F8A5B'                   },
-  { id: 'summer', label: 'Summer', range: 'Jul – Aug', months: [6,7],       color: 'var(--basketball-orange)'  },
+  { id: 'fall',   label: 'Fall',   range: 'Aug – Nov', months: [7,8,9,10],  color: '#C8102E',                  jumpMonth: 8  },
+  { id: 'winter', label: 'Winter', range: 'Dec – Mar', months: [11,0,1,2],  color: 'var(--court-navy)',         jumpMonth: 11 },
+  { id: 'spring', label: 'Spring', range: 'Apr – May', months: [3,4],       color: '#1F8A5B',                  jumpMonth: 3  },
+  { id: 'summer', label: 'Summer', range: 'Jun – Aug', months: [5,6,7],     color: 'var(--basketball-orange)',  jumpMonth: 5  },
 ];
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -162,7 +162,12 @@ export default function MasterSchedulerView({ role, coachTeam }) {
       {/* Season tabs */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {SEASONS.map(s => (
-          <button key={s.id} onClick={() => setSeason(s.id)} style={{
+          <button key={s.id} onClick={() => {
+            setSeason(s.id);
+            const now = new Date();
+            const yr = (s.jumpMonth === 11 && now.getMonth() < 6) ? now.getFullYear() - 1 : now.getFullYear();
+            setWeekStart(startOfWeek(new Date(yr, s.jumpMonth, 1)));
+          }} style={{
             padding: '8px 18px', borderRadius: 999, cursor: 'pointer',
             border: `2px solid ${season === s.id ? s.color : 'var(--border)'}`,
             background: season === s.id ? s.color : '#fff',
