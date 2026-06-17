@@ -14,11 +14,12 @@ const NAV_ITEMS = [
 ];
 
 const SECONDARY = [
-  { id: 'staff',     icon: 'shield-check', label: 'Staff & Volunteers' },
-  { id: 'playoffs',  icon: 'trophy',   label: 'Playoffs'   },
-  { id: 'draftboard',icon: 'shuffle',  label: 'Draft Board'},
-  { id: 'season',    icon: 'bar-chart',label: 'Season'     },
-  { id: 'settings',  icon: 'settings', label: 'Settings'   },
+  { id: 'staff',     icon: 'shield-check',  label: 'Staff & Volunteers' },
+  { id: 'scheduler', icon: 'calendar-range',label: 'Master Scheduler'   },
+  { id: 'playoffs',  icon: 'trophy',        label: 'Playoffs'           },
+  { id: 'draftboard',icon: 'shuffle',       label: 'Draft Board'        },
+  { id: 'season',    icon: 'bar-chart',     label: 'Season'             },
+  { id: 'settings',  icon: 'settings',      label: 'Settings'           },
 ];
 
 export default function Sidebar({ active, onNav, team, sport, onSportChange, isMobile, sidebarOpen, onClose, role, profile }) {
