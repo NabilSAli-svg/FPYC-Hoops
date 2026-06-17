@@ -496,6 +496,14 @@ export function useOfficials() {
   return useSupabaseTable('officials', []);
 }
 
+export function useGymPermits() {
+  return useSupabaseTable('gym_permits', []);
+}
+
+export function useBlackoutDates() {
+  return useSupabaseTable('blackout_dates', []);
+}
+
 // ─── Draft Board ──────────────────────────────────────────────────────────────
 
 export const DRAFT_PLAYERS = [

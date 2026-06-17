@@ -18,6 +18,7 @@ import StatsView from './StatsView.jsx';
 import AnnouncementsView from './AnnouncementsView.jsx';
 import PlayoffsView from './PlayoffsView.jsx';
 import StaffView from './StaffView.jsx';
+import MasterSchedulerView from './MasterSchedulerView.jsx';
 import { Button } from '../shared/index.js';
 import ErrorBoundary from '../shared/ErrorBoundary.jsx';
 
@@ -112,6 +113,7 @@ export default function AdminApp() {
     draftboard:  { title: 'Draft Board',        breadcrumb: `${activeTeam.division} · Season 2025–26` },
     season:      { title: 'Season',             breadcrumb: `${activeTeam.division} · Season 2025–26` },
     stats:       { title: 'Player Stats',       breadcrumb: `${activeTeam.name} · Season 2025–26` },
+    scheduler:   { title: 'Master Scheduler', breadcrumb: 'Gym permits · School closings · League calendar' },
     settings:    { title: 'Settings',           breadcrumb: `${(SPORTS.find(s => s.id === sport) || SPORTS[0]).tagline} · ${role === 'commissioner' ? 'Admin' : 'Coach'} console` },
   };
   const t = titleMap[view] || titleMap.dashboard;
@@ -194,6 +196,7 @@ export default function AdminApp() {
           {view === 'draftboard'  && <DraftBoardView />}
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} sport={sport} />}
           {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} sport={sport} />}
+          {view === 'scheduler'   && <MasterSchedulerView />}
           {view === 'settings'    && <SettingsView profile={profile} role={role} />}
           </ErrorBoundary>
         </div>
