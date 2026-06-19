@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Card, Button, Icon, Display } from '../shared/index.js';
+import { Card, Icon, Display } from '../shared/index.js';
 import { useBudget } from '../shared/store.js';
 
 const fmt = n => '$' + Math.round(n).toLocaleString();
@@ -16,8 +16,11 @@ function calcBudget(budget) {
     .reduce((s, ft) => s + (ft.players || 0) * (ft.fee || 0), 0);
   const otherRevBudget = budget.revenueOther.reduce((s, r) => s + (r.budgeted || 0), 0);
   const otherRevActual = budget.revenueOther.reduce((s, r) => s + (r.actual || 0), 0);
+  const otherRevPrior  = budget.revenueOther.reduce((s, r) => s + (r.priorActual || 0), 0);
   const totalRevBudget = regRevenue + lateFeeRevenue + otherRevBudget;
   const totalRevActual = regRevenue + lateFeeRevenue + otherRevActual;
+  const priorYear = budget.priorYear || {};
+  const totalRevPrior = (priorYear.registrations || 0) + (priorYear.lateFees || 0) + otherRevPrior;
 
   const expenses = budget.expenses.map(e => ({
     ...e,
@@ -25,17 +28,18 @@ function calcBudget(budget) {
   }));
   const totalExpBudget = expenses.reduce((s, e) => s + e.budgetCalc, 0);
   const totalExpActual = expenses.reduce((s, e) => s + (e.actual || 0), 0);
+  const totalExpPrior  = expenses.reduce((s, e) => s + (e.priorActual || 0), 0);
 
-  return { regRevenue, lateFeeRevenue, otherRevBudget, otherRevActual, totalRevBudget, totalRevActual, expenses, totalExpBudget, totalExpActual };
+  return { regRevenue, lateFeeRevenue, otherRevBudget, otherRevActual, totalRevBudget, totalRevActual, totalRevPrior, expenses, totalExpBudget, totalExpActual, totalExpPrior };
 }
 
-function EditCell({ value, onSave, locked, directorStyle, treasurerStyle }) {
+function EditCell({ value, onSave, locked, directorStyle, treasurerStyle, priorStyle }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
 
-  if (locked) {
+  if (locked || priorStyle) {
     return (
-      <span style={{ fontSize: 13, color: 'var(--fg-muted)', background: '#F3F4F6', padding: '4px 8px', borderRadius: 5, display: 'inline-block' }}>
+      <span style={{ fontSize: 13, color: priorStyle ? '#6B7280' : 'var(--fg-muted)', background: priorStyle ? '#F9FAFB' : '#F3F4F6', padding: '4px 8px', borderRadius: 5, display: 'inline-block', fontStyle: priorStyle ? 'italic' : 'normal' }}>
         {fmt(value || 0)}
       </span>
     );
@@ -97,6 +101,7 @@ export default function BudgetView() {
   const [saved, setSaved] = useState(false);
 
   const calc = calcBudget(budget);
+  const priorLabel = budget.priorYear?.label || 'Prior Year';
 
   const save = useCallback(async (newBudget) => {
     await saveBudget(newBudget);
@@ -131,6 +136,7 @@ export default function BudgetView() {
   });
 
   const th = { padding: '10px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--fg-muted)', background: 'var(--bone)', borderBottom: '1px solid var(--border)' };
+  const thPrior = { ...th, background: '#F9FAFB', color: '#9CA3AF', fontStyle: 'italic' };
   const td = { padding: '10px 12px', borderBottom: '1px solid var(--border)', fontSize: 13, verticalAlign: 'middle' };
 
   return (
@@ -236,8 +242,9 @@ export default function BudgetView() {
                 <tr>
                   <th style={th}>Account</th>
                   <th style={th}>Line Item</th>
-                  <th style={{ ...th, background: '#F3F4F6' }}>Budget</th>
-                  <th style={th}>Actual Collected</th>
+                  <th style={thPrior}>{priorLabel} Actual</th>
+                  <th style={{ ...th, background: '#EEF2FF' }}>💜 {budget.year} Budget</th>
+                  <th style={th}>{budget.year} Collected</th>
                 </tr>
               </thead>
               <tbody>
@@ -249,12 +256,14 @@ export default function BudgetView() {
                       <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>Override (auto: {fmt(budget.feeTypes.filter(ft => ft.label !== 'Late Fee').reduce((s, ft) => s + (ft.players||0)*(ft.fee||0), 0))})</div>
                     )}
                   </td>
+                  <td style={{ ...td, background: '#F9FAFB' }}><EditCell value={budget.priorYear?.registrations || 0} onSave={() => {}} priorStyle /></td>
                   <td style={{ ...td, background: '#EEF2FF' }}><EditCell value={calc.regRevenue} onSave={updateRegistrationsBudget} treasurerStyle /></td>
                   <td style={{ ...td, background: '#F3F4F6' }}><EditCell value={calc.regRevenue} onSave={() => {}} locked /></td>
                 </tr>
                 <tr style={{ background: 'var(--bone)' }}>
                   <td style={{ ...td, color: 'var(--fg-muted)', fontSize: 11 }}>1041-08</td>
                   <td style={td}>Late Fees</td>
+                  <td style={{ ...td, background: '#F9FAFB' }}><EditCell value={budget.priorYear?.lateFees || 0} onSave={() => {}} priorStyle /></td>
                   <td style={{ ...td, background: '#F3F4F6' }}><EditCell value={calc.lateFeeRevenue} onSave={() => {}} locked /></td>
                   <td style={{ ...td, background: '#F3F4F6' }}><EditCell value={calc.lateFeeRevenue} onSave={() => {}} locked /></td>
                 </tr>
@@ -262,6 +271,7 @@ export default function BudgetView() {
                   <tr key={r.id} style={{ background: i % 2 === 0 ? '#fff' : 'var(--bone)' }}>
                     <td style={{ ...td, color: 'var(--fg-muted)', fontSize: 11 }}>{r.account}</td>
                     <td style={td}>{r.label}</td>
+                    <td style={{ ...td, background: '#F9FAFB' }}><EditCell value={r.priorActual || 0} onSave={() => {}} priorStyle /></td>
                     <td style={td}><EditCell value={r.budgeted} onSave={v => updateRevenueOther(r.id, 'budgeted', v)} treasurerStyle /></td>
                     <td style={td}><EditCell value={r.actual} onSave={v => updateRevenueOther(r.id, 'actual', v)} /></td>
                   </tr>
@@ -270,6 +280,7 @@ export default function BudgetView() {
                   <td style={{ ...td, border: 'none', color: 'rgba(255,255,255,0.6)', fontSize: 11 }} colSpan={2}>
                     <strong style={{ color: '#fff' }}>TOTAL REVENUE</strong>
                   </td>
+                  <td style={{ ...td, border: 'none', fontWeight: 700, fontSize: 14, color: 'rgba(255,255,255,0.65)', fontStyle: 'italic' }}>{fmt(calc.totalRevPrior)}</td>
                   <td style={{ ...td, border: 'none', fontWeight: 700, fontSize: 14, color: '#fff' }}>{fmt(calc.totalRevBudget)}</td>
                   <td style={{ ...td, border: 'none', fontWeight: 700, fontSize: 14, color: '#fff' }}>{fmt(calc.totalRevActual)}</td>
                 </tr>
@@ -288,8 +299,9 @@ export default function BudgetView() {
                 <th style={th}>Account</th>
                 <th style={th}>Line Item</th>
                 <th style={th}>Type</th>
-                <th style={{ ...th, background: '#EEF2FF' }}>💜 Budget</th>
-                <th style={th}>Actual Spent</th>
+                <th style={thPrior}>{priorLabel} Actual</th>
+                <th style={{ ...th, background: '#EEF2FF' }}>💜 {budget.year} Budget</th>
+                <th style={th}>{budget.year} Actual</th>
                 <th style={th}>Remaining</th>
                 <th style={{ ...th, minWidth: 120 }}>% Used</th>
               </tr>
@@ -311,6 +323,9 @@ export default function BudgetView() {
                         : <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: '#EEF2FF', color: '#6366F1', border: '1px solid #A5B4FC' }}>SET</span>
                       }
                       {isAuto && <div style={{ fontSize: 10, color: 'var(--fg-muted)', marginTop: 2 }}>${e.perPlayer}/player</div>}
+                    </td>
+                    <td style={{ ...td, background: '#F9FAFB' }}>
+                      <EditCell value={e.priorActual || 0} onSave={() => {}} priorStyle />
                     </td>
                     <td style={{ ...td, background: isAuto ? '#F3F4F6' : '#EEF2FF' }}>
                       {isAuto
@@ -336,6 +351,7 @@ export default function BudgetView() {
                 <td style={{ ...td, border: 'none', color: 'rgba(255,255,255,0.6)' }} colSpan={3}>
                   <strong style={{ color: '#fff' }}>TOTAL EXPENSES</strong>
                 </td>
+                <td style={{ ...td, border: 'none', fontWeight: 700, fontSize: 14, color: 'rgba(255,255,255,0.65)', fontStyle: 'italic' }}>{fmt(calc.totalExpPrior)}</td>
                 <td style={{ ...td, border: 'none', fontWeight: 700, fontSize: 14, color: '#fff' }}>{fmt(calc.totalExpBudget)}</td>
                 <td style={{ ...td, border: 'none', fontWeight: 700, fontSize: 14, color: '#fff' }}>{fmt(calc.totalExpActual)}</td>
                 <td style={{ ...td, border: 'none', fontWeight: 700, fontSize: 14, color: calc.totalExpBudget - calc.totalExpActual < 0 ? '#FCA5A5' : '#86EFAC' }}>
@@ -352,6 +368,10 @@ export default function BudgetView() {
 
       {/* Legend */}
       <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', fontSize: 12, color: 'var(--fg-muted)', padding: '4px 0' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 14, height: 14, background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 3, display: 'inline-block' }} />
+          Prior year actual (locked)
+        </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ width: 14, height: 14, background: '#EFF6FF', border: '1px solid #93C5FD', borderRadius: 3, display: 'inline-block' }} />
           Director-editable (player counts)
