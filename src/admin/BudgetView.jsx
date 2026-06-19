@@ -4,6 +4,103 @@ import { useBudget } from '../shared/store.js';
 
 const fmt = n => '$' + Math.round(n).toLocaleString();
 const pct = (a, b) => b === 0 ? 0 : Math.min(100, Math.round((a / b) * 100));
+const fmtRaw = n => Math.round(n || 0).toString();
+
+function exportCSV(budget, calc) {
+  const rows = [];
+  const py = budget.priorYear?.label || 'Prior Year';
+  const yr = budget.year;
+
+  rows.push([`FPYC Basketball Budget · ${yr}`]);
+  rows.push([]);
+  rows.push(['REVENUE']);
+  rows.push(['Account', 'Line Item', `${py} Actual`, `${yr} Budget`, `${yr} Collected`]);
+  rows.push(['1040-08', 'Registrations', fmtRaw(budget.priorYear?.registrations), fmtRaw(calc.regRevenue), fmtRaw(calc.regRevenueActual)]);
+  rows.push(['1041-08', 'Late Fees', fmtRaw(budget.priorYear?.lateFees), fmtRaw(calc.lateFeeRevenue), fmtRaw(calc.lateFeeActual)]);
+  budget.revenueOther.forEach(r => rows.push([r.account, r.label, fmtRaw(r.priorActual), fmtRaw(r.budgeted), fmtRaw(r.actual)]));
+  rows.push(['', 'TOTAL REVENUE', fmtRaw(calc.totalRevPrior), fmtRaw(calc.totalRevBudget), fmtRaw(calc.totalRevActual)]);
+
+  rows.push([]);
+  rows.push(['EXPENSES']);
+  rows.push(['Account', 'Line Item', 'Type', `${py} Actual`, `${yr} Budget`, `${yr} Actual`, 'Remaining']);
+  calc.expenses.forEach(e => {
+    const remaining = e.budgetCalc - (e.actual || 0);
+    rows.push([e.account, e.label, e.perPlayer != null ? `AUTO $${e.perPlayer}/player` : 'SET', fmtRaw(e.priorActual), fmtRaw(e.budgetCalc), fmtRaw(e.actual), fmtRaw(remaining)]);
+  });
+  rows.push(['', '', 'TOTAL EXPENSES', fmtRaw(calc.totalExpPrior), fmtRaw(calc.totalExpBudget), fmtRaw(calc.totalExpActual), fmtRaw(calc.totalExpBudget - calc.totalExpActual)]);
+
+  rows.push([]);
+  rows.push(['FEE CONFIGURATION']);
+  rows.push(['Fee Type', 'Projected #', 'Actual #', 'Fee', 'Projected $', 'Actual $']);
+  budget.feeTypes.forEach(ft => {
+    const ap = ft.actualPlayers ?? ft.players;
+    rows.push([ft.label, ft.players, ap, ft.fee, fmtRaw(ft.players * ft.fee), fmtRaw(ap * ft.fee)]);
+  });
+
+  const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `FPYC-Budget-${budget.year}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function exportPDF(budget, calc) {
+  const py = budget.priorYear?.label || 'Prior Year';
+  const yr = budget.year;
+
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>FPYC Budget ${yr}</title>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #111; margin: 24px; }
+  h1 { font-size: 18px; margin-bottom: 4px; }
+  h2 { font-size: 13px; margin: 18px 0 6px; border-bottom: 2px solid #0a2240; padding-bottom: 4px; color: #0a2240; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  th { background: #0a2240; color: #fff; padding: 5px 8px; text-align: left; font-size: 10px; }
+  td { padding: 4px 8px; border-bottom: 1px solid #e5e7eb; }
+  tr:nth-child(even) td { background: #f9fafb; }
+  .total td { background: #0a2240 !important; color: #fff; font-weight: bold; }
+  .summary { display: flex; gap: 16px; margin-bottom: 16px; }
+  .card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; flex: 1; }
+  .card-label { font-size: 9px; text-transform: uppercase; color: #6b7280; letter-spacing: .05em; }
+  .card-value { font-size: 20px; font-weight: bold; margin: 2px 0; }
+  .card-sub { font-size: 9px; color: #6b7280; }
+  @media print { body { margin: 0; } }
+</style></head><body>
+<h1>FPYC Basketball Budget · ${yr}</h1>
+<p style="color:#6b7280;font-size:10px;margin-bottom:16px">${budget.projectedPlayers} projected players · Exported ${new Date().toLocaleDateString()}</p>
+
+<div class="summary">
+  <div class="card"><div class="card-label">Revenue Budget</div><div class="card-value" style="color:#1f8a5b">${fmt(calc.totalRevBudget)}</div><div class="card-sub">${fmt(calc.totalRevActual)} collected</div></div>
+  <div class="card"><div class="card-label">Expense Budget</div><div class="card-value" style="color:#c8102e">${fmt(calc.totalExpBudget)}</div><div class="card-sub">${fmt(calc.totalExpActual)} spent</div></div>
+  <div class="card"><div class="card-label">Net Income</div><div class="card-value" style="color:${calc.totalRevBudget - calc.totalExpBudget >= 0 ? '#1f8a5b' : '#ef4444'}">${(calc.totalRevBudget - calc.totalExpBudget >= 0 ? '+' : '') + fmt(calc.totalRevBudget - calc.totalExpBudget)}</div><div class="card-sub">Actual: ${(calc.totalRevActual - calc.totalExpActual >= 0 ? '+' : '') + fmt(calc.totalRevActual - calc.totalExpActual)}</div></div>
+  <div class="card"><div class="card-label">Spent to Date</div><div class="card-value" style="color:#ea580c">${fmt(calc.totalExpActual)}</div><div class="card-sub">${fmt(calc.totalExpBudget - calc.totalExpActual)} remaining</div></div>
+</div>
+
+<h2>Revenue</h2>
+<table><thead><tr><th>Account</th><th>Line Item</th><th>${py} Actual</th><th>${yr} Budget</th><th>${yr} Collected</th></tr></thead><tbody>
+<tr><td>1040-08</td><td>Registrations</td><td>${fmt(budget.priorYear?.registrations || 0)}</td><td>${fmt(calc.regRevenue)}</td><td>${fmt(calc.regRevenueActual)}</td></tr>
+<tr><td>1041-08</td><td>Late Fees</td><td>${fmt(budget.priorYear?.lateFees || 0)}</td><td>${fmt(calc.lateFeeRevenue)}</td><td>${fmt(calc.lateFeeActual)}</td></tr>
+${budget.revenueOther.map(r => `<tr><td>${r.account}</td><td>${r.label}</td><td>${fmt(r.priorActual || 0)}</td><td>${fmt(r.budgeted || 0)}</td><td>${fmt(r.actual || 0)}</td></tr>`).join('')}
+<tr class="total"><td colspan="2">TOTAL REVENUE</td><td>${fmt(calc.totalRevPrior)}</td><td>${fmt(calc.totalRevBudget)}</td><td>${fmt(calc.totalRevActual)}</td></tr>
+</tbody></table>
+
+<h2>Expenses</h2>
+<table><thead><tr><th>Account</th><th>Line Item</th><th>${py} Actual</th><th>${yr} Budget</th><th>${yr} Actual</th><th>Remaining</th></tr></thead><tbody>
+${calc.expenses.map(e => {
+  const rem = e.budgetCalc - (e.actual || 0);
+  return `<tr><td>${e.account}</td><td>${e.label}${e.perPlayer != null ? ` <span style="font-size:9px;color:#6b7280">$${e.perPlayer}/player</span>` : ''}</td><td>${fmt(e.priorActual || 0)}</td><td>${fmt(e.budgetCalc)}</td><td>${fmt(e.actual || 0)}</td><td style="color:${rem < 0 ? '#ef4444' : '#111'}">${rem < 0 ? '-' : ''}${fmt(Math.abs(rem))}</td></tr>`;
+}).join('')}
+<tr class="total"><td colspan="2">TOTAL EXPENSES</td><td>${fmt(calc.totalExpPrior)}</td><td>${fmt(calc.totalExpBudget)}</td><td>${fmt(calc.totalExpActual)}</td><td>${fmt(calc.totalExpBudget - calc.totalExpActual)}</td></tr>
+</tbody></table>
+</body></html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); }, 500);
+}
 
 function calcBudget(budget) {
   const pp = budget.projectedPlayers || 0;
@@ -132,7 +229,15 @@ export default function BudgetView() {
           <Display size={22}>Budget · {budget.year}</Display>
           <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 2 }}>{budget.projectedPlayers} projected players</div>
         </div>
-        {saved && <span style={{ fontSize: 12, color: '#22C55E', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="check" size={14} /> Saved</span>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {saved && <span style={{ fontSize: 12, color: '#22C55E', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="check" size={14} /> Saved</span>}
+          <button onClick={() => exportCSV(budget, calc)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', border: '1.5px solid var(--border)', borderRadius: 8, background: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12, cursor: 'pointer', color: 'var(--fg)' }}>
+            <Icon name="download" size={14} /> CSV
+          </button>
+          <button onClick={() => exportPDF(budget, calc)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', border: '1.5px solid var(--border)', borderRadius: 8, background: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12, cursor: 'pointer', color: 'var(--fg)' }}>
+            <Icon name="printer" size={14} /> PDF
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
