@@ -20,6 +20,7 @@ import PlayoffsView from './PlayoffsView.jsx';
 import StaffView from './StaffView.jsx';
 import MasterSchedulerView from './MasterSchedulerView.jsx';
 import BudgetView from './BudgetView.jsx';
+import InventoryView from './InventoryView.jsx';
 import { Button } from '../shared/index.js';
 import ErrorBoundary from '../shared/ErrorBoundary.jsx';
 
@@ -115,6 +116,8 @@ export default function AdminApp() {
     season:      { title: 'Season',             breadcrumb: `${activeTeam.division} · Season 2025–26` },
     stats:       { title: 'Player Stats',       breadcrumb: `${activeTeam.name} · Season 2025–26` },
     scheduler:   { title: 'Master Scheduler', breadcrumb: 'Gym permits · School closings · League calendar' },
+    budget:      { title: 'Budget',           breadcrumb: '2026–27 · Revenue & expenses · Actual spend tracking' },
+    inventory:   { title: 'Inventory',        breadcrumb: 'Jerseys · Basketballs · Equipment · Check-out tracking' },
     budget:      { title: 'Budget',           breadcrumb: '2025–26 · Revenue & expenses · Actual spend tracking' },
     settings:    { title: 'Settings',           breadcrumb: `${(SPORTS.find(s => s.id === sport) || SPORTS[0]).tagline} · ${role === 'commissioner' ? 'Admin' : 'Coach'} console` },
   };
@@ -200,6 +203,7 @@ export default function AdminApp() {
           {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} sport={sport} />}
           {view === 'scheduler'   && <MasterSchedulerView role={role} coachTeam={coachTeam} />}
           {view === 'budget'      && role === 'commissioner' && <BudgetView />}
+          {view === 'inventory'   && role === 'commissioner' && <InventoryView />}
           {view === 'settings'    && <SettingsView profile={profile} role={role} />}
           </ErrorBoundary>
         </div>
