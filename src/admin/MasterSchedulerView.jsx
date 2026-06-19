@@ -182,10 +182,11 @@ export default function MasterSchedulerView({ role, coachTeam }) {
       {/* View tabs */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)' }}>
         {[
-          { id: 'calendar',  label: 'Calendar',        icon: 'calendar'   },
+          { id: 'calendar',     label: 'Calendar',        icon: 'calendar'   },
           ...(!isCoach ? [
-            { id: 'permits',   label: 'Gym Permits',     icon: 'key'        },
-            { id: 'blackouts', label: 'School Closings', icon: 'ban'        },
+            { id: 'permits',    label: 'Gym Permits',     icon: 'key'        },
+            { id: 'blackouts',  label: 'School Closings', icon: 'ban'        },
+            { id: 'availability', label: 'Availability',  icon: 'check-circle' },
           ] : []),
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
@@ -221,6 +222,9 @@ export default function MasterSchedulerView({ role, coachTeam }) {
       )}
       {tab === 'blackouts' && (
         <BlackoutsTab blackouts={blackouts} setBlackouts={setBlackouts} seasonColor={activeSeason.color} />
+      )}
+      {tab === 'availability' && (
+        <GymAvailabilityTab permits={permits} blackouts={blackouts} season={season} seasonColor={activeSeason.color} />
       )}
 
       {modal && (
@@ -700,6 +704,229 @@ function BlackoutsTab({ blackouts, setBlackouts, seasonColor }) {
             <Button kind="gold" icon="save" onClick={handleSave} disabled={!form.date}>Save</Button>
           </div>
         </Card>
+      )}
+    </div>
+  );
+}
+
+// ── Gym Availability tab ──────────────────────────────────────────────────────
+
+const GYM_ABBR = {
+  'Providence ES':         'PES',
+  'Daniels Run ES Gym #1': 'DR1',
+  'Daniels Run ES Gym #2': 'DR2',
+  'KJMS #1':               'KJ1',
+  'KJMS #2':               'KJ2',
+  'Fairfax HS':            'FHS',
+};
+
+function gymAbbr(name) {
+  return GYM_ABBR[name] || name.slice(0, 4);
+}
+
+function startOfMonth(d) {
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+function daysInMonth(year, month) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+// Returns Mon=0 … Sun=6 offset for calendar grid (ISO week starts Mon)
+function calendarStartOffset(year, month) {
+  const dow = new Date(year, month, 1).getDay(); // 0=Sun
+  return (dow + 6) % 7; // convert so Mon=0
+}
+
+function GymAvailabilityTab({ permits, blackouts, season, seasonColor }) {
+  const today = new Date();
+  const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [selectedGyms, setSelectedGyms] = useState(null); // null = all
+
+  const year  = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+
+  // All unique gyms in permits
+  const allGyms = useMemo(() => {
+    const names = [...new Set(permits.map(p => p.gym_name).filter(Boolean))].sort();
+    return names;
+  }, [permits]);
+
+  const activeGyms = selectedGyms ? allGyms.filter(g => selectedGyms.has(g)) : allGyms;
+
+  const blackoutSet = useMemo(() => new Set(blackouts.map(b => b.date)), [blackouts]);
+
+  const permitsByGym = useMemo(() => {
+    const map = {};
+    permits.forEach(p => { (map[p.gym_name] = map[p.gym_name] || []).push(p); });
+    return map;
+  }, [permits]);
+
+  function isPermitted(gymName, date) {
+    const perms = permitsByGym[gymName] || [];
+    const dayName = WEEK_DAYS[date.getDay()];
+    const iso = isoDate(date);
+    return perms.some(p =>
+      p.season === season &&
+      (p.days || []).includes(dayName) &&
+      (!p.start_date || iso >= p.start_date) &&
+      (!p.end_date   || iso <= p.end_date)
+    );
+  }
+
+  const numDays = daysInMonth(year, month);
+  const offset  = calendarStartOffset(year, month); // Mon-based offset
+
+  // Build 7-column grid cells (nulls for padding)
+  const cells = [];
+  for (let i = 0; i < offset; i++) cells.push(null);
+  for (let d = 1; d <= numDays; d++) cells.push(d);
+
+  function prevMonth() { setViewDate(v => new Date(v.getFullYear(), v.getMonth() - 1, 1)); }
+  function nextMonth() { setViewDate(v => new Date(v.getFullYear(), v.getMonth() + 1, 1)); }
+
+  function toggleGym(gym) {
+    setSelectedGyms(prev => {
+      const base = prev ? new Set(prev) : new Set(allGyms);
+      if (base.has(gym)) { base.delete(gym); } else { base.add(gym); }
+      if (base.size === allGyms.length) return null; // all selected = reset to null
+      return base;
+    });
+  }
+
+  const todayIso = isoDate(today);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+      {/* Month nav */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <button onClick={prevMonth} style={navBtn}><Icon name="chevron-left"  size={18} /></button>
+        <button onClick={nextMonth} style={navBtn}><Icon name="chevron-right" size={18} /></button>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, textTransform: 'uppercase', color: 'var(--court-navy)' }}>
+          {MONTH_NAMES[month]} {year}
+        </span>
+        <button onClick={() => setViewDate(new Date(today.getFullYear(), today.getMonth(), 1))} style={{ ...navBtn, padding: '5px 14px', fontSize: 12, fontWeight: 700 }}>Today</button>
+      </div>
+
+      {/* Gym selector pills */}
+      {allGyms.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 4 }}>Filter:</span>
+          <button
+            onClick={() => setSelectedGyms(null)}
+            style={{
+              padding: '4px 13px', borderRadius: 999, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              border: `1.5px solid ${!selectedGyms ? 'var(--court-navy)' : 'var(--border)'}`,
+              background: !selectedGyms ? 'var(--court-navy)' : '#fff',
+              color: !selectedGyms ? '#fff' : 'var(--fg)',
+              fontFamily: 'var(--font-body)',
+            }}>All gyms</button>
+          {allGyms.map(gym => {
+            const active = !selectedGyms || selectedGyms.has(gym);
+            return (
+              <button key={gym} onClick={() => toggleGym(gym)} style={{
+                padding: '4px 13px', borderRadius: 999, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                border: `1.5px solid ${active ? seasonColor : 'var(--border)'}`,
+                background: active ? `${seasonColor}18` : '#fff',
+                color: active ? seasonColor : 'var(--fg-muted)',
+                fontFamily: 'var(--font-body)',
+              }}>{gym}</button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Legend */}
+      <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+        <LegendItem color="rgba(31,138,91,0.2)"  border="#1F8A5B" label="Available (permitted)" />
+        <LegendItem color="rgba(180,180,180,0.2)" border="#aaa"   label="No permit this day" />
+        <LegendItem color="rgba(200,16,46,0.12)"  border="#C8102E" label="Blackout / school closed" />
+      </div>
+
+      {/* Calendar grid */}
+      <div style={{ overflowX: 'auto' }}>
+        <div style={{ minWidth: 560 }}>
+          {/* Day-of-week header */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3, marginBottom: 3 }}>
+            {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
+              <div key={d} style={{
+                textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)',
+                textTransform: 'uppercase', letterSpacing: '0.07em', padding: '4px 0',
+              }}>{d}</div>
+            ))}
+          </div>
+
+          {/* Date cells */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
+            {cells.map((day, idx) => {
+              if (!day) {
+                return <div key={`pad-${idx}`} style={{ background: 'transparent', minHeight: 80 }} />;
+              }
+              const cellDate = new Date(year, month, day);
+              const iso      = isoDate(cellDate);
+              const isBlackout = blackoutSet.has(iso);
+              const isToday    = iso === todayIso;
+
+              const permittedGyms = activeGyms.filter(g => isPermitted(g, cellDate));
+              const unpermittedGyms = activeGyms.filter(g => !isPermitted(g, cellDate));
+
+              return (
+                <div key={iso} style={{
+                  border: `1.5px solid ${isToday ? seasonColor : isBlackout ? '#C8102E' : 'var(--border)'}`,
+                  borderRadius: 8,
+                  padding: '6px 6px 5px',
+                  minHeight: 80,
+                  background: isBlackout
+                    ? 'rgba(200,16,46,0.07)'
+                    : isToday ? 'rgba(255,199,44,0.10)' : '#fff',
+                  display: 'flex', flexDirection: 'column', gap: 3,
+                  position: 'relative',
+                }}>
+                  {/* Day number */}
+                  <div style={{
+                    fontFamily: 'var(--font-display)', fontSize: 15,
+                    color: isToday ? seasonColor : isBlackout ? '#C8102E' : 'var(--court-navy)',
+                    fontWeight: isToday ? 900 : 700, lineHeight: 1, marginBottom: 3,
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  }}>
+                    <span>{day}</span>
+                    {isBlackout && <span style={{ fontSize: 11, color: '#C8102E', fontWeight: 700 }}>✕</span>}
+                  </div>
+
+                  {/* Permitted gym chips */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                    {permittedGyms.map(g => (
+                      <span key={g} title={g} style={{
+                        fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-body)',
+                        padding: '1px 5px', borderRadius: 4,
+                        background: 'rgba(31,138,91,0.18)', color: '#1F8A5B',
+                        border: '1px solid rgba(31,138,91,0.35)',
+                        whiteSpace: 'nowrap',
+                      }}>{gymAbbr(g)}</span>
+                    ))}
+                    {!isBlackout && unpermittedGyms.map(g => (
+                      <span key={g} title={g} style={{
+                        fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-body)',
+                        padding: '1px 5px', borderRadius: 4,
+                        background: 'rgba(180,180,180,0.18)', color: '#999',
+                        border: '1px solid rgba(180,180,180,0.35)',
+                        whiteSpace: 'nowrap',
+                      }}>{gymAbbr(g)}</span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {allGyms.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--fg-muted)', fontSize: 14 }}>
+          <Icon name="check-circle" size={32} color="var(--border)" /><br /><br />
+          No gym permits found. Add permits in the Gym Permits tab first.
+        </div>
       )}
     </div>
   );
