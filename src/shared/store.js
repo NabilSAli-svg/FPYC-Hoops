@@ -1212,3 +1212,30 @@ export function useBudget() {
 
   return [budget, saveBudget];
 }
+
+// ── Inventory ─────────────────────────────────────────────────────────────────
+
+const INITIAL_INVENTORY = {
+  jerseys:     {},
+  pullovers:   {},
+  basketballs: {},
+  clocks:      { owned: 0, checkedOut: 0 },
+  training:    { items: [] },
+};
+
+export function useInventory() {
+  const [inventory, setInventoryState] = useState(INITIAL_INVENTORY);
+
+  useEffect(() => {
+    supabase.from('budget').select('data').eq('id', 'inventory-2627').single().then(({ data, error }) => {
+      if (!error && data?.data) setInventoryState(data.data);
+    });
+  }, []);
+
+  async function saveInventory(newInv) {
+    setInventoryState(newInv);
+    await supabase.from('budget').upsert({ id: 'inventory-2627', data: newInv, updated_at: new Date().toISOString() });
+  }
+
+  return [inventory, saveInventory];
+}
