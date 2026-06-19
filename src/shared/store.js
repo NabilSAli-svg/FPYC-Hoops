@@ -689,8 +689,77 @@ export function useOfficials() {
   return useSupabaseTable('officials', []);
 }
 
+// Summer 2026 gym permits — from NCS permit system
+const INITIAL_GYM_PERMITS = [
+  {
+    id: 'gp-4686422',
+    gym_name: 'Providence ES',
+    season: 'summer',
+    year: 2026,
+    days: ['Mon', 'Wed', 'Fri'],
+    start_time: '18:00',
+    end_time: '21:00',
+    start_date: '2026-06-15',
+    end_date: '2026-07-31',
+    sport: 'basketball',
+    notes: 'Permit #4686422 — FPYC Summer Basketball',
+  },
+  {
+    id: 'gp-4686424',
+    gym_name: 'Daniels Run ES Gym #1',
+    season: 'summer',
+    year: 2026,
+    days: ['Mon', 'Wed', 'Fri'],
+    start_time: '18:00',
+    end_time: '21:00',
+    start_date: '2026-07-01',
+    end_date: '2026-07-31',
+    sport: 'basketball',
+    notes: 'Permit #4686424 — FPYC Summer Basketball',
+  },
+  {
+    id: 'gp-4698157',
+    gym_name: 'KJMS #1',
+    season: 'summer',
+    year: 2026,
+    days: ['Mon', 'Wed', 'Fri'],
+    start_time: '18:00',
+    end_time: '21:00',
+    start_date: '2026-06-22',
+    end_date: '2026-08-07',
+    sport: 'basketball',
+    notes: 'Permit #4698157 — Summer Basketball FPYC (Johnson MS Gym #1)',
+  },
+  {
+    id: 'gp-4698157-2',
+    gym_name: 'KJMS #2',
+    season: 'summer',
+    year: 2026,
+    days: ['Mon', 'Wed', 'Fri'],
+    start_time: '18:00',
+    end_time: '21:00',
+    start_date: '2026-06-22',
+    end_date: '2026-08-07',
+    sport: 'basketball',
+    notes: 'Permit #4698157 — Summer Basketball FPYC (Johnson MS Gym #2)',
+  },
+  {
+    id: 'gp-4700223',
+    gym_name: 'Fairfax HS',
+    season: 'summer',
+    year: 2026,
+    days: ['Mon', 'Wed', 'Fri'],
+    start_time: '18:00',
+    end_time: '21:00',
+    start_date: '2026-06-15',
+    end_date: '2026-07-27',
+    sport: 'basketball',
+    notes: 'Permit #4700223 — Summer Basketball FPYC FH 6pm-9pm',
+  },
+];
+
 export function useGymPermits() {
-  return useSupabaseTable('gym_permits', []);
+  return useSupabaseTable('gym_permits', INITIAL_GYM_PERMITS);
 }
 
 export function useBlackoutDates() {
