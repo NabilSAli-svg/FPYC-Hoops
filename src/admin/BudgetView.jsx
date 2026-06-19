@@ -7,9 +7,10 @@ const pct = (a, b) => b === 0 ? 0 : Math.min(100, Math.round((a / b) * 100));
 
 function calcBudget(budget) {
   const pp = budget.projectedPlayers || 0;
-  const regRevenue = budget.feeTypes
+  const regRevenueAuto = budget.feeTypes
     .filter(ft => ft.label !== 'Late Fee')
     .reduce((s, ft) => s + (ft.players || 0) * (ft.fee || 0), 0);
+  const regRevenue = budget.registrationsBudget != null ? budget.registrationsBudget : regRevenueAuto;
   const lateFeeRevenue = budget.feeTypes
     .filter(ft => ft.label === 'Late Fee')
     .reduce((s, ft) => s + (ft.players || 0) * (ft.fee || 0), 0);
@@ -108,6 +109,9 @@ export default function BudgetView() {
   }
   function updateProjectedPlayers(val) {
     save({ ...budget, projectedPlayers: val });
+  }
+  function updateRegistrationsBudget(val) {
+    save({ ...budget, registrationsBudget: val });
   }
   function updateRevenueOther(id, field, val) {
     save({ ...budget, revenueOther: budget.revenueOther.map(r => r.id === id ? { ...r, [field]: val } : r) });
@@ -239,9 +243,14 @@ export default function BudgetView() {
               <tbody>
                 <tr>
                   <td style={{ ...td, color: 'var(--fg-muted)', fontSize: 11 }}>1040-08</td>
-                  <td style={td}>Registrations</td>
+                  <td style={td}>
+                    <div style={{ fontWeight: 600 }}>Registrations</div>
+                    {budget.registrationsBudget != null && (
+                      <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>Override (auto: {fmt(budget.feeTypes.filter(ft => ft.label !== 'Late Fee').reduce((s, ft) => s + (ft.players||0)*(ft.fee||0), 0))})</div>
+                    )}
+                  </td>
+                  <td style={{ ...td, background: '#EEF2FF' }}><EditCell value={calc.regRevenue} onSave={updateRegistrationsBudget} treasurerStyle /></td>
                   <td style={{ ...td, background: '#F3F4F6' }}><EditCell value={calc.regRevenue} onSave={() => {}} locked /></td>
-                  <td style={td}><EditCell value={calc.regRevenue} onSave={() => {}} locked /></td>
                 </tr>
                 <tr style={{ background: 'var(--bone)' }}>
                   <td style={{ ...td, color: 'var(--fg-muted)', fontSize: 11 }}>1041-08</td>

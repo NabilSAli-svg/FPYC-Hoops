@@ -1160,6 +1160,7 @@ export const INITIAL_BUDGET = {
   id: 'budget-2627',
   year: '2026-27',
   projectedPlayers: 930,
+  registrationsBudget: 155750,
   feeTypes: [
     { id: 'ft1', label: 'Rec Winter Regular',    players: 500, fee: 195 },
     { id: 'ft2', label: 'Scholarship',           players: 50,  fee: 75  },
