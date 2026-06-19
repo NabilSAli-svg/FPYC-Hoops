@@ -152,11 +152,7 @@ export default function BudgetView() {
             <div style={{ padding: '14px 18px 10px', borderBottom: '1px solid var(--border)' }}>
               <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--court-navy)' }}>Fee Configuration</div>
               <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 2 }}>
-<<<<<<< HEAD
                 Projected players:&nbsp;<EditCell value={budget.projectedPlayers} onSave={updateProjectedPlayers} treasurerStyle plain />
-=======
-                Projected players:&nbsp;<EditCell value={budget.projectedPlayers} onSave={updateProjectedPlayers} treasurerStyle />
->>>>>>> origin/main
               </div>
             </div>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -170,11 +166,7 @@ export default function BudgetView() {
                 {budget.feeTypes.map((ft, i) => (
                   <tr key={ft.id} style={{ background: i % 2 === 0 ? '#fff' : 'var(--bone)' }}>
                     <td style={td}><span style={{ fontWeight: 600 }}>{ft.label}</span></td>
-<<<<<<< HEAD
                     <td style={{ ...td, background: '#EFF6FF' }}><EditCell value={ft.players} onSave={v => updateFeeType(ft.id, 'players', v)} directorStyle plain /></td>
-=======
-                    <td style={{ ...td, background: '#EFF6FF' }}><EditCell value={ft.players} onSave={v => updateFeeType(ft.id, 'players', v)} directorStyle /></td>
->>>>>>> origin/main
                     <td style={{ ...td, background: '#EEF2FF' }}><EditCell value={ft.fee} onSave={v => updateFeeType(ft.id, 'fee', v)} treasurerStyle /></td>
                     <td style={{ ...td, background: '#F3F4F6' }}><EditCell value={ft.players * ft.fee} onSave={() => {}} locked /></td>
                   </tr>
