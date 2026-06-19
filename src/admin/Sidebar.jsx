@@ -17,6 +17,7 @@ const SECONDARY = [
   { id: 'staff',     icon: 'shield-check',  label: 'Staff & Volunteers' },
   { id: 'scheduler', icon: 'calendar-range',label: 'Master Scheduler'   },
   { id: 'budget',    icon: 'dollar-sign',   label: 'Budget'             },
+  { id: 'payments',  icon: 'credit-card',   label: 'Payments'           },
   { id: 'inventory', icon: 'package',       label: 'Inventory'          },
   { id: 'playoffs',  icon: 'trophy',        label: 'Playoffs'           },
   { id: 'draftboard',icon: 'shuffle',       label: 'Draft Board'        },

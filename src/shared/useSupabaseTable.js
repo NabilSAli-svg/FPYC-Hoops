@@ -20,7 +20,19 @@ export function useSupabaseTable(tableName, initial = []) {
       .select('*')
       .then(({ data: rows, error }) => {
         if (error) { console.error(`[supabase] fetch ${tableName}:`, error.message); return; }
-        if (rows && rows.length > 0) setDataLocal(rows);
+        if (rows && rows.length > 0) {
+          // Seed any initial rows missing from the DB (e.g. newly added seed data)
+          const dbIds = new Set(rows.map(r => r.id));
+          const missing = initial.filter(r => r.id && !dbIds.has(r.id));
+          if (missing.length > 0) {
+            supabase.from(tableName).upsert(missing).then(({ error: e }) => {
+              if (e) console.error(`[supabase] seed ${tableName}:`, e.message);
+            });
+            setDataLocal([...rows, ...missing]);
+          } else {
+            setDataLocal(rows);
+          }
+        }
       });
 
     // Realtime subscription — channel name must be unique per hook instance,
@@ -42,7 +54,7 @@ export function useSupabaseTable(tableName, initial = []) {
       .subscribe();
 
     return () => supabase.removeChannel(channel);
-  }, [tableName]);
+  }, [tableName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setData = useCallback(async (updaterOrValue) => {
     const current = dataRef.current;

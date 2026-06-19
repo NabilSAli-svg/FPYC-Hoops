@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill, Avatar } from '../shared/index.js';
-import { useStaff } from '../shared/store.js';
+import { useStaff, INITIAL_STAFF } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
 
 const PROGRAMS = ['Recreation', 'Select', 'Training'];
@@ -17,6 +17,18 @@ const EMPTY_FORM = { name: '', role: '', program: 'Recreation', team: '', email:
 
 export default function StaffView() {
   const [staff, setStaff] = useStaff();
+
+  // Seed any INITIAL_STAFF entries missing from Supabase (e.g. Select/Training coaches added after initial launch)
+  useEffect(() => {
+    if (staff.length === 0) return; // still loading
+    const dbIds = new Set(staff.map(s => s.id));
+    const missing = INITIAL_STAFF.filter(s => !dbIds.has(s.id));
+    if (missing.length === 0) return;
+    supabase.from('staff').upsert(missing).then(({ error }) => {
+      if (error) { console.error('[staff seed]', error.message); return; }
+      setStaff(prev => [...prev, ...missing]);
+    });
+  }, [staff.length]); // eslint-disable-line react-hooks/exhaustive-deps
   const [activeProgram, setActiveProgram] = useState('All');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
