@@ -224,7 +224,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
         <BlackoutsTab blackouts={blackouts} setBlackouts={setBlackouts} seasonColor={activeSeason.color} />
       )}
       {tab === 'availability' && (
-        <GymAvailabilityTab permits={permits} blackouts={blackouts} season={season} seasonColor={activeSeason.color} />
+        <GymAvailabilityTab permits={permits} blackouts={blackouts} season={season} seasonColor={activeSeason.color} games={games} practices={practices} />
       )}
 
       {modal && (
@@ -738,7 +738,7 @@ function calendarStartOffset(year, month) {
   return (dow + 6) % 7; // convert so Mon=0
 }
 
-function GymAvailabilityTab({ permits, blackouts, season, seasonColor }) {
+function GymAvailabilityTab({ permits, blackouts, season, seasonColor, games = [], practices = [] }) {
   const today = new Date();
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectedGyms, setSelectedGyms] = useState(null); // null = all
@@ -762,6 +762,22 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor }) {
     return map;
   }, [permits]);
 
+  // Build set of "iso||gymName" combos that have a scheduled game or practice
+  const bookedSet = useMemo(() => {
+    const set = new Set();
+    games.forEach(g => {
+      const d = parseGameDate(g);
+      if (!d || !g.location || g.location === 'TBD') return;
+      set.add(`${isoDate(d)}||${g.location}`);
+    });
+    practices.forEach(p => {
+      const d = parsePracticeDate(p);
+      if (!d || !p.gym) return;
+      set.add(`${isoDate(d)}||${p.gym}`);
+    });
+    return set;
+  }, [games, practices]);
+
   function isPermitted(gymName, date) {
     const perms = permitsByGym[gymName] || [];
     const dayName = WEEK_DAYS[date.getDay()];
@@ -772,6 +788,10 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor }) {
       (!p.start_date || iso >= p.start_date) &&
       (!p.end_date   || iso <= p.end_date)
     );
+  }
+
+  function isBooked(gymName, date) {
+    return bookedSet.has(`${isoDate(date)}||${gymName}`);
   }
 
   const numDays = daysInMonth(year, month);
@@ -839,9 +859,10 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor }) {
 
       {/* Legend */}
       <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-        <LegendItem color="rgba(31,138,91,0.2)"  border="#1F8A5B" label="Available (permitted)" />
-        <LegendItem color="rgba(180,180,180,0.2)" border="#aaa"   label="No permit this day" />
-        <LegendItem color="rgba(200,16,46,0.12)"  border="#C8102E" label="Blackout / school closed" />
+        <LegendItem color="rgba(31,138,91,0.2)"    border="#1F8A5B"  label="Permitted & open" />
+        <LegendItem color="rgba(255,199,44,0.25)"  border="#C97B00"  label="Permitted but booked" />
+        <LegendItem color="rgba(180,180,180,0.2)"  border="#aaa"     label="No permit this day" />
+        <LegendItem color="rgba(200,16,46,0.12)"   border="#C8102E"  label="Blackout / school closed" />
       </div>
 
       {/* Calendar grid */}
@@ -868,7 +889,8 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor }) {
               const isBlackout = blackoutSet.has(iso);
               const isToday    = iso === todayIso;
 
-              const permittedGyms = activeGyms.filter(g => isPermitted(g, cellDate));
+              const permittedGyms    = activeGyms.filter(g =>  isPermitted(g, cellDate) && !isBooked(g, cellDate));
+              const bookedGyms      = activeGyms.filter(g =>  isPermitted(g, cellDate) &&  isBooked(g, cellDate));
               const unpermittedGyms = activeGyms.filter(g => !isPermitted(g, cellDate));
 
               return (
@@ -894,10 +916,10 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor }) {
                     {isBlackout && <span style={{ fontSize: 11, color: '#C8102E', fontWeight: 700 }}>✕</span>}
                   </div>
 
-                  {/* Permitted gym chips */}
+                  {/* Gym chips: open / booked / no permit */}
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                     {permittedGyms.map(g => (
-                      <span key={g} title={g} style={{
+                      <span key={g} title={`${g} — permitted & open`} style={{
                         fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-body)',
                         padding: '1px 5px', borderRadius: 4,
                         background: 'rgba(31,138,91,0.18)', color: '#1F8A5B',
@@ -905,8 +927,17 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor }) {
                         whiteSpace: 'nowrap',
                       }}>{gymAbbr(g)}</span>
                     ))}
+                    {bookedGyms.map(g => (
+                      <span key={g} title={`${g} — permitted but already scheduled`} style={{
+                        fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-body)',
+                        padding: '1px 5px', borderRadius: 4,
+                        background: 'rgba(255,199,44,0.25)', color: '#C97B00',
+                        border: '1px solid rgba(201,123,0,0.45)',
+                        whiteSpace: 'nowrap',
+                      }}>{gymAbbr(g)} ●</span>
+                    ))}
                     {!isBlackout && unpermittedGyms.map(g => (
-                      <span key={g} title={g} style={{
+                      <span key={g} title={`${g} — no permit`} style={{
                         fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-body)',
                         padding: '1px 5px', borderRadius: 4,
                         background: 'rgba(180,180,180,0.18)', color: '#999',
