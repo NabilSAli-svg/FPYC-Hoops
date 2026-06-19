@@ -10,15 +10,21 @@ function calcBudget(budget) {
   const regRevenueAuto = budget.feeTypes
     .filter(ft => ft.label !== 'Late Fee')
     .reduce((s, ft) => s + (ft.players || 0) * (ft.fee || 0), 0);
+  const regRevenueActual = budget.feeTypes
+    .filter(ft => ft.label !== 'Late Fee')
+    .reduce((s, ft) => s + (ft.actualPlayers != null ? ft.actualPlayers : ft.players || 0) * (ft.fee || 0), 0);
   const regRevenue = budget.registrationsBudget != null ? budget.registrationsBudget : regRevenueAuto;
   const lateFeeRevenue = budget.feeTypes
     .filter(ft => ft.label === 'Late Fee')
     .reduce((s, ft) => s + (ft.players || 0) * (ft.fee || 0), 0);
+  const lateFeeActual = budget.feeTypes
+    .filter(ft => ft.label === 'Late Fee')
+    .reduce((s, ft) => s + (ft.actualPlayers != null ? ft.actualPlayers : ft.players || 0) * (ft.fee || 0), 0);
   const otherRevBudget = budget.revenueOther.reduce((s, r) => s + (r.budgeted || 0), 0);
   const otherRevActual = budget.revenueOther.reduce((s, r) => s + (r.actual || 0), 0);
   const otherRevPrior  = budget.revenueOther.reduce((s, r) => s + (r.priorActual || 0), 0);
   const totalRevBudget = regRevenue + lateFeeRevenue + otherRevBudget;
-  const totalRevActual = regRevenue + lateFeeRevenue + otherRevActual;
+  const totalRevActual = regRevenueActual + lateFeeActual + otherRevActual;
   const priorYear = budget.priorYear || {};
   const totalRevPrior = (priorYear.registrations || 0) + (priorYear.lateFees || 0) + otherRevPrior;
   const expenses = budget.expenses.map(e => ({
@@ -28,7 +34,7 @@ function calcBudget(budget) {
   const totalExpBudget = expenses.reduce((s, e) => s + e.budgetCalc, 0);
   const totalExpActual = expenses.reduce((s, e) => s + (e.actual || 0), 0);
   const totalExpPrior  = expenses.reduce((s, e) => s + (e.priorActual || 0), 0);
-  return { regRevenue, lateFeeRevenue, totalRevBudget, totalRevActual, totalRevPrior, expenses, totalExpBudget, totalExpActual, totalExpPrior };
+  return { regRevenue, regRevenueActual, lateFeeRevenue, lateFeeActual, totalRevBudget, totalRevActual, totalRevPrior, expenses, totalExpBudget, totalExpActual, totalExpPrior };
 }
 
 function EditCell({ value, onSave, locked, directorStyle, treasurerStyle, priorStyle, plain }) {
@@ -158,19 +164,36 @@ export default function BudgetView() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead><tr>
                 <th style={th}>Fee Type</th>
-                <th style={{ ...th, background: '#EFF6FF' }}>🔵 # Players</th>
+                <th style={{ ...th, background: '#EFF6FF' }}>🔵 Projected #</th>
+                <th style={th}>Actual #</th>
                 <th style={{ ...th, background: '#EEF2FF' }}>💜 Fee</th>
-                <th style={{ ...th, background: '#F3F4F6' }}>⬛ Subtotal</th>
+                <th style={{ ...th, background: '#F3F4F6' }}>Projected $</th>
+                <th style={th}>Actual $</th>
               </tr></thead>
               <tbody>
-                {budget.feeTypes.map((ft, i) => (
-                  <tr key={ft.id} style={{ background: i % 2 === 0 ? '#fff' : 'var(--bone)' }}>
-                    <td style={td}><span style={{ fontWeight: 600 }}>{ft.label}</span></td>
-                    <td style={{ ...td, background: '#EFF6FF' }}><EditCell value={ft.players} onSave={v => updateFeeType(ft.id, 'players', v)} directorStyle plain /></td>
-                    <td style={{ ...td, background: '#EEF2FF' }}><EditCell value={ft.fee} onSave={v => updateFeeType(ft.id, 'fee', v)} treasurerStyle /></td>
-                    <td style={{ ...td, background: '#F3F4F6' }}><EditCell value={ft.players * ft.fee} onSave={() => {}} locked /></td>
-                  </tr>
-                ))}
+                {budget.feeTypes.map((ft, i) => {
+                  const actualPlayers = ft.actualPlayers ?? ft.players;
+                  const diff = actualPlayers - ft.players;
+                  return (
+                    <tr key={ft.id} style={{ background: i % 2 === 0 ? '#fff' : 'var(--bone)' }}>
+                      <td style={td}><span style={{ fontWeight: 600 }}>{ft.label}</span></td>
+                      <td style={{ ...td, background: '#EFF6FF' }}><EditCell value={ft.players} onSave={v => updateFeeType(ft.id, 'players', v)} directorStyle plain /></td>
+                      <td style={td}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <EditCell value={actualPlayers} onSave={v => updateFeeType(ft.id, 'actualPlayers', v)} plain />
+                          {diff !== 0 && (
+                            <span style={{ fontSize: 11, fontWeight: 700, color: diff > 0 ? '#22C55E' : '#EF4444' }}>
+                              {diff > 0 ? '+' : ''}{diff}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td style={{ ...td, background: '#EEF2FF' }}><EditCell value={ft.fee} onSave={v => updateFeeType(ft.id, 'fee', v)} treasurerStyle /></td>
+                      <td style={{ ...td, background: '#F3F4F6' }}><EditCell value={ft.players * ft.fee} onSave={() => {}} locked /></td>
+                      <td style={td}><EditCell value={actualPlayers * ft.fee} onSave={() => {}} locked /></td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </Card>
@@ -196,14 +219,14 @@ export default function BudgetView() {
                   </td>
                   <td style={{ ...td, background: '#F9FAFB' }}><EditCell value={budget.priorYear?.registrations || 0} onSave={() => {}} priorStyle /></td>
                   <td style={{ ...td, background: '#EEF2FF' }}><EditCell value={calc.regRevenue} onSave={updateRegistrationsBudget} treasurerStyle /></td>
-                  <td style={{ ...td, background: '#F3F4F6' }}><EditCell value={calc.regRevenue} onSave={() => {}} locked /></td>
+                  <td style={td}><EditCell value={calc.regRevenueActual} onSave={() => {}} locked /></td>
                 </tr>
                 <tr style={{ background: 'var(--bone)' }}>
                   <td style={{ ...td, color: 'var(--fg-muted)', fontSize: 11 }}>1041-08</td>
                   <td style={td}>Late Fees</td>
                   <td style={{ ...td, background: '#F9FAFB' }}><EditCell value={budget.priorYear?.lateFees || 0} onSave={() => {}} priorStyle /></td>
                   <td style={{ ...td, background: '#F3F4F6' }}><EditCell value={calc.lateFeeRevenue} onSave={() => {}} locked /></td>
-                  <td style={{ ...td, background: '#F3F4F6' }}><EditCell value={calc.lateFeeRevenue} onSave={() => {}} locked /></td>
+                  <td style={td}><EditCell value={calc.lateFeeActual} onSave={() => {}} locked /></td>
                 </tr>
                 {budget.revenueOther.map((r, i) => (
                   <tr key={r.id} style={{ background: i % 2 === 0 ? '#fff' : 'var(--bone)' }}>
