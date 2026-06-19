@@ -115,7 +115,7 @@ export default function AdminApp() {
     season:      { title: 'Season',             breadcrumb: `${activeTeam.division} · Season 2025–26` },
     stats:       { title: 'Player Stats',       breadcrumb: `${activeTeam.name} · Season 2025–26` },
     scheduler:   { title: 'Master Scheduler', breadcrumb: 'Gym permits · School closings · League calendar' },
-    budget:      { title: 'Budget',           breadcrumb: '2025–26 · Revenue & expenses · Actual spend tracking' },
+    budget:      { title: 'Budget',           breadcrumb: '2026–27 · Revenue & expenses · Actual spend tracking' },
     settings:    { title: 'Settings',           breadcrumb: `${(SPORTS.find(s => s.id === sport) || SPORTS[0]).tagline} · ${role === 'commissioner' ? 'Admin' : 'Coach'} console` },
   };
   const t = titleMap[view] || titleMap.dashboard;

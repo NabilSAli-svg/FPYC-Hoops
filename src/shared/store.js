@@ -1157,38 +1157,41 @@ export function countRsvps(rsvps, gameId) {
 // ── Budget ────────────────────────────────────────────────────────────────────
 
 export const INITIAL_BUDGET = {
-  id: 'budget-2526',
-  year: '2025-26',
-  projectedPlayers: 795,
+  id: 'budget-2627',
+  year: '2026-27',
+  projectedPlayers: 930,
   feeTypes: [
-    { id: 'ft1', label: 'Regular',       players: 485, fee: 195  },
-    { id: 'ft2', label: 'Scholarship',   players: 50,  fee: 75   },
-    { id: 'ft3', label: 'Late Fee',      players: 75,  fee: 45   },
-    { id: 'ft4', label: 'Select Winter', players: 100, fee: 245  },
-    { id: 'ft5', label: 'Select Summer', players: 85,  fee: 215  },
-    { id: 'ft6', label: 'Skills Clinic', players: 75,  fee: 65   },
+    { id: 'ft1', label: 'Rec Winter Regular',    players: 500, fee: 195 },
+    { id: 'ft2', label: 'Scholarship',           players: 50,  fee: 75  },
+    { id: 'ft3', label: 'Late Fee',              players: 50,  fee: 45  },
+    { id: 'ft4', label: 'Select Winter',         players: 100, fee: 240 },
+    { id: 'ft5', label: 'Select Summer',         players: 100, fee: 225 },
+    { id: 'ft6', label: 'REC Summer',            players: 50,  fee: 125 },
+    { id: 'ft7', label: 'Skills Clinic Fall',    players: 50,  fee: 200 },
+    { id: 'ft8', label: 'Skills Clinic Spring',  players: 40,  fee: 200 },
+    { id: 'ft9', label: 'Skills Clinic Summer',  players: 40,  fee: 200 },
   ],
   revenueOther: [
-    { id: 'ro1', account: '1027-08', label: 'Donations', budgeted: 0, actual: 1786 },
+    { id: 'ro1', account: '1027-08', label: 'Donations', budgeted: 0, actual: 0 },
   ],
   expenses: [
-    { id: 'e1',  account: '5050-08', label: 'Admin Contributions',    perPlayer: 12.50, budget: null, actual: 0, notes: 'Basketball share toward FPYC expense' },
-    { id: 'e3',  account: '5058-08', label: 'Capital Improvement',    perPlayer: 7.41,  budget: null, actual: 0, notes: 'Building/fields expenses' },
-    { id: 'e5',  account: '5060-08', label: 'Database',               perPlayer: 1.00,  budget: null, actual: 0, notes: 'Demosphere + TeamSnap' },
-    { id: 'e7',  account: '5068-08', label: 'Ins / Clubhouse',        perPlayer: 0.60,  budget: null, actual: 0, notes: '' },
-    { id: 'e8',  account: '5070-08', label: 'Ins / L&A',             perPlayer: 15.35, budget: null, actual: 0, notes: '' },
-    { id: 'e9',  account: '5071-08', label: 'Ins / D&O',             perPlayer: 0.39,  budget: null, actual: 0, notes: '' },
-    { id: 'e2',  account: '5051-08', label: 'Annual Reception',       perPlayer: null,  budget: 650,   actual: 0, notes: 'End of year food/bar tab for coaches' },
-    { id: 'e4',  account: '5059-08', label: 'County / City Fees',     perPlayer: null,  budget: 30000, actual: 0, notes: 'Gym fees' },
-    { id: 'e6',  account: '5062-08', label: 'Equipment',              perPlayer: null,  budget: 4500,  actual: 0, notes: 'Basketballs and other equipment' },
+    { id: 'e1',  account: '5050-08', label: 'Admin Contributions',    perPlayer: 12.50, budget: null,  actual: 0, notes: 'Basketball share toward FPYC expense' },
+    { id: 'e3',  account: '5058-08', label: 'Capital Improvement',    perPlayer: 7.41,  budget: null,  actual: 0, notes: 'Building/fields expenses' },
+    { id: 'e5',  account: '5060-08', label: 'Database',               perPlayer: 1.00,  budget: null,  actual: 0, notes: 'Demosphere + TeamSnap' },
+    { id: 'e7',  account: '5068-08', label: 'Ins / Clubhouse',        perPlayer: 0.60,  budget: null,  actual: 0, notes: '' },
+    { id: 'e8',  account: '5070-08', label: 'Ins / L&A',             perPlayer: 15.35, budget: null,  actual: 0, notes: '' },
+    { id: 'e9',  account: '5071-08', label: 'Ins / D&O',             perPlayer: 0.39,  budget: null,  actual: 0, notes: '' },
+    { id: 'e2',  account: '5051-08', label: 'Annual Reception',       perPlayer: null,  budget: 500,   actual: 0, notes: 'End of year food/bar tab for coaches' },
+    { id: 'e4',  account: '5059-08', label: 'County / City Fees',     perPlayer: null,  budget: 15000, actual: 0, notes: 'Gym fees' },
+    { id: 'e6',  account: '5062-08', label: 'Equipment',              perPlayer: null,  budget: 5000,  actual: 0, notes: 'Basketballs and other equipment' },
     { id: 'e10', account: '5074-08', label: 'Miscellaneous',          perPlayer: null,  budget: 8000,  actual: 0, notes: 'Travel league FCYBL fees' },
-    { id: 'e11', account: '5084-08', label: 'Referees / Umpires',     perPlayer: null,  budget: 30000, actual: 0, notes: 'Refs' },
-    { id: 'e12', account: '5086-08', label: 'Refunds',                perPlayer: null,  budget: 500,   actual: 0, notes: 'Post-season refunds' },
-    { id: 'e13', account: '5088-08', label: 'Registrations (Expense)',perPlayer: null,  budget: 5000,  actual: 0, notes: '' },
-    { id: 'e14', account: '5093-08', label: 'Spirit Wear / Coaches',  perPlayer: null,  budget: 3000,  actual: 0, notes: 'Coaches gear 2026' },
-    { id: 'e15', account: '5096-08', label: 'Training',               perPlayer: null,  budget: 21000, actual: 0, notes: 'Shaun / TYS / Evolution' },
-    { id: 'e16', account: '5098-08', label: 'Trophies / Plaques',     perPlayer: null,  budget: 3000,  actual: 0, notes: 'Awards' },
-    { id: 'e17', account: '5099-08', label: 'Uniforms',               perPlayer: null,  budget: 14000, actual: 0, notes: 'Uniforms' },
+    { id: 'e11', account: '5084-08', label: 'Referees / Umpires',     perPlayer: null,  budget: 28000, actual: 0, notes: 'Refs' },
+    { id: 'e12', account: '5086-08', label: 'Refunds',                perPlayer: null,  budget: 600,   actual: 0, notes: 'Post-season refunds' },
+    { id: 'e13', account: '5088-08', label: 'Registrations (Expense)',perPlayer: null,  budget: 8600,  actual: 0, notes: '' },
+    { id: 'e14', account: '5093-08', label: 'Spirit Wear / Coaches',  perPlayer: null,  budget: 5000,  actual: 0, notes: 'Coaches gear 2027' },
+    { id: 'e15', account: '5096-08', label: 'Training',               perPlayer: null,  budget: 35000, actual: 0, notes: 'Shaun / TYS / Evolution' },
+    { id: 'e16', account: '5098-08', label: 'Trophies / Plaques',     perPlayer: null,  budget: 2000,  actual: 0, notes: 'Awards' },
+    { id: 'e17', account: '5099-08', label: 'Uniforms',               perPlayer: null,  budget: 15000, actual: 0, notes: 'Uniforms' },
   ],
 };
 
@@ -1196,14 +1199,14 @@ export function useBudget() {
   const [budget, setBudgetState] = useState(INITIAL_BUDGET);
 
   useEffect(() => {
-    supabase.from('budget').select('data').eq('id', 'budget-2526').single().then(({ data, error }) => {
+    supabase.from('budget').select('data').eq('id', 'budget-2627').single().then(({ data, error }) => {
       if (!error && data?.data) setBudgetState(data.data);
     });
   }, []);
 
   async function saveBudget(newBudget) {
     setBudgetState(newBudget);
-    await supabase.from('budget').upsert({ id: 'budget-2526', data: newBudget, updated_at: new Date().toISOString() });
+    await supabase.from('budget').upsert({ id: 'budget-2627', data: newBudget, updated_at: new Date().toISOString() });
   }
 
   return [budget, saveBudget];
