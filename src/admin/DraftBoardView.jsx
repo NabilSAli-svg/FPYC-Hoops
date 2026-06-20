@@ -17,14 +17,20 @@ function buildDraftPool(players, evals, division) {
     .filter(p => division
       ? p.division?.toLowerCase().includes(division.toLowerCase())
       : true)
+    .filter(p => p.status !== 'inactive')
     .map(p => {
       const ev = evals[p.id] || {};
       const vals = Object.values(ev).filter(v => typeof v === 'number');
       const skill = vals.length
         ? parseFloat((vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1))
         : null;
-      return { id: p.id, name: p.name, grade: p.grade, position: p.position || 'Guard', school: p.school || '', skill, division: p.division };
+      return { id: p.id, name: p.name, grade: p.grade, position: p.position || 'Guard', school: p.school || '', skill, division: p.division, evaluated: vals.length > 0 };
     });
+}
+
+function applyNoShowPolicy(pool, policy) {
+  if (policy === 'exclude' || policy === 'randomize') return pool.filter(p => p.evaluated);
+  return pool; // 'include' — everyone
 }
 
 function skillColor(s) {
@@ -107,6 +113,7 @@ function NewDraftForm({ onSave, onCancel, initial }) {
   const [season, setSeason] = useState(initial?.season || '2026-27');
   const [format, setFormat] = useState(initial?.format || 'snake');
   const [rounds, setRounds] = useState(initial?.rounds || 4);
+  const [noShowPolicy, setNoShowPolicy] = useState(initial?.noShowPolicy || 'include');
   const [teams, setTeams] = useState(initial?.teams || [
     { id: uid(), name: '', coach: '', color: TEAM_COLORS[0] },
     { id: uid(), name: '', coach: '', color: TEAM_COLORS[1] },
@@ -131,6 +138,7 @@ function NewDraftForm({ onSave, onCancel, initial }) {
       division: division.trim(),
       season: season.trim(),
       format,
+      noShowPolicy,
       teams: teams.map(t => ({ ...t, name: t.name || 'Team', coach: t.coach || '' })),
       draftOrder,
       rounds: Number(rounds),
@@ -139,6 +147,7 @@ function NewDraftForm({ onSave, onCancel, initial }) {
       log: [],
       status: 'open',
       playerIds: [],
+      noShowRoster: {},  // assigned after main draft
     });
   }
 
@@ -173,6 +182,26 @@ function NewDraftForm({ onSave, onCancel, initial }) {
         <div>
           <label style={lbl}>Rounds</label>
           <input style={inp} type="number" min={1} max={20} value={rounds} onChange={e => setRounds(e.target.value)} />
+        </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label style={lbl}>Players who missed tryouts (no eval score)</label>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {[
+              { id: 'include',    label: 'Include in main draft',         desc: 'Everyone in the pool regardless of eval status' },
+              { id: 'randomize',  label: 'Randomize after draft',         desc: 'Main draft = evaluated only · No-shows distributed randomly after' },
+              { id: 'exclude',    label: 'Exclude entirely',              desc: 'Only evaluated players are eligible' },
+            ].map(opt => (
+              <button key={opt.id} type="button" onClick={() => setNoShowPolicy(opt.id)} style={{
+                flex: 1, minWidth: 180, padding: '10px 14px', borderRadius: 8, textAlign: 'left', cursor: 'pointer',
+                border: `2px solid ${noShowPolicy === opt.id ? 'var(--court-navy)' : 'var(--border)'}`,
+                background: noShowPolicy === opt.id ? 'rgba(10,31,61,0.06)' : '#fff',
+                fontFamily: 'var(--font-body)',
+              }}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--court-navy)', marginBottom: 2 }}>{opt.label}</div>
+                <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{opt.desc}</div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -213,13 +242,15 @@ function NewDraftForm({ onSave, onCancel, initial }) {
 
 function OpenView({ draft, setDrafts, players, evals }) {
   const [sortBy, setSortBy] = useState('skill');
+  const fullPool = useMemo(() => buildDraftPool(players, evals, draft.division), [players, evals, draft.division]);
+  const noShows = useMemo(() => fullPool.filter(p => !p.evaluated), [fullPool]);
   const pool = useMemo(() => {
-    const p = buildDraftPool(players, evals, draft.division);
+    const p = applyNoShowPolicy(fullPool, draft.noShowPolicy);
     return p.sort((a, b) =>
       sortBy === 'skill' ? (b.skill ?? 0) - (a.skill ?? 0) :
       sortBy === 'name' ? a.name.localeCompare(b.name) :
       (a.grade || '').localeCompare(b.grade || ''));
-  }, [players, evals, draft.division, sortBy]);
+  }, [fullPool, draft.noShowPolicy, sortBy]);
 
   const draftOrder = buildOrder(draft.format, draft.teams, draft.rounds);
   const gradeGroups = {};
@@ -228,7 +259,9 @@ function OpenView({ draft, setDrafts, players, evals }) {
 
   function startDraft() {
     setDrafts(prev => prev.map(d => d.id !== draft.id ? d : {
-      ...d, status: 'live', playerIds: pool.map(p => p.id), currentPick: 0, draftOrder,
+      ...d, status: 'live', playerIds: pool.map(p => p.id),
+      noShowIds: noShows.map(p => p.id),
+      currentPick: 0, draftOrder,
     }));
   }
   function backToSetup() {
@@ -250,10 +283,25 @@ function OpenView({ draft, setDrafts, players, evals }) {
         <Button size="sm" onClick={startDraft}>{draft.format === 'balanced' ? 'Auto-Assign' : 'Start Draft'}</Button>
       </div>
 
+      {draft.noShowPolicy === 'randomize' && noShows.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 8, background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.25)' }}>
+          <Icon name="shuffle" size={16} color="#7C3AED" />
+          <span style={{ fontSize: 13, flex: 1 }}><strong>{noShows.length} players missed tryouts</strong> — they won't appear in the main draft and will be randomly distributed across teams after.</span>
+        </div>
+      )}
+      {draft.noShowPolicy === 'exclude' && noShows.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 8, background: 'rgba(200,16,46,0.06)', border: '1px solid rgba(200,16,46,0.20)' }}>
+          <Icon name="user-x" size={16} color="#C8102E" />
+          <span style={{ fontSize: 13, flex: 1 }}><strong>{noShows.length} players excluded</strong> — no eval score on file. They will not be drafted.</span>
+        </div>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
         <Card padding={16}>
           <Eyebrow style={{ marginBottom: 10 }}>Pool stats</Eyebrow>
-          <Row label="Total players" value={pool.length} />
+          <Row label="Eligible for draft" value={pool.length} />
+          {draft.noShowPolicy === 'randomize' && <Row label="No-shows (post-draft)" value={noShows.length} />}
+          {draft.noShowPolicy === 'exclude' && noShows.length > 0 && <Row label="Excluded (no eval)" value={noShows.length} />}
           <Row label="Avg skill" value={avgSkill} />
           {Object.entries(gradeGroups).sort().map(([g, c]) => <Row key={g} label={g} value={c} />)}
         </Card>
@@ -309,8 +357,9 @@ function LiveView({ draft, setDrafts, players, evals }) {
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [balancedPreview, setBalancedPreview] = useState(null);
 
-  const pool = useMemo(() => buildDraftPool(players, evals, draft.division), [players, evals, draft.division]);
-  const poolMap = useMemo(() => Object.fromEntries(pool.map(p => [p.id, p])), [pool]);
+  const fullPool = useMemo(() => buildDraftPool(players, evals, draft.division), [players, evals, draft.division]);
+  const pool = useMemo(() => applyNoShowPolicy(fullPool, draft.noShowPolicy), [fullPool, draft.noShowPolicy]);
+  const poolMap = useMemo(() => Object.fromEntries(fullPool.map(p => [p.id, p])), [fullPool]);
 
   const drafted = new Set(Object.values(draft.roster).flat());
   let available = pool.filter(p => !drafted.has(p.id));
@@ -451,6 +500,9 @@ function LiveView({ draft, setDrafts, players, evals }) {
                   <div style={{ fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</div>
                   <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.grade} · {p.position} · {p.school}</div>
                 </div>
+                {!p.evaluated && (
+                  <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 5px', borderRadius: 4, background: 'rgba(124,58,237,0.12)', color: '#7C3AED', flexShrink: 0 }}>NO EVAL</span>
+                )}
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: skillColor(p.skill), flexShrink: 0 }}>{p.skill ?? '—'}</div>
                 {!done && format !== 'balanced' && (
                   <div style={{ width: 26, height: 26, borderRadius: 6, background: 'var(--varsity-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -531,15 +583,27 @@ function LiveView({ draft, setDrafts, players, evals }) {
 // ── Completed View ────────────────────────────────────────────────────────────
 
 function CompletedView({ draft, setDrafts, players, evals, setPlayers }) {
-  const pool = useMemo(() => buildDraftPool(players, evals, draft.division), [players, evals, draft.division]);
-  const poolMap = useMemo(() => Object.fromEntries(pool.map(p => [p.id, p])), [pool]);
+  const fullPool = useMemo(() => buildDraftPool(players, evals, draft.division), [players, evals, draft.division]);
+  const pool = useMemo(() => applyNoShowPolicy(fullPool, draft.noShowPolicy), [fullPool, draft.noShowPolicy]);
+  const poolMap = useMemo(() => Object.fromEntries(fullPool.map(p => [p.id, p])), [fullPool]);
+
+  const noShows = useMemo(() => fullPool.filter(p => !p.evaluated), [fullPool]);
+  const noShowsDistributed = draft.noShowPolicy !== 'randomize' || Object.values(draft.noShowRoster || {}).flat().length > 0;
+
+  function distributeNoShows() {
+    const shuffled = shuffle(noShows);
+    const teamIds = draft.teams.map(t => t.id);
+    const noShowRoster = {};
+    teamIds.forEach(id => { noShowRoster[id] = []; });
+    shuffled.forEach((p, i) => { noShowRoster[teamIds[i % teamIds.length]].push(p.id); });
+    setDrafts(prev => prev.map(d => d.id !== draft.id ? d : { ...d, noShowRoster }));
+  }
 
   function finalizeTeams() {
     setPlayers(prev => prev.map(p => {
       for (const team of draft.teams) {
-        if ((draft.roster[team.id] || []).includes(p.id)) {
-          return { ...p, team: team.name, status: 'active' };
-        }
+        if ((draft.roster[team.id] || []).includes(p.id)) return { ...p, team: team.name, status: 'active' };
+        if ((draft.noShowRoster?.[team.id] || []).includes(p.id)) return { ...p, team: team.name, status: 'active' };
       }
       return p;
     }));
@@ -563,6 +627,38 @@ function CompletedView({ draft, setDrafts, players, evals, setPlayers }) {
         <Button size="sm" variant="ghost" onClick={resetDraft}>Reset draft</Button>
         <Button size="sm" onClick={finalizeTeams}>Finalize Teams</Button>
       </div>
+
+      {draft.noShowPolicy === 'randomize' && noShows.length > 0 && (
+        <Card padding={16}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: noShowsDistributed ? 12 : 0 }}>
+            <Icon name="shuffle" size={16} color="#7C3AED" />
+            <span style={{ flex: 1, fontSize: 14, fontWeight: 700 }}>{noShows.length} no-show players — randomize to teams</span>
+            <Button size="sm" onClick={distributeNoShows}>{noShowsDistributed ? 'Re-randomize' : 'Randomize now'}</Button>
+          </div>
+          {noShowsDistributed && (
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(draft.teams.length, 4)}, 1fr)`, gap: 8, marginTop: 12 }}>
+              {draft.teams.map(team => {
+                const pids = draft.noShowRoster?.[team.id] || [];
+                return (
+                  <div key={team.id} style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+                    <div style={{ background: team.color, color: '#fff', padding: '6px 10px', fontSize: 12, fontWeight: 700 }}>{team.name}</div>
+                    {pids.length === 0
+                      ? <div style={{ padding: '8px 10px', fontSize: 12, color: 'var(--fg-muted)' }}>None assigned</div>
+                      : pids.map(id => {
+                          const p = poolMap[id];
+                          return p ? <div key={id} style={{ padding: '5px 10px', fontSize: 12, borderBottom: '1px solid var(--border)' }}>{p.name} <span style={{ color: 'var(--fg-muted)', fontSize: 11 }}>· {p.grade}</span></div> : null;
+                        })
+                    }
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {!noShowsDistributed && (
+            <div style={{ marginTop: 8, fontSize: 12, color: 'var(--fg-muted)' }}>Click "Randomize now" to distribute these players randomly across teams. You can re-randomize as many times as you like before finalizing.</div>
+          )}
+        </Card>
+      )}
 
       <Card padding={16}>
         <Eyebrow style={{ marginBottom: 12 }}>Skill balance</Eyebrow>
@@ -609,6 +705,18 @@ function CompletedView({ draft, setDrafts, players, evals, setPlayers }) {
                   <span style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: skillColor(p.skill) }}>{p.skill ?? '—'}</span>
                 </div>
               ))}
+              {(draft.noShowRoster?.[team.id] || []).map(id => {
+                const p = poolMap[id];
+                return p ? (
+                  <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', borderBottom: '1px solid var(--border)', background: 'rgba(124,58,237,0.04)' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</div>
+                      <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.grade} · {p.position}</div>
+                    </div>
+                    <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 5px', borderRadius: 4, background: 'rgba(124,58,237,0.12)', color: '#7C3AED' }}>NO EVAL</span>
+                  </div>
+                ) : null;
+              })}
             </Card>
           );
         })}
