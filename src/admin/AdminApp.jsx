@@ -195,7 +195,7 @@ export default function AdminApp() {
           {view === 'lineup'      && <LineupView players={teamPlayers.filter(p => p.status === 'active')} games={teamGames} sport={sport} />}
           {view === 'attendance'  && <AttendanceView players={teamPlayers} />}
           {view === 'messages'       && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} teamName={selectedTeamName} />}
-          {view === 'announcements'  && <AnnouncementsView />}
+          {view === 'announcements'  && <AnnouncementsView players={players} />}
           {view === 'evaluations' && <EvaluationsView players={teamPlayers.filter(p => p.status !== 'inactive')} sport={sport} />}
           {view === 'staff'       && <StaffView />}
           {view === 'playoffs'    && <PlayoffsView />}

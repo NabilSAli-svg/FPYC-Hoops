@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAnnouncements, TEAMS_INFO } from '../shared/store.js';
 import { Button, Icon } from '../shared/index.js';
+import { supabase } from '../shared/supabase.js';
 
 const TARGET_OPTIONS = [
   'All families',
@@ -19,12 +20,24 @@ function makeId() {
   return 'ann-' + Math.random().toString(36).slice(2, 9);
 }
 
-export default function AnnouncementsView() {
+function getRecipients(players, target) {
+  const active = players.filter(p => p.status !== 'inactive');
+  const pool = target === 'All families' ? active : active.filter(p => p.team === target);
+  const emails = [...new Set(pool.map(p => p.guardianEmail || p.email).filter(Boolean))];
+  const phones = [...new Set(pool.map(p => p.guardianPhone || p.phone).filter(Boolean))];
+  return { emails, phones, count: pool.length };
+}
+
+export default function AnnouncementsView({ players = [] }) {
   const [announcements, setAnnouncements] = useAnnouncements();
   const [composing, setComposing] = useState(false);
   const [editId, setEditId]       = useState(null);
   const [deleteId, setDeleteId]   = useState(null);
   const [draft, setDraft]         = useState(emptyDraft);
+  const [sendEmail, setSendEmail] = useState(false);
+  const [sendSms, setSendSms]     = useState(false);
+  const [sending, setSending]     = useState(false);
+  const [sendResult, setSendResult] = useState(null); // { ok, emailCount, smsCount, error }
 
   function emptyDraft() {
     return { type: 'info', title: '', body: '', target: 'All families', pinned: false };
@@ -33,27 +46,82 @@ export default function AnnouncementsView() {
   function openNew() {
     setDraft(emptyDraft());
     setEditId(null);
+    setSendEmail(false);
+    setSendSms(false);
+    setSendResult(null);
     setComposing(true);
   }
 
   function openEdit(a) {
     setDraft({ type: a.type, title: a.title, body: a.body, target: a.target, pinned: a.pinned });
     setEditId(a.id);
+    setSendEmail(false);
+    setSendSms(false);
+    setSendResult(null);
     setComposing(true);
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!draft.title.trim()) return;
+    setSending(true);
+    setSendResult(null);
+
+    let emailCount = 0;
+    let smsCount = 0;
+    let errors = [];
+
+    const { emails, phones } = getRecipients(players, draft.target);
+    const subject = `[FPYC] ${draft.title}`;
+    const text = draft.body ? `${draft.title}\n\n${draft.body}` : draft.title;
+
+    if (sendEmail && emails.length > 0) {
+      try {
+        const { error } = await supabase.functions.invoke('send-email', {
+          body: { to: emails, subject, html: `<p><strong>${draft.title}</strong></p>${draft.body ? `<p>${draft.body.replace(/\n/g, '<br>')}</p>` : ''}` },
+        });
+        if (error) throw error;
+        emailCount = emails.length;
+      } catch (e) {
+        errors.push(`Email: ${e.message || e}`);
+      }
+    }
+
+    if (sendSms && phones.length > 0) {
+      try {
+        const { error } = await supabase.functions.invoke('send-sms', {
+          body: { to: phones, body: text },
+        });
+        if (error) throw error;
+        smsCount = phones.length;
+      } catch (e) {
+        errors.push(`SMS: ${e.message || e}`);
+      }
+    }
+
+    // Save to feed
+    const sent = sendEmail || sendSms;
     if (editId) {
       setAnnouncements(prev => prev.map(a =>
         a.id === editId ? { ...a, ...draft, date: TODAY } : a
       ));
     } else {
       setAnnouncements(prev => [
-        { id: makeId(), ...draft, date: TODAY, author: 'Commissioner' },
+        { id: makeId(), ...draft, date: TODAY, author: 'Commissioner', emailCount, smsCount },
         ...prev,
       ]);
     }
+
+    setSending(false);
+    if (sent) {
+      setSendResult({ ok: errors.length === 0, emailCount, smsCount, error: errors.join(' · ') });
+    } else {
+      setComposing(false);
+      setEditId(null);
+    }
+  }
+
+  function closeSendResult() {
+    setSendResult(null);
     setComposing(false);
     setEditId(null);
   }
@@ -67,6 +135,7 @@ export default function AnnouncementsView() {
     setAnnouncements(prev => prev.map(a => a.id === id ? { ...a, pinned: !a.pinned } : a));
   }
 
+  const recipients = getRecipients(players, draft.target);
   const pinned   = announcements.filter(a => a.pinned);
   const unpinned = announcements.filter(a => !a.pinned);
 
@@ -150,13 +219,65 @@ export default function AnnouncementsView() {
               </div>
             )}
 
+            {/* Send options */}
+            {!editId && (
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
+                  Also notify via
+                </div>
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+                    <input type="checkbox" checked={sendEmail} onChange={e => setSendEmail(e.target.checked)}
+                      style={{ accentColor: 'var(--court-navy)', width: 15, height: 15 }} />
+                    <Icon name="mail" size={14} color={sendEmail ? 'var(--court-navy)' : 'var(--fg-muted)'} />
+                    Email
+                    {sendEmail && <span style={{ fontSize: 11, color: 'var(--fg-muted)', fontWeight: 400 }}>({recipients.emails.length} addresses)</span>}
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+                    <input type="checkbox" checked={sendSms} onChange={e => setSendSms(e.target.checked)}
+                      style={{ accentColor: 'var(--court-navy)', width: 15, height: 15 }} />
+                    <Icon name="message-square" size={14} color={sendSms ? 'var(--court-navy)' : 'var(--fg-muted)'} />
+                    SMS
+                    {sendSms && <span style={{ fontSize: 11, color: 'var(--fg-muted)', fontWeight: 400 }}>({recipients.phones.length} numbers)</span>}
+                  </label>
+                  {(sendEmail || sendSms) && recipients.count === 0 && (
+                    <span style={{ fontSize: 12, color: '#F59E0B', fontWeight: 600 }}>
+                      ⚠ No contact info found for this audience
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Send result */}
+            {sendResult && (
+              <div style={{
+                background: sendResult.ok ? 'rgba(34,197,94,0.08)' : 'rgba(220,38,38,0.06)',
+                border: `1px solid ${sendResult.ok ? '#22C55E' : '#DC2626'}55`,
+                borderRadius: 8, padding: '10px 14px', fontSize: 13,
+                color: sendResult.ok ? '#166534' : '#7F1D1D', fontWeight: 600,
+                display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                <Icon name={sendResult.ok ? 'check-circle' : 'alert-circle'} size={15} color={sendResult.ok ? '#22C55E' : '#DC2626'} />
+                <span style={{ flex: 1 }}>
+                  {sendResult.ok
+                    ? `Sent! ${sendResult.emailCount > 0 ? `${sendResult.emailCount} email${sendResult.emailCount !== 1 ? 's' : ''}` : ''}${sendResult.emailCount > 0 && sendResult.smsCount > 0 ? ' · ' : ''}${sendResult.smsCount > 0 ? `${sendResult.smsCount} SMS` : ''} delivered.`
+                    : `Partially failed: ${sendResult.error}`
+                  }
+                </span>
+                <button onClick={closeSendResult} style={{ all: 'unset', cursor: 'pointer', color: 'var(--fg-muted)', fontSize: 12, fontWeight: 600 }}>Done</button>
+              </div>
+            )}
+
             {/* Actions */}
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4 }}>
-              <button onClick={() => setComposing(false)} style={{ ...ghostBtn }}>Cancel</button>
-              <Button kind="gold" onClick={handleSave} disabled={!draft.title.trim()}>
-                {editId ? 'Save changes' : 'Post announcement'}
-              </Button>
-            </div>
+            {!sendResult && (
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4 }}>
+                <button onClick={() => setComposing(false)} style={{ ...ghostBtn }}>Cancel</button>
+                <Button kind="gold" onClick={handleSave} disabled={!draft.title.trim() || sending}>
+                  {sending ? 'Sending…' : editId ? 'Save changes' : (sendEmail || sendSms) ? 'Post & Send' : 'Post announcement'}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -232,7 +353,21 @@ function AnnouncementCard({ a, onEdit, onDelete, onTogglePin, preview }) {
           {a.pinned && <Icon name="pin" size={11} color={meta.color} />}
         </div>
         {a.body && <div style={{ fontSize: 12, color: '#6B7280', marginTop: 3, lineHeight: 1.5 }}>{a.body}</div>}
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, fontWeight: 600 }}>{a.date} · {a.author || 'Commissioner'}</div>
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+          {a.date} · {a.author || 'Commissioner'}
+          {a.emailCount > 0 && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <Icon name="mail" size={10} color="#9CA3AF" />
+              {a.emailCount}
+            </span>
+          )}
+          {a.smsCount > 0 && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <Icon name="message-square" size={10} color="#9CA3AF" />
+              {a.smsCount}
+            </span>
+          )}
+        </div>
       </div>
       {!preview && (
         <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
