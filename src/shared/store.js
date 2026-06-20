@@ -1112,6 +1112,20 @@ export function useRsvps() {
   return useLocalStorage('fpyc-rsvps', {});
 }
 
+export const DEFAULT_FEE_SETTINGS = {
+  programs: [
+    { id: 'rec',        label: 'Recreation',  fee: 195 },
+    { id: 'select',     label: 'Select',       fee: 240 },
+    { id: 'training',   label: 'Training',     fee: 200 },
+    { id: 'scholarship',label: 'Scholarship',  fee: 75  },
+    { id: 'waived',     label: 'Fee Waived',   fee: 0   },
+  ],
+};
+
+export function useFeeSettings() {
+  return useLocalStorage('fpyc-fee-settings', DEFAULT_FEE_SETTINGS);
+}
+
 export function countRsvps(rsvps, gameId) {
   const game = rsvps[gameId] || {};
   return Object.values(game).filter(v => v === 'yes').length;

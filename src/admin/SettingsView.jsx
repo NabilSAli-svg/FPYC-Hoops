@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill, Avatar } from '../shared/index.js';
-import { TEAM_INFO, TEAMS_INFO, useStaff, usePlayers } from '../shared/store.js';
+import { TEAM_INFO, TEAMS_INFO, useStaff, usePlayers, useFeeSettings, DEFAULT_FEE_SETTINGS } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
 
 const NOTIF_GROUPS = [
@@ -41,6 +41,7 @@ export default function SettingsView({ profile, role }) {
           { id: 'teams',   label: 'All Teams',   icon: 'layers' },
           { id: 'coaches', label: 'Coaches & Permissions', icon: 'key' },
           { id: 'notifs',  label: 'Notifications', icon: 'bell' },
+          { id: 'fees',    label: 'Fees',         icon: 'dollar-sign' },
           { id: 'account', label: 'Account',     icon: 'user' },
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
@@ -61,6 +62,7 @@ export default function SettingsView({ profile, role }) {
       {tab === 'teams'   && <TeamsTab />}
       {tab === 'coaches' && <CoachesTab />}
       {tab === 'notifs'  && <NotificationsTab />}
+      {tab === 'fees'    && <FeesTab />}
       {tab === 'account' && <AccountTab profile={profile} role={role} />}
     </div>
   );
@@ -660,3 +662,133 @@ function InputField({ label, value, placeholder, type = 'text', onChange, disabl
   );
 }
 
+
+// ── Fees Tab ──────────────────────────────────────────────────────────────────
+
+function FeesTab() {
+  const [feeSettings, setFeeSettings] = useFeeSettings();
+  const [players, setPlayers] = usePlayers();
+  const [saved, setSaved] = useState(false);
+  const [applied, setApplied] = useState(false);
+
+  const programs = feeSettings.programs || DEFAULT_FEE_SETTINGS.programs;
+
+  function updateFee(id, val) {
+    setFeeSettings(prev => ({
+      ...prev,
+      programs: prev.programs.map(p => p.id === id ? { ...p, fee: Math.max(0, parseInt(val) || 0) } : p),
+    }));
+    setSaved(false);
+  }
+
+  function addProgram() {
+    setFeeSettings(prev => ({
+      ...prev,
+      programs: [...prev.programs, { id: 'prog_' + Date.now(), label: 'New Program', fee: 0 }],
+    }));
+  }
+
+  function updateLabel(id, label) {
+    setFeeSettings(prev => ({
+      ...prev,
+      programs: prev.programs.map(p => p.id === id ? { ...p, label } : p),
+    }));
+    setSaved(false);
+  }
+
+  function removeProgram(id) {
+    setFeeSettings(prev => ({ ...prev, programs: prev.programs.filter(p => p.id !== id) }));
+  }
+
+  function save() {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  }
+
+  function applyToAllPlayers() {
+    const feeMap = {};
+    programs.forEach(p => { feeMap[p.label.toLowerCase()] = p.fee; });
+    setPlayers(prev => prev.map(p => {
+      const prog = (p.program || '').toLowerCase();
+      const matchedFee = programs.find(fp => fp.label.toLowerCase() === prog || prog.includes(fp.label.toLowerCase()));
+      if (matchedFee === undefined) return p;
+      if (p.amountOwed !== undefined && p.amountOwed !== 0) return p; // don't overwrite if already set
+      return { ...p, amountOwed: matchedFee.fee };
+    }));
+    setApplied(true);
+    setTimeout(() => setApplied(false), 2500);
+  }
+
+  function applyToAllPlayersForce() {
+    setPlayers(prev => prev.map(p => {
+      const matchedFee = programs.find(fp =>
+        fp.label.toLowerCase() === (p.program || '').toLowerCase() ||
+        (p.program || '').toLowerCase().includes(fp.label.toLowerCase())
+      );
+      if (!matchedFee) return p;
+      return { ...p, amountOwed: matchedFee.fee };
+    }));
+    setApplied(true);
+    setTimeout(() => setApplied(false), 2500);
+  }
+
+  const inp = { border: '1px solid var(--border)', borderRadius: 6, padding: '7px 10px', fontFamily: 'var(--font-body)', fontSize: 13, background: '#fff', boxSizing: 'border-box' };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 560 }}>
+      <Card padding={20}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+          <div>
+            <Eyebrow>Program Fees</Eyebrow>
+            <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>Set the registration fee for each program. Used to auto-populate Amount Owed in Payments.</div>
+          </div>
+          {saved && <span style={{ fontSize: 12, color: '#22C55E', fontWeight: 700 }}>✓ Saved</span>}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 16 }}>
+          {programs.map(p => (
+            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input
+                style={{ ...inp, flex: 1 }}
+                value={p.label}
+                onChange={e => updateLabel(p.id, e.target.value)}
+                placeholder="Program name"
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                <span style={{ fontSize: 13, color: 'var(--fg-muted)', fontWeight: 700 }}>$</span>
+                <input
+                  style={{ ...inp, width: 90, textAlign: 'right', fontWeight: 700 }}
+                  type="number"
+                  min={0}
+                  value={p.fee}
+                  onChange={e => updateFee(p.id, e.target.value)}
+                />
+              </div>
+              <button onClick={() => removeProgram(p.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--fg-muted)', padding: 4, flexShrink: 0 }}>
+                <Icon name="x" size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+          <button onClick={addProgram} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--basketball-orange)', fontWeight: 700, fontSize: 13, padding: 0 }}>+ Add program</button>
+          <div style={{ flex: 1 }} />
+          <Button kind="gold" onClick={save}>Save fees</Button>
+        </div>
+      </Card>
+
+      <Card padding={20}>
+        <Eyebrow style={{ marginBottom: 8 }}>Apply to Payments</Eyebrow>
+        <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginBottom: 16 }}>
+          Auto-populate the Amount Owed column in Payments based on each player's program. Players who already have an amount set will be skipped unless you force-overwrite.
+        </div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Button kind="primary" onClick={applyToAllPlayers}>Apply to players with $0 owed</Button>
+          <Button kind="quiet" onClick={applyToAllPlayersForce}>Overwrite all</Button>
+          {applied && <span style={{ fontSize: 12, color: '#22C55E', fontWeight: 700 }}>✓ Applied</span>}
+        </div>
+      </Card>
+    </div>
+  );
+}
