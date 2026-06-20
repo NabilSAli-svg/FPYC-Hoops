@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill, Avatar } from '../shared/index.js';
-import { TEAM_INFO, TEAMS_INFO, useStaff, usePlayers, useFeeSettings, DEFAULT_FEE_SETTINGS } from '../shared/store.js';
+import { TEAM_INFO, TEAMS_INFO, useStaff, usePlayers, useFeeSettings, DEFAULT_FEE_SETTINGS, useDiscountCodes, DEFAULT_DISCOUNT_CODES, applyDiscount } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
 
 const NOTIF_GROUPS = [
@@ -789,6 +789,136 @@ function FeesTab() {
           {applied && <span style={{ fontSize: 12, color: '#22C55E', fontWeight: 700 }}>✓ Applied</span>}
         </div>
       </Card>
+
+      <DiscountCodesCard />
     </div>
+  );
+}
+
+// ── Discount Codes Card ───────────────────────────────────────────────────────
+
+function DiscountCodesCard() {
+  const [codes, setCodes] = useDiscountCodes();
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState({ code: '', label: '', type: 'fixed', amount: 0, maxUses: '', note: '' });
+  const [saved, setSaved] = useState(false);
+
+  const inp = { border: '1px solid var(--border)', borderRadius: 6, padding: '7px 10px', fontFamily: 'var(--font-body)', fontSize: 13, background: '#fff', boxSizing: 'border-box' };
+
+  function addCode() {
+    if (!form.code.trim() || !form.label.trim()) return;
+    setCodes(prev => [...prev, {
+      id: 'dc_' + Date.now(),
+      code: form.code.trim().toUpperCase(),
+      label: form.label.trim(),
+      type: form.type,
+      amount: parseFloat(form.amount) || 0,
+      maxUses: form.maxUses ? parseInt(form.maxUses) : null,
+      usedCount: 0,
+      active: true,
+      note: form.note.trim(),
+    }]);
+    setForm({ code: '', label: '', type: 'fixed', amount: 0, maxUses: '', note: '' });
+    setAdding(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  function toggleActive(id) {
+    setCodes(prev => prev.map(c => c.id === id ? { ...c, active: !c.active } : c));
+  }
+
+  function deleteCode(id) {
+    setCodes(prev => prev.filter(c => c.id !== id));
+  }
+
+  function updateAmount(id, val) {
+    setCodes(prev => prev.map(c => c.id === id ? { ...c, amount: parseFloat(val) || 0 } : c));
+  }
+
+  return (
+    <Card padding={20}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div>
+          <Eyebrow>Discount Codes</Eyebrow>
+          <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>Applied per player in the Payments view.</div>
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {saved && <span style={{ fontSize: 12, color: '#22C55E', fontWeight: 700 }}>✓ Saved</span>}
+          <Button kind="primary" onClick={() => setAdding(a => !a)}>{adding ? 'Cancel' : '+ Add code'}</Button>
+        </div>
+      </div>
+
+      {adding && (
+        <div style={{ background: 'var(--bone)', borderRadius: 8, padding: 14, marginBottom: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Code *</div>
+              <input style={{ ...inp, width: '100%', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em' }} value={form.code} onChange={e => setForm(f => ({ ...f, code: e.target.value }))} placeholder="SIBLING" />
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Label *</div>
+              <input style={{ ...inp, width: '100%' }} value={form.label} onChange={e => setForm(f => ({ ...f, label: e.target.value }))} placeholder="Sibling Discount" />
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Type</div>
+              <select style={{ ...inp, width: '100%' }} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+                <option value="fixed">Fixed $ off</option>
+                <option value="percent">Percent % off</option>
+              </select>
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                {form.type === 'fixed' ? 'Amount ($)' : 'Percent (%)'}
+              </div>
+              <input style={{ ...inp, width: '100%' }} type="number" min={0} max={form.type === 'percent' ? 100 : undefined} value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Max uses (blank = unlimited)</div>
+              <input style={{ ...inp, width: '100%' }} type="number" min={1} value={form.maxUses} onChange={e => setForm(f => ({ ...f, maxUses: e.target.value }))} placeholder="Unlimited" />
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Note</div>
+              <input style={{ ...inp, width: '100%' }} value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="Optional internal note" />
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button kind="gold" onClick={addCode}>Save code</Button>
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+        {codes.length === 0 && <div style={{ padding: '20px 0', textAlign: 'center', fontSize: 13, color: 'var(--fg-muted)' }}>No discount codes yet.</div>}
+        {codes.map((c, i) => (
+          <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: i < codes.length - 1 ? '1px solid var(--border)' : 'none', opacity: c.active ? 1 : 0.45 }}>
+            <div style={{ background: c.active ? 'var(--court-navy)' : 'var(--bone)', color: c.active ? '#fff' : 'var(--fg-muted)', fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, letterSpacing: '0.1em', padding: '4px 10px', borderRadius: 6, flexShrink: 0 }}>{c.code}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 700, fontSize: 13 }}>{c.label}</div>
+              <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>
+                {c.type === 'fixed' ? `$${c.amount} off` : `${c.amount}% off`}
+                {c.maxUses ? ` · max ${c.maxUses} uses` : ' · unlimited'} · {c.usedCount} used
+                {c.note ? ` · ${c.note}` : ''}
+              </div>
+            </div>
+            <input
+              type="number"
+              min={0}
+              value={c.amount}
+              onChange={e => updateAmount(c.id, e.target.value)}
+              title={c.type === 'fixed' ? 'Dollar amount off' : 'Percent off'}
+              style={{ ...inp, width: 70, textAlign: 'right', fontWeight: 700, flexShrink: 0 }}
+            />
+            <span style={{ fontSize: 12, color: 'var(--fg-muted)', flexShrink: 0 }}>{c.type === 'fixed' ? '$' : '%'}</span>
+            <button onClick={() => toggleActive(c.id)} title={c.active ? 'Deactivate' : 'Activate'} style={{ border: 'none', background: 'none', cursor: 'pointer', color: c.active ? '#22C55E' : 'var(--fg-muted)', padding: 4, flexShrink: 0 }}>
+              <Icon name={c.active ? 'toggle-right' : 'toggle-left'} size={20} />
+            </button>
+            <button onClick={() => deleteCode(c.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--fg-muted)', padding: 4, flexShrink: 0 }}>
+              <Icon name="trash-2" size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }

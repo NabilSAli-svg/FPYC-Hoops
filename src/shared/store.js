@@ -1126,6 +1126,23 @@ export function useFeeSettings() {
   return useLocalStorage('fpyc-fee-settings', DEFAULT_FEE_SETTINGS);
 }
 
+export const DEFAULT_DISCOUNT_CODES = [
+  { id: 'dc_sibling',  code: 'SIBLING',  label: 'Sibling Discount',  type: 'fixed',   amount: 25,  maxUses: null, usedCount: 0, active: true, note: 'Each additional sibling' },
+  { id: 'dc_half',     code: 'HALF',     label: '50% Discount',      type: 'percent', amount: 50,  maxUses: null, usedCount: 0, active: true, note: '' },
+  { id: 'dc_coach',    code: 'COACH',    label: 'Coach Discount',     type: 'percent', amount: 100, maxUses: null, usedCount: 0, active: true, note: "Free registration for coach's child" },
+];
+
+export function useDiscountCodes() {
+  return useLocalStorage('fpyc-discount-codes', DEFAULT_DISCOUNT_CODES);
+}
+
+export function applyDiscount(baseAmount, code) {
+  if (!code) return baseAmount;
+  if (code.type === 'fixed') return Math.max(0, baseAmount - code.amount);
+  if (code.type === 'percent') return Math.max(0, baseAmount * (1 - code.amount / 100));
+  return baseAmount;
+}
+
 export function countRsvps(rsvps, gameId) {
   const game = rsvps[gameId] || {};
   return Object.values(game).filter(v => v === 'yes').length;
