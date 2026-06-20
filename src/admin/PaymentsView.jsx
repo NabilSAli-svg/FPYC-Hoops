@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Card, Button, Icon, Display } from '../shared/index.js';
-import { TEAMS_INFO } from '../shared/store.js';
+import { TEAMS_INFO, useDiscountCodes, applyDiscount, useFeeSettings, DEFAULT_FEE_SETTINGS } from '../shared/store.js';
 
 const STATUSES = [
   { id: 'paid',        label: 'Paid',        color: '#22C55E' },
@@ -113,15 +113,94 @@ function NotesCell({ value, onChange }) {
   );
 }
 
+function DiscountCell({ player, codes, feeSettings, onApply, onRemove }) {
+  const [open, setOpen] = useState(false);
+  const applied = codes.find(c => c.id === player.discountCodeId);
+  const activeCodes = codes.filter(c => c.active);
+
+  function baseFeeForPlayer(p) {
+    const programs = (feeSettings || DEFAULT_FEE_SETTINGS).programs;
+    const match = programs.find(pr => pr.label?.toLowerCase() === (p.program || '').toLowerCase());
+    return match ? match.fee : p.amountOwed || 0;
+  }
+
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          padding: '3px 10px', borderRadius: 999, border: `1.5px solid ${applied ? 'var(--varsity-gold)' : 'var(--border)'}`,
+          background: applied ? 'rgba(232,179,34,0.12)' : 'transparent',
+          color: applied ? '#a87b00' : 'var(--fg-muted)',
+          fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11,
+          cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4,
+        }}
+      >
+        {applied ? applied.code : 'None'}
+        <Icon name="chevron-down" size={10} />
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, marginTop: 4,
+          background: '#fff', border: '1px solid var(--border)', borderRadius: 8,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.12)', zIndex: 50, minWidth: 190, overflow: 'hidden',
+        }}>
+          {applied && (
+            <button onClick={() => { onRemove(player, baseFeeForPlayer(player)); setOpen(false); }} style={{
+              width: '100%', padding: '8px 14px', border: 'none', borderBottom: '1px solid var(--border)',
+              background: '#fff', color: '#EF4444', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12,
+              textAlign: 'left', cursor: 'pointer',
+            }}>✕ Remove discount</button>
+          )}
+          {activeCodes.map(c => (
+            <button key={c.id} onClick={() => { onApply(player, c, baseFeeForPlayer(player)); setOpen(false); }} style={{
+              width: '100%', padding: '8px 14px', border: 'none',
+              background: c.id === player.discountCodeId ? 'rgba(232,179,34,0.10)' : '#fff',
+              color: 'var(--fg)', fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 12,
+              textAlign: 'left', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', gap: 8,
+            }}>
+              <span style={{ fontWeight: 700, color: '#a87b00' }}>{c.code}</span>
+              <span style={{ color: 'var(--fg-muted)', fontWeight: 400 }}>
+                {c.type === 'fixed' ? `-$${c.amount}` : `-${c.amount}%`}
+              </span>
+            </button>
+          ))}
+          {activeCodes.length === 0 && (
+            <div style={{ padding: '10px 14px', fontSize: 12, color: 'var(--fg-muted)' }}>No active codes</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PaymentsView({ players, setPlayers }) {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterTeam, setFilterTeam] = useState('all');
   const [search, setSearch] = useState('');
   const [sortCol, setSortCol] = useState('name');
   const [sortDir, setSortDir] = useState(1);
+  const [discountCodes, setDiscountCodes] = useDiscountCodes();
+  const [feeSettings] = useFeeSettings();
 
   function updatePayment(id, field, val) {
     setPlayers(ps => ps.map(p => p.id === id ? { ...p, [field]: val } : p));
+  }
+
+  function applyCode(player, code, baseFee) {
+    const discounted = Math.round(applyDiscount(baseFee, code));
+    setPlayers(ps => ps.map(p => p.id === player.id ? { ...p, discountCodeId: code.id, amountOwed: discounted } : p));
+    if (code.maxUses !== null) {
+      setDiscountCodes(cs => cs.map(c => c.id === code.id ? { ...c, usedCount: (c.usedCount || 0) + 1 } : c));
+    }
+  }
+
+  function removeCode(player, baseFee) {
+    const prevCode = discountCodes.find(c => c.id === player.discountCodeId);
+    setPlayers(ps => ps.map(p => p.id === player.id ? { ...p, discountCodeId: null, amountOwed: baseFee } : p));
+    if (prevCode && prevCode.maxUses !== null) {
+      setDiscountCodes(cs => cs.map(c => c.id === prevCode.id ? { ...c, usedCount: Math.max(0, (c.usedCount || 0) - 1) } : c));
+    }
   }
 
   const teams = useMemo(() => {
@@ -235,6 +314,7 @@ export default function PaymentsView({ players, setPlayers }) {
                 <SortTh col="name">Player</SortTh>
                 <SortTh col="team">Team</SortTh>
                 <th style={{ padding: '8px 14px', textAlign: 'left', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--fg-muted)', borderBottom: '1px solid var(--border)' }}>Program</th>
+                <th style={{ padding: '8px 14px', textAlign: 'left', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--fg-muted)', borderBottom: '1px solid var(--border)' }}>Discount</th>
                 <SortTh col="status">Status</SortTh>
                 <SortTh col="owed" style={{ textAlign: 'right' }}>Amount Owed</SortTh>
                 <SortTh col="paid" style={{ textAlign: 'right' }}>Amount Paid</SortTh>
@@ -244,7 +324,7 @@ export default function PaymentsView({ players, setPlayers }) {
             </thead>
             <tbody>
               {filtered.length === 0 && (
-                <tr><td colSpan={8} style={{ padding: '32px', textAlign: 'center', color: 'var(--fg-muted)', fontSize: 13 }}>No players match your filters.</td></tr>
+                <tr><td colSpan={9} style={{ padding: '32px', textAlign: 'center', color: 'var(--fg-muted)', fontSize: 13 }}>No players match your filters.</td></tr>
               )}
               {filtered.map((p, i) => {
                 const owed = p.amountOwed || 0;
@@ -263,6 +343,9 @@ export default function PaymentsView({ players, setPlayers }) {
                     </td>
                     <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', fontSize: 12, color: 'var(--fg-muted)' }}>
                       {p.program || '—'}
+                    </td>
+                    <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)' }}>
+                      <DiscountCell player={p} codes={discountCodes} feeSettings={feeSettings} onApply={applyCode} onRemove={removeCode} />
                     </td>
                     <td style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)' }}>
                       <StatusPill status={status} onChange={v => updatePayment(p.id, 'paymentStatus', v)} />
