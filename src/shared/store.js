@@ -1065,7 +1065,7 @@ export function deriveEvents(games, practices) {
     type: 'game',
     date: g.day,
     time: g.time,
-    label: g.home ? `vs. ${g.opponent}` : `@ ${g.opponent}`,
+    label: g.opponent.includes(' vs ') ? g.opponent : (g.home ? `vs. ${g.opponent}` : `@ ${g.opponent}`),
     opponent: g.opponent,
     location: g.location,
     home: g.home,
