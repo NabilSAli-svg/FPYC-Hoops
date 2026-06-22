@@ -70,7 +70,7 @@ export default function CoachHome({ team }) {
           </div>
           <div style={{ padding: '16px 18px' }}>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--court-navy)', lineHeight: 1, marginBottom: 10 }}>
-              {next.home ? 'vs.' : '@'} {next.opponent}
+              {next.opponent.includes(' vs ') ? next.opponent : `${next.home ? 'vs.' : '@'} ${next.opponent}`}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <InfoRow icon="clock"   text={next.time} />
