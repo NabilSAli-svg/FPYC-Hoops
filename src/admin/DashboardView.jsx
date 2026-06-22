@@ -161,8 +161,8 @@ function DashboardContent({ team, players, games, onGo }) {
         </div>
       </Card>
 
-      {/* Practice attendance */}
-      <Card>
+      {/* Practice attendance — hidden for game-only leagues like 3v3 Summer Cup */}
+      {team?.division !== '3v3 Summer Cup' && <Card>
         <SectionHeader title="Practice attendance" subtitle="Last 4 sessions" />
         <div style={{ display: 'flex', gap: 18, marginTop: 14, alignItems: 'flex-end' }}>
           {practiceAttendance.length > 0 ? practiceAttendance.map((b, i) => (
@@ -181,7 +181,7 @@ function DashboardContent({ team, players, games, onGo }) {
           <span style={{ fontSize: 13, color: 'var(--fg-soft)' }}>Avg {attPct}% · {activePlayers.length} active players</span>
           <Button kind="ghost" size="sm" icon="plus" onClick={() => onGo('schedule:practices')}>Log practice</Button>
         </div>
-      </Card>
+      </Card>}
 
       {/* League announcements */}
       <Card style={{ gridColumn: '1 / -1' }}>
