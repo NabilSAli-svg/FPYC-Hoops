@@ -6,19 +6,18 @@ import CoachPractice from './CoachPractice.jsx';
 import CoachMessage from './CoachMessage.jsx';
 
 const TEAMS = {
-  '23boys': { id: '23boys',  name: 'Rising 2nd-3rd Boys', division: '3v3 Summer Cup',  coach: 'Nick Blessing',                    color: 'var(--court-navy)',       lineupKey: 'fpyc-lineup-starters-23boys'  },
-  girls:    { id: 'girls',   name: 'Girls 3v3 (2nd-8th)', division: '3v3 Summer Cup',  coach: 'Coach',                            color: '#1F8A5B',                  lineupKey: 'fpyc-lineup-starters-girls'   },
-  '45boys': { id: '45boys',  name: 'Rising 4th-5th Boys', division: '3v3 Summer Cup',  coach: 'Joshua Nehr, Jim Quinn & Shaun Ali', color: '#C8102E',                lineupKey: 'fpyc-lineup-starters-45boys'  },
-  '68boys': { id: '68boys',  name: 'Rising 6th-8th Boys', division: '3v3 Summer Cup',  coach: 'Coach',                            color: 'var(--basketball-orange)', lineupKey: 'fpyc-lineup-starters-68boys'  },
-  'ts-ab5': { id: 'ts-ab5',  name: 'Aidris B5',           division: 'Travel Select',   coach: 'Coach Aidris',                     color: '#7C3AED',                  lineupKey: 'fpyc-lineup-starters-ab5'     },
-  'ts-tb6': { id: 'ts-tb6',  name: 'Tom B6',               division: 'Travel Select',   coach: 'Coach Tom',                        color: '#0369A1',                  lineupKey: 'fpyc-lineup-starters-tb6'     },
-  'ts-mdg6':{ id: 'ts-mdg6', name: 'Mike Do G6',           division: 'Travel Select',   coach: 'Mike Do',                          color: '#059669',                  lineupKey: 'fpyc-lineup-starters-mdg6'    },
-  'ts-eg7': { id: 'ts-eg7',  name: 'Earnest G7',           division: 'Travel Select',   coach: 'Coach Earnest',                    color: '#D97706',                  lineupKey: 'fpyc-lineup-starters-eg7'     },
-  'ts-rb7': { id: 'ts-rb7',  name: 'Rene B7',              division: 'Travel Select',   coach: 'Coach Rene',                       color: '#BE185D',                  lineupKey: 'fpyc-lineup-starters-rb7'     },
-  'ts-mlb8':{ id: 'ts-mlb8', name: 'Mike Lee B8',          division: 'Travel Select',   coach: 'Mike Lee',                         color: '#1D4ED8',                  lineupKey: 'fpyc-lineup-starters-mlb8'    },
-  'ts-kb82':{ id: 'ts-kb82', name: 'Keun B8-2',            division: 'Travel Select',   coach: 'Coach Keun',                       color: '#374151',                  lineupKey: 'fpyc-lineup-starters-kb82'    },
+  '23boys': { id: '23boys',  name: 'Rising 2nd-3rd Boys', division: '3v3 Summer Cup',  coach: 'Nick Blessing',                      color: 'var(--court-navy)',       lineupKey: 'fpyc-lineup-starters-23boys',  password: 'nick2025'    },
+  girls:    { id: 'girls',   name: 'Girls 3v3 (2nd-8th)', division: '3v3 Summer Cup',  coach: 'Coach',                              color: '#1F8A5B',                  lineupKey: 'fpyc-lineup-starters-girls',   password: 'girls2025'   },
+  '45boys': { id: '45boys',  name: 'Rising 4th-5th Boys', division: '3v3 Summer Cup',  coach: 'Joshua Nehr, Jim Quinn & Shaun Ali', color: '#C8102E',                  lineupKey: 'fpyc-lineup-starters-45boys',  password: 'rising2025'  },
+  '68boys': { id: '68boys',  name: 'Rising 6th-8th Boys', division: '3v3 Summer Cup',  coach: 'Coach',                              color: 'var(--basketball-orange)', lineupKey: 'fpyc-lineup-starters-68boys',  password: 'rising682025'},
+  'ts-ab5': { id: 'ts-ab5',  name: 'Aidris B5',           division: 'Travel Select',   coach: 'Coach Aidris',                       color: '#7C3AED',                  lineupKey: 'fpyc-lineup-starters-ab5',     password: 'aidris2025'  },
+  'ts-tb6': { id: 'ts-tb6',  name: 'Tom B6',               division: 'Travel Select',   coach: 'Coach Tom',                          color: '#0369A1',                  lineupKey: 'fpyc-lineup-starters-tb6',     password: 'tom2025'     },
+  'ts-mdg6':{ id: 'ts-mdg6', name: 'Mike Do G6',           division: 'Travel Select',   coach: 'Mike Do',                            color: '#059669',                  lineupKey: 'fpyc-lineup-starters-mdg6',    password: 'mikedo2025'  },
+  'ts-eg7': { id: 'ts-eg7',  name: 'Earnest G7',           division: 'Travel Select',   coach: 'Coach Earnest',                      color: '#D97706',                  lineupKey: 'fpyc-lineup-starters-eg7',     password: 'earnest2025' },
+  'ts-rb7': { id: 'ts-rb7',  name: 'Rene B7',              division: 'Travel Select',   coach: 'Coach Rene',                         color: '#BE185D',                  lineupKey: 'fpyc-lineup-starters-rb7',     password: 'rene2025'    },
+  'ts-mlb8':{ id: 'ts-mlb8', name: 'Mike Lee B8',          division: 'Travel Select',   coach: 'Mike Lee',                           color: '#1D4ED8',                  lineupKey: 'fpyc-lineup-starters-mlb8',    password: 'mikele2025'  },
+  'ts-kb82':{ id: 'ts-kb82', name: 'Keun B8-2',            division: 'Travel Select',   coach: 'Coach Keun',                         color: '#374151',                  lineupKey: 'fpyc-lineup-starters-kb82',    password: 'keun2025'    },
 };
-const CREDENTIALS = { password: 'fpyc2025' };
 
 const TABS = [
   { id: 'home',     label: 'Home',     icon: 'home' },
@@ -30,15 +29,16 @@ const TABS = [
 export default function CoachApp() {
   const [tab, setTab] = useState('home');
   const [team, setTeam] = useState(null);
-  const [form, setForm] = useState({ teamId: 'hawks', password: '' });
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   function handleLogin() {
-    if (form.password === CREDENTIALS.password) {
-      setTeam(TEAMS[form.teamId]);
+    const matched = Object.values(TEAMS).find(t => t.password === password.trim());
+    if (matched) {
+      setTeam(matched);
       setError('');
     } else {
-      setError('Incorrect password. Please try again.');
+      setError('Incorrect password. Contact the commissioner if you need access.');
     }
   }
 
@@ -46,7 +46,6 @@ export default function CoachApp() {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--court-navy)', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
         <div style={{ width: '100%', maxWidth: 400 }}>
-          {/* Logo + title */}
           <div style={{ textAlign: 'center', marginBottom: 36 }}>
             <img src="/assets/logo-fpyc-basketball-v3.png" alt="FPYC" style={{ height: 56, objectFit: 'contain', marginBottom: 16 }} />
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.06em', lineHeight: 1 }}>
@@ -57,38 +56,18 @@ export default function CoachApp() {
             </div>
           </div>
 
-          {/* Login card */}
           <div style={{ background: '#fff', borderRadius: 18, padding: '28px 24px', boxShadow: '0 8px 40px rgba(0,0,0,0.25)' }}>
-            <div style={{ marginBottom: 18 }}>
-              <label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9CA3AF', display: 'block', marginBottom: 7 }}>
-                Select Team
-              </label>
-              <select
-                value={form.teamId}
-                onChange={e => setForm(f => ({ ...f, teamId: e.target.value }))}
-                style={{
-                  width: '100%', boxSizing: 'border-box', padding: '11px 14px',
-                  borderRadius: 9, border: '1.5px solid #E2E5EA',
-                  fontSize: 14, fontFamily: 'var(--font-body)', color: '#111',
-                  outline: 'none', background: '#fff', cursor: 'pointer',
-                }}
-              >
-                {Object.values(TEAMS).map(t => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-              </select>
-            </div>
-
             <div style={{ marginBottom: 22 }}>
               <label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9CA3AF', display: 'block', marginBottom: 7 }}>
-                Password
+                Coach Password
               </label>
               <input
                 type="password"
-                value={form.password}
-                onChange={e => { setForm(f => ({ ...f, password: e.target.value })); setError(''); }}
+                value={password}
+                onChange={e => { setPassword(e.target.value); setError(''); }}
                 onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }}
-                placeholder="Enter password…"
+                placeholder="Enter your coach password…"
+                autoFocus
                 style={{
                   width: '100%', boxSizing: 'border-box', padding: '11px 14px',
                   borderRadius: 9, border: `1.5px solid ${error ? '#DC2626' : '#E2E5EA'}`,
@@ -113,8 +92,8 @@ export default function CoachApp() {
               Sign In
             </button>
 
-            <div style={{ marginTop: 18, padding: '10px 14px', background: '#F9FAFB', borderRadius: 8, fontSize: 12, color: '#6B7280', textAlign: 'center' }}>
-              Demo credential — password: <span style={{ fontWeight: 700, color: '#374151' }}>fpyc2025</span>
+            <div style={{ marginTop: 16, fontSize: 12, color: '#9CA3AF', textAlign: 'center' }}>
+              Your password was sent by the commissioner.
             </div>
           </div>
         </div>
@@ -148,7 +127,7 @@ export default function CoachApp() {
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{team.division}</div>
             </div>
             <button
-              onClick={() => { setTeam(null); setForm({ teamId: 'hawks', password: '' }); }}
+              onClick={() => { setTeam(null); setPassword(''); setError(''); }}
               style={{
                 background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
                 borderRadius: 7, padding: '5px 10px', cursor: 'pointer',
