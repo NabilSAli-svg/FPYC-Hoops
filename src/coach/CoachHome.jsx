@@ -134,20 +134,26 @@ export default function CoachHome({ team }) {
             const win = g.us > g.them;
             return (
               <div key={g.id} style={{
-                display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px',
+                padding: '12px 18px',
                 borderBottom: i < played.length - 1 ? '1px solid #F9FAFB' : 'none',
               }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: 8, flexShrink: 0,
-                  background: win ? 'rgba(16,185,129,0.10)' : 'rgba(239,68,68,0.08)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 800, fontSize: 14, color: win ? '#059669' : '#DC2626',
-                }}>{win ? 'W' : 'L'}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: 13, color: '#111' }}>{g.home ? 'vs.' : '@'} {g.opponent}</div>
-                  <div style={{ fontSize: 11, color: '#9CA3AF' }}>{g.day}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 8, flexShrink: 0,
+                    background: win ? 'rgba(16,185,129,0.10)' : 'rgba(239,68,68,0.08)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 800, fontSize: 14, color: win ? '#059669' : '#DC2626',
+                  }}>{win ? 'W' : 'L'}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: '#111' }}>{g.opponent}</div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF' }}>{g.day}</div>
+                  </div>
                 </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 14, color: '#374151' }}>{g.us}–{g.them}</div>
+                {g.note && (
+                  <div style={{ marginTop: 8, fontSize: 12, color: '#6B7280', lineHeight: 1.6, paddingLeft: 48 }}>
+                    {g.note}
+                  </div>
+                )}
               </div>
             );
           })}
