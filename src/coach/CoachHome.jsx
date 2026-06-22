@@ -14,6 +14,7 @@ export default function CoachHome({ team }) {
 
   const wins   = played.filter(g => g.us > g.them).length;
   const losses = played.filter(g => g.us < g.them).length;
+  const ties   = played.filter(g => g.us != null && g.them != null && g.us === g.them).length;
 
   // Team PPG from stats store
   let totalPts = 0, statGames = 0;
@@ -47,6 +48,8 @@ export default function CoachHome({ team }) {
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.10em', color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Season Record</div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, color: '#fff', lineHeight: 1 }}>
             {wins}<span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 28, margin: '0 6px' }}>–</span>{losses}
+            {ties > 0 && <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 28, margin: '0 6px' }}>–</span>}
+            {ties > 0 && <span style={{ fontSize: 36 }}>{ties}</span>}
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-end' }}>
@@ -131,7 +134,11 @@ export default function CoachHome({ team }) {
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9CA3AF' }}>Results</div>
           </div>
           {[...played].reverse().map((g, i) => {
+            const tie = g.us != null && g.them != null && g.us === g.them;
             const win = g.us > g.them;
+            const badgeBg = tie ? 'rgba(107,114,128,0.10)' : win ? 'rgba(16,185,129,0.10)' : 'rgba(239,68,68,0.08)';
+            const badgeColor = tie ? '#6B7280' : win ? '#059669' : '#DC2626';
+            const badgeLabel = tie ? 'T' : win ? 'W' : 'L';
             return (
               <div key={g.id} style={{
                 padding: '12px 18px',
@@ -140,10 +147,10 @@ export default function CoachHome({ team }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{
                     width: 36, height: 36, borderRadius: 8, flexShrink: 0,
-                    background: win ? 'rgba(16,185,129,0.10)' : 'rgba(239,68,68,0.08)',
+                    background: badgeBg,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 800, fontSize: 14, color: win ? '#059669' : '#DC2626',
-                  }}>{win ? 'W' : 'L'}</div>
+                    fontWeight: 800, fontSize: 14, color: badgeColor,
+                  }}>{badgeLabel}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: 13, color: '#111' }}>{g.opponent}</div>
                     <div style={{ fontSize: 11, color: '#9CA3AF' }}>{g.day}</div>
