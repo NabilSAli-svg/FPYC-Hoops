@@ -9,7 +9,7 @@ const POS_COLOR = {
 
 export default function RosterTab({ family }) {
   const [players] = usePlayers();
-  const PLAYERS = players.filter(p => p.status !== 'inactive');
+  const PLAYERS = players.filter(p => p.status !== 'inactive' && p.team === family.child.team);
   const TEAM = TEAM_INFO;
   const myNumber = family.child.number;
 
