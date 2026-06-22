@@ -81,7 +81,7 @@ export default function TeamSpotlight() {
               </div>
               <div>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: 'var(--court-navy)', textTransform: 'uppercase', lineHeight: 1.1 }}>
-                  {nextGame.home ? 'vs.' : '@'} {nextGame.opponent}
+                  {nextGame.opponent.includes(' vs ') ? nextGame.opponent : `${nextGame.home ? 'vs.' : '@'} ${nextGame.opponent}`}
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 6, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -127,7 +127,7 @@ export default function TeamSpotlight() {
                   </span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {g.home ? 'vs.' : '@'} {g.opponent}
+                      {g.opponent.includes(' vs ') ? g.opponent : `${g.home ? 'vs.' : '@'} ${g.opponent}`}
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{g.day}</div>
                   </div>
