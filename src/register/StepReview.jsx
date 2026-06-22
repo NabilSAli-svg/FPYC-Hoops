@@ -1,9 +1,16 @@
 import { useState } from 'react';
 import { BackBtn } from './StepProgram.jsx';
-import { usePlayers, useRegistrations } from '../shared/store.js';
+import { usePlayers, useRegistrations, useDiscountCodes, applyDiscount, useFeeSettings, DEFAULT_FEE_SETTINGS } from '../shared/store.js';
 
 const PROGRAM_PRICES  = { house: 195, clinic: 95, travel: 425 };
 const PROGRAM_LABELS  = { house: 'House League', clinic: 'Skills Clinic', travel: 'Travel Select' };
+
+function lookupBaseFee(feeSettings, programId) {
+  const label = PROGRAM_LABELS[programId];
+  const programs = (feeSettings || DEFAULT_FEE_SETTINGS).programs;
+  const match = programs.find(p => p.label?.toLowerCase() === label?.toLowerCase());
+  return match ? match.fee : PROGRAM_PRICES[programId] ?? 195;
+}
 
 const GRADE_RANK = { 'Kindergarten': 0, '1st Grade': 1, '2nd Grade': 2, '3rd Grade': 3, '4th Grade': 4, '5th Grade': 5, '6th Grade': 6, '7th Grade': 7, '8th Grade': 8 };
 
@@ -38,16 +45,37 @@ export default function StepReview({ data, back, isMobile }) {
   const [confirmNum] = useState(() => 'FPYC-' + Math.random().toString(36).slice(2, 8).toUpperCase());
   const [, setPlayers] = usePlayers();
   const [, setRegistrations] = useRegistrations();
+  const [discountCodes, setDiscountCodes] = useDiscountCodes();
+  const [feeSettings] = useFeeSettings();
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedCode, setAppliedCode] = useState(null);
+  const [promoError, setPromoError] = useState('');
 
   const prog   = data.program;
   const player = data.player;
   const p1     = data.parents?.p1 || {};
   const donation = data.donation;
 
-  const basePrice     = prog ? PROGRAM_PRICES[prog.id] : 0;
-  const siblingDiscount = player.sibling ? -(basePrice * 0.1) : 0;
-  const donationAmt   = donation?.amount || 0;
-  const total         = basePrice + siblingDiscount + donationAmt;
+  const basePrice   = prog ? lookupBaseFee(feeSettings, prog.id) : 0;
+  const codeDiscount  = appliedCode ? Math.round(applyDiscount(basePrice, appliedCode)) - basePrice : 0; // negative
+  const donationAmt = donation?.amount || 0;
+  const total       = basePrice + codeDiscount + donationAmt;
+
+  function applyPromoCode() {
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    const found = discountCodes.find(c => c.code.toUpperCase() === code && c.active);
+    if (!found) { setPromoError('Code not found or inactive.'); return; }
+    if (found.maxUses !== null && found.usedCount >= found.maxUses) { setPromoError('This code has reached its maximum uses.'); return; }
+    setAppliedCode(found);
+    setPromoError('');
+  }
+
+  function removePromoCode() {
+    setAppliedCode(null);
+    setPromoInput('');
+    setPromoError('');
+  }
 
   const setCardField = (k, v) => setCard(c => ({ ...c, [k]: v }));
 
@@ -65,6 +93,11 @@ export default function StepReview({ data, back, isMobile }) {
       const waiverSigned = !!(data.waivers?.concussion && data.waivers?.seasonal);
       const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
+      // Increment usedCount for applied code
+      if (appliedCode && appliedCode.maxUses !== null) {
+        setDiscountCodes(cs => cs.map(c => c.id === appliedCode.id ? { ...c, usedCount: (c.usedCount || 0) + 1 } : c));
+      }
+
       let nextId;
       setPlayers(prev => {
         const ids = prev.map(p => parseInt(p.id.replace('p', ''), 10)).filter(n => !isNaN(n));
@@ -75,7 +108,10 @@ export default function StepReview({ data, back, isMobile }) {
           name: `${player.firstName} ${player.lastName}`,
           grade: gradeShort(player.grade),
           school: player.school || '',
-          guardian: `${p1.firstName?.[0] || ''}. ${p1.lastName || ''}`.trim(),
+          guardian: `${p1.firstName || ''} ${p1.lastName || ''}`.trim(),
+          guardianEmail: p1.email || '',
+          guardianPhone: p1.phone || '',
+          email: p1.email || '',
           phone: p1.phone || '',
           position: 'Guard',
           status: 'pending',
@@ -85,6 +121,10 @@ export default function StepReview({ data, back, isMobile }) {
           team: 'Unassigned',
           regDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
           confirmNum,
+          amountOwed: Math.max(0, total),
+          amountPaid: Math.max(0, total),
+          paymentStatus: 'paid',
+          discountCodeId: appliedCode?.id || null,
         };
         return [...prev, newPlayer];
       });
@@ -154,17 +194,49 @@ export default function StepReview({ data, back, isMobile }) {
 
           <SummaryCard title="Fee breakdown">
             <Row label={`${prog ? PROGRAM_LABELS[prog.id] : 'Program'} registration`} value={`$${basePrice.toFixed(2)}`} mono />
-            {siblingDiscount < 0 && <Row label="Sibling discount (10%)" value={`-$${Math.abs(siblingDiscount).toFixed(2)}`} mono green />}
+            {codeDiscount < 0 && (
+              <Row
+                label={`Promo: ${appliedCode.code} (${appliedCode.type === 'fixed' ? `-$${appliedCode.amount}` : `-${appliedCode.amount}%`})`}
+                value={`-$${Math.abs(codeDiscount).toFixed(2)}`}
+                mono green
+              />
+            )}
             {player.scholarship && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', fontSize: 13, color: '#6B7280', fontStyle: 'italic' }}>
                 <span>Scholarship application</span><span>Pending review</span>
               </div>
             )}
             {donationAmt > 0 && <Row label={`Donation (${donation.tier} tier)`} value={`$${donationAmt.toFixed(2)}`} mono />}
-            <div style={{ borderTop: '1px solid #E5E7EB', marginTop: 10, paddingTop: 10 }}>
+
+            {/* Promo code input */}
+            <div style={{ margin: '10px 0', display: 'flex', gap: 8 }}>
+              {!appliedCode ? (
+                <>
+                  <input
+                    type="text"
+                    value={promoInput}
+                    onChange={e => { setPromoInput(e.target.value.toUpperCase()); setPromoError(''); }}
+                    onKeyDown={e => e.key === 'Enter' && applyPromoCode()}
+                    placeholder="Promo / discount code"
+                    style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: `1.5px solid ${promoError ? '#EF4444' : '#E2E5EA'}`, fontFamily: 'var(--font-body)', fontSize: 13, outline: 'none' }}
+                  />
+                  <button onClick={applyPromoCode} style={{ padding: '8px 14px', borderRadius: 8, border: '1.5px solid var(--court-navy)', background: 'var(--court-navy)', color: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    Apply
+                  </button>
+                </>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 8, background: 'rgba(5,150,105,0.08)', border: '1px solid #059669', flex: 1 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#059669', flex: 1 }}>✓ {appliedCode.code} — {appliedCode.label}</span>
+                  <button onClick={removePromoCode} style={{ all: 'unset', cursor: 'pointer', fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-body)' }}>Remove</button>
+                </div>
+              )}
+            </div>
+            {promoError && <div style={{ fontSize: 12, color: '#EF4444', marginTop: -4, marginBottom: 4 }}>{promoError}</div>}
+
+            <div style={{ borderTop: '1px solid #E5E7EB', marginTop: 6, paddingTop: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 15, color: 'var(--court-navy)' }}>
                 <span>Total due today</span>
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: 22 }}>${total.toFixed(2)}</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: 22 }}>${Math.max(0, total).toFixed(2)}</span>
               </div>
               <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>$50 minimum fee deducted from any refund</div>
             </div>
@@ -249,7 +321,7 @@ export default function StepReview({ data, back, isMobile }) {
                   </>
                 ) : (
                   <>
-                    Pay ${total.toFixed(2)} & complete registration
+                    Pay ${Math.max(0, total).toFixed(2)} & complete registration
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                   </>
                 )}
