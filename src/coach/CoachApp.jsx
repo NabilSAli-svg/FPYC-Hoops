@@ -4,6 +4,7 @@ import CoachHome from './CoachHome.jsx';
 import CoachLineup from './CoachLineup.jsx';
 import CoachPractice from './CoachPractice.jsx';
 import CoachMessage from './CoachMessage.jsx';
+import { supabase } from '../shared/supabase.js';
 
 const TEAMS = {
   '23boys': { id: '23boys',  name: 'Rising 2nd-3rd Boys', division: '3v3 Summer Cup',  coach: 'Nick Blessing',                      color: 'var(--court-navy)',       lineupKey: 'fpyc-lineup-starters-23boys',  password: 'nick2025'    },
@@ -31,14 +32,40 @@ export default function CoachApp() {
   const [team, setTeam] = useState(null);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
-  function handleLogin() {
-    const matched = Object.values(TEAMS).find(t => t.password === password.trim());
-    if (matched) {
-      setTeam(matched);
-      setError('');
-    } else {
-      setError('Incorrect password. Contact the commissioner if you need access.');
+  async function handleLogin() {
+    const pw = password.trim();
+    if (!pw) return;
+    setLoading(true);
+    setError('');
+    try {
+      const { data, error: rpcError } = await supabase.rpc('coach_login', { p_password: pw });
+      if (rpcError) throw rpcError;
+      if (data && data.length > 0) {
+        const row = data[0];
+        const teamDef = TEAMS[row.team_id];
+        setTeam({ ...teamDef, _teamId: row.team_id, _password: pw });
+      } else {
+        // Fallback to hardcoded while migration is being applied
+        const matched = Object.values(TEAMS).find(t => t.password === pw);
+        if (matched) {
+          setTeam({ ...matched, _teamId: matched.id, _password: pw });
+        } else {
+          setError('Incorrect password. Contact the commissioner if you need access.');
+        }
+      }
+    } catch {
+      // Fallback to hardcoded if Supabase unavailable
+      const matched = Object.values(TEAMS).find(t => t.password === pw);
+      if (matched) {
+        setTeam({ ...matched, _teamId: matched.id, _password: pw });
+      } else {
+        setError('Incorrect password. Contact the commissioner if you need access.');
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -81,15 +108,17 @@ export default function CoachApp() {
 
             <button
               onClick={handleLogin}
+              disabled={loading}
               style={{
                 width: '100%', padding: '13px', borderRadius: 10, border: 'none',
-                background: 'var(--court-navy)', color: '#fff',
+                background: loading ? '#9CA3AF' : 'var(--court-navy)', color: '#fff',
                 fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15,
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               }}
             >
               <Icon name="log-in" size={16} color="#fff" />
-              Sign In
+              {loading ? 'Signing in…' : 'Sign In'}
             </button>
 
             <div style={{ marginTop: 16, fontSize: 12, color: '#9CA3AF', textAlign: 'center' }}>
@@ -121,11 +150,22 @@ export default function CoachApp() {
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.04em' }}>Coach Portal</div>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{team.coach}</div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{team.division}</div>
             </div>
+            <button
+              onClick={() => setShowChangePassword(true)}
+              title="Change password"
+              style={{
+                background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.18)',
+                borderRadius: 7, padding: '5px 8px', cursor: 'pointer',
+                display: 'flex', alignItems: 'center',
+              }}
+            >
+              <Icon name="key" size={14} color="rgba(255,255,255,0.75)" />
+            </button>
             <button
               onClick={() => { setTeam(null); setPassword(''); setError(''); }}
               style={{
@@ -140,6 +180,15 @@ export default function CoachApp() {
           </div>
         </div>
       </header>
+
+      {/* Change password modal */}
+      {showChangePassword && (
+        <ChangePasswordModal
+          team={team}
+          onClose={() => setShowChangePassword(false)}
+          onChanged={(newPw) => { setTeam(t => ({ ...t, _password: newPw })); setShowChangePassword(false); }}
+        />
+      )}
 
       {/* Content */}
       <div style={{ flex: 1, maxWidth: 640, width: '100%', margin: '0 auto', padding: '20px 16px', paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))' }}>
@@ -175,6 +224,100 @@ export default function CoachApp() {
           );
         })}
       </nav>
+    </div>
+  );
+}
+
+function ChangePasswordModal({ team, onClose, onChanged }) {
+  const [oldPw, setOldPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  async function handleSave() {
+    setError('');
+    if (newPw.length < 6) { setError('New password must be at least 6 characters.'); return; }
+    if (newPw !== confirm) { setError('Passwords do not match.'); return; }
+    setSaving(true);
+    try {
+      const { data, error: rpcError } = await supabase.rpc('coach_change_password', {
+        p_team_id: team._teamId,
+        p_old_password: oldPw,
+        p_new_password: newPw,
+      });
+      if (rpcError) throw rpcError;
+      if (data === true) {
+        setSuccess(true);
+        setTimeout(() => onChanged(newPw), 1200);
+      } else {
+        setError('Current password is incorrect.');
+      }
+    } catch {
+      setError('Could not save. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 200,
+      background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+    }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div style={{ background: '#fff', borderRadius: 18, padding: '28px 24px', width: '100%', maxWidth: 380, boxShadow: '0 8px 40px rgba(0,0,0,0.25)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+          <Icon name="key" size={18} color="var(--court-navy)" />
+          <div style={{ fontWeight: 700, fontSize: 17, color: 'var(--court-navy)' }}>Change Password</div>
+          <button onClick={onClose} style={{ all: 'unset', cursor: 'pointer', marginLeft: 'auto', color: '#9CA3AF' }}>
+            <Icon name="x" size={18} />
+          </button>
+        </div>
+
+        {success ? (
+          <div style={{ textAlign: 'center', padding: '16px 0', color: '#059669', fontWeight: 700, fontSize: 15 }}>
+            ✓ Password updated successfully!
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <PwField label="Current password" value={oldPw} onChange={setOldPw} />
+            <PwField label="New password" value={newPw} onChange={setNewPw} hint="Minimum 6 characters" />
+            <PwField label="Confirm new password" value={confirm} onChange={setConfirm} />
+            {error && <div style={{ fontSize: 12, color: '#DC2626', fontWeight: 600 }}>{error}</div>}
+            <button
+              onClick={handleSave}
+              disabled={saving || !oldPw || !newPw || !confirm}
+              style={{
+                width: '100%', padding: '12px', borderRadius: 10, border: 'none',
+                background: saving || !oldPw || !newPw || !confirm ? '#E2E5EA' : 'var(--court-navy)',
+                color: saving || !oldPw || !newPw || !confirm ? '#9CA3AF' : '#fff',
+                fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
+                cursor: saving || !oldPw || !newPw || !confirm ? 'not-allowed' : 'pointer', marginTop: 4,
+              }}
+            >
+              {saving ? 'Saving…' : 'Update Password'}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PwField({ label, value, onChange, hint }) {
+  return (
+    <div>
+      <label style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: 5 }}>{label}</label>
+      <input
+        type="password"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 8, border: '1.5px solid #E2E5EA', fontFamily: 'var(--font-body)', fontSize: 14, outline: 'none', color: '#111' }}
+        onFocus={e => e.target.style.borderColor = 'var(--court-navy)'}
+        onBlur={e => e.target.style.borderColor = '#E2E5EA'}
+      />
+      {hint && <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3 }}>{hint}</div>}
     </div>
   );
 }
