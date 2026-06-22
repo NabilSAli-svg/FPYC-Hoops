@@ -76,7 +76,7 @@ export default function AdminApp() {
     setSelectedTeamName(TEAM_NAMES_BY_SPORT[newSport]?.[0] || '');
   }
 
-  const teamPlayers = players.filter(p => p.team === selectedTeamName || p.team === 'Unassigned');
+  const teamPlayers = players.filter(p => p.team === selectedTeamName);
   const teamGames   = games.filter(g => !g.team || g.team === selectedTeamName);
   const activeTeam  = TEAMS_INFO[selectedTeamName] || TEAMS_INFO[TEAM_INFO.name];
 
