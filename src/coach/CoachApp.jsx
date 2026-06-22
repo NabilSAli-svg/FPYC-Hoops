@@ -6,10 +6,17 @@ import CoachPractice from './CoachPractice.jsx';
 import CoachMessage from './CoachMessage.jsx';
 
 const TEAMS = {
-  hawks:   { id: 'hawks',   name: 'Fairfax Hawks',   division: 'Boys 5–6 House',  coach: 'Coach M. Davis',    color: 'var(--court-navy)',       lineupKey: 'fpyc-lineup-starters-hawks'   },
-  wolves:  { id: 'wolves',  name: 'Fairfax Wolves',  division: 'Girls 5–6 House', coach: 'Coach S. Thompson', color: '#1F8A5B',                  lineupKey: 'fpyc-lineup-starters-wolves'  },
-  eagles:  { id: 'eagles',  name: 'Fairfax Eagles',  division: 'Boys 7–8 Select', coach: 'Coach J. Williams', color: '#C8102E',                  lineupKey: 'fpyc-lineup-starters-eagles'  },
-  cougars: { id: 'cougars', name: 'Fairfax Cougars', division: 'Girls 3–4 House', coach: 'Coach D. Park',     color: 'var(--basketball-orange)', lineupKey: 'fpyc-lineup-starters-cougars' },
+  '23boys': { id: '23boys',  name: 'Rising 2nd-3rd Boys', division: '3v3 Summer Cup',  coach: 'Nick Blessing',                    color: 'var(--court-navy)',       lineupKey: 'fpyc-lineup-starters-23boys'  },
+  girls:    { id: 'girls',   name: 'Girls 3v3 (2nd-8th)', division: '3v3 Summer Cup',  coach: 'Coach',                            color: '#1F8A5B',                  lineupKey: 'fpyc-lineup-starters-girls'   },
+  '45boys': { id: '45boys',  name: 'Rising 4th-5th Boys', division: '3v3 Summer Cup',  coach: 'Joshua Nehr, Jim Quinn & Shaun Ali', color: '#C8102E',                lineupKey: 'fpyc-lineup-starters-45boys'  },
+  '68boys': { id: '68boys',  name: 'Rising 6th-8th Boys', division: '3v3 Summer Cup',  coach: 'Coach',                            color: 'var(--basketball-orange)', lineupKey: 'fpyc-lineup-starters-68boys'  },
+  'ts-ab5': { id: 'ts-ab5',  name: 'Aidris B5',           division: 'Travel Select',   coach: 'Coach Aidris',                     color: '#7C3AED',                  lineupKey: 'fpyc-lineup-starters-ab5'     },
+  'ts-tb6': { id: 'ts-tb6',  name: 'Tom B6',               division: 'Travel Select',   coach: 'Coach Tom',                        color: '#0369A1',                  lineupKey: 'fpyc-lineup-starters-tb6'     },
+  'ts-mdg6':{ id: 'ts-mdg6', name: 'Mike Do G6',           division: 'Travel Select',   coach: 'Mike Do',                          color: '#059669',                  lineupKey: 'fpyc-lineup-starters-mdg6'    },
+  'ts-eg7': { id: 'ts-eg7',  name: 'Earnest G7',           division: 'Travel Select',   coach: 'Coach Earnest',                    color: '#D97706',                  lineupKey: 'fpyc-lineup-starters-eg7'     },
+  'ts-rb7': { id: 'ts-rb7',  name: 'Rene B7',              division: 'Travel Select',   coach: 'Coach Rene',                       color: '#BE185D',                  lineupKey: 'fpyc-lineup-starters-rb7'     },
+  'ts-mlb8':{ id: 'ts-mlb8', name: 'Mike Lee B8',          division: 'Travel Select',   coach: 'Mike Lee',                         color: '#1D4ED8',                  lineupKey: 'fpyc-lineup-starters-mlb8'    },
+  'ts-kb82':{ id: 'ts-kb82', name: 'Keun B8-2',            division: 'Travel Select',   coach: 'Coach Keun',                       color: '#374151',                  lineupKey: 'fpyc-lineup-starters-kb82'    },
 };
 const CREDENTIALS = { password: 'fpyc2025' };
 
