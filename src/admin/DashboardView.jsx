@@ -360,7 +360,7 @@ function ResultRow({ game }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 12px', background: 'var(--bone)', border: '1px solid var(--border)', borderRadius: 8 }}>
       <Pill kind={win ? 'win' : 'loss'}>{win ? 'W' : 'L'}</Pill>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 700, fontSize: 14 }}>vs. {game.opponent}</div>
+        <div style={{ fontWeight: 700, fontSize: 14 }}>{game.opponent.includes(' vs ') ? game.opponent : `vs. ${game.opponent}`}</div>
         <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 2 }}>{game.day} · {game.location}</div>
       </div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: 1, fontVariantNumeric: 'tabular-nums', color: win ? 'var(--court-navy)' : 'var(--fg-muted)' }}>
