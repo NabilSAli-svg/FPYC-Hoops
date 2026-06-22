@@ -20,7 +20,7 @@ export default function CoachMessage({ team }) {
   const [view, setView] = useState('compose'); // 'compose' | 'history'
 
   const roster = players.filter(p => p.team === team.name && p.status === 'active');
-  const sent_msgs = messages.filter(m => m.from === team.coach);
+  const sent_msgs = messages.filter(m => m.target === team.name);
 
   function applyTemplate(text) {
     setBody(text);
@@ -29,22 +29,21 @@ export default function CoachMessage({ team }) {
   function handleSend() {
     if (!subject.trim() || !body.trim()) return;
     setSending(true);
-    setTimeout(() => {
-      const newMsg = {
-        id: `m${Date.now()}`,
-        from: team.coach,
-        time: 'Just now',
-        unread: true,
-        subject: subject.trim(),
-        body: body.trim(),
-      };
-      setMessages(prev => [newMsg, ...prev]);
-      setSending(false);
-      setSent(true);
-      setSubject('');
-      setBody('');
-      setTimeout(() => setSent(false), 3000);
-    }, 1200);
+    const newMsg = {
+      id: `m${Date.now()}`,
+      from: team.coach,
+      target: team.name,
+      time: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      unread: true,
+      subject: subject.trim(),
+      body: body.trim(),
+    };
+    setMessages(prev => [newMsg, ...prev]);
+    setSending(false);
+    setSent(true);
+    setSubject('');
+    setBody('');
+    setTimeout(() => setSent(false), 3000);
   }
 
   return (
