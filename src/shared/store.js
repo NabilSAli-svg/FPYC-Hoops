@@ -1121,6 +1121,13 @@ export function nextUpcomingGameEvent(events) {
   return upcoming[0]?.e ?? events.find(e => e.type === 'game' && e.status === 'upcoming') ?? null;
 }
 
+// Final games sorted most-recent first.
+export function recentFinalGames(games) {
+  return games
+    .filter(g => g.status === 'final')
+    .sort((a, b) => (gameDateOf(b) ?? 0) - (gameDateOf(a) ?? 0));
+}
+
 // The next scheduled game that hasn't passed yet (falls back to first scheduled).
 export function nextScheduledGame(games) {
   const today = new Date();

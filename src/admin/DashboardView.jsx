@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, Pill, Button, Icon, Eyebrow, Display, Skeleton } from '../shared/index.js';
-import { usePractices, useAnnouncements, useAttendance, nextScheduledGame } from '../shared/store.js';
+import { usePractices, useAnnouncements, useAttendance, nextScheduledGame, recentFinalGames } from '../shared/store.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 
 export default function DashboardView({ team, players, games, onGo }) {
@@ -33,7 +33,7 @@ function DashboardContent({ team, players, games, onGo }) {
     if (gameDate < now && now - gameDate > 1000 * 60 * 60 * 24 * 180) gameDate.setFullYear(gameDate.getFullYear() + 1);
     return Math.max(0, Math.ceil((gameDate - now) / (1000 * 60 * 60 * 24)));
   })();
-  const recent = games.filter(g => g.status === 'final').slice(0, 3);
+  const recent = recentFinalGames(games).slice(0, 3);
 
   // Compute real attendance per practice session
   const activePlayers = players.filter(p => p.status === 'active');

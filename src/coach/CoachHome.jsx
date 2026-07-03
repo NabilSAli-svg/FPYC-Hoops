@@ -1,4 +1,4 @@
-import { usePlayers, useGames, useStats, useRsvps, countRsvps, gameDateOf, nextScheduledGame } from '../shared/store.js';
+import { usePlayers, useGames, useStats, useRsvps, countRsvps, gameDateOf, nextScheduledGame, recentFinalGames } from '../shared/store.js';
 import Icon from '../shared/Icon.jsx';
 
 export default function CoachHome({ team }) {
@@ -8,7 +8,7 @@ export default function CoachHome({ team }) {
 
   const [rsvps] = useRsvps();
   const roster  = players.filter(p => p.team === team.name && p.status === 'active');
-  const played  = games.filter(g => g.status === 'final' && (!g.team || g.team === team.name));
+  const played  = recentFinalGames(games.filter(g => !g.team || g.team === team.name));
   const teamScheduled = games.filter(g => g.status === 'scheduled' && (!g.team || g.team === team.name));
   const upcoming = teamScheduled.sort((a, b) => (gameDateOf(a) ?? 0) - (gameDateOf(b) ?? 0));
   const next    = nextScheduledGame(teamScheduled);
@@ -134,7 +134,7 @@ export default function CoachHome({ team }) {
           <div style={{ padding: '12px 18px', borderBottom: '1px solid #F3F4F6' }}>
             <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9CA3AF' }}>Results</div>
           </div>
-          {[...played].reverse().map((g, i) => {
+          {played.map((g, i) => {
             const tie = g.us != null && g.them != null && g.us === g.them;
             const win = g.us > g.them;
             const badgeBg = tie ? 'rgba(107,114,128,0.10)' : win ? 'rgba(16,185,129,0.10)' : 'rgba(239,68,68,0.08)';
