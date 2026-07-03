@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
-import { useGames, usePractices, deriveEvents, nextUpcomingGameEvent, TEAM_INFO, useRsvps, useOfficialAssignments } from '../shared/store.js';
+import { useGames, usePractices, deriveEvents, nextUpcomingGameEvent, gameDateOf, TEAM_INFO, useRsvps, useOfficialAssignments } from '../shared/store.js';
 
 const MONTH_NUM = { Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12' };
 
@@ -47,7 +47,8 @@ export default function ScheduleTab({ familyKey, childTeam = 'Fairfax Hawks' }) 
 
   const live      = filtered.filter(e => e.status === 'live');
   const upcoming  = filtered.filter(e => e.status === 'upcoming');
-  const past      = filtered.filter(e => e.status === 'final');
+  const past      = filtered.filter(e => e.status === 'final')
+    .sort((a, b) => (gameDateOf({ month: b.month, date: b.dayNum }) ?? 0) - (gameDateOf({ month: a.month, date: a.dayNum }) ?? 0));
 
   const liveGame  = EVENTS.find(e => e.type === 'game' && e.status === 'live') || null;
   const nextGame  = nextUpcomingGameEvent(EVENTS);

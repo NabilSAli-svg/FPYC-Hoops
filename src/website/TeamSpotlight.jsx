@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { useGames, useStandings, INITIAL_STANDINGS, PLAYOFF_SPOTS, nextScheduledGame } from '../shared/store.js';
+import { useGames, useStandings, INITIAL_STANDINGS, PLAYOFF_SPOTS, nextScheduledGame, recentFinalGames } from '../shared/store.js';
 import { TEAM_INFO } from '../shared/store.js';
 import { SectionHead } from './Programs.jsx';
 import Icon from '../shared/Icon.jsx';
@@ -13,7 +13,7 @@ export default function TeamSpotlight() {
 
   const liveGame   = games.find(g => g.status === 'live');
   const nextGame   = nextScheduledGame(games);
-  const recent     = [...games].filter(g => g.status === 'final').slice(-3).reverse();
+  const recent     = recentFinalGames(games).slice(0, 3);
   const wins       = games.filter(g => g.status === 'final' && g.us > g.them).length;
   const losses     = games.filter(g => g.status === 'final' && g.us < g.them).length;
   const leader     = STANDINGS[0];

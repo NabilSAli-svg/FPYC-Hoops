@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
-import { useGames, usePractices, deriveEvents, nextUpcomingGameEvent, TEAM_INFO, useAnnouncements, useAttendance } from '../shared/store.js';
+import { useGames, usePractices, deriveEvents, nextUpcomingGameEvent, gameDateOf, TEAM_INFO, useAnnouncements, useAttendance } from '../shared/store.js';
 
 export default function HomeTab({ family, messages, onTabChange, onAnnouncementsSeen }) {
   const [games]         = useGames();
@@ -44,7 +44,8 @@ export default function HomeTab({ family, messages, onTabChange, onAnnouncements
 
   const nextGame = nextUpcomingGameEvent(EVENTS);
   const nextPractice = EVENTS.find(e => e.type === 'practice' && e.status === 'upcoming');
-  const lastGame = EVENTS.find(e => e.type === 'game' && e.status === 'final');
+  const lastGame = EVENTS.filter(e => e.type === 'game' && e.status === 'final')
+    .sort((a, b) => (gameDateOf({ month: b.month, date: b.dayNum }) ?? 0) - (gameDateOf({ month: a.month, date: a.dayNum }) ?? 0))[0];
   const lastWin = lastGame && lastGame.us > lastGame.them;
   const unread = (messages || []).filter(m => m.unread).length;
 
