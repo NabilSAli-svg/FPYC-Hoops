@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
-import { useMessages, useGames, useAnnouncements } from '../shared/store.js';
+import { useMessages, useGames, useAnnouncements, nextScheduledGame } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
 import Icon from '../shared/Icon.jsx';
 import FamilyLogin from './FamilyLogin.jsx';
@@ -32,7 +32,7 @@ async function requestAndNotify(games) {
   if (perm === 'default') perm = await Notification.requestPermission();
   if (perm !== 'granted') return perm;
 
-  const next = games.find(g => g.status === 'scheduled');
+  const next = nextScheduledGame(games);
   const sw = await navigator.serviceWorker?.ready.catch(() => null);
   if (sw) {
     sw.showNotification('🏀 FPYC Hawks', {

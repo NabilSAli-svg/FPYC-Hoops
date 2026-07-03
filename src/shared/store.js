@@ -1098,6 +1098,41 @@ export function deriveEvents(games, practices) {
   return [...gameEvents, ...practiceEvents];
 }
 
+// Resolve a game's calendar date from its month/date fields.
+const MONTH_IDX = { Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5, Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11 };
+export function gameDateOf(g) {
+  if (!g?.month || !g?.date || !(g.month in MONTH_IDX)) return null;
+  const now = new Date();
+  let d = new Date(now.getFullYear(), MONTH_IDX[g.month], g.date);
+  // Handle season wrap (e.g. a Jan game viewed in Dec)
+  if (d - now < -1000 * 60 * 60 * 24 * 180) d.setFullYear(d.getFullYear() + 1);
+  return d;
+}
+
+// The next upcoming game event from deriveEvents() output that hasn't passed yet.
+export function nextUpcomingGameEvent(events) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const upcoming = events
+    .filter(e => e.type === 'game' && e.status === 'upcoming')
+    .map(e => ({ e, d: gameDateOf({ month: e.month, date: e.dayNum }) }))
+    .filter(x => x.d && x.d >= today)
+    .sort((a, b) => a.d - b.d);
+  return upcoming[0]?.e ?? events.find(e => e.type === 'game' && e.status === 'upcoming') ?? null;
+}
+
+// The next scheduled game that hasn't passed yet (falls back to first scheduled).
+export function nextScheduledGame(games) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const upcoming = games
+    .filter(g => g.status === 'scheduled')
+    .map(g => ({ g, d: gameDateOf(g) }))
+    .filter(x => x.d && x.d >= today)
+    .sort((a, b) => a.d - b.d);
+  return upcoming[0]?.g ?? games.find(g => g.status === 'scheduled') ?? null;
+}
+
 // ─── Registrations ───────────────────────────────────────────────────────────
 
 export function useRegistrations() {

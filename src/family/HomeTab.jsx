@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
-import { useGames, usePractices, deriveEvents, TEAM_INFO, useAnnouncements, useAttendance } from '../shared/store.js';
+import { useGames, usePractices, deriveEvents, nextUpcomingGameEvent, TEAM_INFO, useAnnouncements, useAttendance } from '../shared/store.js';
 
 export default function HomeTab({ family, messages, onTabChange, onAnnouncementsSeen }) {
   const [games]         = useGames();
@@ -42,7 +42,7 @@ export default function HomeTab({ family, messages, onTabChange, onAnnouncements
     }
   }, [loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const nextGame = EVENTS.find(e => e.type === 'game' && e.status === 'upcoming');
+  const nextGame = nextUpcomingGameEvent(EVENTS);
   const nextPractice = EVENTS.find(e => e.type === 'practice' && e.status === 'upcoming');
   const lastGame = EVENTS.find(e => e.type === 'game' && e.status === 'final');
   const lastWin = lastGame && lastGame.us > lastGame.them;
