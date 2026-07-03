@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, Pill, Button, Icon, Eyebrow, Display, Skeleton } from '../shared/index.js';
-import { usePractices, useAnnouncements, useAttendance } from '../shared/store.js';
+import { usePractices, useAnnouncements, useAttendance, nextScheduledGame } from '../shared/store.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 
 export default function DashboardView({ team, players, games, onGo }) {
@@ -24,7 +24,7 @@ function DashboardContent({ team, players, games, onGo }) {
   });
   const isMobile        = useIsMobile();
 
-  const next   = games.find(g => g.status === 'scheduled');
+  const next   = nextScheduledGame(games);
   const countdown = next?.countdown ?? (() => {
     if (!next?.month || !next?.date) return '—';
     const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };

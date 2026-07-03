@@ -1,4 +1,4 @@
-import { usePlayers, useGames, useStats, useRsvps, countRsvps } from '../shared/store.js';
+import { usePlayers, useGames, useStats, useRsvps, countRsvps, gameDateOf, nextScheduledGame } from '../shared/store.js';
 import Icon from '../shared/Icon.jsx';
 
 export default function CoachHome({ team }) {
@@ -9,8 +9,9 @@ export default function CoachHome({ team }) {
   const [rsvps] = useRsvps();
   const roster  = players.filter(p => p.team === team.name && p.status === 'active');
   const played  = games.filter(g => g.status === 'final' && (!g.team || g.team === team.name));
-  const upcoming = games.filter(g => g.status === 'scheduled' && (!g.team || g.team === team.name)).sort((a, b) => a.date - b.date);
-  const next    = upcoming[0] ?? null;
+  const teamScheduled = games.filter(g => g.status === 'scheduled' && (!g.team || g.team === team.name));
+  const upcoming = teamScheduled.sort((a, b) => (gameDateOf(a) ?? 0) - (gameDateOf(b) ?? 0));
+  const next    = nextScheduledGame(teamScheduled);
 
   const wins   = played.filter(g => g.us > g.them).length;
   const losses = played.filter(g => g.us < g.them).length;
