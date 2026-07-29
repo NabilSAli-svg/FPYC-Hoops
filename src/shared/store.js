@@ -4,8 +4,8 @@ import { useSupabaseTable, useSupabaseAssignments } from './useSupabaseTable.js'
 import { supabase } from './supabase.js';
 
 export const TEAM_INFO = {
-  name: 'Rising 2nd-3rd Boys',
-  division: '3v3 Summer Cup',
+  name: '5/6 Boys',
+  division: 'Winter Rec',
   record: '0–0',
   seed: '—',
   coach: 'Coach',
@@ -18,19 +18,46 @@ export const SPORTS = [
   { id: 'football',   label: 'Football',   tagline: 'FPYC Lions Football', icon: 'shield' },
 ];
 
+export const REC_DIVISION    = 'Winter Rec';
+export const SELECT_DIVISION = 'Winter Select';
+
 export const TEAMS_INFO = {
-  'Rising 2nd-3rd Boys': { id: '23boys', name: 'Rising 2nd-3rd Boys', division: '3v3 Summer Cup', coach: 'Nick Blessing', color: 'var(--court-navy)', sport: 'basketball' },
-  'Girls 3v3 (2nd-8th)': { id: 'girls',  name: 'Girls 3v3 (2nd-8th)', division: '3v3 Summer Cup', coach: 'Coach', color: '#1F8A5B', sport: 'basketball' },
-  'Rising 4th-5th Boys': { id: '45boys', name: 'Rising 4th-5th Boys', division: '3v3 Summer Cup', coach: 'Joshua Nehr, Jim Quinn & Shaun Ali', color: '#C8102E', sport: 'basketball' },
-  'Rising 6th-8th Boys': { id: '68boys', name: 'Rising 6th-8th Boys', division: '3v3 Summer Cup', coach: 'Coach', color: 'var(--basketball-orange)', sport: 'basketball' },
-  // Travel Select — Summer 2026
-  'Aidris B5':   { id: 'ts-ab5',  name: 'Aidris B5',   division: 'Travel Select', coach: 'Coach Aidris',   color: '#7C3AED', sport: 'basketball' },
-  'Tom B6':      { id: 'ts-tb6',  name: 'Tom B6',      division: 'Travel Select', coach: 'Coach Tom',      color: '#0369A1', sport: 'basketball' },
-  'Mike Do G6':  { id: 'ts-mdg6', name: 'Mike Do G6',  division: 'Travel Select', coach: 'Mike Do',        color: '#059669', sport: 'basketball' },
-  'Earnest G7':  { id: 'ts-eg7',  name: 'Earnest G7',  division: 'Travel Select', coach: 'Coach Earnest',  color: '#D97706', sport: 'basketball' },
-  'Rene B7':     { id: 'ts-rb7',  name: 'Rene B7',     division: 'Travel Select', coach: 'Coach Rene',     color: '#BE185D', sport: 'basketball' },
-  'Mike Lee B8': { id: 'ts-mlb8', name: 'Mike Lee B8', division: 'Travel Select', coach: 'Mike Lee',       color: '#1D4ED8', sport: 'basketball' },
-  'Keun B8-2':   { id: 'ts-kb82', name: 'Keun B8-2',   division: 'Travel Select', coach: 'Coach Keun',     color: '#374151', sport: 'basketball' },
+  // ── Winter 2026–27 · Rec ───────────────────────────────────────────────────
+  // K-3 is formed by skill/age — no draft.
+  'K-3 3v3':    { id: 'k3-3v3', name: 'K-3 3v3',    division: REC_DIVISION, coach: 'Coach', color: '#0891B2', sport: 'basketball', noDraft: true },
+  '3/4 Boys':   { id: '34boys', name: '3/4 Boys',   division: REC_DIVISION, coach: 'Coach', color: 'var(--court-navy)', sport: 'basketball' },
+  '3/4 Girls':  { id: '34girls',name: '3/4 Girls',  division: REC_DIVISION, coach: 'Coach', color: '#BE185D', sport: 'basketball' },
+  '5/6 Boys':   { id: '56boys', name: '5/6 Boys',   division: REC_DIVISION, coach: 'Coach', color: '#1D4ED8', sport: 'basketball' },
+  '5/6 Girls':  { id: '56girls',name: '5/6 Girls',  division: REC_DIVISION, coach: 'Coach', color: '#DB2777', sport: 'basketball' },
+  '7/8 Boys':   { id: '78boys', name: '7/8 Boys',   division: REC_DIVISION, coach: 'Coach', color: '#C8102E', sport: 'basketball' },
+  '7/8 Girls':  { id: '78girls',name: '7/8 Girls',  division: REC_DIVISION, coach: 'Coach', color: '#9333EA', sport: 'basketball' },
+  'HS Boys':    { id: 'hsboys', name: 'HS Boys',    division: REC_DIVISION, coach: 'Coach', color: '#111827', sport: 'basketball' },
+  'HS Girls':   { id: 'hsgirls',name: 'HS Girls',   division: REC_DIVISION, coach: 'Coach', color: '#7C3AED', sport: 'basketball' },
+
+  // ── Winter 2026–27 · Select ────────────────────────────────────────────────
+  // Each grade may field a second team — add a "… 2" entry once tryouts settle.
+  '5th Boys Select':  { id: 'sel-5b', name: '5th Boys Select',  division: SELECT_DIVISION, coach: 'Coach', color: '#0369A1', sport: 'basketball' },
+  '5th Girls Select': { id: 'sel-5g', name: '5th Girls Select', division: SELECT_DIVISION, coach: 'Coach', color: '#E11D48', sport: 'basketball' },
+  '6th Boys Select':  { id: 'sel-6b', name: '6th Boys Select',  division: SELECT_DIVISION, coach: 'Coach', color: '#047857', sport: 'basketball' },
+  '6th Girls Select': { id: 'sel-6g', name: '6th Girls Select', division: SELECT_DIVISION, coach: 'Coach', color: '#A21CAF', sport: 'basketball' },
+  '7th Boys Select':  { id: 'sel-7b', name: '7th Boys Select',  division: SELECT_DIVISION, coach: 'Coach', color: '#B45309', sport: 'basketball' },
+  '7th Girls Select': { id: 'sel-7g', name: '7th Girls Select', division: SELECT_DIVISION, coach: 'Coach', color: '#BE123C', sport: 'basketball' },
+  '8th Boys Select':  { id: 'sel-8b', name: '8th Boys Select',  division: SELECT_DIVISION, coach: 'Coach', color: '#1E40AF', sport: 'basketball' },
+  '8th Girls Select': { id: 'sel-8g', name: '8th Girls Select', division: SELECT_DIVISION, coach: 'Coach', color: '#86198F', sport: 'basketball' },
+
+  // ── Archived · Summer 2026 ─────────────────────────────────────────────────
+  // Kept so past games/rosters still resolve; hidden from team pickers.
+  'Rising 2nd-3rd Boys': { id: '23boys', name: 'Rising 2nd-3rd Boys', division: '3v3 Summer Cup', coach: 'Nick Blessing', color: 'var(--court-navy)', sport: 'basketball', archived: true },
+  'Girls 3v3 (2nd-8th)': { id: 'girls',  name: 'Girls 3v3 (2nd-8th)', division: '3v3 Summer Cup', coach: 'Coach', color: '#1F8A5B', sport: 'basketball', archived: true },
+  'Rising 4th-5th Boys': { id: '45boys', name: 'Rising 4th-5th Boys', division: '3v3 Summer Cup', coach: 'Joshua Nehr, Jim Quinn & Shaun Ali', color: '#C8102E', sport: 'basketball', archived: true },
+  'Rising 6th-8th Boys': { id: '68boys', name: 'Rising 6th-8th Boys', division: '3v3 Summer Cup', coach: 'Coach', color: 'var(--basketball-orange)', sport: 'basketball', archived: true },
+  'Aidris B5':   { id: 'ts-ab5',  name: 'Aidris B5',   division: 'Travel Select', coach: 'Coach Aidris',   color: '#7C3AED', sport: 'basketball', archived: true },
+  'Tom B6':      { id: 'ts-tb6',  name: 'Tom B6',      division: 'Travel Select', coach: 'Coach Tom',      color: '#0369A1', sport: 'basketball', archived: true },
+  'Mike Do G6':  { id: 'ts-mdg6', name: 'Mike Do G6',  division: 'Travel Select', coach: 'Mike Do',        color: '#059669', sport: 'basketball', archived: true },
+  'Earnest G7':  { id: 'ts-eg7',  name: 'Earnest G7',  division: 'Travel Select', coach: 'Coach Earnest',  color: '#D97706', sport: 'basketball', archived: true },
+  'Rene B7':     { id: 'ts-rb7',  name: 'Rene B7',     division: 'Travel Select', coach: 'Coach Rene',     color: '#BE185D', sport: 'basketball', archived: true },
+  'Mike Lee B8': { id: 'ts-mlb8', name: 'Mike Lee B8', division: 'Travel Select', coach: 'Mike Lee',       color: '#1D4ED8', sport: 'basketball', archived: true },
+  'Keun B8-2':   { id: 'ts-kb82', name: 'Keun B8-2',   division: 'Travel Select', coach: 'Coach Keun',     color: '#374151', sport: 'basketball', archived: true },
   'U9 Fairfax FC':  { id: 'soccer-u9',  name: 'U9 Fairfax FC',  division: 'PowerRec U9-U10',  coach: 'Rich Crowder', color: '#1F8A5B', sport: 'soccer' },
   'U12 Fairfax FC': { id: 'soccer-u12', name: 'U12 Fairfax FC', division: 'NCSL Rec U11-U19', coach: 'Coach', color: '#C8102E', sport: 'soccer' },
 
@@ -63,6 +90,30 @@ export const TEAMS_INFO = {
   'Bucs (15U)':      { id: 'fb-15u-bucs',      name: 'Bucs (15U)',      division: '15U Coed Flag', coach: 'Coach Whitlock',     color: '#C8102E', sport: 'football' },
   'Commanders (15U)':{ id: 'fb-15u-commanders',name: 'Commanders (15U)',division: '15U Coed Flag', coach: 'Coach Parish',       color: '#C8102E', sport: 'football' },
 };
+
+// Team names for a sport, excluding archived (past-season) teams.
+export function activeTeamNames(sport = 'basketball') {
+  return Object.keys(TEAMS_INFO).filter(
+    name => (TEAMS_INFO[name].sport || 'basketball') === sport && !TEAMS_INFO[name].archived
+  );
+}
+
+// Active team names grouped by division, e.g. { 'Winter Rec': [...], 'Winter Select': [...] }.
+export function activeTeamsByDivision(sport = 'basketball') {
+  return activeTeamNames(sport).reduce((acc, name) => {
+    const div = TEAMS_INFO[name].division || '—';
+    (acc[div] ??= []).push(name);
+    return acc;
+  }, {});
+}
+
+// Divisions that hold a draft (K-3 forms teams by skill/age instead).
+export function draftableDivisions(sport = 'basketball') {
+  const divs = activeTeamNames(sport)
+    .filter(name => !TEAMS_INFO[name].noDraft)
+    .map(name => TEAMS_INFO[name].division);
+  return [...new Set(divs)];
+}
 
 
 export const INITIAL_PLAYERS = [

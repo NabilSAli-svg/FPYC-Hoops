@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { Card, Pill, Button, Icon, Jersey, EmptyState, Skeleton } from '../shared/index.js';
 import { csvDownload } from '../shared/csvDownload.js';
 import { printRoster } from '../shared/printSheet.js';
-import { TEAM_INFO, TEAMS_INFO } from '../shared/store.js';
+import { TEAM_INFO, TEAMS_INFO, REC_DIVISION, SELECT_DIVISION, activeTeamNames, activeTeamsByDivision } from '../shared/store.js';
 
-const GRADES    = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
+const GRADES    = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th'];
 const POSITIONS_BY_SPORT = {
   basketball: ['Guard', 'Forward', 'Center'],
   soccer:     ['Goalkeeper', 'Defender', 'Midfielder', 'Forward'],
@@ -14,26 +14,28 @@ const STATUSES  = ['active', 'pending', 'inactive'];
 
 const PROGRAMS = ['Recreation', 'Select', 'Training', 'Unassigned'];
 
+const BY_DIVISION = activeTeamsByDivision('basketball');
+
 const DIVISIONS_BY_PROGRAM = {
-  'Recreation': ['3v3 Summer Cup'],
-  'Select':     ['—'],
+  'Recreation': [REC_DIVISION],
+  'Select':     [SELECT_DIVISION],
   'Training':   ['Beginner', 'Intermediate', 'Advanced'],
   'Unassigned': ['—'],
 };
 
 const TEAMS_BY_PROGRAM = {
-  'Recreation': ['Rising 2nd-3rd Boys', 'Girls 3v3 (2nd-8th)', 'Rising 4th-5th Boys', 'Rising 6th-8th Boys'],
-  'Select':     ['Unassigned'],
+  'Recreation': BY_DIVISION[REC_DIVISION] || [],
+  'Select':     BY_DIVISION[SELECT_DIVISION] || [],
   'Training':   ['Training - Beginner', 'Training - Intermediate', 'Training - Advanced'],
   'Unassigned': ['Unassigned'],
 };
 
-const TEAMS = [...Object.keys(TEAMS_INFO), 'Unassigned'];
+const TEAMS = [...activeTeamNames('basketball'), 'Unassigned'];
 
 const STATUS_KIND = { active: 'navy', pending: 'warn', neutral: 'neutral' };
 
 function emptyForm(sport) {
-  return { firstName: '', lastName: '', number: '', grade: '5th', position: (POSITIONS_BY_SPORT[sport] || POSITIONS_BY_SPORT.basketball)[0], school: '', guardian: '', email: '', phone: '', status: 'active', waiver: false, program: 'Recreation', division: '3v3 Summer Cup', team: TEAMS[0] };
+  return { firstName: '', lastName: '', number: '', grade: '5th', position: (POSITIONS_BY_SPORT[sport] || POSITIONS_BY_SPORT.basketball)[0], school: '', guardian: '', email: '', phone: '', status: 'active', waiver: false, program: 'Recreation', division: REC_DIVISION, team: TEAMS[0] };
 }
 
 function exportRosterCSV(players) {
@@ -123,7 +125,7 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
       status: p.status,
       waiver: p.waiver,
       program: p.program || 'Recreation',
-      division: p.division || '3v3 Summer Cup',
+      division: p.division || REC_DIVISION,
       team: p.team || 'Unassigned',
     });
     setErrors({});
