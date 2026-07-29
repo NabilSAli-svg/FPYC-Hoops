@@ -1,9 +1,12 @@
 import { useState, useMemo } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
-import { usePlayers, buildSnakeOrder } from '../shared/store.js';
+import { usePlayers, buildSnakeOrder, TEAMS_INFO, activeTeamNames } from '../shared/store.js';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
 
 const TEAM_COLORS = ['#0A1F3D','#C8102E','#1F8A5B','#E87722','#7C3AED','#0F766E','#B45309','#1D4ED8'];
+
+// Age groups eligible for a draft — K-3 forms teams by skill/age instead.
+const DRAFTABLE_TEAMS = activeTeamNames('basketball').filter(name => !TEAMS_INFO[name].noDraft);
 
 function uid() { return 'draft-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7); }
 
@@ -13,9 +16,10 @@ function teamAvg(pids, pool) {
 }
 
 function buildDraftPool(players, evals, division) {
+  const want = division?.toLowerCase();
   return players
-    .filter(p => division
-      ? p.division?.toLowerCase().includes(division.toLowerCase())
+    .filter(p => want
+      ? p.team?.toLowerCase() === want || p.division?.toLowerCase().includes(want)
       : true)
     .filter(p => p.status !== 'inactive')
     .map(p => {
@@ -165,7 +169,10 @@ function NewDraftForm({ onSave, onCancel, initial }) {
         </div>
         <div>
           <label style={lbl}>Division (filter players)</label>
-          <input style={inp} value={division} onChange={e => setDivision(e.target.value)} placeholder="Boys 5–6 House" />
+          <select style={inp} value={division} onChange={e => setDivision(e.target.value)}>
+            <option value="">All divisions</option>
+            {DRAFTABLE_TEAMS.map(name => <option key={name} value={name}>{name}</option>)}
+          </select>
         </div>
         <div>
           <label style={lbl}>Season</label>

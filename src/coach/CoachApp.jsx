@@ -7,6 +7,28 @@ import CoachMessage from './CoachMessage.jsx';
 import { supabase } from '../shared/supabase.js';
 
 const TEAMS = {
+  // ── Winter 2026–27 · Rec ───────────────────────────────────────────────────
+  'k3-3v3': { id: 'k3-3v3', name: 'K-3 3v3',    division: 'Winter Rec', coach: 'Coach', color: '#0891B2',           lineupKey: 'fpyc-lineup-starters-k3',      password: 'k3hoops27'   },
+  '34boys': { id: '34boys', name: '3/4 Boys',   division: 'Winter Rec', coach: 'Coach', color: 'var(--court-navy)', lineupKey: 'fpyc-lineup-starters-34boys',  password: 'boys34win'   },
+  '34girls':{ id: '34girls',name: '3/4 Girls',  division: 'Winter Rec', coach: 'Coach', color: '#BE185D',           lineupKey: 'fpyc-lineup-starters-34girls', password: 'girls34win'  },
+  '56boys': { id: '56boys', name: '5/6 Boys',   division: 'Winter Rec', coach: 'Coach', color: '#1D4ED8',           lineupKey: 'fpyc-lineup-starters-56boys',  password: 'boys56win'   },
+  '56girls':{ id: '56girls',name: '5/6 Girls',  division: 'Winter Rec', coach: 'Coach', color: '#DB2777',           lineupKey: 'fpyc-lineup-starters-56girls', password: 'girls56win'  },
+  '78boys': { id: '78boys', name: '7/8 Boys',   division: 'Winter Rec', coach: 'Coach', color: '#C8102E',           lineupKey: 'fpyc-lineup-starters-78boys',  password: 'boys78win'   },
+  '78girls':{ id: '78girls',name: '7/8 Girls',  division: 'Winter Rec', coach: 'Coach', color: '#9333EA',           lineupKey: 'fpyc-lineup-starters-78girls', password: 'girls78win'  },
+  'hsboys': { id: 'hsboys', name: 'HS Boys',    division: 'Winter Rec', coach: 'Coach', color: '#111827',           lineupKey: 'fpyc-lineup-starters-hsboys',  password: 'hsboyswin'   },
+  'hsgirls':{ id: 'hsgirls',name: 'HS Girls',   division: 'Winter Rec', coach: 'Coach', color: '#7C3AED',           lineupKey: 'fpyc-lineup-starters-hsgirls', password: 'hsgirlswin'  },
+
+  // ── Winter 2026–27 · Select ────────────────────────────────────────────────
+  'sel-5b': { id: 'sel-5b', name: '5th Boys Select',  division: 'Winter Select', coach: 'Coach', color: '#0369A1', lineupKey: 'fpyc-lineup-starters-sel5b', password: 'sel5boys27'  },
+  'sel-5g': { id: 'sel-5g', name: '5th Girls Select', division: 'Winter Select', coach: 'Coach', color: '#E11D48', lineupKey: 'fpyc-lineup-starters-sel5g', password: 'sel5girls27' },
+  'sel-6b': { id: 'sel-6b', name: '6th Boys Select',  division: 'Winter Select', coach: 'Coach', color: '#047857', lineupKey: 'fpyc-lineup-starters-sel6b', password: 'sel6boys27'  },
+  'sel-6g': { id: 'sel-6g', name: '6th Girls Select', division: 'Winter Select', coach: 'Coach', color: '#A21CAF', lineupKey: 'fpyc-lineup-starters-sel6g', password: 'sel6girls27' },
+  'sel-7b': { id: 'sel-7b', name: '7th Boys Select',  division: 'Winter Select', coach: 'Coach', color: '#B45309', lineupKey: 'fpyc-lineup-starters-sel7b', password: 'sel7boys27'  },
+  'sel-7g': { id: 'sel-7g', name: '7th Girls Select', division: 'Winter Select', coach: 'Coach', color: '#BE123C', lineupKey: 'fpyc-lineup-starters-sel7g', password: 'sel7girls27' },
+  'sel-8b': { id: 'sel-8b', name: '8th Boys Select',  division: 'Winter Select', coach: 'Coach', color: '#1E40AF', lineupKey: 'fpyc-lineup-starters-sel8b', password: 'sel8boys27'  },
+  'sel-8g': { id: 'sel-8g', name: '8th Girls Select', division: 'Winter Select', coach: 'Coach', color: '#86198F', lineupKey: 'fpyc-lineup-starters-sel8g', password: 'sel8girls27' },
+
+  // ── Archived · Summer 2026 (logins still work for past-season review) ──────
   '23boys': { id: '23boys',  name: 'Rising 2nd-3rd Boys', division: '3v3 Summer Cup',  coach: 'Nick Blessing',                      color: 'var(--court-navy)',       lineupKey: 'fpyc-lineup-starters-23boys',  password: 'nick2025'    },
   girls:    { id: 'girls',   name: 'Girls 3v3 (2nd-8th)', division: '3v3 Summer Cup',  coach: 'Coach',                              color: '#1F8A5B',                  lineupKey: 'fpyc-lineup-starters-girls',   password: 'girls2025'   },
   '45boys': { id: '45boys',  name: 'Rising 4th-5th Boys', division: '3v3 Summer Cup',  coach: 'Joshua Nehr, Jim Quinn & Shaun Ali', color: '#C8102E',                  lineupKey: 'fpyc-lineup-starters-45boys',  password: 'rising2025'  },

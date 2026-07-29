@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useGames, usePlayers, TEAM_INFO, TEAMS_INFO, SPORTS } from '../shared/store.js';
+import { useGames, usePlayers, TEAM_INFO, TEAMS_INFO, SPORTS, activeTeamNames } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
 import Sidebar from './Sidebar.jsx';
 import TopBar from './TopBar.jsx';
@@ -26,7 +26,7 @@ import { Button } from '../shared/index.js';
 import ErrorBoundary from '../shared/ErrorBoundary.jsx';
 
 const TEAM_NAMES_BY_SPORT = SPORTS.reduce((acc, s) => {
-  acc[s.id] = Object.keys(TEAMS_INFO).filter(name => (TEAMS_INFO[name].sport || 'basketball') === s.id);
+  acc[s.id] = activeTeamNames(s.id);
   return acc;
 }, {});
 
