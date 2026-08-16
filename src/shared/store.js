@@ -12,11 +12,14 @@ export const TEAM_INFO = {
   coachEmail: '',
 };
 
+// `enabled: false` keeps a sport's data intact but hides it from pickers.
 export const SPORTS = [
-  { id: 'basketball', label: 'Basketball', tagline: 'FPYC Basketball', icon: 'circle-dot' },
-  { id: 'soccer',     label: 'Soccer',     tagline: 'FPYC Soccer',     icon: 'circle' },
-  { id: 'football',   label: 'Football',   tagline: 'FPYC Lions Football', icon: 'shield' },
+  { id: 'basketball', label: 'Basketball', tagline: 'FPYC Basketball', icon: 'circle-dot', enabled: true },
+  { id: 'soccer',     label: 'Soccer',     tagline: 'FPYC Soccer',     icon: 'circle',     enabled: false },
+  { id: 'football',   label: 'Football',   tagline: 'FPYC Lions Football', icon: 'shield', enabled: false },
 ];
+
+export const ACTIVE_SPORTS = SPORTS.filter(s => s.enabled);
 
 export const REC_DIVISION    = 'Winter Rec';
 export const SELECT_DIVISION = 'Winter Select';
