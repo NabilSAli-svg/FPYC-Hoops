@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import Icon from '../shared/Icon.jsx';
 import Skeleton from '../shared/Skeleton.jsx';
-import { useGames, usePractices, deriveEvents, nextUpcomingGameEvent, gameDateOf, TEAM_INFO, useAnnouncements, useAttendance } from '../shared/store.js';
+import { useGames, usePractices, deriveEvents, nextUpcomingGameEvent, gameDateOf, useAnnouncements, useAttendance } from '../shared/store.js';
 
 export default function HomeTab({ family, messages, onTabChange, onAnnouncementsSeen }) {
   const [games]         = useGames();
   const [practices]     = usePractices();
   const [announcements] = useAnnouncements();
   const EVENTS = deriveEvents(games, practices);
-  const TEAM = TEAM_INFO;
 
   const [attendanceRows] = useAttendance();
   const attendance = {};
@@ -83,13 +82,10 @@ export default function HomeTab({ family, messages, onTabChange, onAnnouncements
           </div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, textTransform: 'uppercase', lineHeight: 1, marginTop: 3 }}>{child.name}</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', marginTop: 4 }}>
-            #{child.number} · {child.position} · {child.grade} · {TEAM.name}
+            #{child.number} · {child.position} · {child.grade} · {child.team}
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--varsity-gold)', lineHeight: 1 }}>{TEAM.record}</div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 3 }}>{TEAM.seed} in division</div>
-        </div>
+
       </div>
 
       {/* Unread messages alert */}
@@ -105,9 +101,9 @@ export default function HomeTab({ family, messages, onTabChange, onAnnouncements
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--court-navy)' }}>
-              {unread} new message{unread > 1 ? 's' : ''} from Coach Davis
+              {unread} new message{unread > 1 ? 's' : ''} from your coach
             </div>
-            <div style={{ fontSize: 12, color: '#6B7280', marginTop: 1 }}>Game day info · Practice update</div>
+            <div style={{ fontSize: 12, color: '#6B7280', marginTop: 1 }}>Tap to read in Messages</div>
           </div>
           <Icon name="arrow-right" size={16} color="var(--court-navy)" />
         </button>

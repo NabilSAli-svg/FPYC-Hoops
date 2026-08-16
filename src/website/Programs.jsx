@@ -7,19 +7,19 @@ export default function Programs() {
       <div className="mob-grid-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginTop: 32 }}>
         <ProgramCard
           tag="Rec"
-          title="House League"
-          grades="K – 8th grade"
+          title="Rec League"
+          grades="K – 12th grade"
           price="$195"
           desc="Our flagship recreational program. Balanced teams, every player gets meaningful minutes, focus on fundamentals and fun."
-          bullets={['Saturday games, December – February', 'Weekday practice at local schools', 'Coed K–2, single-gender 3rd+']}
+          bullets={['K-3 3v3 through high school', 'Weekday practice at local schools', 'Boys and girls divisions 3/4 through 7/8']}
         />
         <ProgramCard
           tag="Competitive"
-          title="Select / Travel"
-          grades="3rd – 8th grade"
+          title="Select"
+          grades="5th – 8th grade"
           price="$425"
           desc="Tryout-based competitive teams playing in the Fairfax County Youth Basketball League (FCYBL). Two practices a week."
-          bullets={['FCYBL games across NoVa', 'Tryouts in early September', 'Boys and girls divisions']}
+          bullets={['FCYBL games across NoVa', 'Tryouts in early September', 'Boys and girls, 5th through 8th']}
           featured
         />
         <ProgramCard
