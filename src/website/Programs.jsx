@@ -25,9 +25,9 @@ export default function Programs() {
         <ProgramCard
           tag="Clinic"
           title="Skills Clinic"
-          grades="Beginner · Intermediate · Advanced"
-          price="$95"
-          desc="Monday-evening skills sessions grouped by ability. Coach-led drills, no games — a great bridge into the winter league."
+          grades="1st grade – high school"
+          price="$200"
+          desc="Six Monday-evening development sessions grouped by ability. Led by Nabil and Shaun Ali with local HS coaches and standout players."
           bullets={['6 Mondays, Sep 14 – Oct 26', 'Beginner 6–7 · Intermediate 7–8 · Advanced 8–9', 'Providence ES · gym may change']}
         />
       </div>
