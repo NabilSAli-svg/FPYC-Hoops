@@ -31,7 +31,7 @@ export default function Hero({ onRegister }) {
             marginBottom: 20,
           }}>
             <span style={{ width: 6, height: 6, background: 'var(--varsity-gold)', borderRadius: '50%' }} />
-            2025–26 Season · Now open
+            2026–27 Season · Now open
           </div>
 
           <div style={{
@@ -54,7 +54,7 @@ export default function Hero({ onRegister }) {
                 textDecoration: 'none', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15,
                 display: 'inline-flex', alignItems: 'center', gap: 8,
               }}
-            >Register for 2025–26 <Icon name="arrow-right" size={16} /></a>
+            >Register for 2026–27 <Icon name="arrow-right" size={16} /></a>
             <a href="#register" onClick={(e) => { e.preventDefault(); onRegister(); }} style={{
               background: 'rgba(255,255,255,0.08)', color: '#fff', padding: '14px 22px', borderRadius: 8,
               border: '1px solid rgba(255,255,255,0.18)', textDecoration: 'none',
