@@ -8,15 +8,9 @@ const EVENTS = [
     category: 'play',
   },
   {
-    date: 'Sept 27',
+    date: 'Fall',
     title: 'Walk-in registration',
-    desc: 'Saturday 10am–12pm · FPYC Office, 3955 Pickett Rd',
-    category: 'reg',
-  },
-  {
-    date: 'Oct 11',
-    title: 'Final walk-in session',
-    desc: 'Last chance for in-person help · same location',
+    desc: 'Saturdays 10am–12pm · FPYC Clubhouse, 10701 West Dr · dates posted at fpycsports.com',
     category: 'reg',
   },
   {
@@ -150,7 +144,7 @@ export default function SeasonCalendar() {
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
             <span style={{ fontSize: 14, color: 'var(--fg)', fontWeight: 500 }}>
-              <strong>Walk-in registration</strong> is Sept 27 & Oct 11 · Saturdays 10am–12pm at 3955 Pickett Rd, Fairfax VA
+              <strong>Walk-in registration</strong> · Saturdays 10am–12pm at the FPYC Clubhouse, 10701 West Dr, Fairfax VA 22030
             </span>
           </div>
           <a href="/register" style={{

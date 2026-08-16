@@ -42,6 +42,14 @@ const TEAMS = {
   'ts-kb82':{ id: 'ts-kb82', name: 'Keun B8-2',            division: 'Travel Select',   coach: 'Coach Keun',                         color: '#374151',                  lineupKey: 'fpyc-lineup-starters-kb82',    password: 'keun2025'    },
 };
 
+const labelSt = { fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9CA3AF', display: 'block', marginBottom: 7 };
+const errSt   = { marginTop: 6, fontSize: 12, color: '#DC2626', fontWeight: 600 };
+const inputSt = (error) => ({
+  width: '100%', boxSizing: 'border-box', padding: '11px 14px',
+  borderRadius: 9, border: `1.5px solid ${error ? '#DC2626' : '#E2E5EA'}`,
+  fontSize: 14, fontFamily: 'var(--font-body)', color: '#111', outline: 'none',
+});
+
 const TABS = [
   { id: 'home',     label: 'Home',     icon: 'home' },
   { id: 'lineup',   label: 'Lineup',   icon: 'layout-list' },
@@ -56,6 +64,9 @@ export default function CoachApp() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [mode, setMode] = useState('account'); // 'account' | 'teamcode'
+  const [acctEmail, setAcctEmail] = useState('');
+  const [acctPassword, setAcctPassword] = useState('');
 
   async function handleLogin() {
     const pw = password.trim();
@@ -91,6 +102,33 @@ export default function CoachApp() {
     }
   }
 
+  // Resolve a signed-in Supabase account to its coach team.
+  async function teamFromProfile(userId) {
+    const { data: profile } = await supabase
+      .from('profiles').select('role, team, parent_name, email').eq('id', userId).single();
+    if (!profile) return { error: 'No profile found for this account.' };
+    if (profile.role !== 'coach' && profile.role !== 'commissioner') {
+      return { error: 'This account is not set up as a coach. Ask the commissioner for access.' };
+    }
+    if (!profile.team) return { error: 'No team assigned to your account yet. Ask the commissioner.' };
+    const def = Object.values(TEAMS).find(t => t.name === profile.team);
+    if (!def) return { error: `Your assigned team (${profile.team}) is not active this season.` };
+    return { team: { ...def, _teamId: def.id, _account: profile.email || profile.parent_name } };
+  }
+
+  async function handleAccountLogin() {
+    if (!acctEmail.trim() || !acctPassword) { setError('Email and password are required.'); return; }
+    setLoading(true); setError('');
+    const { data, error: authErr } = await supabase.auth.signInWithPassword({
+      email: acctEmail.trim(), password: acctPassword,
+    });
+    if (authErr) { setLoading(false); setError(authErr.message); return; }
+    const res = await teamFromProfile(data.user.id);
+    setLoading(false);
+    if (res.error) { await supabase.auth.signOut(); setError(res.error); return; }
+    setTeam(res.team);
+  }
+
   if (!team) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--court-navy)', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
@@ -106,30 +144,60 @@ export default function CoachApp() {
           </div>
 
           <div style={{ background: '#fff', borderRadius: 18, padding: '28px 24px', boxShadow: '0 8px 40px rgba(0,0,0,0.25)' }}>
-            <div style={{ marginBottom: 22 }}>
-              <label style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9CA3AF', display: 'block', marginBottom: 7 }}>
-                Coach Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => { setPassword(e.target.value); setError(''); }}
-                onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }}
-                placeholder="Enter your coach password…"
-                autoFocus
-                style={{
-                  width: '100%', boxSizing: 'border-box', padding: '11px 14px',
-                  borderRadius: 9, border: `1.5px solid ${error ? '#DC2626' : '#E2E5EA'}`,
-                  fontSize: 14, fontFamily: 'var(--font-body)', color: '#111', outline: 'none',
-                }}
-              />
-              {error && (
-                <div style={{ marginTop: 6, fontSize: 12, color: '#DC2626', fontWeight: 600 }}>{error}</div>
-              )}
+            {/* Mode switch */}
+            <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #E2E5EA', marginBottom: 20 }}>
+              {[{ id: 'account', label: 'My account' }, { id: 'teamcode', label: 'Team code' }].map(m => (
+                <button key={m.id} onClick={() => { setMode(m.id); setError(''); }} style={{
+                  flex: 1, padding: '8px 4px', border: 'none', background: 'transparent', cursor: 'pointer',
+                  borderBottom: `2px solid ${mode === m.id ? 'var(--court-navy)' : 'transparent'}`,
+                  color: mode === m.id ? 'var(--court-navy)' : '#9CA3AF',
+                  fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13, marginBottom: -1,
+                }}>{m.label}</button>
+              ))}
             </div>
 
+            {mode === 'account' ? (
+              <>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={labelSt}>Email</label>
+                  <input
+                    type="email" value={acctEmail} autoComplete="email"
+                    onChange={e => { setAcctEmail(e.target.value); setError(''); }}
+                    onKeyDown={e => { if (e.key === 'Enter') handleAccountLogin(); }}
+                    placeholder="you@example.com" autoFocus
+                    style={inputSt(error)}
+                  />
+                </div>
+                <div style={{ marginBottom: 22 }}>
+                  <label style={labelSt}>Password</label>
+                  <input
+                    type="password" value={acctPassword} autoComplete="current-password"
+                    onChange={e => { setAcctPassword(e.target.value); setError(''); }}
+                    onKeyDown={e => { if (e.key === 'Enter') handleAccountLogin(); }}
+                    placeholder="••••••••"
+                    style={inputSt(error)}
+                  />
+                  {error && <div style={errSt}>{error}</div>}
+                </div>
+              </>
+            ) : (
+              <div style={{ marginBottom: 22 }}>
+                <label style={labelSt}>Team Code</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); setError(''); }}
+                  onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }}
+                  placeholder="Enter your team code…"
+                  autoFocus
+                  style={inputSt(error)}
+                />
+                {error && <div style={errSt}>{error}</div>}
+              </div>
+            )}
+
             <button
-              onClick={handleLogin}
+              onClick={mode === 'account' ? handleAccountLogin : handleLogin}
               disabled={loading}
               style={{
                 width: '100%', padding: '13px', borderRadius: 10, border: 'none',
@@ -143,8 +211,10 @@ export default function CoachApp() {
               {loading ? 'Signing in…' : 'Sign In'}
             </button>
 
-            <div style={{ marginTop: 16, fontSize: 12, color: '#9CA3AF', textAlign: 'center' }}>
-              Your password was sent by the commissioner.
+            <div style={{ marginTop: 16, fontSize: 12, color: '#9CA3AF', textAlign: 'center', lineHeight: 1.5 }}>
+              {mode === 'account'
+                ? 'Use the same email and password as the family portal. Ask the commissioner to grant coach access.'
+                : 'Shared code from the commissioner — everyone on the team uses the same one.'}
             </div>
           </div>
         </div>

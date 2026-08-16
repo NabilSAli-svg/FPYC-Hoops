@@ -1,5 +1,5 @@
 import { Icon, Avatar, Jersey } from '../shared/index.js';
-import { SPORTS } from '../shared/store.js';
+import { SPORTS, ACTIVE_SPORTS } from '../shared/store.js';
 
 const NAV_ITEMS = [
   { id: 'dashboard',     icon: 'layout-dashboard', label: 'Dashboard' },
@@ -82,8 +82,8 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
       </div>
 
       {/* Sport switcher */}
-      {role !== 'coach' && <div style={{ display: 'flex', gap: 6, padding: '12px 12px 0' }}>
-        {SPORTS.map(s => {
+      {role !== 'coach' && ACTIVE_SPORTS.length > 1 && <div style={{ display: 'flex', gap: 6, padding: '12px 12px 0' }}>
+        {ACTIVE_SPORTS.map(s => {
           const isActive = s.id === sport;
           return (
             <button key={s.id} onClick={() => onSportChange?.(s.id)} style={{

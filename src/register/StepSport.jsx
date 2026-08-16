@@ -1,11 +1,15 @@
 import Icon from '../shared/Icon.jsx';
 import { StepHeader, ContinueBtn } from './StepProgram.jsx';
 
-const SPORTS = [
-  { id: 'basketball', title: 'Basketball', icon: 'circle-dot', color: 'var(--basketball-orange)', desc: 'House League, Skills Clinic, and Travel Select — Winter season.' },
-  { id: 'soccer', title: 'Soccer', icon: 'circle', color: 'var(--court-navy)', desc: 'Mini & Mighty Academy, PowerRec Youth, and NCSL Rec — Spring season.' },
-  { id: 'football', title: 'Football', icon: 'shield', color: '#C8102E', desc: 'Flag Football (Spring) and Tackle Football (Summer/Fall) — FPYC Lions.' },
-];
+import { ACTIVE_SPORTS } from '../shared/store.js';
+
+const SPORT_CARDS = {
+  basketball: { id: 'basketball', title: 'Basketball', icon: 'circle-dot', color: 'var(--basketball-orange)', desc: 'Rec, Skills Clinic, and Select — Winter season.' },
+  soccer:     { id: 'soccer', title: 'Soccer', icon: 'circle', color: 'var(--court-navy)', desc: 'Mini & Mighty Academy, PowerRec Youth, and NCSL Rec — Spring season.' },
+  football:   { id: 'football', title: 'Football', icon: 'shield', color: '#C8102E', desc: 'Flag Football (Spring) and Tackle Football (Summer/Fall) — FPYC Lions.' },
+};
+
+const SPORTS = ACTIVE_SPORTS.map(s => SPORT_CARDS[s.id]).filter(Boolean);
 
 export default function StepSport({ data, update, next, isMobile }) {
   const selected = data.sport;
