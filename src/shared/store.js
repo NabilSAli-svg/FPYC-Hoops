@@ -849,7 +849,7 @@ const INITIAL_GYM_PERMITS = [
     start_date: '2026-09-08',
     end_date: '2026-11-24',
     sport: 'basketball',
-    notes: 'KJMSGymFPYCM-FFall2026 (Johnson MS Gym #1) — no Mon Sep 21',
+    notes: 'KJMSGymFPYCM-FFall2026 (Johnson MS Gym #1) — no Mon Sep 21 · Wednesdays Sep 16-Nov 18 held for volleyball',
   },
   {
     id: 'gp-fall26-kjms2',
@@ -862,7 +862,7 @@ const INITIAL_GYM_PERMITS = [
     start_date: '2026-09-08',
     end_date: '2026-11-24',
     sport: 'basketball',
-    notes: 'KJMSGymFPYCM-FFall2026 (Johnson MS Gym #2) — no Mon Sep 21',
+    notes: 'KJMSGymFPYCM-FFall2026 (Johnson MS Gym #2) — no Mon Sep 21 · Wednesdays Sep 16-Nov 18 held for volleyball',
   },
 ];
 
