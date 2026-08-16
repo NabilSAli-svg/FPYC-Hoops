@@ -1,16 +1,16 @@
--- Fall 2026 Skills Clinic — 6 Mondays at Providence ES (gym subject to change).
+-- Fall 2026 Skills Clinic — 6 Mondays, Sep 14 - Oct 26 (gym subject to change).
 -- Beginner 6-7 PM · Intermediate 7-8 PM · Advanced 8-9 PM. No session Oct 12.
 --
--- NOTE: Sep 21 has no Providence ES permit (that Monday is booked at Daniels
--- Run only). Move that session or amend the permit before the season starts.
+-- Providence ES every week except Sep 21, which is at Daniels Run ES —
+-- Providence has no permit that Monday.
 
 INSERT INTO practices (id, date, time, gym, type, rsvp, notes, team) VALUES
   ('fc_beg_1', 'Mon, Sep 14', '6:00-7:00 PM', 'Providence ES', 'Clinic', 0, 'Gym subject to change', 'Training - Beginner'),
   ('fc_int_1', 'Mon, Sep 14', '7:00-8:00 PM', 'Providence ES', 'Clinic', 0, 'Gym subject to change', 'Training - Intermediate'),
   ('fc_adv_1', 'Mon, Sep 14', '8:00-9:00 PM', 'Providence ES', 'Clinic', 0, 'Gym subject to change', 'Training - Advanced'),
-  ('fc_beg_2', 'Mon, Sep 21', '6:00-7:00 PM', 'Providence ES', 'Clinic', 0, 'Gym subject to change — no Providence permit this date', 'Training - Beginner'),
-  ('fc_int_2', 'Mon, Sep 21', '7:00-8:00 PM', 'Providence ES', 'Clinic', 0, 'Gym subject to change — no Providence permit this date', 'Training - Intermediate'),
-  ('fc_adv_2', 'Mon, Sep 21', '8:00-9:00 PM', 'Providence ES', 'Clinic', 0, 'Gym subject to change — no Providence permit this date', 'Training - Advanced'),
+  ('fc_beg_2', 'Mon, Sep 21', '6:00-7:00 PM', 'Daniels Run ES', 'Clinic', 0, 'At Daniels Run ES this week — no Providence permit Sep 21', 'Training - Beginner'),
+  ('fc_int_2', 'Mon, Sep 21', '7:00-8:00 PM', 'Daniels Run ES', 'Clinic', 0, 'At Daniels Run ES this week — no Providence permit Sep 21', 'Training - Intermediate'),
+  ('fc_adv_2', 'Mon, Sep 21', '8:00-9:00 PM', 'Daniels Run ES', 'Clinic', 0, 'At Daniels Run ES this week — no Providence permit Sep 21', 'Training - Advanced'),
   ('fc_beg_3', 'Mon, Sep 28', '6:00-7:00 PM', 'Providence ES', 'Clinic', 0, 'Gym subject to change', 'Training - Beginner'),
   ('fc_int_3', 'Mon, Sep 28', '7:00-8:00 PM', 'Providence ES', 'Clinic', 0, 'Gym subject to change', 'Training - Intermediate'),
   ('fc_adv_3', 'Mon, Sep 28', '8:00-9:00 PM', 'Providence ES', 'Clinic', 0, 'Gym subject to change', 'Training - Advanced'),

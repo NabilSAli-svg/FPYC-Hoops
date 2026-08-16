@@ -661,15 +661,15 @@ export const INITIAL_PRACTICES = [
   { id: 'ts_eg7_24',  date: 'Fri, Aug 7',  time: '7:30-9:00 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: '', team: 'Earnest G7' },
 
   // ── Fall 2026 Skills Clinic ───────────────────────────────────────────────
-  // Mondays at Providence ES (gym may change). Beginner 6-7, Intermediate 7-8,
-  // Advanced 8-9. No session Oct 12.
+  // Mondays at Providence ES except Sep 21 (Daniels Run — no Providence permit).
+  // Beginner 6-7, Intermediate 7-8, Advanced 8-9. No session Oct 12.
 
   { id: 'fc_beg_1', date: 'Mon, Sep 14', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
   { id: 'fc_int_1', date: 'Mon, Sep 14', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
   { id: 'fc_adv_1', date: 'Mon, Sep 14', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
-  { id: 'fc_beg_2', date: 'Mon, Sep 21', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change — no Providence permit this date', team: 'Training - Beginner' },
-  { id: 'fc_int_2', date: 'Mon, Sep 21', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change — no Providence permit this date', team: 'Training - Intermediate' },
-  { id: 'fc_adv_2', date: 'Mon, Sep 21', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change — no Providence permit this date', team: 'Training - Advanced' },
+  { id: 'fc_beg_2', date: 'Mon, Sep 21', time: '6:00-7:00 PM', gym: 'Daniels Run ES', type: 'Clinic', rsvp: 0, notes: 'At Daniels Run ES this week — no Providence permit Sep 21', team: 'Training - Beginner' },
+  { id: 'fc_int_2', date: 'Mon, Sep 21', time: '7:00-8:00 PM', gym: 'Daniels Run ES', type: 'Clinic', rsvp: 0, notes: 'At Daniels Run ES this week — no Providence permit Sep 21', team: 'Training - Intermediate' },
+  { id: 'fc_adv_2', date: 'Mon, Sep 21', time: '8:00-9:00 PM', gym: 'Daniels Run ES', type: 'Clinic', rsvp: 0, notes: 'At Daniels Run ES this week — no Providence permit Sep 21', team: 'Training - Advanced' },
   { id: 'fc_beg_3', date: 'Mon, Sep 28', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
   { id: 'fc_int_3', date: 'Mon, Sep 28', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
   { id: 'fc_adv_3', date: 'Mon, Sep 28', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
