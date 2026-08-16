@@ -25,10 +25,10 @@ export default function Programs() {
         <ProgramCard
           tag="Clinic"
           title="Skills Clinic"
-          grades="K – 4th grade"
+          grades="Beginner · Intermediate · Advanced"
           price="$95"
-          desc="Saturday-morning skills sessions for younger players who aren't quite ready for a full league. Coach-led drills, no games."
-          bullets={['6 Saturdays, 9–10:30 AM', 'Held at Robinson Secondary', 'Equipment provided']}
+          desc="Monday-evening skills sessions grouped by ability. Coach-led drills, no games — a great bridge into the winter league."
+          bullets={['6 Mondays, Sep 14 – Oct 26', 'Beginner 6–7 · Intermediate 7–8 · Advanced 8–9', 'Providence ES · gym may change']}
         />
       </div>
     </section>

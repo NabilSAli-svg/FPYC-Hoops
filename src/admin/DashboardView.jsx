@@ -209,30 +209,31 @@ function DashboardContent({ team, players, games, onGo }) {
 
 // ── Season Info Card ──────────────────────────────────────────────────────────
 
-const SUMMER_SCHEDULE = [
+const CLINIC_SCHEDULE = [
   {
-    day: 'Tuesday Nights', icon: 'calendar',
+    day: 'Monday Nights · Skills Clinic', icon: 'calendar',
     divisions: [
-      { name: 'Rising 2nd–3rd Boys',           time: '6:30–7:30 PM', dates: 'Jun 16, 23, 30 · Jul 7, 14, 21' },
-      { name: 'Girls Division (2nd–8th Grade)', time: '7:30–8:30 PM', dates: 'Jun 16, 23, 30 · Jul 7, 14, 21' },
+      { name: 'Beginner',     time: '6:00–7:00 PM', dates: 'Sep 14, 21, 28 · Oct 5, 19, 26' },
+      { name: 'Intermediate', time: '7:00–8:00 PM', dates: 'Sep 14, 21, 28 · Oct 5, 19, 26' },
+      { name: 'Advanced',     time: '8:00–9:00 PM', dates: 'Sep 14, 21, 28 · Oct 5, 19, 26' },
     ],
   },
   {
-    day: 'Thursday Nights', icon: 'calendar',
+    day: 'Gym Availability · Mon–Fri', icon: 'map-pin',
     divisions: [
-      { name: 'Rising 4th–5th Boys',   time: '6:30–7:30 PM', dates: 'Jun 18, 25 · Jul 2, 9, 16, 23' },
-      { name: 'Rising 6th–8th Boys',   time: '7:30–8:30 PM', dates: 'Jun 18, 25 · Jul 2, 9, 16, 23' },
+      { name: 'Providence ES · Daniels Run ES', time: '6:00–9:00 PM', dates: 'Sep 8 – Nov 24' },
+      { name: 'Johnson MS #1 & #2',             time: '6:00–9:00 PM', dates: 'Mon, Tue, Thu, Fri only' },
     ],
   },
 ];
 
-const WEEKLY_EVENTS = [
-  { week: 1, name: 'Opening Night Tournament', desc: 'Assigned teams compete; Opening Night Champion crowned.' },
-  { week: 2, name: 'King of the Court',         desc: 'Winners stay on; accumulate wins all night.' },
-  { week: 3, name: 'World Cup Night',           desc: 'Country teams, group play, standings & championship match.' },
-  { week: 4, name: 'Rivalry Night',             desc: 'Special matchups, challenge games & bonus competitions.' },
-  { week: 5, name: 'All-Star Challenge',         desc: 'Skills contests (shooting, knockout) then 3v3 competition.' },
-  { week: 6, name: 'Summer Cup Finals',          desc: 'Championship tournament — division titles & Summer Cup bragging rights.' },
+const FALL_NOTES = [
+  { week: '!', name: 'Wednesdays at Johnson MS', desc: 'Held for volleyball Sep 16 – Nov 18. Basketball uses Providence ES and Daniels Run ES those nights.' },
+  { week: '1', name: 'Clinic starts Mon, Sep 14', desc: 'Providence ES. Three levels back-to-back, 6–9 PM.' },
+  { week: '2', name: 'Sep 21 moves to Daniels Run ES', desc: 'No Providence permit that Monday — all three levels relocate for the week.' },
+  { week: '—', name: 'No clinic Mon, Oct 12', desc: 'Columbus Day. Season resumes Oct 19.' },
+  { week: '6', name: 'Clinic ends Mon, Oct 26', desc: 'Six sessions total.' },
+  { week: '×', name: 'Facility closures', desc: 'Labor Day (Sep 7), Fall Festival (Oct 10), Thanksgiving (Nov 26–27).' },
 ];
 
 function SeasonInfoCard({ isMobile, onGo }) {
@@ -249,10 +250,10 @@ function SeasonInfoCard({ isMobile, onGo }) {
       }}>
         <Icon name="sun" size={16} color="var(--varsity-gold)" />
         <span style={{ fontFamily: 'var(--font-body)', fontWeight: 800, fontSize: 13, color: '#fff', flex: 1, textAlign: 'left', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-          Summer 3v3 Cup — Season Guide
+          Fall 2026 — Season Guide
         </span>
         <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600, marginRight: 6 }}>
-          All sessions @ Providence ES
+          Clinic Mondays @ Providence ES
         </span>
         <Icon name={open ? 'chevron-up' : 'chevron-down'} size={16} color="rgba(255,255,255,0.6)" />
       </button>
@@ -261,7 +262,7 @@ function SeasonInfoCard({ isMobile, onGo }) {
         <div style={{ padding: '16px 20px 20px' }}>
           {/* Sub-tabs */}
           <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 16 }}>
-            {[{ id: 'schedule', label: 'Schedule' }, { id: 'events', label: 'Weekly Events' }, { id: 'fall', label: 'Fall Clinics' }].map(t => (
+            {[{ id: 'schedule', label: 'Schedule & Gyms' }, { id: 'events', label: 'Key Dates' }, { id: 'fall', label: 'Winter Season' }].map(t => (
               <button key={t.id} onClick={() => setTab(t.id)} style={{
                 padding: '7px 16px', border: 'none', background: 'transparent', cursor: 'pointer',
                 borderBottom: `2px solid ${tab === t.id ? 'var(--basketball-orange)' : 'transparent'}`,
@@ -273,7 +274,7 @@ function SeasonInfoCard({ isMobile, onGo }) {
 
           {tab === 'schedule' && (
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
-              {SUMMER_SCHEDULE.map(block => (
+              {CLINIC_SCHEDULE.map(block => (
                 <div key={block.day}>
                   <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.09em', color: 'var(--basketball-orange)', marginBottom: 8 }}>
                     {block.day}
@@ -302,8 +303,8 @@ function SeasonInfoCard({ isMobile, onGo }) {
 
           {tab === 'events' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-              {WEEKLY_EVENTS.map((e, i) => (
-                <div key={e.week} style={{ display: 'flex', gap: 14, padding: '10px 0', borderBottom: i < WEEKLY_EVENTS.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'flex-start' }}>
+              {FALL_NOTES.map((e, i) => (
+                <div key={e.week} style={{ display: 'flex', gap: 14, padding: '10px 0', borderBottom: i < FALL_NOTES.length - 1 ? '1px solid var(--border)' : 'none', alignItems: 'flex-start' }}>
                   <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--court-navy)', color: '#fff', fontWeight: 800, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
                     {e.week}
                   </div>
@@ -314,7 +315,7 @@ function SeasonInfoCard({ isMobile, onGo }) {
                 </div>
               ))}
               <div style={{ marginTop: 10, fontSize: 12, color: 'var(--fg-muted)', fontStyle: 'italic' }}>
-                Teams earn points each week — standings carry into the Summer Cup Finals.
+                Gym assignments may change — families are notified through the portal.
               </div>
             </div>
           )}
@@ -322,9 +323,14 @@ function SeasonInfoCard({ isMobile, onGo }) {
           {tab === 'fall' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ padding: '14px 16px', background: 'rgba(200,16,46,0.05)', border: '1px solid rgba(200,16,46,0.2)', borderRadius: 10 }}>
-                <div style={{ fontWeight: 800, fontSize: 14, color: '#C8102E', marginBottom: 6 }}>Fall 2026 Clinics — Coming Soon</div>
-                <div style={{ fontSize: 13, color: 'var(--fg)', lineHeight: 1.6 }}>
-                  Fall clinic details will be posted here once finalized. Check the Announcements tab for updates.
+                <div style={{ fontWeight: 800, fontSize: 14, color: '#C8102E', marginBottom: 6 }}>Winter 2026–27 — Divisions Set</div>
+                <div style={{ fontSize: 13, color: 'var(--fg)', lineHeight: 1.6, marginBottom: 10 }}>
+                  <strong>Rec:</strong> K-3 3v3, 3/4 Boys &amp; Girls, 5/6 Boys &amp; Girls, 7/8 Boys &amp; Girls, HS Boys &amp; Girls.<br />
+                  <strong>Select:</strong> 5th–8th Boys and Girls.
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--fg-muted)', lineHeight: 1.6 }}>
+                  K-3 forms teams by skill and age — no draft. Winter gym permit is not yet loaded;
+                  the Fall permit runs through Nov 24.
                 </div>
               </div>
               <Button kind="ghost" size="sm" icon="megaphone" onClick={() => onGo?.('announcements')}>View announcements</Button>

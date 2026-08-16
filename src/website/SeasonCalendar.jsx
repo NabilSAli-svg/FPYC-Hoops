@@ -2,6 +2,12 @@ import { SectionHead } from './Programs.jsx';
 
 const EVENTS = [
   {
+    date: 'Sept 14',
+    title: 'Fall Skills Clinic begins',
+    desc: 'Mondays at Providence ES · Beginner 6–7, Intermediate 7–8, Advanced 8–9',
+    category: 'play',
+  },
+  {
     date: 'Sept 27',
     title: 'Walk-in registration',
     desc: 'Saturday 10am–12pm · FPYC Office, 3955 Pickett Rd',
@@ -12,6 +18,12 @@ const EVENTS = [
     title: 'Final walk-in session',
     desc: 'Last chance for in-person help · same location',
     category: 'reg',
+  },
+  {
+    date: 'Oct 26',
+    title: 'Fall Skills Clinic ends',
+    desc: 'Six sessions complete · no clinic Oct 12 (Columbus Day)',
+    category: 'play',
   },
   {
     date: 'Nov 15',
@@ -32,25 +44,19 @@ const EVENTS = [
     category: 'team',
   },
   {
-    date: 'Dec 2',
-    title: 'Practices begin',
+    date: 'Early Dec',
+    title: 'Winter practices begin',
     desc: 'Weekday practices at local Fairfax County school gyms',
     category: 'play',
   },
   {
-    date: 'Dec 7',
+    date: 'Dec',
     title: 'Season opener',
-    desc: 'First games of the 2025–26 House League season',
+    desc: 'First games of the 2026–27 Rec and Select seasons',
     category: 'play',
   },
   {
-    date: 'Feb 22',
-    title: 'Regular season ends',
-    desc: 'Last regular season games across all divisions',
-    category: 'play',
-  },
-  {
-    date: 'Mar 1–8',
+    date: 'Mar',
     title: 'Championships',
     desc: 'FPYC Basketball Championship Weekend — all divisions',
     category: 'champ',
@@ -71,7 +77,7 @@ export default function SeasonCalendar() {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, marginBottom: 44 }}>
           <SectionHead
-            eyebrow="Season 2025–26"
+            eyebrow="Season 2026–27"
             title="Key dates"
             sub="Everything from registration to championship — mark your calendar."
           />
@@ -95,7 +101,7 @@ export default function SeasonCalendar() {
           }} />
 
           <style>{`@media(max-width:768px){.cal-grid{display:flex!important;flex-direction:column!important}.cal-hline{display:none!important}}`}</style>
-          <div className="cal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(9, 1fr)', gap: 12, position: 'relative', zIndex: 1 }}>
+          <div className="cal-grid" style={{ display: 'grid', gridTemplateColumns: `repeat(${EVENTS.length}, 1fr)`, gap: 12, position: 'relative', zIndex: 1 }}>
             {EVENTS.map((e, i) => {
               const c = CAT[e.category];
               return (
