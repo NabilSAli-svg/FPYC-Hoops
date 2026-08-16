@@ -32,19 +32,22 @@ export default function WebsiteApp() {
       <main id="top" style={{ scrollBehavior: 'smooth' }}>
         <Hero onRegister={() => scrollTo('register')} />
         <Announcements />
-        <TeamSpotlight />
-        <PlayoffBracket />
-        <Standings />
-        <SeasonRecap />
-        <WhyFPYC />
-        <Testimonials />
         <SkillsClinic />
         <Programs />
+        <WhyFPYC />
         <SeasonCalendar />
         <HowToRegister />
         <Schedule />
-        <News />
         <FaqContact />
+        {/*
+          Hidden until backed by real data — these render placeholder content:
+            <TeamSpotlight />  fictional "Fairfax Hawks" record and opponents
+            <PlayoffBracket /> no bracket set for the coming season
+            <Standings />      fictional opponent clubs
+            <SeasonRecap />    fictional team records and league totals
+            <Testimonials />   invented quotes and people
+            <News />           invented articles
+        */}
       </main>
       <Footer />
     </div>

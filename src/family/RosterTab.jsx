@@ -1,5 +1,5 @@
 import Icon from '../shared/Icon.jsx';
-import { usePlayers, TEAM_INFO } from '../shared/store.js';
+import { usePlayers, TEAMS_INFO } from '../shared/store.js';
 
 const POS_COLOR = {
   Guard:   { bg: 'rgba(10,31,61,0.08)',     text: 'var(--court-navy)' },
@@ -10,7 +10,7 @@ const POS_COLOR = {
 export default function RosterTab({ family }) {
   const [players] = usePlayers();
   const PLAYERS = players.filter(p => p.status !== 'inactive' && p.team === family.child.team);
-  const TEAM = TEAM_INFO;
+  const TEAM = TEAMS_INFO[family.child.team] || { name: family.child.team, division: '', coach: 'Coach' };
   const myNumber = family.child.number;
 
   return (
@@ -20,7 +20,7 @@ export default function RosterTab({ family }) {
         <img src="/assets/logo-fpyc-basketball-v3.png" alt="" style={{ height: 48, objectFit: 'contain' }} />
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', textTransform: 'uppercase', lineHeight: 1 }}>{TEAM.name}</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>{TEAM.division} · {TEAM.record} · {TEAM.seed} in division</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>{TEAM.division}</div>
         </div>
       </div>
 
@@ -80,13 +80,13 @@ export default function RosterTab({ family }) {
       {/* Coach */}
       <div style={{ background: '#fff', border: '1px solid #E2E5EA', borderRadius: 12, padding: '14px 16px', display: 'flex', gap: 12, alignItems: 'center' }}>
         <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--varsity-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--court-navy)' }}>
-          MD
+          {(TEAM.coach || 'C').split(' ').map(w => w[0]).slice(0, 2).join('')}
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700, fontSize: 14 }}>Coach M. Davis</div>
-          <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>Head Coach · Volunteer · Boys 5–6 House</div>
+          <div style={{ fontWeight: 700, fontSize: 14 }}>{TEAM.coach || 'Coach'}</div>
+          <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>Head Coach · Volunteer · {TEAM.name}</div>
         </div>
-        <a href="mailto:coach@fpycsports.org" style={{ all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: 'var(--court-navy)' }}>
+        <a href="mailto:basketball@fpycsports.com" style={{ all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: 'var(--court-navy)' }}>
           <Icon name="mail" size={15} /> Email
         </a>
       </div>

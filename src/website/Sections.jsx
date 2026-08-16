@@ -49,15 +49,15 @@ export function Schedule() {
   const display   = [
     ...scheduled.map(g => ({
       day: g.weekday, date: String(g.date).padStart(2, '0'), month: g.month.toUpperCase(),
-      time: g.time, team: 'Hawks · Boys 5–6 House',
-      opp: (g.home ? 'vs. ' : '@ ') + g.opponent,
+      time: g.time, team: g.team || 'FPYC Basketball',
+      opp: g.opponent.includes(' vs ') ? g.opponent : (g.home ? 'vs. ' : '@ ') + g.opponent,
       loc: g.location, home: g.home,
       us: g.us, them: g.them, final: false,
     })),
     ...finals.map(g => ({
       day: g.weekday, date: String(g.date).padStart(2, '0'), month: g.month.toUpperCase(),
-      time: g.time, team: 'Hawks · Boys 5–6 House',
-      opp: (g.home ? 'vs. ' : '@ ') + g.opponent,
+      time: g.time, team: g.team || 'FPYC Basketball',
+      opp: g.opponent.includes(' vs ') ? g.opponent : (g.home ? 'vs. ' : '@ ') + g.opponent,
       loc: g.location, home: g.home,
       us: g.us, them: g.them, final: true,
     })),
@@ -66,7 +66,7 @@ export function Schedule() {
   return (
     <section id="schedule" style={{ maxWidth: 1200, margin: '0 auto', padding: '64px 24px 0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
-        <SectionHead eyebrow="Hawks schedule" title="Upcoming & recent" />
+        <SectionHead eyebrow="League schedule" title="Upcoming & recent" />
         <a href="/family" style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13, padding: '10px 14px', borderRadius: 8, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--varsity-gold)', color: 'var(--court-navy)', textDecoration: 'none' }}>
           Full schedule <Icon name="arrow-right" size={14} />
         </a>
@@ -343,11 +343,11 @@ export function FaqContact() {
             <SectionHead eyebrow="FAQ" title="Common questions" />
             <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 0 }}>
               {[
-                { q: 'When does the season run?', a: 'House League runs December through February, with practices starting in mid-November. Select Travel runs October through March.' },
-                { q: 'Are there tryouts?', a: 'House League does NOT have tryouts — every kid is placed on a team. Select / Travel has tryouts in early September.' },
+                { q: 'When does the season run?', a: 'Rec runs December through February, with practices starting in late November. Select runs October through March.' },
+                { q: 'Are there tryouts?', a: 'Rec does NOT have tryouts — every kid is placed on a team, and K-3 3v3 is grouped by age and skill rather than drafted. Select has tryouts in early September.' },
                 { q: 'How do scholarships work?', a: 'FPYC offers need-based scholarships for any family that asks. There is no separate application — just check the box during registration and the Commissioner will follow up.' },
                 { q: 'Do I have to volunteer?', a: 'No, but FPYC is a 100% volunteer-run nonprofit. Coaches, scorekeepers, and board members are all parents giving time. Volunteer credit reduces next-season fees.' },
-                { q: 'Where are practices held?', a: 'At Fairfax County public school gyms — usually Daniels Run, Providence, Lanier, and Robinson. Specific gym is set after teams are formed.' },
+                { q: 'Where are practices held?', a: 'At Fairfax County public school gyms — usually Providence ES, Daniels Run ES, and Johnson Middle School. Specific gym is set after teams are formed.' },
                 { q: 'What\'s the refund policy?', a: 'Full refund minus a $50 admin fee through November 30. No refunds after December 1 once the season has begun.' },
               ].map((f, i) => <Faq key={i} {...f} />)}
             </div>
@@ -359,8 +359,8 @@ export function FaqContact() {
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: 1, textTransform: 'uppercase', color: '#fff', marginBottom: 18 }}>Get in touch</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <ContactItem icon="phone"   label="Commissioner of Basketball" value="(703) 425-7000" />
-                <ContactItem icon="mail"    label="Email"                      value="basketball@fpycsports.org" />
-                <ContactItem icon="map-pin" label="Office"                     value="3955 Pickett Rd, Fairfax VA 22030" />
+                <ContactItem icon="mail"    label="Email"                      value="basketball@fpycsports.com" />
+                <ContactItem icon="map-pin" label="Office"                     value="FPYC Clubhouse · 10701 West Dr, Fairfax VA 22030" />
                 <ContactItem icon="clock"   label="Office hours"               value="Mon–Fri 9am–5pm" />
               </div>
             </div>
