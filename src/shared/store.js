@@ -20,6 +20,7 @@ export const SPORTS = [
 
 export const REC_DIVISION    = 'Winter Rec';
 export const SELECT_DIVISION = 'Winter Select';
+export const CLINIC_DIVISION = 'Fall Skills Clinic';
 
 export const TEAMS_INFO = {
   // ── Winter 2026–27 · Rec ───────────────────────────────────────────────────
@@ -44,6 +45,11 @@ export const TEAMS_INFO = {
   '7th Girls Select': { id: 'sel-7g', name: '7th Girls Select', division: SELECT_DIVISION, coach: 'Coach', color: '#BE123C', sport: 'basketball' },
   '8th Boys Select':  { id: 'sel-8b', name: '8th Boys Select',  division: SELECT_DIVISION, coach: 'Coach', color: '#1E40AF', sport: 'basketball' },
   '8th Girls Select': { id: 'sel-8g', name: '8th Girls Select', division: SELECT_DIVISION, coach: 'Coach', color: '#86198F', sport: 'basketball' },
+
+  // ── Fall 2026 · Skills Clinic ──────────────────────────────────────────────
+  'Training - Beginner':     { id: 'fc-beg', name: 'Training - Beginner',     division: CLINIC_DIVISION, coach: 'Coach', color: '#0D9488', sport: 'basketball', noDraft: true },
+  'Training - Intermediate': { id: 'fc-int', name: 'Training - Intermediate', division: CLINIC_DIVISION, coach: 'Coach', color: '#CA8A04', sport: 'basketball', noDraft: true },
+  'Training - Advanced':     { id: 'fc-adv', name: 'Training - Advanced',     division: CLINIC_DIVISION, coach: 'Coach', color: '#DC2626', sport: 'basketball', noDraft: true },
 
   // ── Archived · Summer 2026 ─────────────────────────────────────────────────
   // Kept so past games/rosters still resolve; hidden from team pickers.
@@ -653,6 +659,29 @@ export const INITIAL_PRACTICES = [
   { id: 'ts_tb6_24',  date: 'Fri, Aug 7',  time: '7:30-9:00 PM', gym: 'KJMS #1', type: 'Practice', rsvp: 0, notes: '', team: 'Tom B6' },
   { id: 'ts_mdg6_24', date: 'Fri, Aug 7',  time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: '', team: 'Mike Do G6' },
   { id: 'ts_eg7_24',  date: 'Fri, Aug 7',  time: '7:30-9:00 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: '', team: 'Earnest G7' },
+
+  // ── Fall 2026 Skills Clinic ───────────────────────────────────────────────
+  // Mondays at Providence ES (gym may change). Beginner 6-7, Intermediate 7-8,
+  // Advanced 8-9. No session Oct 12.
+
+  { id: 'fc_beg_1', date: 'Mon, Sep 14', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
+  { id: 'fc_int_1', date: 'Mon, Sep 14', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
+  { id: 'fc_adv_1', date: 'Mon, Sep 14', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
+  { id: 'fc_beg_2', date: 'Mon, Sep 21', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change — no Providence permit this date', team: 'Training - Beginner' },
+  { id: 'fc_int_2', date: 'Mon, Sep 21', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change — no Providence permit this date', team: 'Training - Intermediate' },
+  { id: 'fc_adv_2', date: 'Mon, Sep 21', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change — no Providence permit this date', team: 'Training - Advanced' },
+  { id: 'fc_beg_3', date: 'Mon, Sep 28', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
+  { id: 'fc_int_3', date: 'Mon, Sep 28', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
+  { id: 'fc_adv_3', date: 'Mon, Sep 28', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
+  { id: 'fc_beg_4', date: 'Mon, Oct 5', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
+  { id: 'fc_int_4', date: 'Mon, Oct 5', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
+  { id: 'fc_adv_4', date: 'Mon, Oct 5', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
+  { id: 'fc_beg_5', date: 'Mon, Oct 19', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
+  { id: 'fc_int_5', date: 'Mon, Oct 19', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
+  { id: 'fc_adv_5', date: 'Mon, Oct 19', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
+  { id: 'fc_beg_6', date: 'Mon, Oct 26', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
+  { id: 'fc_int_6', date: 'Mon, Oct 26', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
+  { id: 'fc_adv_6', date: 'Mon, Oct 26', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
 ];
 
 export const INITIAL_MESSAGES = [
