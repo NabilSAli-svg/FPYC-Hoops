@@ -5,6 +5,7 @@ import WhyFPYC from './WhyFPYC.jsx';
 import Testimonials from './Testimonials.jsx';
 import Programs from './Programs.jsx';
 import SeasonCalendar from './SeasonCalendar.jsx';
+import SkillsClinic from './SkillsClinic.jsx';
 import HowToRegister from './HowToRegister.jsx';
 import TeamSpotlight from './TeamSpotlight.jsx';
 import PlayoffBracket from './PlayoffBracket.jsx';
@@ -37,6 +38,7 @@ export default function WebsiteApp() {
         <SeasonRecap />
         <WhyFPYC />
         <Testimonials />
+        <SkillsClinic />
         <Programs />
         <SeasonCalendar />
         <HowToRegister />
