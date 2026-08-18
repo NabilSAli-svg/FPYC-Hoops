@@ -1,5 +1,6 @@
 import { Icon, Avatar, Jersey } from '../shared/index.js';
 import { SPORTS, ACTIVE_SPORTS } from '../shared/store.js';
+import { canView, canManageOps, roleLabel } from '../shared/roles.js';
 
 const NAV_ITEMS = [
   { id: 'dashboard',     icon: 'layout-dashboard', label: 'Dashboard' },
@@ -19,6 +20,7 @@ const SECONDARY = [
   { id: 'budget',    icon: 'dollar-sign',   label: 'Budget'             },
   { id: 'payments',  icon: 'credit-card',   label: 'Payments'           },
   { id: 'inventory', icon: 'package',       label: 'Inventory'          },
+  { id: 'officials', icon: 'user-check',    label: 'Officials'          },
   { id: 'playoffs',  icon: 'trophy',        label: 'Playoffs'           },
   { id: 'draftboard',icon: 'shuffle',       label: 'Draft Board'        },
   { id: 'season',    icon: 'bar-chart',     label: 'Season'             },
@@ -27,11 +29,12 @@ const SECONDARY = [
 
 export default function Sidebar({ active, onNav, team, sport, onSportChange, isMobile, sidebarOpen, onClose, role, profile }) {
   const displayName = profile?.parent_name || profile?.first_name || profile?.email || 'Coach';
-  const roleLabel = role === 'commissioner' ? 'Commissioner' : 'Volunteer Coach';
+  const displayRole = roleLabel(role);
   const activeSport = SPORTS.find(s => s.id === sport) || SPORTS[0];
-  const secondaryItems = role === 'coach'
-    ? SECONDARY.filter(it => ['scheduler', 'settings'].includes(it.id))
-    : SECONDARY;
+  const navItems = NAV_ITEMS.filter(it => canView(role, it.id));
+  const secondaryItems = SECONDARY.filter(it =>
+    canView(role, it.id) && (['budget', 'payments', 'inventory'].includes(it.id) ? canManageOps(role) : true)
+  );
   const asideStyle = isMobile ? {
     position: 'fixed',
     top: 0,
@@ -128,7 +131,7 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
       </button>
 
       <nav style={{ padding: '6px 8px', flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {NAV_ITEMS.map(it => (
+        {navItems.map(it => (
           <NavItem key={it.id} {...it} active={active === it.id} onClick={() => onNav(it.id)} />
         ))}
         <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '10px 8px' }} />
@@ -142,7 +145,7 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
         <Avatar name={displayName} size={32} color="var(--varsity-gold)" />
         <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
           <div style={{ fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>{roleLabel}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>{displayRole}</div>
         </div>
         <Icon name="log-out" size={16} color="rgba(255,255,255,0.5)" />
       </div>
