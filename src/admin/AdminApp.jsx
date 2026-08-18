@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGames, usePlayers, TEAM_INFO, TEAMS_INFO, SPORTS, activeTeamNames } from '../shared/store.js';
+import { canUseConsole, canView, canManageOps, visibleTeams } from '../shared/roles.js';
 import { supabase } from '../shared/supabase.js';
 import Sidebar from './Sidebar.jsx';
 import TopBar from './TopBar.jsx';
@@ -22,6 +23,7 @@ import MasterSchedulerView from './MasterSchedulerView.jsx';
 import BudgetView from './BudgetView.jsx';
 import InventoryView from './InventoryView.jsx';
 import PaymentsView from './PaymentsView.jsx';
+import OfficialsView from './OfficialsView.jsx';
 import { Button } from '../shared/index.js';
 import ErrorBoundary from '../shared/ErrorBoundary.jsx';
 
@@ -36,14 +38,17 @@ export default function AdminApp() {
   const [role, setRole] = useState(null); // 'commissioner' | 'coach' | null
   const [coachTeam, setCoachTeam] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [scopes, setScopes] = useState([]);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { setAuthReady(true); return; }
       const { data: profile } = await supabase.from('profiles').select('id, role, team, first_name, parent_name, email, phone').eq('id', session.user.id).single();
-      if (profile?.role === 'commissioner' || profile?.role === 'coach') {
+      if (profile && canUseConsole(profile.role)) {
         setRole(profile.role);
         setProfile(profile);
+        const { data: rows } = await supabase.from('user_scopes').select('scope_type, scope_value').eq('user_id', session.user.id);
+        setScopes(rows || []);
         if (profile.role === 'coach' && profile.team) setCoachTeam(profile.team);
       }
       setAuthReady(true);
@@ -68,7 +73,8 @@ export default function AdminApp() {
     if (selectedTeamName !== coachTeam) setSelectedTeamName(coachTeam);
   }, [role, coachTeam]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const ALL_TEAM_NAMES = role === 'coach' && coachTeam ? [coachTeam] : (TEAM_NAMES_BY_SPORT[sport] || []);
+  const sportTeams = TEAM_NAMES_BY_SPORT[sport] || [];
+  const ALL_TEAM_NAMES = role ? visibleTeams(role, TEAMS_INFO, scopes, sportTeams) : [];
 
   function handleSportChange(newSport) {
     if (role === 'coach') return;
@@ -120,6 +126,7 @@ export default function AdminApp() {
     budget:      { title: 'Budget',           breadcrumb: '2026–27 · Revenue & expenses · Actual spend tracking' },
     inventory:   { title: 'Inventory',        breadcrumb: 'Jerseys · Basketballs · Equipment · Check-out tracking' },
     payments:    { title: 'Payments',          breadcrumb: 'Player payment tracking · Collect & reconcile fees' },
+    officials:   { title: 'Officials',         breadcrumb: 'Referee roster · Game assignments · Training' },
     settings:    { title: 'Settings',           breadcrumb: `${(SPORTS.find(s => s.id === sport) || SPORTS[0]).tagline} · ${role === 'commissioner' ? 'Admin' : 'Coach'} console` },
   };
   const t = titleMap[view] || titleMap.dashboard;
@@ -203,9 +210,10 @@ export default function AdminApp() {
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} sport={sport} />}
           {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} sport={sport} />}
           {view === 'scheduler'   && <MasterSchedulerView role={role} coachTeam={coachTeam} />}
-          {view === 'budget'      && role === 'commissioner' && <BudgetView />}
-          {view === 'inventory'   && role === 'commissioner' && <InventoryView />}
-          {view === 'payments'    && role === 'commissioner' && <PaymentsView players={players} setPlayers={setPlayers} />}
+          {view === 'budget'      && canManageOps(role) && <BudgetView />}
+          {view === 'inventory'   && canManageOps(role) && <InventoryView />}
+          {view === 'payments'    && canManageOps(role) && <PaymentsView players={players} setPlayers={setPlayers} />}
+          {view === 'officials'   && canView(role, 'officials') && <OfficialsView />}
           {view === 'settings'    && <SettingsView profile={profile} role={role} />}
           </ErrorBoundary>
         </div>
