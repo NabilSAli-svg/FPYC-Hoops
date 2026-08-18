@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { REGISTER_URL } from './shared/store.js';
+import RequireRole from './shared/RequireRole.jsx';
 import WebsiteApp from './website/WebsiteApp.jsx';
 import AdminApp from './admin/AdminApp.jsx';
 import FamilyApp from './family/FamilyApp.jsx';
@@ -24,11 +25,12 @@ export default function App() {
       <Route path="/register" element={<ExternalRedirect to={REGISTER_URL} />} />
       <Route path="/family" element={<FamilyApp />} />
       <Route path="/admin/*" element={<AdminApp />} />
-      <Route path="/refs" element={<RefAdminApp />} />
-      <Route path="/commissioner" element={<CommissionerApp />} />
+      <Route path="/refs" element={<RequireRole allow={['admin', 'ops_director', 'ref_director', 'ref']} title="Referee Portal"><RefAdminApp /></RequireRole>} />
+      <Route path="/commissioner" element={<RequireRole allow={['admin']} title="Commissioner Console"><CommissionerApp /></RequireRole>} />
       <Route path="/coach" element={<CoachApp />} />
-      <Route path="/scheduler" element={<SchedulerApp />} />
-      <Route path="/scorekeeper" element={<ScorekeeperApp />} />
+      <Route path="/scheduler" element={<RequireRole allow={['admin', 'ops_director']} title="Master Scheduler"><SchedulerApp /></RequireRole>} />
+      <Route path="/scorekeeper" element={<RequireRole allow={['admin', 'ops_director', 'league_director', 'coach', 'ref']} title="Scorekeeper"><ScorekeeperApp /></RequireRole>} />
+      {/* Scoreboard is a read-only gym display — intentionally public. */}
       <Route path="/scoreboard" element={<ScoreboardApp />} />
       <Route path="/board" element={<BoardCoaches />} />
       <Route path="/sports/soccer" element={<SoccerPage />} />
