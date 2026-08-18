@@ -1,5 +1,6 @@
 import Icon from '../shared/Icon.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
+import { REGISTER_URL } from '../shared/store.js';
 
 export default function Hero({ onRegister }) {
   const isMobile = useIsMobile();
@@ -48,7 +49,7 @@ export default function Hero({ onRegister }) {
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
             <a
-              href="/register"
+              href={REGISTER_URL} target="_blank" rel="noreferrer"
               style={{
                 background: 'var(--varsity-gold)', color: 'var(--court-navy)', padding: '14px 22px', borderRadius: 8,
                 textDecoration: 'none', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15,
@@ -74,21 +75,21 @@ export default function Hero({ onRegister }) {
         <div style={{ background: '#fff', color: 'var(--fg)', borderRadius: 14, padding: 28, boxShadow: '0 24px 60px rgba(0,0,0,0.30)', position: 'relative' }}>
           <div style={{ position: 'absolute', top: -1, left: 24, right: 24, height: 4, background: 'var(--varsity-gold)', borderRadius: '0 0 4px 4px' }} />
           <div style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--basketball-orange)' }}>
-            Walk-in registration
+            Now enrolling
           </div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, textTransform: 'uppercase', lineHeight: 1, margin: '8px 0 14px', color: 'var(--court-navy)' }}>
-            Sept 27 &amp; Oct 11
+            Fall Skills Clinic
           </div>
           <div style={{ fontSize: 14, color: 'var(--fg-soft)', lineHeight: 1.55, marginBottom: 18 }}>
-            Saturdays, 10:00 AM – 12:00 PM<br />
-            FPYC Office, 3955 Pickett Rd, Fairfax VA
+            6 Mondays · Sept 14 – Oct 26<br />
+            Beginner, Intermediate &amp; Advanced groups
           </div>
           <div style={{ background: 'var(--bone)', border: '1px solid var(--border)', borderRadius: 8, padding: 14, marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <Icon name="alert-triangle" size={14} color="var(--status-warning)" />
               <span style={{ fontWeight: 700, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--court-navy)' }}>Late fees</span>
             </div>
-            <div style={{ fontSize: 13, color: 'var(--fg-soft)' }}>Begin November 15. Register early.</div>
+            <div style={{ fontSize: 13, color: 'var(--fg-soft)' }}>Winter Rec &amp; Select late fees begin Nov 15.</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, marginBottom: 20 }}>
             <CheckLine text="Scholarships available — apply during registration" />
@@ -96,7 +97,7 @@ export default function Hero({ onRegister }) {
             <CheckLine text="Volunteer credit reduces next-season fee" />
           </div>
           <a
-            href="/register"
+            href={REGISTER_URL} target="_blank" rel="noreferrer"
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               background: 'var(--court-navy)', color: '#fff',

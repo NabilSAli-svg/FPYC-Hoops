@@ -1,5 +1,6 @@
 import Icon from '../shared/Icon.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
+import { REGISTER_URL } from '../shared/store.js';
 
 export default function Footer() {
   const isMobile = useIsMobile();
@@ -25,7 +26,7 @@ export default function Footer() {
           <Icon name="arrow-right" size={16} color="rgba(255,255,255,0.4)" style={{ marginLeft: 'auto' }} />
         </a>
 
-        <a href="/register" style={{
+        <a href={REGISTER_URL} target="_blank" rel="noreferrer" style={{
           flex: 1, minWidth: 220,
           background: 'var(--varsity-gold)', border: '1px solid transparent',
           borderRadius: 12, padding: '16px 20px', textDecoration: 'none', color: 'var(--court-navy)',

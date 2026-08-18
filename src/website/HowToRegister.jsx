@@ -1,5 +1,6 @@
 import Icon from '../shared/Icon.jsx';
 import { SectionHead } from './Programs.jsx';
+import { REGISTER_URL } from '../shared/store.js';
 
 const STEPS = [
   {
@@ -31,7 +32,7 @@ const STEPS = [
     icon: 'calendar',
     title: 'Choose a season',
     sub: 'Step 2.2',
-    desc: 'Select the open registration season for your child: House League, Skills Clinics (Player Development), or Travel Select. Football seasons also appear here.',
+    desc: 'Select the open registration season for your child — for basketball that is Skills Clinics (Player Development) for Fall, or Rec and Select for Winter. Other FPYC sports appear here too.',
     tip: 'Not sure which to pick? House League is the right start for most kids.',
   },
   {
@@ -78,7 +79,7 @@ export default function HowToRegister() {
           sub="Eight steps, about 10 minutes. All registration is handled through the FPYC OttoSport portal."
         />
         <a
-          href="/register"
+          href={REGISTER_URL}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -190,12 +191,12 @@ export default function HowToRegister() {
         <div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, textTransform: 'uppercase', color: '#fff', lineHeight: 1 }}>Ready to register?</div>
           <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.70)', margin: '8px 0 0' }}>
-            Questions? Call <strong style={{ color: '#fff' }}>(703) 425-7000</strong> or email <strong style={{ color: '#fff' }}>basketball@fpycsports.com</strong>
+            Questions? Call <strong style={{ color: '#fff' }}>(703) 944-2211</strong> or email <strong style={{ color: '#fff' }}>basketball@fpycsports.com</strong>
           </p>
         </div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <a
-            href="/register"
+            href={REGISTER_URL} target="_blank" rel="noreferrer"
             
             style={{
               background: 'var(--varsity-gold)', color: 'var(--court-navy)',

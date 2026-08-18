@@ -3,6 +3,7 @@ import Footer from './Footer.jsx';
 import Icon from '../shared/Icon.jsx';
 import { SectionHead } from './Programs.jsx';
 import SoccerSubNav from './SoccerSubNav.jsx';
+import { REGISTER_URL } from '../shared/store.js';
 
 function scrollTo(id) {
   if (id === 'top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
@@ -70,7 +71,7 @@ export default function SoccerPage() {
               FPYC has helped our kids develop positive traits such as teamwork and leadership, all while playing
               the greatest sport on the planet!
             </p>
-            <a href="/register" style={{
+            <a href={REGISTER_URL} target="_blank" rel="noreferrer" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 28,
               background: 'var(--varsity-gold)', color: 'var(--court-navy)', padding: '12px 22px', borderRadius: 8,
               textDecoration: 'none', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,

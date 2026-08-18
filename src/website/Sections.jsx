@@ -233,12 +233,12 @@ export function News() {
 }
 
 const VOLUNTEER_ROLES = [
-  { icon: 'whistle',      title: 'Head Coach',       commitment: '2–3 hrs/week', desc: 'Run practices, set lineups, communicate with families. No experience required — just patience and enthusiasm.', spots: 2 },
+  { icon: 'award',        title: 'Head Coach',       commitment: '2–3 hrs/week', desc: 'Run practices, set lineups, communicate with families. No experience required — just patience and enthusiasm.', spots: 2 },
   { icon: 'clipboard',    title: 'Scorekeeper',       commitment: '2 hrs/game',  desc: 'Track points and fouls at the scorer\'s table. Quick training provided. One game = one volunteer credit.', spots: 8 },
   { icon: 'users',        title: 'Team Parent',       commitment: '1 hr/week',   desc: 'Coordinate carpools, collect snacks, send reminders. The glue that keeps a team together off the court.', spots: 4 },
   { icon: 'megaphone',    title: 'Communications',    commitment: '1–2 hrs/week',desc: 'Help manage the website, send newsletters, run social media. Great for parents with a marketing or tech background.', spots: 1 },
   { icon: 'layout',       title: 'Board Member',      commitment: '4–6 hrs/month',desc: 'Shape FPYC policy, manage budgets, plan the season. Elections held each spring. Open to all FPYC families.', spots: 3 },
-  { icon: 'camera',       title: 'Game Photographer', commitment: 'Per game',    desc: 'Capture game-day moments families will treasure. Share photos with teams after each game day.', spots: 'Open' },
+  { icon: 'user-plus',    title: 'Assistant Coach',   commitment: '2 hrs/week',  desc: 'Support the head coach at practices and games — run drills, manage substitutions, help players one-on-one.', spots: 'Open' },
 ];
 
 export function FaqContact() {
@@ -358,17 +358,16 @@ export function FaqContact() {
               <div style={{ height: 4, background: 'var(--varsity-gold)', borderRadius: 2, width: 48, marginBottom: 16 }} />
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: 1, textTransform: 'uppercase', color: '#fff', marginBottom: 18 }}>Get in touch</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <ContactItem icon="phone"   label="Commissioner of Basketball" value="(703) 425-7000" />
-                <ContactItem icon="mail"    label="Email"                      value="basketball@fpycsports.com" />
-                <ContactItem icon="map-pin" label="Office"                     value="FPYC Clubhouse · 10701 West Dr, Fairfax VA 22030" />
-                <ContactItem icon="clock"   label="Office hours"               value="Mon–Fri 9am–5pm" />
+                <ContactItem icon="phone"     label="Director of Basketball" value="(703) 944-2211" href="tel:+17039442211" />
+                <ContactItem icon="mail"      label="Email"                  value="basketball@fpycsports.com" href="mailto:basketball@fpycsports.com" />
+                <ContactItem icon="instagram" label="Instagram"              value="@FPYCHoops" href="https://www.instagram.com/fpychoops" />
               </div>
             </div>
             <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 14, padding: 24 }}>
               <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--court-navy)', marginBottom: 6 }}>Mailing address</div>
               <div style={{ fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.7 }}>
                 FPYC Basketball<br />
-                3955 Pickett Road<br />
+                10701 West Drive<br />
                 Fairfax, VA 22030
               </div>
               <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
@@ -400,13 +399,16 @@ function Faq({ q, a }) {
   );
 }
 
-function ContactItem({ icon, label, value }) {
+function ContactItem({ icon, label, value, href }) {
+  const text = <div style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{value}</div>;
   return (
     <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
       <Icon name={icon} size={16} color="var(--varsity-gold)" style={{ marginTop: 3 }} />
       <div>
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>{label}</div>
-        <div style={{ fontSize: 14, color: '#fff', fontWeight: 500 }}>{value}</div>
+        {href
+          ? <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel="noreferrer" style={{ textDecoration: 'none' }}>{text}</a>
+          : text}
       </div>
     </div>
   );

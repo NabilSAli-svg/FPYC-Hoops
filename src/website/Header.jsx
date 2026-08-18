@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
-import { useGames } from '../shared/store.js';
+import { useGames, REGISTER_URL } from '../shared/store.js';
 
 const NAV_ITEMS = [
   { id: 'programs',  label: 'Programs' },
@@ -68,7 +68,7 @@ export default function Header({ onJump }) {
           textDecoration: 'none', padding: '8px 10px', whiteSpace: 'nowrap',
         }}>Coach login</a>
 
-        <a href="/register" className="mob-hide" style={{
+        <a href={REGISTER_URL} target="_blank" rel="noreferrer" className="mob-hide" style={{
           background: 'var(--varsity-gold)', color: 'var(--court-navy)',
           padding: '10px 16px', borderRadius: 8, textDecoration: 'none',
           fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
@@ -123,7 +123,7 @@ export default function Header({ onJump }) {
             padding: '16px 24px', borderBottom: '1px solid var(--border)',
           }}>Coach login</a>
           <div style={{ padding: '16px 24px' }}>
-            <a href="/register" onClick={closeMenu} style={{
+            <a href={REGISTER_URL} target="_blank" rel="noreferrer" onClick={closeMenu} style={{
               background: 'var(--varsity-gold)', color: 'var(--court-navy)',
               padding: '12px 20px', borderRadius: 8, textDecoration: 'none',
               fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15,

@@ -1,5 +1,6 @@
 import Icon from '../shared/Icon.jsx';
 import { SectionHead } from './Programs.jsx';
+import { REGISTER_URL } from '../shared/store.js';
 
 const LEVELS = [
   {
@@ -137,7 +138,7 @@ export default function SkillsClinic() {
           <span style={{ fontSize: 14, color: 'var(--fg)' }}>
             <strong>25 spots per group</strong> · $200 for six sessions
           </span>
-          <a href="/register" style={{
+          <a href={REGISTER_URL} target="_blank" rel="noreferrer" style={{
             background: 'var(--varsity-gold)', color: 'var(--court-navy)',
             padding: '10px 18px', borderRadius: 8, textDecoration: 'none',
             fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13,
