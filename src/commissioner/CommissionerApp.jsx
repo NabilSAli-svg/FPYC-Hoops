@@ -3,8 +3,7 @@ import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 import { csvDownload } from '../shared/csvDownload.js';
 import { useBrackets, INITIAL_BRACKETS, useStandings, INITIAL_STANDINGS, PLAYOFF_SPOTS, useAnnouncements, useRegistrations, usePlayers, buildSnakeOrder } from '../shared/store.js';
-
-const CREDENTIALS = { username: 'commissioner', password: 'fpyc2025' };
+import { supabase } from '../shared/supabase.js';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -1297,85 +1296,8 @@ const TABS = ['Dashboard', 'Teams', 'Registrations', 'Standings', 'Bracket', 'Dr
 
 export default function CommissionerApp() {
   const isMobile = useIsMobile();
-  const [authed, setAuthed] = useState(false);
-  const [form, setForm] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
-  const [showPw, setShowPw] = useState(false);
+  // Access is enforced by RequireRole on the /commissioner route.
   const [activeTab, setActiveTab] = useState('Dashboard');
-
-  function handleLogin(e) {
-    e.preventDefault();
-    if (form.username === CREDENTIALS.username && form.password === CREDENTIALS.password) {
-      setAuthed(true);
-    } else {
-      setError('Invalid credentials.');
-    }
-  }
-
-  // ── Login screen ──
-  if (!authed) {
-    return (
-      <div style={{
-        minHeight: '100vh', background: 'var(--court-navy)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: 'var(--font-body)', padding: 24,
-      }}>
-        <div style={{
-          background: '#fff', borderRadius: 16, padding: '36px 32px',
-          width: '100%', maxWidth: 380, boxShadow: '0 24px 64px rgba(0,0,0,0.35)',
-        }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: 28 }}>
-            <img src="/assets/logo-fpyc-basketball-v3.png" alt="FPYC" style={{ height: 44, objectFit: 'contain', marginBottom: 4 }} />
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, textTransform: 'uppercase', color: 'var(--court-navy)', letterSpacing: '0.04em' }}>Commissioner Portal</div>
-            <div style={{ fontSize: 12, color: 'var(--fg-muted)', fontWeight: 600 }}>Commissioner access only</div>
-          </div>
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <LoginField label="Username">
-              <input
-                value={form.username}
-                onChange={e => { setForm(f => ({ ...f, username: e.target.value })); setError(''); }}
-                placeholder="commissioner"
-                autoComplete="username"
-                style={inputStyle}
-              />
-            </LoginField>
-            <LoginField label="Password">
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={showPw ? 'text' : 'password'}
-                  value={form.password}
-                  onChange={e => { setForm(f => ({ ...f, password: e.target.value })); setError(''); }}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  style={{ ...inputStyle, paddingRight: 44 }}
-                />
-                <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                  <Icon name={showPw ? 'eye-off' : 'eye'} size={17} color="var(--fg-muted)" />
-                </button>
-              </div>
-            </LoginField>
-            {error && (
-              <div style={{ fontSize: 13, color: 'var(--foul-red)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Icon name="alert-circle" size={14} color="var(--foul-red)" /> {error}
-              </div>
-            )}
-            <button type="submit" style={{
-              marginTop: 4, padding: '12px', borderRadius: 8, border: 'none', cursor: 'pointer',
-              background: 'var(--court-navy)', color: '#fff',
-              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15,
-            }}>
-              Sign in
-            </button>
-          </form>
-
-          <div style={{ marginTop: 20, padding: '12px 16px', borderRadius: 8, background: 'rgba(10,31,61,0.05)', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Demo credentials</div>
-            <div style={{ fontSize: 12, color: 'var(--fg)', fontFamily: 'var(--font-mono)' }}>commissioner / fpyc2025</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // ── Authenticated portal ──
   return (
@@ -1398,7 +1320,7 @@ export default function CommissionerApp() {
             </div>
           </div>
           <button
-            onClick={() => setAuthed(false)}
+            onClick={() => supabase.auth.signOut()}
             style={{ all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.65)' }}
           >
             <Icon name="log-out" size={15} color="rgba(255,255,255,0.55)" /> Sign out

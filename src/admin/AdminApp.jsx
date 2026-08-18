@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGames, usePlayers, TEAM_INFO, TEAMS_INFO, SPORTS, activeTeamNames } from '../shared/store.js';
-import { canUseConsole, canView, canManageOps, visibleTeams } from '../shared/roles.js';
+import { canUseConsole, canView, canManageOps, visibleTeams, roleLabel } from '../shared/roles.js';
 import { supabase } from '../shared/supabase.js';
 import Sidebar from './Sidebar.jsx';
 import TopBar from './TopBar.jsx';
@@ -35,7 +35,7 @@ const TEAM_NAMES_BY_SPORT = SPORTS.reduce((acc, s) => {
 export default function AdminApp() {
   const isMobile = useIsMobile();
   const [authReady, setAuthReady] = useState(false);
-  const [role, setRole] = useState(null); // 'commissioner' | 'coach' | null
+  const [role, setRole] = useState(null); // see shared/roles.js
   const [coachTeam, setCoachTeam] = useState(null);
   const [profile, setProfile] = useState(null);
   const [scopes, setScopes] = useState([]);
@@ -127,7 +127,7 @@ export default function AdminApp() {
     inventory:   { title: 'Inventory',        breadcrumb: 'Jerseys · Basketballs · Equipment · Check-out tracking' },
     payments:    { title: 'Payments',          breadcrumb: 'Player payment tracking · Collect & reconcile fees' },
     officials:   { title: 'Officials',         breadcrumb: 'Referee roster · Game assignments · Training' },
-    settings:    { title: 'Settings',           breadcrumb: `${(SPORTS.find(s => s.id === sport) || SPORTS[0]).tagline} · ${role === 'commissioner' ? 'Admin' : 'Coach'} console` },
+    settings:    { title: 'Settings',           breadcrumb: `${(SPORTS.find(s => s.id === sport) || SPORTS[0]).tagline} · ${roleLabel(role)} console` },
   };
   const t = titleMap[view] || titleMap.dashboard;
 
@@ -172,7 +172,7 @@ export default function AdminApp() {
         {/* Team selector strip */}
         <div style={{ borderBottom: '1px solid var(--border)', background: '#fff', padding: '8px 28px', display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>Team</span>
-          {role === 'commissioner' && (
+          {role === 'admin' && (
             <span style={{ marginLeft: 'auto', flexShrink: 0, fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: 'var(--varsity-gold)', color: 'var(--court-navy)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Admin
             </span>
@@ -238,7 +238,7 @@ function AdminLogin({ onSuccess }) {
       const { error: signUpErr } = await supabase.auth.signUp({ email: email.trim(), password });
       setLoading(false);
       if (signUpErr) { setError(signUpErr.message); return; }
-      setInfo('Account created. Ask an admin to grant admin access, then sign in below.');
+      setInfo('Account created. Ask an admin to grant you a role, then sign in below.');
       setMode('signin');
       return;
     }
@@ -249,10 +249,10 @@ function AdminLogin({ onSuccess }) {
     const { data: { user } } = await supabase.auth.getUser();
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
     setLoading(false);
-    if (profile?.role === 'commissioner' || profile?.role === 'coach') {
+    if (profile && canUseConsole(profile.role)) {
       onSuccess(profile.role);
     } else {
-      setError('Your account does not have admin access. Contact an admin.');
+      setError('Your account does not have console access. Contact an admin.');
       await supabase.auth.signOut();
     }
   }
@@ -265,7 +265,7 @@ function AdminLogin({ onSuccess }) {
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <img src="/assets/logo-fpyc-basketball-v3.png" alt="FPYC" style={{ height: 64, objectFit: 'contain', marginBottom: 12 }} />
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', textTransform: 'uppercase' }}>Admin Console</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>Admin / Coach access only</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>Staff access only</div>
         </div>
         <div style={{ background: '#fff', borderRadius: 16, padding: '28px 24px', boxShadow: '0 20px 60px rgba(0,0,0,0.35)' }}>
           {error && (

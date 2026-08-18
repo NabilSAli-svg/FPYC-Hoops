@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill, Avatar } from '../shared/index.js';
 import { TEAM_INFO, TEAMS_INFO, useStaff, usePlayers, useFeeSettings, DEFAULT_FEE_SETTINGS, useDiscountCodes, DEFAULT_DISCOUNT_CODES, applyDiscount } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
+import { ROLES, roleLabel as roleLabelOf } from '../shared/roles.js';
 
 const NOTIF_GROUPS = [
   {
@@ -328,7 +329,7 @@ function CoachesTab() {
             {group.rows.map((person, i) => {
               const key = person.email ? person.email.toLowerCase() : `__noemail__${person.id}`;
               const profile = person.email ? profiles[person.email.toLowerCase()] : null;
-              const isAdmin = profile?.role === 'commissioner';
+              const isAdmin = profile?.role === 'admin';
               const isCoach = profile?.role === 'coach';
               const hasAccess = isAdmin || isCoach;
               return (
@@ -372,37 +373,24 @@ function CoachesTab() {
 
                   <div>
                     {profile
-                      ? <Pill kind={isAdmin ? 'gold' : hasAccess ? 'navy' : 'neutral'}>{isAdmin ? 'admin' : isCoach ? 'coach' : profile.role}</Pill>
+                      ? <Pill kind={isAdmin ? 'gold' : hasAccess ? 'navy' : 'neutral'}>{roleLabelOf(profile.role)}</Pill>
                       : <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>{person.email ? 'No account' : 'Needs email'}</span>}
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    {isAdmin ? (
-                      <button
-                        onClick={() => setCoachRole(person.email, 'coach')}
+                  <div>
+                    {profile ? (
+                      <select
+                        value={profile.role || ''}
+                        onChange={e => setCoachRole(person.email, e.target.value)}
                         disabled={busyEmail === key}
-                        title="Revoke admin — demote to coach"
-                        style={{ width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'rgba(31,138,91,0.12)', color: 'var(--status-win)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                        style={{ fontSize: 12, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--fg)', width: '100%' }}
                       >
-                        <Icon name="check" size={14} />
-                      </button>
-                    ) : isCoach ? (
-                      <button
-                        onClick={() => setCoachRole(person.email, 'commissioner')}
-                        disabled={busyEmail === key}
-                        title="Promote to admin"
-                        style={{ width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'rgba(59,130,246,0.12)', color: '#3b82f6', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                      >
-                        <Icon name="chevron-up" size={14} />
-                      </button>
+                        {Object.values(ROLES).map(r => (
+                          <option key={r.id} value={r.id}>{r.label}</option>
+                        ))}
+                      </select>
                     ) : (
-                      <button
-                        disabled
-                        title={person.email ? 'No account yet — coach must sign up first' : 'Add an email address to enable login'}
-                        style={{ width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'default', background: 'var(--bone)', color: 'var(--fg-muted)', opacity: 0.4, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                      >
-                        <Icon name="minus" size={14} />
-                      </button>
+                      <span style={{ fontSize: 12, color: 'var(--fg-muted)' }} title={person.email ? 'No account yet — they must sign up first' : 'Add an email address to enable login'}>—</span>
                     )}
                   </div>
                 </div>
@@ -584,7 +572,7 @@ function AccountTab({ profile: authProfile, role }) {
     setTimeout(() => setSaved(false), 2500);
   }
 
-  const roleLabel = role === 'commissioner' ? 'Commissioner' : 'Volunteer Coach';
+  const displayRole = roleLabelOf(role);
   const initials = (account.name || 'Coach').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
   return (
@@ -595,7 +583,7 @@ function AccountTab({ profile: authProfile, role }) {
           <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--varsity-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22, color: 'var(--court-navy)' }}>{initials}</div>
           <div>
             <div style={{ fontWeight: 700, fontSize: 18 }}>{account.name || 'Coach'}</div>
-            <div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>{roleLabel} · FPYC Season 2025–26</div>
+            <div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>{displayRole} · FPYC Season 2025–26</div>
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

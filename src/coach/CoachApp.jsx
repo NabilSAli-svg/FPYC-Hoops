@@ -6,6 +6,9 @@ import CoachPractice from './CoachPractice.jsx';
 import CoachMessage from './CoachMessage.jsx';
 import { supabase } from '../shared/supabase.js';
 
+// Roles allowed to open a team in the coach portal.
+const COACH_ROLES = ['coach', 'league_director', 'admin'];
+
 const TEAMS = {
   // ── Winter 2026–27 · Rec ───────────────────────────────────────────────────
   'k3-3v3': { id: 'k3-3v3', name: 'K-3 3v3',    division: 'Winter Rec', coach: 'Coach', color: '#0891B2',           lineupKey: 'fpyc-lineup-starters-k3',      password: 'k3hoops27'   },
@@ -107,8 +110,8 @@ export default function CoachApp() {
     const { data: profile } = await supabase
       .from('profiles').select('role, team, parent_name, email').eq('id', userId).single();
     if (!profile) return { error: 'No profile found for this account.' };
-    if (profile.role !== 'coach' && profile.role !== 'commissioner') {
-      return { error: 'This account is not set up as a coach. Ask the commissioner for access.' };
+    if (!COACH_ROLES.includes(profile.role)) {
+      return { error: 'This account is not set up as a coach. Ask an admin for access.' };
     }
     if (!profile.team) return { error: 'No team assigned to your account yet. Ask the commissioner.' };
     const def = Object.values(TEAMS).find(t => t.name === profile.team);
