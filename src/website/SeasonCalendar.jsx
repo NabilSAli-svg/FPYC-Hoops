@@ -1,4 +1,5 @@
 import { SectionHead } from './Programs.jsx';
+import { REGISTER_URL } from '../shared/store.js';
 
 const EVENTS = [
   {
@@ -147,7 +148,7 @@ export default function SeasonCalendar() {
               <strong>Walk-in registration</strong> · Saturdays 10am–12pm at the FPYC Clubhouse, 10701 West Dr, Fairfax VA 22030
             </span>
           </div>
-          <a href="/register" style={{
+          <a href={REGISTER_URL} target="_blank" rel="noreferrer" style={{
             background: 'var(--varsity-gold)', color: 'var(--court-navy)',
             padding: '10px 18px', borderRadius: 8, textDecoration: 'none',
             fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13,

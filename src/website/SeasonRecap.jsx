@@ -1,5 +1,5 @@
 import { SectionHead } from './Programs.jsx';
-import { useBracket } from '../shared/store.js';
+import { useBracket, REGISTER_URL } from '../shared/store.js';
 
 const SEASON = '2025–26';
 
@@ -104,7 +104,7 @@ export default function SeasonRecap() {
 
         {/* CTA row */}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', borderTop: '1px solid rgba(255,255,255,0.10)', paddingTop: 28 }}>
-          <a href="/register" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 22px', borderRadius: 8, background: 'var(--varsity-gold)', color: 'var(--court-navy)', textDecoration: 'none', fontFamily: 'var(--font-body)', fontWeight: 800, fontSize: 14 }}>
+          <a href={REGISTER_URL} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 22px', borderRadius: 8, background: 'var(--varsity-gold)', color: 'var(--court-navy)', textDecoration: 'none', fontFamily: 'var(--font-body)', fontWeight: 800, fontSize: 14 }}>
             Register for 2026–27
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>

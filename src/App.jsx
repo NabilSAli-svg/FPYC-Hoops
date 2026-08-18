@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { REGISTER_URL } from './shared/store.js';
 import WebsiteApp from './website/WebsiteApp.jsx';
 import AdminApp from './admin/AdminApp.jsx';
-import RegisterApp from './register/RegisterApp.jsx';
 import FamilyApp from './family/FamilyApp.jsx';
 import RefAdminApp from './refs/RefAdminApp.jsx';
 import CommissionerApp from './commissioner/CommissionerApp.jsx';
@@ -20,7 +20,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<WebsiteApp />} />
-      <Route path="/register" element={<RegisterApp />} />
+      {/* Registration runs on FPYC's Ottosport portal this season. */}
+      <Route path="/register" element={<ExternalRedirect to={REGISTER_URL} />} />
       <Route path="/family" element={<FamilyApp />} />
       <Route path="/admin/*" element={<AdminApp />} />
       <Route path="/refs" element={<RefAdminApp />} />
@@ -38,4 +39,9 @@ export default function App() {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
+}
+
+function ExternalRedirect({ to }) {
+  if (typeof window !== 'undefined') window.location.replace(to);
+  return null;
 }

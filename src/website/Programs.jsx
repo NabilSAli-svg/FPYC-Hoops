@@ -1,4 +1,5 @@
 import Icon from '../shared/Icon.jsx';
+import { REGISTER_URL } from '../shared/store.js';
 
 export default function Programs() {
   return (
@@ -66,7 +67,7 @@ function ProgramCard({ tag, title, grades, price, desc, bullets, featured }) {
             </li>
           ))}
         </ul>
-        <a href="/register" style={{
+        <a href={REGISTER_URL} target="_blank" rel="noreferrer" style={{
           marginTop: 'auto',
           background: featured ? 'var(--varsity-gold)' : 'transparent',
           color: 'var(--court-navy)',
