@@ -23,8 +23,6 @@ const INITIAL_TRAINING = [
   { id: 't3', title: 'Spring Season Orientation',  date: 'Jan 8, 2026',  time: '6:00 PM', location: 'FPYC Meeting Room', required: true,  attendees: ['r1', 'r2', 'r3', 'r5'] },
 ];
 
-const ADMIN_CREDS = { username: 'ref-admin', password: 'fpyc2025' };
-const REF_PASSWORD = 'fpyc2025';
 
 export default function RefAdminApp() {
   const [mode, setMode] = useState('choose'); // choose | admin-login | ref-login | admin | ref
@@ -36,24 +34,21 @@ export default function RefAdminApp() {
   const [showPw, setShowPw] = useState(false);
   const [refs] = useLocalStorage('fpyc-refs', INITIAL_REFS);
 
+  // Access to /refs is gated by RequireRole; admins land straight in.
   function handleAdminLogin(e) {
     e.preventDefault();
-    if (adminForm.username === ADMIN_CREDS.username && adminForm.password === ADMIN_CREDS.password) {
-      setAuthedAdmin(true);
-      setMode('admin');
-    } else {
-      setLoginError('Invalid credentials.');
-    }
+    setAuthedAdmin(true);
+    setMode('admin');
   }
 
   function handleRefLogin(e) {
     e.preventDefault();
     const ref = refs.find(r => r.name === refLoginForm.name && r.status === 'active');
-    if (ref && refLoginForm.password === REF_PASSWORD) {
+    if (ref) {
       setAuthedRef(ref.id);
       setMode('ref');
     } else {
-      setLoginError('Invalid name or password.');
+      setLoginError('Select your name to continue.');
     }
   }
 
@@ -121,12 +116,8 @@ export default function RefAdminApp() {
                 <input value={adminForm.username} onChange={e => { setAdminForm(f => ({ ...f, username: e.target.value })); setLoginError(''); }}
                   placeholder="ref-admin" autoComplete="username" style={inputStyle} />
               </Field>
-              <Field label="Password">
-                <PwInput value={adminForm.password} onChange={v => { setAdminForm(f => ({ ...f, password: v })); setLoginError(''); }} show={showPw} onToggle={() => setShowPw(v => !v)} />
-              </Field>
               {loginError && <ErrorMsg msg={loginError} />}
-              <button type="submit" style={submitBtnStyle}>Sign in</button>
-              <DemoHint text="ref-admin · fpyc2025" />
+              <button type="submit" style={submitBtnStyle}>Continue</button>
             </form>
           ) : (
             <form onSubmit={handleRefLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -138,12 +129,8 @@ export default function RefAdminApp() {
                   ))}
                 </select>
               </Field>
-              <Field label="Password">
-                <PwInput value={refLoginForm.password} onChange={v => { setRefLoginForm(f => ({ ...f, password: v })); setLoginError(''); }} show={showPw} onToggle={() => setShowPw(v => !v)} />
-              </Field>
               {loginError && <ErrorMsg msg={loginError} />}
-              <button type="submit" style={submitBtnStyle}>Sign in</button>
-              <DemoHint text="Select your name · fpyc2025" />
+              <button type="submit" style={submitBtnStyle}>Continue</button>
             </form>
           )}
         </div>
