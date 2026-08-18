@@ -3,6 +3,7 @@ import Icon from '../shared/Icon.jsx';
 import { SectionHead } from './Programs.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
 import { useGames, useAnnouncements } from '../shared/store.js';
+import { supabase } from '../shared/supabase.js';
 
 const TYPE_ICON = { urgent: 'alert-circle', info: 'info', general: 'megaphone' };
 const TYPE_COLOR = { urgent: 'var(--foul-red)', info: 'var(--court-navy)', general: 'var(--basketball-orange)' };
@@ -246,9 +247,20 @@ export function FaqContact() {
   const [volForm, setVolForm] = useState({ name: '', email: '', role: '', note: '' });
   const [volSent, setVolSent] = useState(false);
 
-  function handleVolSubmit(e) {
+  const [volError, setVolError] = useState('');
+
+  async function handleVolSubmit(e) {
     e.preventDefault();
     if (!volForm.name.trim() || !volForm.email.trim() || !volForm.role) return;
+    setVolError('');
+    const { error } = await supabase.from('volunteer_signups').insert({
+      id: 'vol-' + Math.random().toString(36).slice(2, 10),
+      name: volForm.name.trim(),
+      email: volForm.email.trim(),
+      role: volForm.role,
+      note: volForm.note.trim(),
+    });
+    if (error) { setVolError('Could not submit — please email basketball@fpycsports.com instead.'); return; }
     setVolSent(true);
   }
 
@@ -327,6 +339,9 @@ export function FaqContact() {
                   <textarea value={volForm.note} onChange={e => setVolForm(v => ({ ...v, note: e.target.value }))} placeholder="Availability, prior experience, questions…" rows={3}
                     style={{ width: '100%', boxSizing: 'border-box', padding: '10px 13px', borderRadius: 8, border: '1.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.07)', color: '#fff', fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none', resize: 'vertical' }} />
                 </div>
+                {volError && (
+                  <div style={{ fontSize: 13, color: '#FCA5A5', fontWeight: 600 }}>{volError}</div>
+                )}
                 <button type="submit" style={{ padding: '13px', borderRadius: 8, border: 'none', background: 'var(--varsity-gold)', color: 'var(--court-navy)', fontFamily: 'var(--font-body)', fontWeight: 800, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                   Submit interest <Icon name="arrow-right" size={15} color="var(--court-navy)" />
                 </button>

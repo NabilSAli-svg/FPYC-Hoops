@@ -6,6 +6,7 @@ import Testimonials from './Testimonials.jsx';
 import Programs from './Programs.jsx';
 import SeasonCalendar from './SeasonCalendar.jsx';
 import SkillsClinic from './SkillsClinic.jsx';
+import RefSignup from './RefSignup.jsx';
 import HowToRegister from './HowToRegister.jsx';
 import TeamSpotlight from './TeamSpotlight.jsx';
 import PlayoffBracket from './PlayoffBracket.jsx';
@@ -38,6 +39,7 @@ export default function WebsiteApp() {
         <SeasonCalendar />
         <HowToRegister />
         <Schedule />
+        <RefSignup />
         <FaqContact />
         {/*
           Hidden until backed by real data — these render placeholder content:
