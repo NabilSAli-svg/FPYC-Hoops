@@ -3,12 +3,12 @@ import Icon from '../shared/Icon.jsx';
 import { useGames, REGISTER_URL } from '../shared/store.js';
 
 const NAV_ITEMS = [
+  { id: 'clinic',    label: 'Skills Clinic' },
   { id: 'programs',  label: 'Programs' },
-  { id: 'standings', label: 'Standings' },
   { id: 'schedule',  label: 'Schedule' },
-  { id: 'news',      label: 'News' },
   { id: 'board',     label: 'Board & Coaches', href: '/board' },
   { id: 'volunteer', label: 'Volunteer' },
+  { id: 'referee',   label: 'Referee' },
   { id: 'contact',   label: 'Contact' },
 ];
 
