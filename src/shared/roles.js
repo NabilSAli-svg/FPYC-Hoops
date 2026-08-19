@@ -17,7 +17,7 @@ export const ROLES = {
     id: 'ops_director',
     label: 'Ops Director',
     blurb: 'Budget, payments, inventory, scheduling and gym permits across all programs.',
-    views: ['dashboard', 'schedule', 'scheduler', 'budget', 'payments', 'inventory', 'season', 'stats', 'officials'],
+    views: ['dashboard', 'schedule', 'scheduler', 'budget', 'payments', 'inventory', 'season', 'stats', 'officials', 'signups'],
     canEdit: true,
     teamScope: 'all',
   },
@@ -25,7 +25,7 @@ export const ROLES = {
     id: 'community_director',
     label: 'Community & Sponsorship Director',
     blurb: 'Announcements and sponsorship outreach. No rosters or financials.',
-    views: ['dashboard', 'announcements', 'messages'],
+    views: ['dashboard', 'announcements', 'messages', 'signups'],
     canEdit: true,
     teamScope: 'none',
   },
@@ -51,7 +51,7 @@ export const ROLES = {
     id: 'ref_director',
     label: 'Ref Director',
     blurb: 'View officials and game assignments.',
-    views: ['dashboard', 'schedule', 'officials'],
+    views: ['dashboard', 'schedule', 'officials', 'signups'],
     canEdit: false,
     teamScope: 'none',
   },
@@ -88,6 +88,14 @@ export const ROLES = {
 };
 
 export const CONSOLE_ROLES = Object.values(ROLES).filter(r => r.views === '*' || r.views.length > 0).map(r => r.id);
+
+/** Which sign-up lists a role may review. */
+export function signupTabs(role) {
+  if (role === 'ref_director') return ['refs'];
+  if (role === 'community_director') return ['volunteers'];
+  if (role === 'admin' || role === 'ops_director') return ['refs', 'volunteers'];
+  return [];
+}
 
 export function roleDef(role) {
   return ROLES[role] || null;

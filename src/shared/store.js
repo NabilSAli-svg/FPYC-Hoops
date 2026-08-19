@@ -887,6 +887,15 @@ export function useGymPermits() {
   return useSupabaseTable('gym_permits', INITIAL_GYM_PERMITS);
 }
 
+// Public sign-up submissions from the website (staff-read via RLS).
+export function useRefSignups() {
+  return useSupabaseTable('ref_signups', []);
+}
+
+export function useVolunteerSignups() {
+  return useSupabaseTable('volunteer_signups', []);
+}
+
 export function useBlackoutDates() {
   return useSupabaseTable('blackout_dates', []);
 }
