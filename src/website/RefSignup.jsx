@@ -40,7 +40,7 @@ export default function RefSignup() {
       note: form.note.trim(),
     });
     setSending(false);
-    if (err) { setError('Could not submit — please email basketball@fpycsports.com instead.'); return; }
+    if (err) { setError('Could not submit — please email fpycreferee@gmail.com instead.'); return; }
     setSent(true);
   }
 
@@ -128,7 +128,7 @@ export default function RefSignup() {
                 </button>
                 <div style={{ fontSize: 12, color: 'var(--fg-muted)', textAlign: 'center', lineHeight: 1.5 }}>
                   Questions? Email{' '}
-                  <a href="mailto:basketball@fpycsports.com" style={{ color: 'var(--court-navy)', fontWeight: 700 }}>basketball@fpycsports.com</a>
+                  <a href="mailto:fpycreferee@gmail.com" style={{ color: 'var(--court-navy)', fontWeight: 700 }}>fpycreferee@gmail.com</a>
                 </div>
               </form>
             )}
