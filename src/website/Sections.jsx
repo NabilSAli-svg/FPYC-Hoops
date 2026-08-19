@@ -387,7 +387,7 @@ export function FaqContact() {
               </div>
               <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
                 <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--court-navy)', marginBottom: 6 }}>About FPYC</div>
-                <div style={{ fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.6 }}>The Fairfax Police Youth Club is a 501(c)(3) nonprofit serving Fairfax County youth since 1951. Basketball registration fees support programs, gym rentals, and equipment.</div>
+                <div style={{ fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.6 }}>The Fairfax Police Youth Club is a 501(c)(3) nonprofit serving Fairfax County youth since 1963. Basketball registration fees support programs, gym rentals, and equipment.</div>
               </div>
             </div>
           </aside>
