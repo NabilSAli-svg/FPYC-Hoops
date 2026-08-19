@@ -4,6 +4,7 @@ import { useGames, REGISTER_URL } from '../shared/store.js';
 
 const NAV_ITEMS = [
   { id: 'clinic',    label: 'Skills Clinic' },
+  { id: 'open-gyms', label: 'Open Gyms' },
   { id: 'programs',  label: 'Programs' },
   { id: 'schedule',  label: 'Schedule' },
   { id: 'board',     label: 'Board & Coaches', href: '/board' },
