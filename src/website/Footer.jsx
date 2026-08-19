@@ -65,36 +65,35 @@ export default function Footer() {
           </div>
         )}
         <FooterCol title="Play" items={[
-          { label: 'House League',    href: '/register' },
-          { label: 'Select / Travel', href: '/register' },
-          { label: 'Skills Clinic',   href: '/register' },
+          { label: 'Rec League',      href: '/#programs' },
+          { label: 'Select',          href: '/#programs' },
+          { label: 'Skills Clinic',   href: '/#clinic' },
+          { label: 'Select open gyms',href: '/#open-gyms' },
           { label: 'Schedules',       href: '/#schedule' },
-          { label: 'Standings',       href: '/#season' },
           { label: 'Live scoreboard', href: '/scoreboard' },
         ]} />
         <FooterCol title="Help" items={[
-          { label: 'Registration',  href: '/register' },
-          { label: 'Scholarships',  href: '/#contact' },
-          { label: 'Refund policy', href: '#' },
-          { label: 'FAQs',          href: '/#contact' },
-          { label: 'Volunteer',     href: '/#volunteer' },
+          { label: 'Register',       href: REGISTER_URL, external: true },
+          { label: 'Scholarships',   href: '/#contact' },
+          { label: 'FAQs',           href: '/#contact' },
+          { label: 'Volunteer',      href: '/#volunteer' },
+          { label: 'Become a referee', href: '/#referee' },
         ]} />
         <FooterCol title="Account" items={[
-          { label: 'Family portal', href: '/family' },
-          { label: 'Coach login',   href: '/admin' },
-          { label: 'About FPYC',   href: 'https://fpycsports.org', external: true },
-          { label: 'FPYC Soccer', href: '/sports/soccer' },
-          { label: 'Other sports', href: 'https://fpycsports.org', external: true },
-          { label: 'Contact',      href: '/#contact' },
+          { label: 'Family portal',  href: '/family' },
+          { label: 'Coach portal',   href: '/coach' },
+          { label: 'Admin console',  href: '/admin' },
+          { label: 'Referee portal', href: '/refs' },
+          { label: 'All FPYC sports', href: 'https://www.fpycsports.com', external: true },
+          { label: 'Contact',        href: '/#contact' },
         ]} />
       </div>
 
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 48, padding: '20px 24px', maxWidth: 1200, marginLeft: 'auto', marginRight: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, fontSize: 12 }}>
-        <span style={{ color: 'rgba(255,255,255,0.5)' }}>© 2025 Fairfax Police Youth Club. A 501(c)(3) nonprofit.</span>
+        <span style={{ color: 'rgba(255,255,255,0.5)' }}>© 2026 Fairfax Police Youth Club. A 501(c)(3) nonprofit.</span>
         <div style={{ display: 'flex', gap: 16, color: 'rgba(255,255,255,0.5)' }}>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</a>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Terms</a>
-          <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Code of Conduct</a>
+          <a href="https://www.fpycsports.com" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>fpycsports.com</a>
+          <a href="/#contact" style={{ color: 'inherit', textDecoration: 'none' }}>Contact</a>
         </div>
       </div>
     </footer>
