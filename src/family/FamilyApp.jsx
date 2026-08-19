@@ -57,23 +57,31 @@ const TABS = [
   { id: 'messages', label: 'Messages', icon: 'message-square' },
 ];
 
-// Build the family object shape the rest of the app expects
-function profileToFamily(profile, player) {
+// Build the family object shape the rest of the app expects.
+// `children` holds every linked player; `child` is the one currently selected.
+function toChild(player) {
   return {
-    parent:     profile.parent_name || profile.email,
-    firstName:  profile.first_name  || (profile.parent_name || profile.email).split(' ')[0],
-    email:      profile.email,
-    child: player ? {
-      id:       player.id,
-      name:     player.name,
-      number:   player.number,
-      position: player.position || 'Player',
-      grade:    player.grade    || '',
-      status:   player.status   || 'active',
-      team:     player.team     || 'FPYC',
-    } : {
-      name: 'Player', number: '?', position: '', grade: '', status: 'active', team: 'FPYC',
-    },
+    id:       player.id,
+    name:     player.name,
+    number:   player.number,
+    position: player.position || 'Player',
+    grade:    player.grade    || '',
+    status:   player.status   || 'active',
+    team:     player.team     || 'FPYC',
+  };
+}
+
+const BLANK_CHILD = { name: 'Player', number: '?', position: '', grade: '', status: 'active', team: 'FPYC' };
+
+function profileToFamily(profile, players = [], selectedId = null) {
+  const children = players.filter(Boolean).map(toChild);
+  const child = children.find(c => c.id === selectedId) || children[0] || BLANK_CHILD;
+  return {
+    parent:    profile.parent_name || profile.email,
+    firstName: profile.first_name  || (profile.parent_name || profile.email).split(' ')[0],
+    email:     profile.email,
+    children,
+    child,
   };
 }
 
@@ -84,6 +92,7 @@ export default function FamilyApp() {
   const [siblingCandidates, setSiblingCandidates] = useState([]);
   const [tab, setTab] = useState('home');
   const [userKey, setUserKey] = useState(null);
+  const [addingChild, setAddingChild] = useState(false);
 
   // Load session on mount, listen for auth changes
   useEffect(() => {
@@ -99,14 +108,10 @@ export default function FamilyApp() {
     return () => subscription.unsubscribe();
   }, []);
 
-  async function loadFamily(authUser) {
+  async function loadFamily(authUser, keepSelectedId = null) {
     setAuthLoading(true);
-    // Fetch profile
     const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', authUser.id)
-      .single();
+      .from('profiles').select('*').eq('id', authUser.id).single();
 
     if (!profile) {
       // Profile not yet created (trigger may not have fired) — create it
@@ -116,7 +121,7 @@ export default function FamilyApp() {
         parent_name: authUser.user_metadata?.parent_name || '',
         first_name:  authUser.user_metadata?.first_name  || '',
       });
-      setFamily(profileToFamily({ email: authUser.email, parent_name: authUser.user_metadata?.parent_name || '' }, null));
+      setFamily(profileToFamily({ email: authUser.email, parent_name: authUser.user_metadata?.parent_name || '' }, []));
       setPlayerLinked(false);
       setAuthLoading(false);
       return;
@@ -124,29 +129,45 @@ export default function FamilyApp() {
 
     setUserKey(authUser.id);
 
-    // Fetch linked player if any
-    let player = null;
-    if (profile.player_id) {
-      const { data } = await supabase.from('players').select('*').eq('id', profile.player_id).single();
-      player = data;
-    } else {
-      // Try to auto-match this account's email against a player's guardian email
-      const { data: matches } = await supabase
-        .from('players')
-        .select('*')
-        .ilike('guardian', authUser.email);
+    // Every linked child: scope rows, plus the legacy single player_id column.
+    const { data: scopeRows } = await supabase
+      .from('user_scopes').select('scope_value')
+      .eq('user_id', authUser.id).eq('scope_type', 'player');
 
-      if (matches && matches.length === 1) {
-        await supabase.from('profiles').update({ player_id: matches[0].id, team: matches[0].team }).eq('id', authUser.id);
-        player = matches[0];
-      } else if (matches && matches.length > 1) {
-        setSiblingCandidates(matches);
+    let ids = (scopeRows || []).map(r => r.scope_value);
+    if (profile.player_id && !ids.includes(profile.player_id)) ids.push(profile.player_id);
+
+    // Nothing linked yet — auto-match this account's email against guardians.
+    if (ids.length === 0) {
+      const { data: matches } = await supabase
+        .from('players').select('*').ilike('guardian', authUser.email);
+      if (matches && matches.length > 0) {
+        // Link every match, so siblings come through together.
+        await supabase.from('user_scopes').upsert(
+          matches.map(m => ({ user_id: authUser.id, scope_type: 'player', scope_value: m.id })),
+          { onConflict: 'user_id,scope_type,scope_value' },
+        );
+        await supabase.from('profiles')
+          .update({ player_id: matches[0].id, team: matches[0].team }).eq('id', authUser.id);
+        setPlayerLinked(true);
+        setFamily(profileToFamily(profile, matches, keepSelectedId));
+        setAuthLoading(false);
+        return;
       }
+      setPlayerLinked(false);
+      setFamily(profileToFamily(profile, []));
+      setAuthLoading(false);
+      return;
     }
 
-    setPlayerLinked(!!player);
-    setFamily(profileToFamily(profile, player));
+    const { data: players } = await supabase.from('players').select('*').in('id', ids);
+    setPlayerLinked((players || []).length > 0);
+    setFamily(profileToFamily(profile, players || [], keepSelectedId));
     setAuthLoading(false);
+  }
+
+  function selectChild(id) {
+    setFamily(f => (f ? { ...f, child: f.children.find(c => c.id === id) || f.child } : f));
   }
 
   async function handleSignOut() {
@@ -206,7 +227,22 @@ export default function FamilyApp() {
 
   if (!family) return <FamilyLogin />;
 
-  if (!playerLinked) return <LinkPlayerScreen family={family} candidates={siblingCandidates} onLinked={player => { setFamily(profileToFamily({ ...family, player_id: player.id }, player)); setPlayerLinked(true); }} onSignOut={handleSignOut} />;
+  if (addingChild) return <LinkPlayerScreen
+    family={family}
+    candidates={[]}
+    onLinked={async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) await loadFamily(user, family?.child?.id);
+      setAddingChild(false);
+    }}
+    onSignOut={() => setAddingChild(false)}
+    signOutLabel="Cancel"
+  />;
+
+  if (!playerLinked) return <LinkPlayerScreen family={family} candidates={siblingCandidates} onLinked={async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) await loadFamily(user);
+  }} onSignOut={handleSignOut} />;
 
   const unread = myMessages.filter(m => m.unread && !readIds.has(m.id)).length;
 
@@ -239,7 +275,31 @@ export default function FamilyApp() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{family.parent}</div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)' }}>{family.child.name}</div>
+              {family.children.length > 1 ? (
+                <select
+                  value={family.child.id || ''}
+                  onChange={e => {
+                    if (e.target.value === '__add__') { setAddingChild(true); return; }
+                    selectChild(e.target.value);
+                  }}
+                  aria-label="Switch child"
+                  style={{
+                    background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: 6, color: '#fff', fontSize: 11, fontWeight: 600,
+                    padding: '2px 6px', marginTop: 2, cursor: 'pointer',
+                    fontFamily: 'var(--font-body)', maxWidth: 150,
+                  }}
+                >
+                  {family.children.map(c => (
+                    <option key={c.id} value={c.id} style={{ color: '#111' }}>{c.name}</option>
+                  ))}
+                  <option value="__add__" style={{ color: '#111' }}>+ Add another child</option>
+                </select>
+              ) : (
+                <button onClick={() => setAddingChild(true)} title="Add another child" style={{ all: 'unset', cursor: 'pointer', fontSize: 10, color: 'rgba(255,255,255,0.55)' }}>
+                  {family.child.name} <span style={{ color: 'var(--varsity-gold)' }}>+</span>
+                </button>
+              )}
             </div>
             {notifPerm !== 'unsupported' && (
               <button
@@ -317,7 +377,7 @@ export default function FamilyApp() {
 // ── Link Player Screen ────────────────────────────────────────────────────────
 // Shown after sign-up when no player is linked to the account yet.
 
-function LinkPlayerScreen({ family, candidates = [], onLinked, onSignOut }) {
+function LinkPlayerScreen({ family, candidates = [], onLinked, onSignOut, signOutLabel = 'Sign out' }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -340,6 +400,10 @@ function LinkPlayerScreen({ family, candidates = [], onLinked, onSignOut }) {
   async function linkPlayer(player) {
     setLinking(true); setError('');
     const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from('user_scopes').upsert(
+      { user_id: user.id, scope_type: 'player', scope_value: player.id },
+      { onConflict: 'user_id,scope_type,scope_value' },
+    );
     const { error: err } = await supabase
       .from('profiles')
       .update({ player_id: player.id, team: player.team })
@@ -432,7 +496,7 @@ function LinkPlayerScreen({ family, candidates = [], onLinked, onSignOut }) {
         </div>
 
         <button onClick={onSignOut} style={{ all: 'unset', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, margin: '20px auto 0', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
-          <Icon name="log-out" size={13} color="rgba(255,255,255,0.4)" /> Sign out
+          <Icon name="log-out" size={13} color="rgba(255,255,255,0.4)" /> {signOutLabel}
         </button>
       </div>
     </div>

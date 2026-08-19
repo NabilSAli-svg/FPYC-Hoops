@@ -116,3 +116,16 @@ drop policy if exists "gym_permits_commissioner"   on public.gym_permits;
 drop policy if exists "blackout_dates_commissioner" on public.blackout_dates;
 create policy "gym_permits_ops"    on public.gym_permits    for all using (public.can_manage_ops());
 create policy "blackout_dates_ops" on public.blackout_dates for all using (public.can_manage_ops());
+
+-- Parents link their own children from the family portal, so they need to be
+-- able to add player scopes for themselves. Limited to scope_type 'player' and
+-- to their own user_id — everything else stays Admin-only.
+drop policy if exists "user_scopes_self_link_player" on public.user_scopes;
+create policy "user_scopes_self_link_player"
+  on public.user_scopes for insert
+  with check (user_id = auth.uid() and scope_type = 'player');
+
+drop policy if exists "user_scopes_self_unlink_player" on public.user_scopes;
+create policy "user_scopes_self_unlink_player"
+  on public.user_scopes for delete
+  using (user_id = auth.uid() and scope_type = 'player');
