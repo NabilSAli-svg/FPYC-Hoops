@@ -1,6 +1,6 @@
 import Icon from '../shared/Icon.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
-import { REGISTER_URL } from '../shared/store.js';
+import { REGISTER_URL, FOUNDED_YEAR } from '../shared/store.js';
 
 export default function Footer() {
   const isMobile = useIsMobile();
@@ -56,11 +56,11 @@ export default function Footer() {
               <img src="/assets/logo-fpyc-basketball-v3.png" alt="" style={{ height: 68 }} />
               <div>
                 <div style={{ fontFamily: 'var(--font-display)', textTransform: 'uppercase', fontSize: 20, letterSpacing: '0.04em', color: '#fff' }}>FPYC Basketball</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>est. 1963 · Fairfax, Virginia</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>est. {FOUNDED_YEAR} · Fairfax, Virginia</div>
               </div>
             </div>
             <p style={{ fontSize: 13, lineHeight: 1.6, color: 'rgba(255,255,255,0.62)', maxWidth: 360 }}>
-              FPYC is a completely volunteer-based organization, serving Fairfax kids since 1963. We need volunteers to coach and run our leagues.
+              FPYC is a completely volunteer-based organization, serving Fairfax kids since {FOUNDED_YEAR}. We need volunteers to coach and run our leagues.
             </p>
           </div>
         )}
@@ -90,7 +90,7 @@ export default function Footer() {
       </div>
 
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 48, padding: '20px 24px', maxWidth: 1200, marginLeft: 'auto', marginRight: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, fontSize: 12 }}>
-        <span style={{ color: 'rgba(255,255,255,0.5)' }}>© 2026 Fairfax Police Youth Club. A 501(c)(3) nonprofit.</span>
+        <span style={{ color: 'rgba(255,255,255,0.5)' }}>© {new Date().getFullYear()} Fairfax Police Youth Club. A 501(c)(3) nonprofit.</span>
         <div style={{ display: 'flex', gap: 16, color: 'rgba(255,255,255,0.5)' }}>
           <a href="https://www.fpycsports.com" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>fpycsports.com</a>
           <a href="/#contact" style={{ color: 'inherit', textDecoration: 'none' }}>Contact</a>

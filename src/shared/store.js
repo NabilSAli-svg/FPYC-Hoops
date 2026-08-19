@@ -23,6 +23,12 @@ export const ACTIVE_SPORTS = SPORTS.filter(s => s.enabled);
 
 // Registration is handled by FPYC's Ottosport portal this season — the in-app
 // /register wizard is disabled and every "sign up" link points here.
+// FPYC was founded in 1963. Derive the anniversary so it never goes stale.
+export const FOUNDED_YEAR = 1963;
+export function yearsInFairfax() {
+  return new Date().getFullYear() - FOUNDED_YEAR;
+}
+
 export const REGISTER_URL = 'https://fpycsports.ottosport.ai/_registration_login?to=https%3A%2F%2Ffpycsports.ottosport.ai%2F_registration';
 
 export const REC_DIVISION    = 'Winter Rec';

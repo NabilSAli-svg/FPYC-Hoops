@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Icon from '../shared/Icon.jsx';
 import { SectionHead } from './Programs.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
-import { useGames, useAnnouncements } from '../shared/store.js';
+import { useGames, useAnnouncements, FOUNDED_YEAR } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
 
 const TYPE_ICON = { urgent: 'alert-circle', info: 'info', general: 'megaphone' };
@@ -387,7 +387,7 @@ export function FaqContact() {
               </div>
               <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
                 <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--court-navy)', marginBottom: 6 }}>About FPYC</div>
-                <div style={{ fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.6 }}>The Fairfax Police Youth Club is a 501(c)(3) nonprofit serving Fairfax County youth since 1963. Basketball registration fees support programs, gym rentals, and equipment.</div>
+                <div style={{ fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.6 }}>The Fairfax Police Youth Club is a 501(c)(3) nonprofit serving Fairfax County youth since {FOUNDED_YEAR}. Basketball registration fees support programs, gym rentals, and equipment.</div>
               </div>
             </div>
           </aside>
