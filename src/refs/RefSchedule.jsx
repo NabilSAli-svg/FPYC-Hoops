@@ -40,7 +40,8 @@ export default function RefSchedule({ onSignOut }) {
             </div>
             <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 6, lineHeight: 1.6, maxWidth: 380, margin: '6px auto 0' }}>
               Your sign-in works, but no referee on the roster uses this email address.
-              Ask the Ref Director to add it to your officials record.
+              Email <a href="mailto:fpycreferee@gmail.com" style={{ color: 'var(--court-navy)', fontWeight: 700 }}>fpycreferee@gmail.com</a>{' '}
+              to have it added to your officials record.
             </div>
           </div>
         </Card>
