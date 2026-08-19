@@ -85,7 +85,7 @@ export default function SelectOpenGyms() {
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
               Open gyms are drop-in for players considering Select — just turn up. Questions about
               whether Select is the right fit? Email{' '}
-              <a href="mailto:basketball@fpycsports.com" style={{ color: 'var(--varsity-gold)', fontWeight: 700 }}>basketball@fpycsports.com</a>.
+              <a href="mailto:fpycselect@gmail.com" style={{ color: 'var(--varsity-gold)', fontWeight: 700 }}>fpycselect@gmail.com</a>.
             </div>
           </div>
         </div>
