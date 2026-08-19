@@ -1,6 +1,6 @@
 import Icon from '../shared/Icon.jsx';
 import { useIsMobile } from '../shared/useIsMobile.js';
-import { REGISTER_URL } from '../shared/store.js';
+import { REGISTER_URL, yearsInFairfax } from '../shared/store.js';
 
 export default function Hero({ onRegister }) {
   const isMobile = useIsMobile();
@@ -68,7 +68,7 @@ export default function Hero({ onRegister }) {
             <Fact value="K–12" label="Grades" isMobile={isMobile} />
             <Fact value="Rec · Select" label="Programs" isMobile={isMobile} />
             <Fact value="10+" label="Games / season" isMobile={isMobile} />
-            <Fact value="63" label="Years in Fairfax" isMobile={isMobile} />
+            <Fact value={String(yearsInFairfax())} label="Years in Fairfax" isMobile={isMobile} />
           </div>
         </div>
 
