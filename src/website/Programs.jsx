@@ -21,6 +21,7 @@ export default function Programs() {
           price="$240"
           desc="Tryout-based competitive teams playing in the Fairfax County Youth Basketball League (FCYBL). Two practices a week."
           bullets={['Summer season $225', 'FCYBL games across NoVa', 'Boys and girls, 5th through 8th']}
+          contactEmail="fpycselect@gmail.com"
           featured
         />
         <ProgramCard
@@ -30,13 +31,14 @@ export default function Programs() {
           price="$200"
           desc="Six Monday-evening development sessions grouped by ability. Led by Nabil and Shaun Ali with local HS coaches and standout players."
           bullets={['6 Mondays, Sep 14 – Oct 26', 'Beginner 6–7 · Intermediate 7–8 · Advanced 8–9', 'Providence ES · gym may change']}
+          contactEmail="shaunali34@gmail.com"
         />
       </div>
     </section>
   );
 }
 
-function ProgramCard({ tag, title, grades, price, desc, bullets, featured }) {
+function ProgramCard({ tag, title, grades, price, desc, bullets, featured, contactEmail }) {
   return (
     <div style={{
       background: featured ? 'var(--court-navy)' : '#fff',
@@ -76,6 +78,17 @@ function ProgramCard({ tag, title, grades, price, desc, bullets, featured }) {
           fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
           display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between', gap: 6,
         }}>Sign up <Icon name="arrow-right" size={14} /></a>
+        {contactEmail && (
+          <a
+            href={`mailto:${contactEmail}`}
+            style={{
+              marginTop: 10, fontSize: 12, textAlign: 'center', textDecoration: 'none',
+              color: featured ? 'rgba(255,255,255,0.65)' : 'var(--fg-muted)',
+            }}
+          >
+            Questions? <span style={{ fontWeight: 700, color: featured ? 'var(--varsity-gold)' : 'var(--court-navy)' }}>{contactEmail}</span>
+          </a>
+        )}
       </div>
     </div>
   );
