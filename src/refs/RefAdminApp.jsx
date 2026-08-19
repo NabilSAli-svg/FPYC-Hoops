@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Icon from '../shared/Icon.jsx';
 import { useGames } from '../shared/store.js';
 import { useLocalStorage } from '../shared/useLocalStorage.js';
+import { supabase } from '../shared/supabase.js';
+import RefSchedule from './RefSchedule.jsx';
 
 const INITIAL_REFS = [
   { id: 'r1', name: 'James Park',      email: 'j.park@email.com',      phone: '703-555-0101', cert: 'VBOS Level 2', status: 'active',   seasons: 4 },
@@ -25,6 +27,17 @@ const INITIAL_TRAINING = [
 
 
 export default function RefAdminApp() {
+  const [sessionRole, setSessionRole] = useState(undefined); // undefined = loading
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data?.user) { setSessionRole(null); return; }
+      const { data: profile } = await supabase
+        .from('profiles').select('role').eq('id', data.user.id).single();
+      setSessionRole(profile?.role ?? null);
+    });
+  }, []);
+
   const [mode, setMode] = useState('choose'); // choose | admin-login | ref-login | admin | ref
   const [authedAdmin, setAuthedAdmin] = useState(false);
   const [authedRef, setAuthedRef] = useState(null); // ref id
@@ -50,6 +63,19 @@ export default function RefAdminApp() {
     } else {
       setLoginError('Select your name to continue.');
     }
+  }
+
+  if (sessionRole === undefined) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--court-navy)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-body)' }}>
+        <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 14 }}>Loading…</div>
+      </div>
+    );
+  }
+
+  // A referee only ever sees their own assignments.
+  if (sessionRole === 'ref') {
+    return <RefSchedule onSignOut={() => supabase.auth.signOut()} />;
   }
 
   if (mode === 'choose') {
