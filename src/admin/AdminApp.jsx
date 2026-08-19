@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGames, usePlayers, TEAM_INFO, TEAMS_INFO, SPORTS, activeTeamNames } from '../shared/store.js';
-import { canUseConsole, canView, canManageOps, visibleTeams, roleLabel } from '../shared/roles.js';
+import { canUseConsole, canView, canManageOps, visibleTeams, roleLabel, signupTabs } from '../shared/roles.js';
 import { supabase } from '../shared/supabase.js';
 import Sidebar from './Sidebar.jsx';
 import TopBar from './TopBar.jsx';
@@ -24,6 +24,7 @@ import BudgetView from './BudgetView.jsx';
 import InventoryView from './InventoryView.jsx';
 import PaymentsView from './PaymentsView.jsx';
 import OfficialsView from './OfficialsView.jsx';
+import SignupsView from './SignupsView.jsx';
 import { Button } from '../shared/index.js';
 import ErrorBoundary from '../shared/ErrorBoundary.jsx';
 
@@ -127,6 +128,7 @@ export default function AdminApp() {
     inventory:   { title: 'Inventory',        breadcrumb: 'Jerseys · Basketballs · Equipment · Check-out tracking' },
     payments:    { title: 'Payments',          breadcrumb: 'Player payment tracking · Collect & reconcile fees' },
     officials:   { title: 'Officials',         breadcrumb: 'Referee roster · Game assignments · Training' },
+    signups:     { title: 'Sign-ups',          breadcrumb: 'Referee & volunteer applications from the website' },
     settings:    { title: 'Settings',           breadcrumb: `${(SPORTS.find(s => s.id === sport) || SPORTS[0]).tagline} · ${roleLabel(role)} console` },
   };
   const t = titleMap[view] || titleMap.dashboard;
@@ -214,6 +216,7 @@ export default function AdminApp() {
           {view === 'inventory'   && canManageOps(role) && <InventoryView />}
           {view === 'payments'    && canManageOps(role) && <PaymentsView players={players} setPlayers={setPlayers} />}
           {view === 'officials'   && canView(role, 'officials') && <OfficialsView />}
+          {view === 'signups'     && canView(role, 'signups')   && <SignupsView tabs={signupTabs(role)} />}
           {view === 'settings'    && <SettingsView profile={profile} role={role} />}
           </ErrorBoundary>
         </div>

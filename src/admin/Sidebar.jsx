@@ -21,6 +21,7 @@ const SECONDARY = [
   { id: 'payments',  icon: 'credit-card',   label: 'Payments'           },
   { id: 'inventory', icon: 'package',       label: 'Inventory'          },
   { id: 'officials', icon: 'user-check',    label: 'Officials'          },
+  { id: 'signups',   icon: 'inbox',         label: 'Sign-ups'           },
   { id: 'playoffs',  icon: 'trophy',        label: 'Playoffs'           },
   { id: 'draftboard',icon: 'shuffle',       label: 'Draft Board'        },
   { id: 'season',    icon: 'bar-chart',     label: 'Season'             },
