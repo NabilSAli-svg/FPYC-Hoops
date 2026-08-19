@@ -7,6 +7,7 @@ import Programs from './Programs.jsx';
 import SeasonCalendar from './SeasonCalendar.jsx';
 import SkillsClinic from './SkillsClinic.jsx';
 import RefSignup from './RefSignup.jsx';
+import SelectOpenGyms from './SelectOpenGyms.jsx';
 import HowToRegister from './HowToRegister.jsx';
 import TeamSpotlight from './TeamSpotlight.jsx';
 import PlayoffBracket from './PlayoffBracket.jsx';
@@ -34,6 +35,7 @@ export default function WebsiteApp() {
         <Hero onRegister={() => scrollTo('register')} />
         <Announcements />
         <SkillsClinic />
+        <SelectOpenGyms />
         <Programs />
         <WhyFPYC />
         <SeasonCalendar />

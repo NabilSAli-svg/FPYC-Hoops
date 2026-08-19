@@ -36,8 +36,8 @@ export default function Footer() {
             <Icon name="clipboard-list" size={20} color="var(--court-navy)" />
           </div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>Register for 2025–26</div>
-            <div style={{ fontSize: 12, color: 'rgba(10,31,61,0.6)', marginTop: 2 }}>Spots still available · $195</div>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>Register for 2026–27</div>
+            <div style={{ fontSize: 12, color: 'rgba(10,31,61,0.6)', marginTop: 2 }}>Fees vary by program</div>
           </div>
           <Icon name="arrow-right" size={16} color="rgba(10,31,61,0.5)" style={{ marginLeft: 'auto' }} />
         </a>

@@ -65,8 +65,8 @@ export default function Hero({ onRegister }) {
           </div>
 
           <div style={{ display: 'flex', gap: isMobile ? 16 : 32, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.10)' }}>
-            <Fact value="K–8" label="Grades" isMobile={isMobile} />
-            <Fact value="$195" label="Reg fee" isMobile={isMobile} />
+            <Fact value="K–12" label="Grades" isMobile={isMobile} />
+            <Fact value="Rec · Select" label="Programs" isMobile={isMobile} />
             <Fact value="10+" label="Games / season" isMobile={isMobile} />
             <Fact value="62" label="Years in Fairfax" isMobile={isMobile} />
           </div>
