@@ -1,6 +1,5 @@
 import Icon from '../shared/Icon.jsx';
 import { SectionHead } from './Programs.jsx';
-import { REGISTER_URL } from '../shared/store.js';
 
 // Fill these in once the schedule is set. Leaving the array empty renders the
 // "dates announced soon" state rather than inventing a schedule.
@@ -11,6 +10,7 @@ const WHAT_TO_EXPECT = [
   { icon: 'eye',        title: 'Coaches are watching',      desc: 'Select coaches attend to evaluate. Open gyms directly inform how teams are formed.' },
   { icon: 'users',      title: 'Play with your grade',      desc: 'Grouped by grade and gender so evaluation is fair and the competition is level.' },
   { icon: 'help-circle',title: 'Come with questions',       desc: 'A good chance to ask coaches what Select asks of a player before you commit to tryouts.' },
+  { icon: 'door-open',  title: 'Just show up',              desc: 'No registration and nothing to sign up for — bring a ball, water and court shoes.' },
 ];
 
 export default function SelectOpenGyms() {
@@ -76,18 +76,17 @@ export default function SelectOpenGyms() {
           )}
 
           <div style={{ marginTop: 'auto', paddingTop: 20 }}>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, marginBottom: 14 }}>
-              Open gyms are for players considering Select. Questions about whether Select is the right fit?
-              Email <a href="mailto:basketball@fpycsports.com" style={{ color: 'var(--varsity-gold)', fontWeight: 700 }}>basketball@fpycsports.com</a>.
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '6px 12px', borderRadius: 999, background: 'rgba(255,199,44,0.15)', border: '1px solid rgba(255,199,44,0.3)', marginBottom: 14 }}>
+              <Icon name="door-open" size={14} color="var(--varsity-gold)" />
+              <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--varsity-gold)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                Free · No registration
+              </span>
             </div>
-            <a href={REGISTER_URL} target="_blank" rel="noreferrer" style={{
-              background: 'var(--varsity-gold)', color: 'var(--court-navy)',
-              padding: '11px 18px', borderRadius: 8, textDecoration: 'none',
-              fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14,
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-            }}>
-              Register for Select <Icon name="arrow-right" size={14} />
-            </a>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
+              Open gyms are drop-in for players considering Select — just turn up. Questions about
+              whether Select is the right fit? Email{' '}
+              <a href="mailto:basketball@fpycsports.com" style={{ color: 'var(--varsity-gold)', fontWeight: 700 }}>basketball@fpycsports.com</a>.
+            </div>
           </div>
         </div>
       </div>

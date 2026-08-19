@@ -18,9 +18,9 @@ export default function Programs() {
           tag="Competitive"
           title="Select"
           grades="5th – 8th grade"
-          price="$425"
+          price="$240"
           desc="Tryout-based competitive teams playing in the Fairfax County Youth Basketball League (FCYBL). Two practices a week."
-          bullets={['FCYBL games across NoVa', 'Tryouts in early September', 'Boys and girls, 5th through 8th']}
+          bullets={['Summer season $225', 'FCYBL games across NoVa', 'Boys and girls, 5th through 8th']}
           featured
         />
         <ProgramCard
