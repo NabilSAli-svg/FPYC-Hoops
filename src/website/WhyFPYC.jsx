@@ -5,7 +5,7 @@ const PILLARS = [
   {
     icon: 'users',
     title: 'Community First',
-    desc: '100% volunteer-run since 1962. Every coach, scorekeeper, and board member is a Fairfax parent giving time so kids can play.',
+    desc: '100% volunteer-run since 1963. Every coach, scorekeeper, and board member is a Fairfax parent giving time so kids can play.',
   },
   {
     icon: 'trending-up',
@@ -35,7 +35,7 @@ const PILLARS = [
 ];
 
 const STATS = [
-  { value: '62', label: 'Years in Fairfax' },
+  { value: '63', label: 'Years in Fairfax' },
   { value: '500+', label: 'Kids this season' },
   { value: '40+', label: 'Teams across divisions' },
   { value: '$0', label: 'If you need a scholarship' },
