@@ -25,7 +25,7 @@ import InventoryView from './InventoryView.jsx';
 import PaymentsView from './PaymentsView.jsx';
 import OfficialsView from './OfficialsView.jsx';
 import SignupsView from './SignupsView.jsx';
-import { Button } from '../shared/index.js';
+import { Button, Icon } from '../shared/index.js';
 import ErrorBoundary from '../shared/ErrorBoundary.jsx';
 
 const TEAM_NAMES_BY_SPORT = SPORTS.reduce((acc, s) => {
@@ -172,29 +172,49 @@ export default function AdminApp() {
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <TopBar title={t.title} breadcrumb={t.breadcrumb} action={topAction} onMenuToggle={() => setSidebarOpen(o => !o)} />
         {/* Team selector strip */}
-        <div style={{ borderBottom: '1px solid var(--border)', background: '#fff', padding: '8px 28px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ borderBottom: '1px solid var(--border)', background: '#fff', padding: '10px 28px', display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>Team</span>
+
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+            <span style={{
+              width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
+              background: activeTeam.color, marginRight: 8, pointerEvents: 'none',
+            }} />
+            <select
+              value={selectedTeamName}
+              onChange={e => setSelectedTeamName(e.target.value)}
+              disabled={role === 'coach' && ALL_TEAM_NAMES.length <= 1}
+              style={{
+                appearance: 'none', WebkitAppearance: 'none',
+                padding: '6px 30px 6px 4px', borderRadius: 8, border: '1.5px solid var(--border)',
+                background: 'transparent', color: 'var(--fg)',
+                fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13,
+                cursor: ALL_TEAM_NAMES.length > 1 ? 'pointer' : 'default',
+                maxWidth: 260,
+              }}
+            >
+              {Object.entries(
+                ALL_TEAM_NAMES.reduce((acc, name) => {
+                  const div = TEAMS_INFO[name]?.division || 'Other';
+                  (acc[div] ??= []).push(name);
+                  return acc;
+                }, {})
+              ).map(([division, names]) => (
+                <optgroup key={division} label={division}>
+                  {names.map(name => <option key={name} value={name}>{name}</option>)}
+                </optgroup>
+              ))}
+            </select>
+            <Icon name="chevron-down" size={14} color="var(--fg-muted)" style={{ position: 'absolute', right: 8, pointerEvents: 'none' }} />
+          </div>
+
+          <span style={{ fontSize: 12, color: 'var(--fg-muted)', flexShrink: 0 }}>{activeTeam.division}</span>
+
           {role === 'admin' && (
             <span style={{ marginLeft: 'auto', flexShrink: 0, fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: 'var(--varsity-gold)', color: 'var(--court-navy)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Admin
             </span>
           )}
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {ALL_TEAM_NAMES.map(name => {
-              const ti = TEAMS_INFO[name];
-              const active = name === selectedTeamName;
-              return (
-                <button key={name} onClick={() => setSelectedTeamName(name)} style={{
-                  padding: '4px 12px', borderRadius: 999, border: `1.5px solid ${active ? ti.color : 'var(--border)'}`,
-                  background: active ? ti.color : 'transparent', color: active ? '#fff' : 'var(--fg-muted)',
-                  fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12, cursor: 'pointer',
-                  transition: 'all 120ms',
-                }}>
-                  {name}
-                </button>
-              );
-            })}
-          </div>
         </div>
         <div style={{ padding: '24px 28px 64px', flex: 1 }}>
           <ErrorBoundary resetKey={view + selectedTeamName}>

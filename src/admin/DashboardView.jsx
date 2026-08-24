@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, Pill, Button, Icon, Eyebrow, Display, Skeleton } from '../shared/index.js';
-import { usePractices, useAnnouncements, useAttendance, nextScheduledGame, recentFinalGames } from '../shared/store.js';
+import { usePractices, useAnnouncements, useAttendance, nextScheduledGame, recentFinalGames, CLINIC_DIVISION } from '../shared/store.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 
 export default function DashboardView({ team, players, games, onGo }) {
@@ -76,8 +76,8 @@ function DashboardContent({ team, players, games, onGo }) {
         ))}
       </div>
 
-      {/* Season info card */}
-      <SeasonInfoCard isMobile={isMobile} onGo={onGo} />
+      {/* Season info card — only relevant to the Fall Skills Clinic teams */}
+      {team.division === CLINIC_DIVISION && <SeasonInfoCard isMobile={isMobile} onGo={onGo} />}
 
     <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.6fr 1fr', gap: 20 }}>
       {/* Next game hero */}
