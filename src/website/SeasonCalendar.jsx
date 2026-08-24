@@ -29,7 +29,7 @@ const EVENTS = [
   {
     date: 'Mid Nov',
     title: 'Team placements',
-    desc: 'Commissioner assigns players to balanced rosters',
+    desc: 'League office assigns players to balanced rosters',
     category: 'team',
   },
   {

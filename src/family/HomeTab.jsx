@@ -109,7 +109,7 @@ export default function HomeTab({ family, messages, onTabChange, onAnnouncements
         </button>
       )}
 
-      {/* Commissioner announcements */}
+      {/* Admin announcements */}
       {relevantAnnouncements.length > 0 && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -146,7 +146,7 @@ export default function HomeTab({ family, messages, onTabChange, onAnnouncements
                       )}
                     </div>
                     <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2, lineHeight: 1.5 }}>{a.body}</div>
-                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4, fontWeight: 600 }}>{a.date} · {a.author || 'Commissioner'}</div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4, fontWeight: 600 }}>{a.date} · {a.author || 'Admin'}</div>
                   </div>
                 </div>
               );

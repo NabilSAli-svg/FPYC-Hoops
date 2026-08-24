@@ -106,7 +106,7 @@ export default function AnnouncementsView({ players = [] }) {
       ));
     } else {
       setAnnouncements(prev => [
-        { id: makeId(), ...draft, date: TODAY, author: 'Commissioner', emailCount, smsCount },
+        { id: makeId(), ...draft, date: TODAY, author: 'Admin', emailCount, smsCount },
         ...prev,
       ]);
     }
@@ -215,7 +215,7 @@ export default function AnnouncementsView({ players = [] }) {
             {draft.title && (
               <div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Preview</div>
-                <AnnouncementCard a={{ ...draft, date: TODAY, author: 'Commissioner' }} preview />
+                <AnnouncementCard a={{ ...draft, date: TODAY, author: 'Admin' }} preview />
               </div>
             )}
 
@@ -354,7 +354,7 @@ function AnnouncementCard({ a, onEdit, onDelete, onTogglePin, preview }) {
         </div>
         {a.body && <div style={{ fontSize: 12, color: '#6B7280', marginTop: 3, lineHeight: 1.5 }}>{a.body}</div>}
         <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 5, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
-          {a.date} · {a.author || 'Commissioner'}
+          {a.date} · {a.author || 'Admin'}
           {a.emailCount > 0 && (
             <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
               <Icon name="mail" size={10} color="#9CA3AF" />

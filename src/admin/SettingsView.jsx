@@ -24,7 +24,7 @@ const NOTIF_GROUPS = [
   {
     label: 'League',
     items: [
-      { id: 'commissioner',   label: 'Commissioner messages', sub: 'From league office',         email: true,  sms: false },
+      { id: 'commissioner',   label: 'Admin messages',         sub: 'From league office',         email: true,  sms: false },
       { id: 'schedule_change',label: 'Schedule changes',      sub: 'Location / time updates',    email: true,  sms: true  },
     ],
   },

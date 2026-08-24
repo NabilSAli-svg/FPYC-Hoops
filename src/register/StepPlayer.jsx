@@ -92,7 +92,7 @@ export default function StepPlayer({ data, update, next, back, isMobile }) {
             checked={!!p.scholarship}
             onChange={v => set('scholarship', v)}
             label="Apply for a need-based scholarship"
-            sub="The Commissioner will follow up by email. No documentation required upfront."
+            sub="The league office will follow up by email. No documentation required upfront."
           />
           <CheckRow
             checked={!!p.sibling}

@@ -303,7 +303,7 @@ export function FaqContact() {
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, textTransform: 'uppercase', color: '#fff', lineHeight: 1, marginBottom: 10 }}>Express interest</div>
               <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.60)', lineHeight: 1.6, marginBottom: 0 }}>
-                Fill out the form and the Commissioner will reach out before the season starts. No commitment yet — just let us know you're interested.
+                Fill out the form and someone from the league office will reach out before the season starts. No commitment yet — just let us know you're interested.
               </p>
             </div>
 
@@ -360,7 +360,7 @@ export function FaqContact() {
               {[
                 { q: 'When does the season run?', a: 'Rec runs December through February, with practices starting in late November. Select runs October through March.' },
                 { q: 'Are there tryouts?', a: 'Rec does NOT have tryouts — every kid is placed on a team, and K-3 3v3 is grouped by age and skill rather than drafted. Select has tryouts in early September.' },
-                { q: 'How do scholarships work?', a: 'FPYC offers need-based scholarships for any family that asks. There is no separate application — just check the box during registration and the Commissioner will follow up.' },
+                { q: 'How do scholarships work?', a: 'FPYC offers need-based scholarships for any family that asks. There is no separate application — just check the box during registration and the league office will follow up.' },
                 { q: 'Do I have to volunteer?', a: 'No, but FPYC is a 100% volunteer-run nonprofit. Coaches, scorekeepers, and board members are all parents giving time. Volunteer credit reduces next-season fees.' },
                 { q: 'Where are practices held?', a: 'At Fairfax County public school gyms — usually Providence ES, Daniels Run ES, and Johnson Middle School. Specific gym is set after teams are formed.' },
                 { q: 'What\'s the refund policy?', a: 'Full refund minus a $50 admin fee through November 30. No refunds after December 1 once the season has begun.' },
