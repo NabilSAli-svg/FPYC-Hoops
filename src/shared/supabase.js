@@ -3,13 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!url || !key) {
-  // createClient() throws on a missing/empty URL, which white-screens the
-  // whole app with no clue why. Surface it instead — this is almost always a
-  // missing Vercel env var for the current environment (Production/Preview).
-  const missing = [!url && 'VITE_SUPABASE_URL', !key && 'VITE_SUPABASE_ANON_KEY'].filter(Boolean).join(', ');
-  document.body.innerHTML = `<pre style="padding:24px;font:14px monospace;color:#b91c1c;white-space:pre-wrap;">Missing environment variable(s): ${missing}\n\nThis deployment has no Supabase configuration. Check Vercel → Settings → Environment Variables for this environment.</pre>`;
-  throw new Error(`Missing Supabase env var(s): ${missing}`);
-}
+// Exported so main.jsx can check this before ever calling createRoot/render,
+// rather than relying on a throw during module evaluation (whose visibility
+// depends on import order and isn't reliable in a production build with no
+// dev error overlay).
+export const missingSupabaseEnv = [!url && 'VITE_SUPABASE_URL', !key && 'VITE_SUPABASE_ANON_KEY'].filter(Boolean);
 
-export const supabase = createClient(url, key);
+export const supabase = missingSupabaseEnv.length === 0 ? createClient(url, key) : null;
