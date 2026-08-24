@@ -52,7 +52,7 @@ function DashboardContent({ team, players, games, onGo }) {
   const wins = finalGames.filter(g => g.us > g.them).length;
   const ppg  = finalGames.length ? (finalGames.reduce((s, g) => s + g.us, 0) / finalGames.length).toFixed(1) : '—';
 
-  // Commissioner announcements (all-families or no target)
+  // Admin announcements (all-families or no target)
   const leagueAnnouncements = announcements.filter(a => a.target === 'All families').slice(0, 3);
 
   return (
@@ -185,12 +185,12 @@ function DashboardContent({ team, players, games, onGo }) {
 
       {/* League announcements */}
       <Card style={{ gridColumn: '1 / -1' }}>
-        <SectionHeader title="Commissioner announcements" link={`${announcements.length} posted`} />
+        <SectionHeader title="Admin announcements" link={`${announcements.length} posted`} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginTop: 8 }}>
           {leagueAnnouncements.length > 0 ? leagueAnnouncements.map(a => (
             <Announce
               key={a.id}
-              from="Commissioner" time={a.date}
+              from="Admin" time={a.date}
               title={a.title} body={a.body}
               warn={a.type === 'urgent'} pinned={a.pinned}
               type={a.type}
