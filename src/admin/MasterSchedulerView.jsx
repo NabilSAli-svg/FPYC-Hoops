@@ -34,6 +34,30 @@ function startOfWeek(d) {
 }
 function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
 function isoDate(d)    { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+// Map of iso date -> Set of scopes closed that day ('all' or a specific gym_name).
+// A facility is closed on a date if the map has that date AND ('all' is in
+// the set, or the facility's own name is).
+function buildBlackoutMap(blackouts) {
+  const map = {};
+  blackouts.forEach(b => {
+    (map[b.date] ??= new Set()).add(b.scope || 'all');
+  });
+  return map;
+}
+function isFacilityClosed(blackoutMap, iso, facility) {
+  const scopes = blackoutMap[iso];
+  if (!scopes) return false;
+  return scopes.has('all') || scopes.has(facility);
+}
+function isAnyClosed(blackoutMap, iso) {
+  return !!blackoutMap[iso];
+}
+// True only when every facility is closed that day (an 'all'-scope entry).
+// Gym-specific closures surface per-gym instead of painting the whole cell.
+function isAllClosed(blackoutMap, iso) {
+  return !!blackoutMap[iso]?.has('all');
+}
 function formatMonth(d){ return `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`; }
 
 function parseGameDate(g) {
@@ -86,7 +110,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
     return sorted;
   }, [games, practices, permits]);
 
-  const blackoutSet = useMemo(() => new Set(blackouts.map(b => b.date)), [blackouts]);
+  const blackoutMap = useMemo(() => buildBlackoutMap(blackouts), [blackouts]);
 
   const eventsByDateFacility = useMemo(() => {
     const map = {};
@@ -206,7 +230,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
           weekDays={weekDays} weekLabel={weekLabel}
           facilities={allFacilities}
           eventsByDateFacility={eventsByDateFacility}
-          blackoutSet={blackoutSet}
+          blackoutMap={blackoutMap}
           isDayPermitted={isDayPermitted}
           prevWeek={() => setWeekStart(d => addDays(d, -7))}
           nextWeek={() => setWeekStart(d => addDays(d,  7))}
@@ -244,7 +268,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
 
 // ── Calendar tab ──────────────────────────────────────────────────────────────
 
-function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, blackoutSet, isDayPermitted, prevWeek, nextWeek, goToday, seasonColor, onCellClick, onEventClick }) {
+function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, blackoutMap, isDayPermitted, prevWeek, nextWeek, goToday, seasonColor, onCellClick, onEventClick }) {
   const today = isoDate(new Date());
   return (
     <div>
@@ -275,7 +299,7 @@ function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, bl
               {weekDays.map(d => {
                 const iso = isoDate(d);
                 const isToday = iso === today;
-                const isBlackout = blackoutSet.has(iso);
+                const isBlackout = isAnyClosed(blackoutMap, iso);
                 return (
                   <th key={iso} style={{
                     ...thStyle, textAlign: 'center',
@@ -302,7 +326,7 @@ function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, bl
                 {weekDays.map(d => {
                   const iso = isoDate(d);
                   const permitted = isDayPermitted(fac, d);
-                  const isBlackout = blackoutSet.has(iso);
+                  const isBlackout = isFacilityClosed(blackoutMap, iso, fac);
                   const events = eventsByDateFacility[`${iso}||${fac}`] || [];
                   return (
                     <td
@@ -754,7 +778,7 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor, games = [
 
   const activeGyms = selectedGyms ? allGyms.filter(g => selectedGyms.has(g)) : allGyms;
 
-  const blackoutSet = useMemo(() => new Set(blackouts.map(b => b.date)), [blackouts]);
+  const blackoutMap = useMemo(() => buildBlackoutMap(blackouts), [blackouts]);
 
   const permitsByGym = useMemo(() => {
     const map = {};
@@ -779,9 +803,10 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor, games = [
   }, [games, practices]);
 
   function isPermitted(gymName, date) {
+    const iso = isoDate(date);
+    if (isFacilityClosed(blackoutMap, iso, gymName)) return false;
     const perms = permitsByGym[gymName] || [];
     const dayName = WEEK_DAYS[date.getDay()];
-    const iso = isoDate(date);
     return perms.some(p =>
       p.season === season &&
       (p.days || []).includes(dayName) &&
@@ -886,7 +911,7 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor, games = [
               }
               const cellDate = new Date(year, month, day);
               const iso      = isoDate(cellDate);
-              const isBlackout = blackoutSet.has(iso);
+              const isBlackout = isAllClosed(blackoutMap, iso);
               const isToday    = iso === todayIso;
 
               const permittedGyms    = activeGyms.filter(g =>  isPermitted(g, cellDate) && !isBooked(g, cellDate));
