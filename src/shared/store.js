@@ -50,14 +50,14 @@ export const TEAMS_INFO = {
 
   // ── Winter 2026–27 · Select ────────────────────────────────────────────────
   // Each grade may field a second team — add a "… 2" entry once tryouts settle.
-  '5th Boys Select':  { id: 'sel-5b', name: '5th Boys Select',  division: SELECT_DIVISION, coach: 'Coach', color: '#0369A1', sport: 'basketball' },
-  '5th Girls Select': { id: 'sel-5g', name: '5th Girls Select', division: SELECT_DIVISION, coach: 'Coach', color: '#E11D48', sport: 'basketball' },
-  '6th Boys Select':  { id: 'sel-6b', name: '6th Boys Select',  division: SELECT_DIVISION, coach: 'Coach', color: '#047857', sport: 'basketball' },
-  '6th Girls Select': { id: 'sel-6g', name: '6th Girls Select', division: SELECT_DIVISION, coach: 'Coach', color: '#A21CAF', sport: 'basketball' },
-  '7th Boys Select':  { id: 'sel-7b', name: '7th Boys Select',  division: SELECT_DIVISION, coach: 'Coach', color: '#B45309', sport: 'basketball' },
-  '7th Girls Select': { id: 'sel-7g', name: '7th Girls Select', division: SELECT_DIVISION, coach: 'Coach', color: '#BE123C', sport: 'basketball' },
-  '8th Boys Select':  { id: 'sel-8b', name: '8th Boys Select',  division: SELECT_DIVISION, coach: 'Coach', color: '#1E40AF', sport: 'basketball' },
-  '8th Girls Select': { id: 'sel-8g', name: '8th Girls Select', division: SELECT_DIVISION, coach: 'Coach', color: '#86198F', sport: 'basketball' },
+  '5th Boys Select':  { id: 'sel-5b', name: '5th Boys Select',  division: SELECT_DIVISION, coach: 'Aidris Daud',      coachEmail: 'aidris@keydmv.com',            coachPhone: '703-447-1184', color: '#0369A1', sport: 'basketball' },
+  '5th Girls Select': { id: 'sel-5g', name: '5th Girls Select', division: SELECT_DIVISION, coach: 'Fazle Taher',      coachEmail: 'coachftaher@gmail.com',        coachPhone: '703-835-1552', color: '#E11D48', sport: 'basketball' },
+  '6th Boys Select':  { id: 'sel-6b', name: '6th Boys Select',  division: SELECT_DIVISION, coach: 'Thomas Schneider', coachEmail: 'schnet@gmail.com',             coachPhone: '603-809-2483', color: '#047857', sport: 'basketball' },
+  '6th Girls Select': { id: 'sel-6g', name: '6th Girls Select', division: SELECT_DIVISION, coach: 'Michael Do',       coachEmail: 'michaeldo82@gmail.com',        coachPhone: '571-328-8126', color: '#A21CAF', sport: 'basketball' },
+  '7th Boys Select':  { id: 'sel-7b', name: '7th Boys Select',  division: SELECT_DIVISION, coach: 'Tim Anderson',     coachEmail: 'timjanderson7@gmail.com',      coachPhone: '915-474-8825', color: '#B45309', sport: 'basketball' },
+  '7th Girls Select': { id: 'sel-7g', name: '7th Girls Select', division: SELECT_DIVISION, coach: 'Earnest Williams', coachEmail: 'williamssrearnest@gmail.com',  coachPhone: '571-682-9432', color: '#BE123C', sport: 'basketball' },
+  '8th Boys Select':  { id: 'sel-8b', name: '8th Boys Select',  division: SELECT_DIVISION, coach: 'Mike Lee',         coachEmail: 'michael.lee24@gmail.com',      coachPhone: '703-965-8104', color: '#1E40AF', sport: 'basketball' },
+  '8th Girls Select': { id: 'sel-8g', name: '8th Girls Select', division: SELECT_DIVISION, coach: 'Brett Schmitz',    coachEmail: 'brettschmitz@yahoo.com',       coachPhone: '',             color: '#86198F', sport: 'basketball' },
 
   // ── Fall 2026 · Skills Clinic ──────────────────────────────────────────────
   'Training - Beginner':     { id: 'fc-beg', name: 'Training - Beginner',     division: CLINIC_DIVISION, coach: 'Coach', color: '#0D9488', sport: 'basketball', noDraft: true },
