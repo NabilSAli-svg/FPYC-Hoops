@@ -722,6 +722,15 @@ export const INITIAL_STAFF = [
   { id: 'ts_c5', name: "Coach Rene",    role: "Head Coach", program: 'Select', team: "Rene B7",     email: "", phone: "", bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'ts_c6', name: "Mike Lee",      role: "Head Coach", program: 'Select', team: "Mike Lee B8", email: "", phone: "", bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'ts_c7', name: "Coach Keun",    role: "Head Coach", program: 'Select', team: "Keun B8-2",   email: "keunyoo29@gmail.com", phone: "(702) 887-3034", bgCheckStatus: "Not Started", bgCheckDate: null },
+  // Winter 2026-27 Select coaches
+  { id: 'sel_c5b', name: "Aidris Daud",      role: "Head Coach", program: 'Select', team: "5th Boys Select",  email: "aidris@keydmv.com",           phone: "703-447-1184", bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'sel_c5g', name: "Fazle Taher",      role: "Head Coach", program: 'Select', team: "5th Girls Select", email: "coachftaher@gmail.com",       phone: "703-835-1552", bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'sel_c6b', name: "Thomas Schneider", role: "Head Coach", program: 'Select', team: "6th Boys Select",  email: "schnet@gmail.com",            phone: "603-809-2483", bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'sel_c6g', name: "Michael Do",       role: "Head Coach", program: 'Select', team: "6th Girls Select", email: "michaeldo82@gmail.com",       phone: "571-328-8126", bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'sel_c7b', name: "Tim Anderson",     role: "Head Coach", program: 'Select', team: "7th Boys Select",  email: "timjanderson7@gmail.com",     phone: "915-474-8825", bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'sel_c7g', name: "Earnest Williams", role: "Head Coach", program: 'Select', team: "7th Girls Select", email: "williamssrearnest@gmail.com", phone: "571-682-9432", bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'sel_c8b', name: "Mike Lee",         role: "Head Coach", program: 'Select', team: "8th Boys Select",  email: "michael.lee24@gmail.com",     phone: "703-965-8104", bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'sel_c8g', name: "Brett Schmitz",    role: "Head Coach", program: 'Select', team: "8th Girls Select", email: "brettschmitz@yahoo.com",      phone: "",              bgCheckStatus: "Not Started", bgCheckDate: null },
   // Training staff
   { id: 'tr1', name: "Nabil Ali",            role: "Director",  program: 'Training', team: '', email: "syednabilali@gmail.com",  phone: "(703) 994-2211", bgCheckStatus: "Expired",     bgCheckDate: null },
   { id: 'tr2', name: "Shaun Ali",            role: "Trainer",   program: 'Training', team: '', email: "shaunali34@gmail.com",    phone: "(703) 989-0847", bgCheckStatus: "Expired",     bgCheckDate: null },
