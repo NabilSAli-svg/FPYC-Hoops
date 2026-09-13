@@ -695,6 +695,39 @@ export const INITIAL_PRACTICES = [
   { id: 'fc_beg_6', date: 'Mon, Oct 26', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
   { id: 'fc_int_6', date: 'Mon, Oct 26', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
   { id: 'fc_adv_6', date: 'Mon, Oct 26', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
+
+  // ── Fall 2026 Select Open Gyms (not tryouts) — KJMS sessions default to #1 ──
+  { id: 'og_5b_0910', date: 'Thu, Sep 10', time: '7:30-9:00 PM', gym: 'Providence ES', type: 'Open Gym', rsvp: 0, notes: 'Coach Aidris Daud', team: '5th Boys Select' },
+  { id: 'og_5b_0911', date: 'Fri, Sep 11', time: '7:30-9:00 PM', gym: 'KJMS #1',       type: 'Open Gym', rsvp: 0, notes: 'Coach Aidris Daud', team: '5th Boys Select' },
+  { id: 'og_5b_0918', date: 'Fri, Sep 18', time: '7:30-9:00 PM', gym: 'KJMS #1',       type: 'Open Gym', rsvp: 0, notes: 'Coach Aidris Daud', team: '5th Boys Select' },
+  { id: 'og_5b_0924', date: 'Thu, Sep 24', time: '7:30-9:00 PM', gym: 'Providence ES', type: 'Open Gym', rsvp: 0, notes: 'Coach Aidris Daud', team: '5th Boys Select' },
+  { id: 'og_5b_0925', date: 'Fri, Sep 25', time: '7:30-9:00 PM', gym: 'KJMS #1',       type: 'Open Gym', rsvp: 0, notes: 'Coach Aidris Daud', team: '5th Boys Select' },
+
+  { id: 'og_6b_0908', date: 'Tue, Sep 8',  time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Open Gym', rsvp: 0, notes: 'Coach Thomas Schneider', team: '6th Boys Select' },
+  { id: 'og_6b_0910', date: 'Thu, Sep 10', time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Open Gym', rsvp: 0, notes: 'Coach Thomas Schneider', team: '6th Boys Select' },
+  { id: 'og_6b_0915', date: 'Tue, Sep 15', time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Open Gym', rsvp: 0, notes: 'Coach Thomas Schneider', team: '6th Boys Select' },
+  { id: 'og_6b_0917', date: 'Thu, Sep 17', time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Open Gym', rsvp: 0, notes: 'Coach Thomas Schneider', team: '6th Boys Select' },
+  { id: 'og_6b_0922', date: 'Tue, Sep 22', time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Open Gym', rsvp: 0, notes: 'Coach Thomas Schneider', team: '6th Boys Select' },
+  { id: 'og_6b_0924', date: 'Thu, Sep 24', time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Open Gym', rsvp: 0, notes: 'Coach Thomas Schneider', team: '6th Boys Select' },
+
+  { id: 'og_8b_0910', date: 'Thu, Sep 10', time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Open Gym', rsvp: 0, notes: 'Coach Mike Lee', team: '8th Boys Select' },
+  { id: 'og_8b_0914', date: 'Mon, Sep 14', time: '7:30-9:00 PM', gym: 'KJMS #1', type: 'Open Gym', rsvp: 0, notes: 'Coach Mike Lee', team: '8th Boys Select' },
+  { id: 'og_8b_0917', date: 'Thu, Sep 17', time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Open Gym', rsvp: 0, notes: 'Coach Mike Lee', team: '8th Boys Select' },
+  { id: 'og_8b_0924', date: 'Thu, Sep 24', time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Open Gym', rsvp: 0, notes: 'Coach Mike Lee', team: '8th Boys Select' },
+
+  { id: 'og_5g_0916', date: 'Wed, Sep 16', time: '6:00-7:30 PM', gym: 'Daniels Run ES', type: 'Open Gym', rsvp: 0, notes: 'Coach Fazle Taher', team: '5th Girls Select' },
+  { id: 'og_5g_0923', date: 'Wed, Sep 23', time: '6:00-7:30 PM', gym: 'Daniels Run ES', type: 'Open Gym', rsvp: 0, notes: 'Coach Fazle Taher', team: '5th Girls Select' },
+
+  { id: 'og_6g_0914', date: 'Mon, Sep 14', time: '6:00-7:30 PM', gym: 'Daniels Run ES', type: 'Open Gym', rsvp: 0, notes: 'Coach Michael Do', team: '6th Girls Select' },
+  { id: 'og_6g_0916', date: 'Wed, Sep 16', time: '6:00-7:30 PM', gym: 'Providence ES',  type: 'Open Gym', rsvp: 0, notes: 'Coach Michael Do', team: '6th Girls Select' },
+  { id: 'og_6g_0923', date: 'Wed, Sep 23', time: '6:00-7:30 PM', gym: 'Providence ES',  type: 'Open Gym', rsvp: 0, notes: 'Coach Michael Do', team: '6th Girls Select' },
+
+  { id: 'og_7g_0910', date: 'Thu, Sep 10', time: '7:30-9:00 PM', gym: 'KJMS #1',       type: 'Open Gym', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
+  { id: 'og_7g_0911', date: 'Fri, Sep 11', time: '7:30-9:00 PM', gym: 'Providence ES', type: 'Open Gym', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
+  { id: 'og_7g_0917', date: 'Thu, Sep 17', time: '7:30-9:00 PM', gym: 'KJMS #1',       type: 'Open Gym', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
+  { id: 'og_7g_0918', date: 'Fri, Sep 18', time: '7:30-9:00 PM', gym: 'Providence ES', type: 'Open Gym', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
+  { id: 'og_7g_0924', date: 'Thu, Sep 24', time: '7:30-9:00 PM', gym: 'KJMS #1',       type: 'Open Gym', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
+  { id: 'og_7g_0925', date: 'Fri, Sep 25', time: '7:30-9:00 PM', gym: 'Providence ES', type: 'Open Gym', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
 ];
 
 // No seed messages — real ones come from coaches via the portal.
