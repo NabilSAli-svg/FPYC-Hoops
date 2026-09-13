@@ -1377,7 +1377,7 @@ export const INITIAL_BUDGET = {
     { id: 'e14', account: '5093-08', label: 'Spirit Wear / Coaches',  perPlayer: null,  budget: 5000,  actual: 0, priorActual: 5952,    notes: 'Coaches gear 2027' },
     { id: 'e15', account: '5096-08', label: 'Training',               perPlayer: null,  budget: 35000, actual: 0, priorActual: 14050,   notes: 'Shaun / TYS / Evolution' },
     { id: 'e16', account: '5098-08', label: 'Trophies / Plaques',     perPlayer: null,  budget: 2000,  actual: 0, priorActual: 1836.76, notes: 'Awards' },
-    { id: 'e17', account: '5099-08', label: 'Uniforms',               perPlayer: null,  budget: 15000, actual: 0, priorActual: 16410.5, notes: 'Uniforms' },
+    { id: 'e17', account: '5099-08', label: 'Uniforms',               perPlayer: null,  budget: 15000, actual: 14617, priorActual: 16410.5, notes: 'Uniforms' },
   ],
 };
 
@@ -1396,6 +1396,18 @@ export function useBudget() {
   }
 
   return [budget, saveBudget];
+}
+
+// ── Invoices ──────────────────────────────────────────────────────────────────
+// Same access as Budget (admin / ops director only, enforced by RLS on the
+// `invoices` table and by the console only routing to this view for those roles).
+
+export const INITIAL_INVOICES = [
+  { id: 'inv-4041', vendor: '4 Leaf Graphics', invoice_no: '4041', invoice_date: '2026-09-15', amount: 14617, account: '5099-08', line_item: 'Uniforms', notes: '622 house jerseys — blank + screen print' },
+];
+
+export function useInvoices() {
+  return useSupabaseTable('invoices', INITIAL_INVOICES);
 }
 
 // ── Inventory ─────────────────────────────────────────────────────────────────

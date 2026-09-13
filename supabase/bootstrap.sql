@@ -274,6 +274,20 @@ create table if not exists public.budget (
 );
 
 
+-- ── Invoices (same access as budget) ────────────────────────────────────────
+create table if not exists public.invoices (
+  id           text primary key,
+  vendor       text not null,
+  invoice_no   text,
+  invoice_date text,
+  amount       numeric not null default 0,
+  account      text,
+  line_item    text,
+  notes        text,
+  created_at   timestamptz default now()
+);
+
+
 -- ── Coach credentials (team codes) ──────────────────────────────────────────
 create table if not exists public.coach_credentials (
   team_id    text primary key,
@@ -341,6 +355,7 @@ alter table public.practice_notes       enable row level security;
 alter table public.gym_permits          enable row level security;
 alter table public.blackout_dates       enable row level security;
 alter table public.budget               enable row level security;
+alter table public.invoices             enable row level security;
 alter table public.coach_credentials    enable row level security;
 alter table public.user_scopes          enable row level security;
 alter table public.ref_signups          enable row level security;
@@ -452,6 +467,8 @@ drop policy if exists "payments_ops_all"       on public.payments;
 drop policy if exists "gym_permits_ops"        on public.gym_permits;
 drop policy if exists "blackout_dates_ops"     on public.blackout_dates;
 create policy "budget_ops_all"     on public.budget         for all using (public.can_manage_ops());
+drop policy if exists "invoices_ops_all" on public.invoices;
+create policy "invoices_ops_all"   on public.invoices       for all using (public.can_manage_ops());
 create policy "payments_ops_all"   on public.payments       for all using (public.can_manage_ops());
 create policy "gym_permits_ops"    on public.gym_permits    for all using (public.can_manage_ops());
 create policy "blackout_dates_ops" on public.blackout_dates for all using (public.can_manage_ops());
