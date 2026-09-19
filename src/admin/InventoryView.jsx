@@ -52,6 +52,14 @@ const CATEGORIES = [
     unit: 'kit',
   },
   {
+    id: 'icePacks',
+    label: 'Ice Packs',
+    icon: 'snowflake',
+    color: '#0891B2',
+    sizes: null,
+    unit: 'pack',
+  },
+  {
     id: 'training',
     label: 'Training Equipment',
     icon: 'dumbbell',
