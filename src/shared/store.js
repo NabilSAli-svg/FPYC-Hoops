@@ -674,7 +674,9 @@ export const INITIAL_PRACTICES = [
   { id: 'ts_eg7_24',  date: 'Fri, Aug 7',  time: '7:30-9:00 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: '', team: 'Earnest G7' },
 
   // ── Fall 2026 Skills Clinic ───────────────────────────────────────────────
-  // Mondays at Providence ES except Sep 21 (Daniels Run — no Providence permit).
+  // Mondays at Providence ES through Sep 21 (that session moved to Daniels Run
+  // ES — no Providence permit Sep 21). Moved to Tuesdays from Sep 29 onward —
+  // Monday had no fully-open slot at Providence ES, Tuesday did.
   // Beginner 6-7, Intermediate 7-8, Advanced 8-9. No session Oct 12.
 
   { id: 'fc_beg_1', date: 'Mon, Sep 14', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
@@ -683,18 +685,18 @@ export const INITIAL_PRACTICES = [
   { id: 'fc_beg_2', date: 'Mon, Sep 21', time: '6:00-7:00 PM', gym: 'Daniels Run ES', type: 'Clinic', rsvp: 0, notes: 'At Daniels Run ES this week — no Providence permit Sep 21', team: 'Training - Beginner' },
   { id: 'fc_int_2', date: 'Mon, Sep 21', time: '7:00-8:00 PM', gym: 'Daniels Run ES', type: 'Clinic', rsvp: 0, notes: 'At Daniels Run ES this week — no Providence permit Sep 21', team: 'Training - Intermediate' },
   { id: 'fc_adv_2', date: 'Mon, Sep 21', time: '8:00-9:00 PM', gym: 'Daniels Run ES', type: 'Clinic', rsvp: 0, notes: 'At Daniels Run ES this week — no Providence permit Sep 21', team: 'Training - Advanced' },
-  { id: 'fc_beg_3', date: 'Mon, Sep 28', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
-  { id: 'fc_int_3', date: 'Mon, Sep 28', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
-  { id: 'fc_adv_3', date: 'Mon, Sep 28', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
-  { id: 'fc_beg_4', date: 'Mon, Oct 5', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
-  { id: 'fc_int_4', date: 'Mon, Oct 5', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
-  { id: 'fc_adv_4', date: 'Mon, Oct 5', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
-  { id: 'fc_beg_5', date: 'Mon, Oct 19', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
-  { id: 'fc_int_5', date: 'Mon, Oct 19', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
-  { id: 'fc_adv_5', date: 'Mon, Oct 19', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
-  { id: 'fc_beg_6', date: 'Mon, Oct 26', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
-  { id: 'fc_int_6', date: 'Mon, Oct 26', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
-  { id: 'fc_adv_6', date: 'Mon, Oct 26', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
+  { id: 'fc_beg_3', date: 'Tue, Sep 29', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Moved to Tuesdays', team: 'Training - Beginner' },
+  { id: 'fc_int_3', date: 'Tue, Sep 29', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Moved to Tuesdays', team: 'Training - Intermediate' },
+  { id: 'fc_adv_3', date: 'Tue, Sep 29', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Moved to Tuesdays', team: 'Training - Advanced' },
+  { id: 'fc_beg_4', date: 'Tue, Oct 6', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
+  { id: 'fc_int_4', date: 'Tue, Oct 6', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
+  { id: 'fc_adv_4', date: 'Tue, Oct 6', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
+  { id: 'fc_beg_5', date: 'Tue, Oct 20', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
+  { id: 'fc_int_5', date: 'Tue, Oct 20', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
+  { id: 'fc_adv_5', date: 'Tue, Oct 20', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
+  { id: 'fc_beg_6', date: 'Tue, Oct 27', time: '6:00-7:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Beginner' },
+  { id: 'fc_int_6', date: 'Tue, Oct 27', time: '7:00-8:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Intermediate' },
+  { id: 'fc_adv_6', date: 'Tue, Oct 27', time: '8:00-9:00 PM', gym: 'Providence ES', type: 'Clinic', rsvp: 0, notes: 'Gym subject to change', team: 'Training - Advanced' },
 
   // ── Fall 2026 Select Open Gyms (not tryouts) — KJMS sessions default to #1 ──
   { id: 'og_5b_0910', date: 'Thu, Sep 10', time: '7:30-9:00 PM', gym: 'Providence ES', type: 'Open Gym', rsvp: 0, notes: 'Coach Aidris Daud', team: '5th Boys Select' },
@@ -1402,7 +1404,7 @@ export const INITIAL_BUDGET = {
     { id: 'e9',  account: '5071-08', label: 'Ins / D&O',             perPlayer: 0.39,  budget: null,  actual: 0, priorActual: 269.88,  notes: '' },
     { id: 'e2',  account: '5051-08', label: 'Annual Reception',       perPlayer: null,  budget: 500,   actual: 0, priorActual: 470,     notes: 'End of year food/bar tab for coaches' },
     { id: 'e4',  account: '5059-08', label: 'County / City Fees',     perPlayer: null,  budget: 15000, actual: 0, priorActual: 10934,   notes: 'Gym fees' },
-    { id: 'e6',  account: '5062-08', label: 'Equipment',              perPlayer: null,  budget: 5000,  actual: 0, priorActual: 4344.21, notes: 'Basketballs and other equipment' },
+    { id: 'e6',  account: '5062-08', label: 'Equipment',              perPlayer: null,  budget: 5000,  actual: 675, priorActual: 4344.21, notes: 'Basketballs and other equipment' },
     { id: 'e10', account: '5074-08', label: 'Miscellaneous',          perPlayer: null,  budget: 8000,  actual: 0, priorActual: 8318,    notes: 'Travel league FCYBL fees' },
     { id: 'e11', account: '5084-08', label: 'Referees / Umpires',     perPlayer: null,  budget: 28000, actual: 0, priorActual: 25097.5, notes: 'Refs' },
     { id: 'e12', account: '5086-08', label: 'Refunds',                perPlayer: null,  budget: 600,   actual: 0, priorActual: 523.33,  notes: 'Post-season refunds' },
@@ -1437,6 +1439,7 @@ export function useBudget() {
 
 export const INITIAL_INVOICES = [
   { id: 'inv-4041', vendor: '4 Leaf Graphics', invoice_no: '4041', invoice_date: '2026-09-15', amount: 14617, account: '5099-08', line_item: 'Uniforms', notes: '622 house jerseys — blank + screen print' },
+  { id: 'inv-17936', vendor: 'Concept Marketing, Inc.', invoice_no: '17936', invoice_date: '2026-09-17', amount: 675, account: '5062-08', line_item: 'Equipment', notes: '100 FPYC 2026/2027 Basketball Sign Up yard signs, printed 2 sides + metal H-stakes' },
 ];
 
 export function useInvoices() {

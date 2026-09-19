@@ -81,7 +81,7 @@ export default function Hero({ onRegister }) {
             Fall Skills Clinic
           </div>
           <div style={{ fontSize: 14, color: 'var(--fg-soft)', lineHeight: 1.55, marginBottom: 18 }}>
-            6 Mondays · Sept 14 – Oct 26<br />
+            6 sessions · Sept 14 – Oct 27<br />
             Beginner, Intermediate &amp; Advanced groups
           </div>
           <div style={{ background: 'var(--bone)', border: '1px solid var(--border)', borderRadius: 8, padding: 14, marginBottom: 14 }}>

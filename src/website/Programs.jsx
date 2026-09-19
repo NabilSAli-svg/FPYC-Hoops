@@ -29,8 +29,8 @@ export default function Programs() {
           title="Skills Clinic"
           grades="1st grade – high school"
           price="$200"
-          desc="Six Monday-evening development sessions grouped by ability. Led by Nabil and Shaun Ali with local HS coaches and standout players."
-          bullets={['6 Mondays, Sep 14 – Oct 26', 'Beginner 6–7 · Intermediate 7–8 · Advanced 8–9', 'Providence ES · gym may change']}
+          desc="Six evening development sessions grouped by ability. Led by Nabil and Shaun Ali with local HS coaches and standout players."
+          bullets={['6 sessions, Sep 14 – Oct 27 · Mondays through Sep 21, then Tuesdays', 'Beginner 6–7 · Intermediate 7–8 · Advanced 8–9', 'Providence ES · gym may change']}
           contactEmail="shaunali34@gmail.com"
         />
       </div>
