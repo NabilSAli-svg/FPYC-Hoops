@@ -1442,6 +1442,7 @@ const INITIAL_INVENTORY = {
   clocks:      { owned: 0, checkedOut: 0 },
   scorebooks:  { owned: 0, checkedOut: 0 },
   firstAid:    { owned: 0, checkedOut: 0 },
+  icePacks:    { owned: 0, checkedOut: 0 },
   training:    { items: [] },
 };
 
