@@ -99,35 +99,39 @@ export default function MasterSchedulerView({ role, coachTeam }) {
   // Visible teams: coaches only see their own
   const visibleTeams = isCoach && coachTeam ? [coachTeam] : ALL_TEAMS;
 
+  // Basketball only — this view tracks gym permits, not soccer fields/parks etc.
+  const basketballGames     = useMemo(() => games.filter(g => sportForTeam(g.team) === 'basketball'), [games]);
+  const basketballPractices = useMemo(() => practices.filter(p => sportForTeam(p.team) === 'basketball'), [practices]);
+
   // All unique facilities
   const allFacilities = useMemo(() => {
     const names = new Set();
-    games.forEach(g    => { if (g.location && g.location !== 'TBD') names.add(g.location); });
-    practices.forEach(p=> { if (p.gym) names.add(p.gym); });
+    basketballGames.forEach(g    => { if (g.location && g.location !== 'TBD') names.add(g.location); });
+    basketballPractices.forEach(p=> { if (p.gym) names.add(p.gym); });
     permits.forEach(p  => { if (p.gym_name) names.add(p.gym_name); });
     const sorted = [...names].sort();
     if (sorted.length === 0) sorted.push('TBD / Unassigned');
     return sorted;
-  }, [games, practices, permits]);
+  }, [basketballGames, basketballPractices, permits]);
 
   const blackoutMap = useMemo(() => buildBlackoutMap(blackouts), [blackouts]);
 
   const eventsByDateFacility = useMemo(() => {
     const map = {};
     const add = (iso, fac, ev) => { const k = `${iso}||${fac}`; (map[k] = map[k] || []).push(ev); };
-    games.forEach(g => {
+    basketballGames.forEach(g => {
       if (!visibleTeams.includes(g.team)) return;
       const d = parseGameDate(g); if (!d) return;
       add(isoDate(d), (g.location && g.location !== 'TBD') ? g.location : 'TBD / Unassigned',
-        { ...g, _kind: 'game', _sport: sportForTeam(g.team) });
+        { ...g, _kind: 'game', _sport: 'basketball' });
     });
-    practices.forEach(p => {
+    basketballPractices.forEach(p => {
       if (!visibleTeams.includes(p.team)) return;
       const d = parsePracticeDate(p); if (!d) return;
-      add(isoDate(d), p.gym || 'TBD / Unassigned', { ...p, _kind: 'practice', _sport: sportForTeam(p.team) });
+      add(isoDate(d), p.gym || 'TBD / Unassigned', { ...p, _kind: 'practice', _sport: 'basketball' });
     });
     return map;
-  }, [games, practices, visibleTeams]);
+  }, [basketballGames, basketballPractices, visibleTeams]);
 
   const permitsByGym = useMemo(() => {
     const map = {};
@@ -248,7 +252,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
         <BlackoutsTab blackouts={blackouts} setBlackouts={setBlackouts} seasonColor={activeSeason.color} />
       )}
       {tab === 'availability' && (
-        <GymAvailabilityTab permits={permits} blackouts={blackouts} season={season} seasonColor={activeSeason.color} games={games} practices={practices} />
+        <GymAvailabilityTab permits={permits} blackouts={blackouts} season={season} seasonColor={activeSeason.color} games={basketballGames} practices={basketballPractices} />
       )}
 
       {modal && (
