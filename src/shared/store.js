@@ -1440,6 +1440,8 @@ const INITIAL_INVENTORY = {
   pullovers:   {},
   basketballs: {},
   clocks:      { owned: 0, checkedOut: 0 },
+  scorebooks:  { owned: 0, checkedOut: 0 },
+  firstAid:    { owned: 0, checkedOut: 0 },
   training:    { items: [] },
 };
 
