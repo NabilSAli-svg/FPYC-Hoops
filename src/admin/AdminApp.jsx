@@ -33,6 +33,13 @@ const TEAM_NAMES_BY_SPORT = SPORTS.reduce((acc, s) => {
   return acc;
 }, {});
 
+// The team selector only makes sense on per-team pages — Dashboard through
+// Stats in the sidebar. League-wide views (Scheduler, Budget, Settings, etc.)
+// aren't scoped to a single team.
+const TEAM_SCOPED_VIEWS = new Set([
+  'dashboard', 'roster', 'schedule', 'lineup', 'attendance', 'messages', 'announcements', 'evaluations', 'stats',
+]);
+
 export default function AdminApp() {
   const isMobile = useIsMobile();
   const [authReady, setAuthReady] = useState(false);
@@ -171,7 +178,8 @@ export default function AdminApp() {
       />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <TopBar title={t.title} breadcrumb={t.breadcrumb} action={topAction} onMenuToggle={() => setSidebarOpen(o => !o)} />
-        {/* Team selector strip */}
+        {/* Team selector strip — only on per-team pages */}
+        {TEAM_SCOPED_VIEWS.has(view) && (
         <div style={{ borderBottom: '1px solid var(--border)', background: '#fff', padding: '10px 28px', display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>Team</span>
 
@@ -216,6 +224,7 @@ export default function AdminApp() {
             </span>
           )}
         </div>
+        )}
         <div style={{ padding: '24px 28px 64px', flex: 1 }}>
           <ErrorBoundary resetKey={view + selectedTeamName}>
           {view === 'dashboard'   && <DashboardView team={TEAM} players={teamPlayers} games={teamGames} onGo={handleGo} />}
