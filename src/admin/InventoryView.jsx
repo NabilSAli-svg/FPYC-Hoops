@@ -36,6 +36,22 @@ const CATEGORIES = [
     unit: 'clock',
   },
   {
+    id: 'scorebooks',
+    label: 'Score Books',
+    icon: 'book-open',
+    color: '#0369A1',
+    sizes: null,
+    unit: 'book',
+  },
+  {
+    id: 'firstAid',
+    label: 'First Aid Kits',
+    icon: 'cross',
+    color: '#DC2626',
+    sizes: null,
+    unit: 'kit',
+  },
+  {
     id: 'training',
     label: 'Training Equipment',
     icon: 'dumbbell',
