@@ -5,7 +5,7 @@ const EVENTS = [
   {
     date: 'Sept 14',
     title: 'Fall Skills Clinic begins',
-    desc: 'Mondays at Providence ES · Beginner 6–7, Intermediate 7–8, Advanced 8–9',
+    desc: 'Providence ES · Mondays through Sep 21, then Tuesdays · Beginner 6–7, Intermediate 7–8, Advanced 8–9',
     category: 'play',
   },
   {
@@ -15,9 +15,9 @@ const EVENTS = [
     category: 'reg',
   },
   {
-    date: 'Oct 26',
+    date: 'Oct 27',
     title: 'Fall Skills Clinic ends',
-    desc: 'Six sessions complete · no clinic Oct 12 (Columbus Day)',
+    desc: 'Six sessions complete · no clinic Oct 12/13',
     category: 'play',
   },
   {

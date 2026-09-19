@@ -211,11 +211,11 @@ function DashboardContent({ team, players, games, onGo }) {
 
 const CLINIC_SCHEDULE = [
   {
-    day: 'Monday Nights · Skills Clinic', icon: 'calendar',
+    day: 'Skills Clinic · Mon through Sep 21, then Tue', icon: 'calendar',
     divisions: [
-      { name: 'Beginner',     time: '6:00–7:00 PM', dates: 'Sep 14, 21, 28 · Oct 5, 19, 26' },
-      { name: 'Intermediate', time: '7:00–8:00 PM', dates: 'Sep 14, 21, 28 · Oct 5, 19, 26' },
-      { name: 'Advanced',     time: '8:00–9:00 PM', dates: 'Sep 14, 21, 28 · Oct 5, 19, 26' },
+      { name: 'Beginner',     time: '6:00–7:00 PM', dates: 'Sep 14, 21 · Sep 29 · Oct 6, 20, 27' },
+      { name: 'Intermediate', time: '7:00–8:00 PM', dates: 'Sep 14, 21 · Sep 29 · Oct 6, 20, 27' },
+      { name: 'Advanced',     time: '8:00–9:00 PM', dates: 'Sep 14, 21 · Sep 29 · Oct 6, 20, 27' },
     ],
   },
   {
@@ -231,8 +231,9 @@ const FALL_NOTES = [
   { week: '!', name: 'Wednesdays at Johnson MS', desc: 'Held for volleyball Sep 16 – Nov 18. Basketball uses Providence ES and Daniels Run ES those nights.' },
   { week: '1', name: 'Clinic starts Mon, Sep 14', desc: 'Providence ES. Three levels back-to-back, 6–9 PM.' },
   { week: '2', name: 'Sep 21 moves to Daniels Run ES', desc: 'No Providence permit that Monday — all three levels relocate for the week.' },
-  { week: '—', name: 'No clinic Mon, Oct 12', desc: 'Columbus Day. Season resumes Oct 19.' },
-  { week: '6', name: 'Clinic ends Mon, Oct 26', desc: 'Six sessions total.' },
+  { week: '3', name: 'Moves to Tuesdays from Sep 29', desc: 'Monday had no fully-open Providence ES slot going forward — Tuesday did.' },
+  { week: '—', name: 'No clinic Oct 12/13', desc: 'Columbus Day week. Season resumes Tue, Oct 20.' },
+  { week: '6', name: 'Clinic ends Tue, Oct 27', desc: 'Six sessions total.' },
   { week: '×', name: 'Facility closures', desc: 'Labor Day (Sep 7), Fall Festival (Oct 10), Thanksgiving (Nov 26–27).' },
 ];
 
@@ -253,7 +254,7 @@ function SeasonInfoCard({ isMobile, onGo }) {
           Fall 2026 — Season Guide
         </span>
         <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600, marginRight: 6 }}>
-          Clinic Mondays @ Providence ES
+          Clinic @ Providence ES
         </span>
         <Icon name={open ? 'chevron-up' : 'chevron-down'} size={16} color="rgba(255,255,255,0.6)" />
       </button>

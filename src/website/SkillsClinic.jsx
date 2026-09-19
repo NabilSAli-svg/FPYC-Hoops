@@ -65,7 +65,7 @@ export default function SkillsClinic() {
               )}
               <div style={{ marginTop: 'auto', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 7 }}>
                 <Row icon="clock" text={l.time} />
-                <Row icon="calendar" text="6 Mondays · Sep 14 – Oct 26" />
+                <Row icon="calendar" text="6 sessions · Sep 14 – Oct 27 · Mon through Sep 21, then Tue" />
                 <Row icon="users" text="25 spots" />
               </div>
             </div>
