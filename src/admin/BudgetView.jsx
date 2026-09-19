@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { Card, Icon, Display } from '../shared/index.js';
-import { useBudget } from '../shared/store.js';
+import { Card, Icon, Display, Button, Eyebrow } from '../shared/index.js';
+import { useBudget, useInvoices } from '../shared/store.js';
 
 const fmt = n => '$' + Math.round(n).toLocaleString();
 const pct = (a, b) => b === 0 ? 0 : Math.min(100, Math.round((a / b) * 100));
@@ -186,6 +186,131 @@ function SummaryCard({ label, value, accent, sub }) {
   );
 }
 
+const EMPTY_INVOICE = { vendor: '', invoice_no: '', invoice_date: '', amount: '', account: '', notes: '' };
+
+function InvoicesTab({ expenses }) {
+  const [invoices, setInvoices] = useInvoices();
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(EMPTY_INVOICE);
+  const [editingId, setEditingId] = useState(null);
+
+  const accountLabel = acct => expenses.find(e => e.account === acct)?.label || acct;
+  const sorted = [...invoices].sort((a, b) => (b.invoice_date || '').localeCompare(a.invoice_date || ''));
+  const total = invoices.reduce((s, inv) => s + (Number(inv.amount) || 0), 0);
+
+  function openAdd() { setForm(EMPTY_INVOICE); setEditingId(null); setShowForm(true); }
+  function openEdit(inv) {
+    setForm({ vendor: inv.vendor, invoice_no: inv.invoice_no, invoice_date: inv.invoice_date, amount: inv.amount, account: inv.account, notes: inv.notes || '' });
+    setEditingId(inv.id);
+    setShowForm(true);
+  }
+  function save() {
+    if (!form.vendor.trim() || !form.account) return;
+    const line_item = accountLabel(form.account);
+    if (editingId) {
+      setInvoices(prev => prev.map(inv => inv.id === editingId ? { ...inv, ...form, amount: Number(form.amount) || 0, line_item } : inv));
+    } else {
+      const id = 'inv-' + Date.now();
+      setInvoices(prev => [...prev, { id, ...form, amount: Number(form.amount) || 0, line_item }]);
+    }
+    setShowForm(false);
+  }
+  function remove(id) { setInvoices(prev => prev.filter(inv => inv.id !== id)); }
+
+  const th = { padding: '10px 12px', textAlign: 'left', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--fg-muted)', background: 'var(--bone)', borderBottom: '1px solid var(--border)' };
+  const td = { padding: '10px 12px', borderBottom: '1px solid var(--border)', fontSize: 13, verticalAlign: 'middle' };
+  const inputStyle = { padding: '8px 10px', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13, fontFamily: 'var(--font-body)', width: '100%', boxSizing: 'border-box' };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ fontSize: 12, color: 'var(--fg-muted)' }}>
+        Visible only to Admin and Ops Director — same access as the rest of Budget. Recording an invoice here does not
+        automatically change a line item's Actual spend; update that on the Expenses tab.
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: 13, color: 'var(--fg-muted)' }}>{invoices.length} invoice{invoices.length === 1 ? '' : 's'} · {fmt(total)} total</div>
+        <Button kind="gold" icon="plus" onClick={openAdd}>Add invoice</Button>
+      </div>
+
+      {showForm && (
+        <Card>
+          <Eyebrow>{editingId ? 'Edit invoice' : 'Add invoice'}</Eyebrow>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginTop: 12 }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 12, fontWeight: 600, color: 'var(--fg-muted)' }}>
+              Vendor
+              <input style={inputStyle} value={form.vendor} onChange={e => setForm({ ...form, vendor: e.target.value })} />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 12, fontWeight: 600, color: 'var(--fg-muted)' }}>
+              Invoice #
+              <input style={inputStyle} value={form.invoice_no} onChange={e => setForm({ ...form, invoice_no: e.target.value })} />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 12, fontWeight: 600, color: 'var(--fg-muted)' }}>
+              Date
+              <input type="date" style={inputStyle} value={form.invoice_date} onChange={e => setForm({ ...form, invoice_date: e.target.value })} />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 12, fontWeight: 600, color: 'var(--fg-muted)' }}>
+              Amount
+              <input type="number" style={inputStyle} value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 12, fontWeight: 600, color: 'var(--fg-muted)' }}>
+              Budget line item
+              <select style={inputStyle} value={form.account} onChange={e => setForm({ ...form, account: e.target.value })}>
+                <option value="">— select —</option>
+                {expenses.map(e => <option key={e.account} value={e.account}>{e.label}</option>)}
+              </select>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 12, fontWeight: 600, color: 'var(--fg-muted)', gridColumn: '1 / -1' }}>
+              Notes
+              <input style={inputStyle} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
+            </label>
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 16, justifyContent: 'flex-end' }}>
+            <Button kind="quiet" onClick={() => setShowForm(false)}>Cancel</Button>
+            <Button kind="gold" onClick={save}>{editingId ? 'Save changes' : 'Add invoice'}</Button>
+          </div>
+        </Card>
+      )}
+
+      <Card padding={0}>
+        {sorted.length === 0 ? (
+          <div style={{ padding: 24, textAlign: 'center', color: 'var(--fg-muted)', fontSize: 13 }}>No invoices recorded yet.</div>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead><tr>
+              <th style={th}>Date</th>
+              <th style={th}>Vendor</th>
+              <th style={th}>Invoice #</th>
+              <th style={th}>Budget line item</th>
+              <th style={th}>Amount</th>
+              <th style={th}>Notes</th>
+              <th style={th} />
+            </tr></thead>
+            <tbody>
+              {sorted.map((inv, i) => (
+                <tr key={inv.id} style={{ background: i % 2 === 0 ? '#fff' : 'var(--bone)' }}>
+                  <td style={td}>{inv.invoice_date}</td>
+                  <td style={{ ...td, fontWeight: 600 }}>{inv.vendor}</td>
+                  <td style={td}>{inv.invoice_no}</td>
+                  <td style={td}>{accountLabel(inv.account)}</td>
+                  <td style={{ ...td, fontWeight: 700 }}>{fmt(inv.amount)}</td>
+                  <td style={{ ...td, color: 'var(--fg-muted)' }}>{inv.notes}</td>
+                  <td style={td}>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <Button kind="quiet" size="sm" icon="edit-2" onClick={() => openEdit(inv)} />
+                      <Button kind="quiet" size="sm" icon="trash-2" onClick={() => remove(inv.id)} />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 export default function BudgetView() {
   const [budget, saveBudget] = useBudget();
   const [tab, setTab] = useState('expenses');
@@ -255,6 +380,7 @@ export default function BudgetView() {
       <div style={{ borderBottom: '1px solid var(--border)' }}>
         <button style={tabStyle('revenue')} onClick={() => setTab('revenue')}>Revenue</button>
         <button style={tabStyle('expenses')} onClick={() => setTab('expenses')}>Expenses</button>
+        <button style={tabStyle('invoices')} onClick={() => setTab('invoices')}>Invoices</button>
       </div>
 
       {tab === 'revenue' && (
@@ -413,6 +539,8 @@ export default function BudgetView() {
           </table>
         </Card>
       )}
+
+      {tab === 'invoices' && <InvoicesTab expenses={budget.expenses} />}
 
       <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', fontSize: 12, color: 'var(--fg-muted)', padding: '4px 0' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 14, height: 14, background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 3, display: 'inline-block' }} />Prior year actual (locked)</span>
