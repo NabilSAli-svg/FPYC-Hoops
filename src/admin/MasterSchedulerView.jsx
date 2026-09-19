@@ -139,6 +139,10 @@ export default function MasterSchedulerView({ role, coachTeam }) {
     return map;
   }, [permits]);
 
+  // Only gyms actually covered by a permit — keeps new events from drifting
+  // into typo'd or one-off location names.
+  const permitGyms = useMemo(() => [...new Set(permits.map(p => p.gym_name).filter(Boolean))].sort(), [permits]);
+
   function isDayPermitted(gymName, date) {
     const perms = permitsByGym[gymName] || [];
     const dayName = WEEK_DAYS[date.getDay()];
@@ -262,7 +266,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
           onSave={handleSaveEvent}
           onDelete={handleDeleteEvent}
           visibleTeams={visibleTeams}
-          facilities={allFacilities}
+          facilities={permitGyms}
           seasonColor={activeSeason.color}
         />
       )}
@@ -491,10 +495,13 @@ function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, facilities
             <MField label="Time (e.g. 6:30 PM)"><input value={time} onChange={e => setTime(e.target.value)} placeholder="6:30 PM – 7:30 PM" style={inputStyle} /></MField>
           </div>
 
-          {/* Location */}
+          {/* Location — restricted to gyms with an actual permit */}
           <MField label="Facility / Location">
-            <input list="fac-list-modal" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Providence ES" style={inputStyle} />
-            <datalist id="fac-list-modal">{facilities.map(f => <option key={f} value={f} />)}</datalist>
+            <select value={location} onChange={e => setLocation(e.target.value)} style={inputStyle}>
+              <option value="">Select facility…</option>
+              {facilities.map(f => <option key={f} value={f}>{f}</option>)}
+              {location && !facilities.includes(location) && <option value={location}>{location} (no permit on file)</option>}
+            </select>
           </MField>
 
           {/* Game-only fields */}
