@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 import { csvDownload } from '../shared/csvDownload.js';
-import { useGames, useOfficialAssignments, useOfficials } from '../shared/store.js';
+import { useGames, useOfficialAssignments, useOfficials, TEAMS_INFO } from '../shared/store.js';
 
 function exportPaymentsCSV(refs) {
   const headers = ['Name', 'Certification', 'Phone', 'Email', 'Games', 'Rate/Game', 'Total Owed', 'Paid'];
@@ -39,12 +39,14 @@ export default function OfficialsView() {
   const [selectedRefs, setSelectedRefs] = useState([]);
   const [toast, setToast] = useState('');
 
-  // Build assignment view from real games + persistent assignment map
+  // Build assignment view from real games + persistent assignment map.
+  // Officiating (VBOS certs/rates) only applies to basketball games.
   const assignments = games
-    .filter(g => g.status !== 'final')
+    .filter(g => g.status !== 'final' && (TEAMS_INFO[g.team]?.sport ?? 'basketball') === 'basketball')
     .map(g => {
       const saved = assignmentMap[g.id];
-      const label = g.home ? `Hawks vs. ${g.opponent}` : `Hawks @ ${g.opponent}`;
+      const teamLabel = g.team || 'FPYC';
+      const label = g.home ? `${teamLabel} vs. ${g.opponent}` : `${teamLabel} @ ${g.opponent}`;
       const refs  = saved?.refs ?? ['TBD', 'TBD'];
       const status = saved?.status ?? 'unassigned';
       return { id: g.id, game: label, day: g.day, time: g.time, location: g.location, home: !!g.home, refs, status };
