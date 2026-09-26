@@ -40,9 +40,13 @@ export default function OfficialsView() {
   const [toast, setToast] = useState('');
 
   // Build assignment view from real games + persistent assignment map.
-  // Officiating (VBOS certs/rates) only applies to basketball games.
+  // Officiating (VBOS certs/rates) only applies to basketball games, and
+  // archived divisions (e.g. the self-officiated 3v3 Summer Cup) never need refs.
   const assignments = games
-    .filter(g => g.status !== 'final' && (TEAMS_INFO[g.team]?.sport ?? 'basketball') === 'basketball')
+    .filter(g => {
+      const teamInfo = TEAMS_INFO[g.team];
+      return g.status !== 'final' && (teamInfo?.sport ?? 'basketball') === 'basketball' && !teamInfo?.archived;
+    })
     .map(g => {
       const saved = assignmentMap[g.id];
       const teamLabel = g.team || 'FPYC';
