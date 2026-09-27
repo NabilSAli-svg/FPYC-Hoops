@@ -400,7 +400,7 @@ function LegendItem({ color, border, label }) {
 
 // ── Event modal (create / edit) ───────────────────────────────────────────────
 
-const PRACTICE_TYPES = ['Regular', 'Player Development', 'Scrimmage', 'Walk-through', 'Conditioning', 'Skills Clinic', 'Open Gym'];
+const PRACTICE_TYPES = ['Regular', 'Player Development', 'Scrimmage', 'Walk-through', 'Conditioning', 'Skills Clinic', 'Open Gym', 'Tryout'];
 
 function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, facilities, seasonColor }) {
   const isEdit = modal.mode === 'edit';

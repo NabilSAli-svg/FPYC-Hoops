@@ -730,6 +730,45 @@ export const INITIAL_PRACTICES = [
   { id: 'og_7g_0918', date: 'Fri, Sep 18', time: '7:30-9:00 PM', gym: 'Providence ES', type: 'Open Gym', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
   { id: 'og_7g_0924', date: 'Thu, Sep 24', time: '7:30-9:00 PM', gym: 'KJMS #1',       type: 'Open Gym', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
   { id: 'og_7g_0925', date: 'Fri, Sep 25', time: '7:30-9:00 PM', gym: 'Providence ES', type: 'Open Gym', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
+
+  // ── Winter 2026-27 Select Tryouts — KJMS sessions default to #1 ─────────────
+  { id: 'tr_5b_1001', date: 'Thu, Oct 1',  time: '7:30-9:00 PM', gym: 'Providence ES', type: 'Tryout', rsvp: 0, notes: 'Coach Aidris Daud', team: '5th Boys Select' },
+  { id: 'tr_5b_1005', date: 'Mon, Oct 5',  time: '6:00-7:30 PM', gym: 'KJMS #1',       type: 'Tryout', rsvp: 0, notes: 'Coach Aidris Daud', team: '5th Boys Select' },
+  { id: 'tr_5b_1006', date: 'Tue, Oct 6',  time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Tryout', rsvp: 0, notes: 'Coach Aidris Daud', team: '5th Boys Select' },
+  { id: 'tr_5b_1008', date: 'Thu, Oct 8',  time: '7:30-9:00 PM', gym: 'Providence ES', type: 'Tryout', rsvp: 0, notes: 'Coach Aidris Daud', team: '5th Boys Select' },
+
+  { id: 'tr_6b_1001', date: 'Thu, Oct 1',  time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Tryout', rsvp: 0, notes: 'Coach Thomas Schneider', team: '6th Boys Select' },
+  { id: 'tr_6b_1006', date: 'Tue, Oct 6',  time: '6:00-7:30 PM', gym: 'KJMS #1',       type: 'Tryout', rsvp: 0, notes: 'Coach Thomas Schneider', team: '6th Boys Select' },
+  { id: 'tr_6b_1008', date: 'Thu, Oct 8',  time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Tryout', rsvp: 0, notes: 'Coach Thomas Schneider', team: '6th Boys Select' },
+
+  { id: 'tr_7b_1002', date: 'Fri, Oct 2',  time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Tryout', rsvp: 0, notes: 'Coach Tim Anderson', team: '7th Boys Select' },
+  { id: 'tr_7b_1005', date: 'Mon, Oct 5',  time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Tryout', rsvp: 0, notes: 'Coach Tim Anderson', team: '7th Boys Select' },
+  { id: 'tr_7b_1009', date: 'Fri, Oct 9',  time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Tryout', rsvp: 0, notes: 'Coach Tim Anderson', team: '7th Boys Select' },
+  { id: 'tr_7b_1012', date: 'Mon, Oct 12', time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Tryout', rsvp: 0, notes: 'Coach Tim Anderson', team: '7th Boys Select' },
+
+  { id: 'tr_8b_1001', date: 'Thu, Oct 1',  time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Tryout', rsvp: 0, notes: 'Coach Mike Lee / Kuen Yoo', team: '8th Boys Select' },
+  { id: 'tr_8b_1005', date: 'Mon, Oct 5',  time: '7:30-9:00 PM', gym: 'KJMS #1', type: 'Tryout', rsvp: 0, notes: 'Coach Mike Lee / Kuen Yoo', team: '8th Boys Select' },
+  { id: 'tr_8b_1008', date: 'Thu, Oct 8',  time: '6:00-7:30 PM', gym: 'KJMS #1', type: 'Tryout', rsvp: 0, notes: 'Coach Mike Lee / Kuen Yoo', team: '8th Boys Select' },
+
+  { id: 'tr_5g_1001', date: 'Thu, Oct 1',  time: '6:00-7:30 PM', gym: 'Daniels Run ES', type: 'Tryout', rsvp: 0, notes: 'Coach Fazle Taher', team: '5th Girls Select' },
+  { id: 'tr_5g_1007', date: 'Wed, Oct 7',  time: '6:00-7:30 PM', gym: 'Daniels Run ES', type: 'Tryout', rsvp: 0, notes: 'Coach Fazle Taher', team: '5th Girls Select' },
+  { id: 'tr_5g_1012', date: 'Mon, Oct 12', time: '6:00-7:30 PM', gym: 'KJMS #1',        type: 'Tryout', rsvp: 0, notes: 'Coach Fazle Taher', team: '5th Girls Select' },
+  { id: 'tr_5g_1013', date: 'Tue, Oct 13', time: '6:00-7:30 PM', gym: 'Daniels Run ES', type: 'Tryout', rsvp: 0, notes: 'Coach Fazle Taher', team: '5th Girls Select' },
+
+  { id: 'tr_6g_1005', date: 'Mon, Oct 5',  time: '6:00-7:30 PM', gym: 'Daniels Run ES', type: 'Tryout', rsvp: 0, notes: 'Coach Michael Do', team: '6th Girls Select' },
+  { id: 'tr_6g_1007', date: 'Wed, Oct 7',  time: '6:00-7:30 PM', gym: 'Providence ES',  type: 'Tryout', rsvp: 0, notes: 'Coach Michael Do', team: '6th Girls Select' },
+  { id: 'tr_6g_1012', date: 'Mon, Oct 12', time: '6:00-7:30 PM', gym: 'Daniels Run ES', type: 'Tryout', rsvp: 0, notes: 'Coach Michael Do', team: '6th Girls Select' },
+  { id: 'tr_6g_1013', date: 'Tue, Oct 13', time: '6:00-7:30 PM', gym: 'Providence ES',  type: 'Tryout', rsvp: 0, notes: 'Coach Michael Do', team: '6th Girls Select' },
+
+  { id: 'tr_7g_1001', date: 'Thu, Oct 1', time: '7:30-9:00 PM', gym: 'KJMS #1', type: 'Tryout', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
+  { id: 'tr_7g_1002', date: 'Fri, Oct 2', time: '7:30-9:00 PM', gym: 'KJMS #1', type: 'Tryout', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
+  { id: 'tr_7g_1007', date: 'Thu, Oct 7', time: '7:30-9:00 PM', gym: 'KJMS #1', type: 'Tryout', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
+  { id: 'tr_7g_1009', date: 'Fri, Oct 9', time: '7:30-9:00 PM', gym: 'KJMS #1', type: 'Tryout', rsvp: 0, notes: 'Coach Earnest Williams', team: '7th Girls Select' },
+
+  { id: 'tr_8g_1001', date: 'Thu, Oct 1', time: '7:30-9:00 PM', gym: 'KJMS #1',        type: 'Tryout', rsvp: 0, notes: 'Coach Brett Schmitz', team: '8th Girls Select' },
+  { id: 'tr_8g_1005', date: 'Mon, Oct 5', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Tryout', rsvp: 0, notes: 'Coach Brett Schmitz', team: '8th Girls Select' },
+  { id: 'tr_8g_1007', date: 'Wed, Oct 7', time: '7:30-9:00 PM', gym: 'Providence ES',  type: 'Tryout', rsvp: 0, notes: 'Coach Brett Schmitz', team: '8th Girls Select' },
+  { id: 'tr_8g_1009', date: 'Fri, Oct 9', time: '7:30-9:00 PM', gym: 'Providence ES',  type: 'Tryout', rsvp: 0, notes: 'Coach Brett Schmitz', team: '8th Girls Select' },
 ];
 
 // No seed messages — real ones come from coaches via the portal.
