@@ -1391,8 +1391,9 @@ export const INITIAL_BUDGET = {
     { id: 'e9',  account: '5071-08', label: 'Ins / D&O',             perPlayer: 0.39,  budget: null,  actual: 0, priorActual: 269.88,  notes: '' },
     { id: 'e2',  account: '5051-08', label: 'Annual Reception',       perPlayer: null,  budget: 500,   actual: 0, priorActual: 470,     notes: 'End of year food/bar tab for coaches' },
     { id: 'e4',  account: '5059-08', label: 'County / City Fees',     perPlayer: null,  budget: 15000, actual: 0, priorActual: 10934,   notes: 'Gym fees' },
-    { id: 'e6',  account: '5062-08', label: 'Equipment',              perPlayer: null,  budget: 5000,  actual: 675, priorActual: 4344.21, notes: 'Basketballs and other equipment' },
+    { id: 'e6',  account: '5062-08', label: 'Equipment',              perPlayer: null,  budget: 5000,  actual: 0, priorActual: 4344.21, notes: 'Basketballs and other equipment' },
     { id: 'e10', account: '5074-08', label: 'Miscellaneous',          perPlayer: null,  budget: 8000,  actual: 0, priorActual: 8318,    notes: 'Travel league FCYBL fees' },
+    { id: 'e18', account: '5075-08', label: 'Publicity',              perPlayer: null,  budget: null,  actual: 675, priorActual: 0,     notes: 'Yard signs, banners, promotional materials' },
     { id: 'e11', account: '5084-08', label: 'Referees / Umpires',     perPlayer: null,  budget: 28000, actual: 0, priorActual: 25097.5, notes: 'Refs' },
     { id: 'e12', account: '5086-08', label: 'Refunds',                perPlayer: null,  budget: 600,   actual: 0, priorActual: 523.33,  notes: 'Post-season refunds' },
     { id: 'e13', account: '5088-08', label: 'Registrations (Expense)',perPlayer: null,  budget: 8600,  actual: 0, priorActual: 8100,    notes: '' },
@@ -1426,7 +1427,7 @@ export function useBudget() {
 
 export const INITIAL_INVOICES = [
   { id: 'inv-4041', vendor: '4 Leaf Graphics', invoice_no: '4041', invoice_date: '2026-09-15', amount: 14617, account: '5099-08', line_item: 'Uniforms', notes: '622 house jerseys — blank + screen print' },
-  { id: 'inv-17936', vendor: 'Concept Marketing, Inc.', invoice_no: '17936', invoice_date: '2026-09-17', amount: 675, account: '5062-08', line_item: 'Equipment', notes: '100 FPYC 2026/2027 Basketball Sign Up yard signs, printed 2 sides + metal H-stakes' },
+  { id: 'inv-17936', vendor: 'Concept Marketing, Inc.', invoice_no: '17936', invoice_date: '2026-09-17', amount: 675, account: '5075-08', line_item: 'Publicity', notes: '100 FPYC 2026/2027 Basketball Sign Up yard signs, printed 2 sides + metal H-stakes' },
   { id: 'inv-4045', vendor: '4 Leaf Graphics', invoice_no: '4045', invoice_date: '2026-09-28', amount: 3930, account: '5093-08', line_item: 'Spirit Wear / Coaches', notes: '131 navy Gildan Heavy Blend hoodies (20 S, 26 M, 48 L, 32 XL, 5 XXL) — FPYC logo front, @FPYCHOOPS back' },
 ];
 
