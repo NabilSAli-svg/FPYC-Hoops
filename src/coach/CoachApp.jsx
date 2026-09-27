@@ -31,6 +31,11 @@ const TEAMS = {
   'sel-8b': { id: 'sel-8b', name: '8th Boys Select',  division: 'Winter Select', coach: 'Coach', color: '#1E40AF', lineupKey: 'fpyc-lineup-starters-sel8b', password: 'sel8boys27'  },
   'sel-8g': { id: 'sel-8g', name: '8th Girls Select', division: 'Winter Select', coach: 'Coach', color: '#86198F', lineupKey: 'fpyc-lineup-starters-sel8g', password: 'sel8girls27' },
 
+  // ── Fall Skills Clinic ────────────────────────────────────────────────────
+  'fc-beg': { id: 'fc-beg', name: 'Training - Beginner',     division: 'Fall Skills Clinic', coach: 'Coach', color: '#0D9488', lineupKey: 'fpyc-lineup-starters-fcbeg', password: 'fcbeginner27' },
+  'fc-int': { id: 'fc-int', name: 'Training - Intermediate', division: 'Fall Skills Clinic', coach: 'Coach', color: '#CA8A04', lineupKey: 'fpyc-lineup-starters-fcint', password: 'fcinter27'   },
+  'fc-adv': { id: 'fc-adv', name: 'Training - Advanced',     division: 'Fall Skills Clinic', coach: 'Coach', color: '#DC2626', lineupKey: 'fpyc-lineup-starters-fcadv', password: 'fcadvanced27'},
+
   // ── Archived · Summer 2026 (logins still work for past-season review) ──────
   '23boys': { id: '23boys',  name: 'Rising 2nd-3rd Boys', division: '3v3 Summer Cup',  coach: 'Nick Blessing',                      color: 'var(--court-navy)',       lineupKey: 'fpyc-lineup-starters-23boys',  password: 'nick2025'    },
   girls:    { id: 'girls',   name: 'Girls 3v3 (2nd-8th)', division: '3v3 Summer Cup',  coach: 'Coach',                              color: '#1F8A5B',                  lineupKey: 'fpyc-lineup-starters-girls',   password: 'girls2025'   },
