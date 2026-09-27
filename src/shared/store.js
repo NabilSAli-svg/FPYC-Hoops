@@ -1396,7 +1396,7 @@ export const INITIAL_BUDGET = {
     { id: 'e11', account: '5084-08', label: 'Referees / Umpires',     perPlayer: null,  budget: 28000, actual: 0, priorActual: 25097.5, notes: 'Refs' },
     { id: 'e12', account: '5086-08', label: 'Refunds',                perPlayer: null,  budget: 600,   actual: 0, priorActual: 523.33,  notes: 'Post-season refunds' },
     { id: 'e13', account: '5088-08', label: 'Registrations (Expense)',perPlayer: null,  budget: 8600,  actual: 0, priorActual: 8100,    notes: '' },
-    { id: 'e14', account: '5093-08', label: 'Spirit Wear / Coaches',  perPlayer: null,  budget: 5000,  actual: 0, priorActual: 5952,    notes: 'Coaches gear 2027' },
+    { id: 'e14', account: '5093-08', label: 'Spirit Wear / Coaches',  perPlayer: null,  budget: 5000,  actual: 3930, priorActual: 5952,    notes: 'Coaches gear 2027' },
     { id: 'e15', account: '5096-08', label: 'Training',               perPlayer: null,  budget: 35000, actual: 0, priorActual: 14050,   notes: 'Shaun / TYS / Evolution' },
     { id: 'e16', account: '5098-08', label: 'Trophies / Plaques',     perPlayer: null,  budget: 2000,  actual: 0, priorActual: 1836.76, notes: 'Awards' },
     { id: 'e17', account: '5099-08', label: 'Uniforms',               perPlayer: null,  budget: 15000, actual: 14617, priorActual: 16410.5, notes: 'Uniforms' },
@@ -1427,6 +1427,7 @@ export function useBudget() {
 export const INITIAL_INVOICES = [
   { id: 'inv-4041', vendor: '4 Leaf Graphics', invoice_no: '4041', invoice_date: '2026-09-15', amount: 14617, account: '5099-08', line_item: 'Uniforms', notes: '622 house jerseys — blank + screen print' },
   { id: 'inv-17936', vendor: 'Concept Marketing, Inc.', invoice_no: '17936', invoice_date: '2026-09-17', amount: 675, account: '5062-08', line_item: 'Equipment', notes: '100 FPYC 2026/2027 Basketball Sign Up yard signs, printed 2 sides + metal H-stakes' },
+  { id: 'inv-4045', vendor: '4 Leaf Graphics', invoice_no: '4045', invoice_date: '2026-09-28', amount: 3930, account: '5093-08', line_item: 'Spirit Wear / Coaches', notes: '131 navy Gildan Heavy Blend hoodies (20 S, 26 M, 48 L, 32 XL, 5 XXL) — FPYC logo front, @FPYCHOOPS back' },
 ];
 
 export function useInvoices() {
