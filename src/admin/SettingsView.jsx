@@ -251,6 +251,9 @@ function CoachesTab() {
   }, []);
 
   // Group staff by email; coaches with no email get a unique key per id.
+  // A person can belong to more than one program (e.g. a Select coach who
+  // also trains) -- track every program they appear under, not just the
+  // first, so they show up in each relevant section instead of only one.
   const people = [];
   const seen = new Map();
   for (const s of staff) {
@@ -259,8 +262,9 @@ function CoachesTab() {
       const existing = seen.get(key);
       if (!existing.roles.includes(s.role)) existing.roles.push(s.role);
       if (s.team && !existing.teams.includes(s.team)) existing.teams.push(s.team);
+      if (s.program && !existing.programs.includes(s.program)) existing.programs.push(s.program);
     } else {
-      const entry = { id: s.id, name: s.name, email: s.email || '', phone: s.phone, roles: [s.role], teams: s.team ? [s.team] : [], program: s.program };
+      const entry = { id: s.id, name: s.name, email: s.email || '', phone: s.phone, roles: [s.role], teams: s.team ? [s.team] : [], programs: s.program ? [s.program] : [] };
       seen.set(key, entry);
       people.push(entry);
     }
@@ -295,7 +299,7 @@ function CoachesTab() {
   const PROGRAM_ORDER = ['Recreation', 'Select', 'Training'];
   const grouped = PROGRAM_ORDER.map(prog => ({
     label: prog,
-    rows: people.filter(p => p.program === prog),
+    rows: people.filter(p => p.programs.includes(prog)),
   })).filter(g => g.rows.length > 0);
 
   return (
