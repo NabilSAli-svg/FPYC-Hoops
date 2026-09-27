@@ -1438,7 +1438,13 @@ export function useInvoices() {
 
 const INITIAL_INVENTORY = {
   jerseys:     {},
-  pullovers:   {},
+  hoodies:     {
+    Small:  { owned: 20, checkedOut: 0 },
+    Medium: { owned: 26, checkedOut: 0 },
+    Large:  { owned: 48, checkedOut: 0 },
+    XL:     { owned: 32, checkedOut: 0 },
+    XXL:    { owned: 5,  checkedOut: 0 },
+  },
   basketballs: {},
   clocks:      { owned: 0, checkedOut: 0 },
   scorebooks:  { owned: 0, checkedOut: 0 },
