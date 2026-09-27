@@ -12,12 +12,12 @@ const CATEGORIES = [
     unit: 'jersey',
   },
   {
-    id: 'pullovers',
-    label: 'Coach Pullovers',
+    id: 'hoodies',
+    label: 'Coach Hoodies',
     icon: 'shirt',
     color: '#7C3AED',
-    sizes: ['Adult S', 'Adult M', 'Adult L'],
-    unit: 'pullover',
+    sizes: ['Small', 'Medium', 'Large', 'XL', 'XXL'],
+    unit: 'hoodie',
   },
   {
     id: 'basketballs',
