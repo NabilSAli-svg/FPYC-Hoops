@@ -789,7 +789,7 @@ export const INITIAL_STAFF = [
   { id: 'st11', name: "Dale Van Wagner", role: "Assistant Coach", program: 'Recreation', team: "Rising 4th-5th Boys", email: "dale.vanwagner@gmail.com", phone: "(215) 499-5165", bgCheckStatus: "Not Started", bgCheckDate: '' },
   { id: 'st12', name: "Kesara Liyanage", role: "Coach", program: 'Recreation', team: "Rising 4th-5th Boys", email: "kliyanage30@gmail.com", phone: "", bgCheckStatus: "Not Started", bgCheckDate: '' },
   // Travel Select coaches — Summer 2026 (program: 'Select' so they appear under the Select tab)
-  { id: 'ts_c1', name: "Aidris Daud",   role: "Head Coach", program: 'Select', team: "Aidris B5",   email: "", phone: "", bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'ts_c1', name: "Aidris Daud",   role: "Head Coach", program: 'Select', team: "Aidris B5",   email: "aidris@keydmv.com", phone: "703-447-1184", bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'ts_c2', name: "Coach Tom",     role: "Head Coach", program: 'Select', team: "Tom B6",      email: "", phone: "", bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'ts_c3', name: "Mike Do",       role: "Head Coach", program: 'Select', team: "Mike Do G6",  email: "michaeldo82@gmail.com", phone: "(571) 328-8126", bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'ts_c4', name: "Coach Earnest", role: "Head Coach", program: 'Select', team: "Earnest G7",  email: "", phone: "", bgCheckStatus: "Not Started", bgCheckDate: null },
@@ -809,7 +809,7 @@ export const INITIAL_STAFF = [
   { id: 'tr1', name: "Nabil Ali",            role: "Director",  program: 'Training', team: '', email: "syednabilali@gmail.com",  phone: "(703) 994-2211", bgCheckStatus: "Expired",     bgCheckDate: null },
   { id: 'tr2', name: "Shaun Ali",            role: "Trainer",   program: 'Training', team: '', email: "shaunali34@gmail.com",    phone: "(703) 989-0847", bgCheckStatus: "Expired",     bgCheckDate: null },
   { id: 'tr3', name: "Kesara Liyanage",      role: "Trainer",   program: 'Training', team: '', email: "kliyanage30@gmail.com",   phone: "",               bgCheckStatus: "Not Started", bgCheckDate: null },
-  { id: 'tr4', name: "Aidris Daud",          role: "Trainer",   program: 'Training', team: '', email: "",                        phone: "",               bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'tr4', name: "Aidris Daud",          role: "Trainer",   program: 'Training', team: '', email: "aidris@keydmv.com",       phone: "703-447-1184",   bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'tr5', name: "PJ Kelly",             role: "Trainer",   program: 'Training', team: '', email: "",                        phone: "",               bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'tr6', name: "Nikan",                role: "Trainer",   program: 'Training', team: '', email: "",                        phone: "",               bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'tr7', name: "Margad Choijilsuren",  role: "Trainer",   program: 'Training', team: '', email: "",                        phone: "",               bgCheckStatus: "Not Started", bgCheckDate: null },
