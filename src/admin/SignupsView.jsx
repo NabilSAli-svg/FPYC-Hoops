@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Card, Pill, Icon, Display, Eyebrow } from '../shared/index.js';
+import { useState, useRef } from 'react';
+import { Card, Pill, Icon, Display, Eyebrow, Button } from '../shared/index.js';
 import { csvDownload } from '../shared/csvDownload.js';
+import { parseSignupFile } from '../shared/signupImport.js';
 import { useRefSignups, useVolunteerSignups } from '../shared/store.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 
@@ -24,12 +25,21 @@ function fmtDate(iso) {
  * `tabs` limits which lists a role can see — Ref Director sees referees,
  * Community Director sees volunteers, Admin and Ops see both.
  */
+const emptyAddForm = () => ({ name: '', email: '', phone: '', experience: 'none', availability: '', role: '', note: '' });
+
+function makeSignupId() { return 'sig_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
 export default function SignupsView({ tabs = ['refs', 'volunteers'] }) {
   const isMobile = useIsMobile();
   const [tab, setTab] = useState(tabs[0]);
   const [refs, setRefs]           = useRefSignups();
   const [volunteers, setVols]     = useVolunteerSignups();
   const [filter, setFilter]       = useState('all');
+  const fileInputRef = useRef(null);
+  const [importBusy, setImportBusy] = useState(false);
+  const [toast, setToast]         = useState('');
+  const [showAdd, setShowAdd]     = useState(false);
+  const [addForm, setAddForm]     = useState(emptyAddForm());
 
   const rows = tab === 'refs' ? refs : volunteers;
   const setRows = tab === 'refs' ? setRefs : setVols;
@@ -40,6 +50,44 @@ export default function SignupsView({ tabs = ['refs', 'volunteers'] }) {
 
   function setStatus(id, status) {
     setRows(list => list.map(r => (r.id === id ? { ...r, status } : r)));
+  }
+
+  function showToast(msg) {
+    setToast(msg);
+    setTimeout(() => setToast(''), 4000);
+  }
+
+  function addRow(fields) {
+    setRows(list => [...list, { id: makeSignupId(), created_at: new Date().toISOString(), status: 'new', ...fields }]);
+  }
+
+  async function handleFile(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setImportBusy(true);
+    try {
+      const { rows: parsed, skipped, total } = await parseSignupFile(file);
+      parsed.forEach(fields => addRow(tab === 'refs'
+        ? { name: fields.name, email: fields.email, phone: fields.phone || '', experience: fields.experience || 'none', availability: fields.availability || '', note: fields.note || '' }
+        : { name: fields.name, email: fields.email, role: fields.role || '', note: fields.note || '' }));
+      showToast(`Imported ${parsed.length} of ${total} row${total === 1 ? '' : 's'}${skipped ? ` · ${skipped} skipped (missing name or email)` : ''}`);
+    } catch (err) {
+      showToast(err.message || 'Could not read that file');
+    } finally {
+      setImportBusy(false);
+    }
+  }
+
+  function submitAdd() {
+    if (!addForm.name.trim() || !addForm.email.trim()) return;
+    const fields = tab === 'refs'
+      ? { name: addForm.name.trim(), email: addForm.email.trim(), phone: addForm.phone.trim(), experience: addForm.experience, availability: addForm.availability.trim(), note: addForm.note.trim() }
+      : { name: addForm.name.trim(), email: addForm.email.trim(), role: addForm.role.trim(), note: addForm.note.trim() };
+    addRow(fields);
+    setShowAdd(false);
+    setAddForm(emptyAddForm());
+    showToast(`${fields.name} added`);
   }
 
   function exportCsv() {
@@ -90,8 +138,24 @@ export default function SignupsView({ tabs = ['refs', 'volunteers'] }) {
           }}>
             <Icon name="download" size={12} /> CSV
           </button>
+          <input ref={fileInputRef} type="file" accept=".csv,.xls,.xlsx" style={{ display: 'none' }} onChange={handleFile} />
+          <button onClick={() => fileInputRef.current?.click()} disabled={importBusy} style={{
+            padding: '5px 12px', borderRadius: 999, cursor: importBusy ? 'default' : 'pointer',
+            border: '1px solid var(--border)', background: '#fff', color: 'var(--fg-muted)',
+            fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12,
+            display: 'inline-flex', alignItems: 'center', gap: 5, opacity: importBusy ? 0.6 : 1,
+          }}>
+            <Icon name="upload" size={12} /> {importBusy ? 'Importing…' : 'Upload CSV/XLS'}
+          </button>
+          <Button kind="gold" size="sm" icon="user-plus" onClick={() => { setAddForm(emptyAddForm()); setShowAdd(true); }}>
+            Add
+          </Button>
         </div>
       </div>
+
+      {toast && (
+        <div style={{ background: 'var(--court-navy)', color: '#fff', padding: '10px 16px', borderRadius: 8, fontSize: 13 }}>{toast}</div>
+      )}
 
       {/* Summary */}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12 }}>
@@ -167,9 +231,56 @@ export default function SignupsView({ tabs = ['refs', 'volunteers'] }) {
           ))}
         </Card>
       )}
+
+      {showAdd && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: 16 }}
+          onClick={e => e.target === e.currentTarget && setShowAdd(false)}
+        >
+          <div style={{ background: '#fff', borderRadius: 14, padding: 24, width: 440, maxWidth: '100%', boxShadow: 'var(--shadow-3)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <Display size={18} style={{ marginBottom: 16 }}>Add {tab === 'refs' ? 'referee' : 'volunteer'}</Display>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <AddField label="Name"><input style={addInput} value={addForm.name} onChange={e => setAddForm({ ...addForm, name: e.target.value })} /></AddField>
+              <AddField label="Email"><input style={addInput} value={addForm.email} onChange={e => setAddForm({ ...addForm, email: e.target.value })} /></AddField>
+              {tab === 'refs' ? (
+                <>
+                  <AddField label="Phone"><input style={addInput} value={addForm.phone} onChange={e => setAddForm({ ...addForm, phone: e.target.value })} /></AddField>
+                  <AddField label="Experience">
+                    <select style={addInput} value={addForm.experience} onChange={e => setAddForm({ ...addForm, experience: e.target.value })}>
+                      {Object.entries(EXPERIENCE_LABEL).map(([k, label]) => <option key={k} value={k}>{label}</option>)}
+                    </select>
+                  </AddField>
+                  <AddField label="Availability"><input style={addInput} value={addForm.availability} onChange={e => setAddForm({ ...addForm, availability: e.target.value })} placeholder="e.g. Weeknights, Saturdays" /></AddField>
+                </>
+              ) : (
+                <AddField label="Role"><input style={addInput} value={addForm.role} onChange={e => setAddForm({ ...addForm, role: e.target.value })} placeholder="e.g. Scorekeeper, Team parent" /></AddField>
+              )}
+              <AddField label="Note"><textarea style={{ ...addInput, resize: 'vertical' }} rows={2} value={addForm.note} onChange={e => setAddForm({ ...addForm, note: e.target.value })} /></AddField>
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 20, justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowAdd(false)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', background: '#fff', color: 'var(--fg)', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+              <Button kind="gold" onClick={submitAdd} disabled={!addForm.name.trim() || !addForm.email.trim()}>Add</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+function AddField({ label, children }) {
+  return (
+    <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 12, fontWeight: 600, color: 'var(--fg-muted)' }}>
+      {label}
+      {children}
+    </label>
+  );
+}
+
+const addInput = {
+  padding: '8px 10px', borderRadius: 6, border: '1px solid var(--border)',
+  fontSize: 13, fontFamily: 'var(--font-body)', outline: 'none', width: '100%', boxSizing: 'border-box',
+};
 
 function Stat({ label, value, color }) {
   return (
