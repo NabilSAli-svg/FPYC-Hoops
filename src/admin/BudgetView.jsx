@@ -2,9 +2,9 @@ import { useState, useCallback } from 'react';
 import { Card, Icon, Display, Button, Eyebrow } from '../shared/index.js';
 import { useBudget, useInvoices } from '../shared/store.js';
 
-const fmt = n => '$' + Math.round(n).toLocaleString();
+const fmt = n => '$' + (n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const pct = (a, b) => b === 0 ? 0 : Math.min(100, Math.round((a / b) * 100));
-const fmtRaw = n => Math.round(n || 0).toString();
+const fmtRaw = n => (Math.round((n || 0) * 100) / 100).toString();
 
 function exportCSV(budget, calc) {
   const rows = [];
@@ -149,7 +149,7 @@ function EditCell({ value, onSave, locked, directorStyle, treasurerStyle, priorS
   const border = `1px solid ${directorStyle ? '#93C5FD' : treasurerStyle ? '#A5B4FC' : 'var(--border)'}`;
   if (editing) {
     return (
-      <input type="number" value={draft} autoFocus onChange={e => setDraft(e.target.value)}
+      <input type="number" step="0.01" value={draft} autoFocus onChange={e => setDraft(e.target.value)}
         onBlur={() => { setEditing(false); onSave(parseFloat(draft) || 0); }}
         onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') setEditing(false); }}
         style={{ width: 90, padding: '4px 8px', borderRadius: 5, border, background: bg, fontSize: 13, fontFamily: 'var(--font-body)' }} />
