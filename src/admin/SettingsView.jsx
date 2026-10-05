@@ -234,7 +234,7 @@ function TeamsTab() {
   );
 }
 
-const ALL_TEAM_OPTIONS = Object.keys(TEAMS_INFO);
+const ALL_TEAM_OPTIONS = Object.keys(TEAMS_INFO).filter(t => !TEAMS_INFO[t].archived);
 
 function CoachesTab() {
   const [staff] = useStaff();
