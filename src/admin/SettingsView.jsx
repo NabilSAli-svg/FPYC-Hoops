@@ -296,7 +296,7 @@ function CoachesTab() {
     }
   }
 
-  const PROGRAM_ORDER = ['Recreation', 'Select', 'Training'];
+  const PROGRAM_ORDER = ['Recreation', 'Select', 'Training', 'Operations'];
   const grouped = PROGRAM_ORDER.map(prog => ({
     label: prog,
     rows: people.filter(p => p.programs.includes(prog)),

@@ -3,7 +3,7 @@ import { Card, Button, Icon, Display, Eyebrow, Pill, Avatar } from '../shared/in
 import { useStaff, INITIAL_STAFF } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
 
-const PROGRAMS = ['Recreation', 'Select', 'Training'];
+const PROGRAMS = ['Recreation', 'Select', 'Training', 'Operations'];
 
 const BG_COLORS = {
   'Not Started': { bg: 'rgba(120,120,120,0.12)', fg: '#666' },
