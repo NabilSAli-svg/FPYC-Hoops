@@ -163,8 +163,8 @@ create table if not exists public.staff (
   team            text,
   email           text,
   phone           text,
-  bg_check_status text default 'Not Started',
-  bg_check_date   text
+  "bgCheckStatus" text default 'Not Started',
+  "bgCheckDate"   text
 );
 
 
