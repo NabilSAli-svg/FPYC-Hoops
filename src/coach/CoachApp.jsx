@@ -22,21 +22,21 @@ const TEAMS = {
   'hsgirls':{ id: 'hsgirls',name: 'HS Girls',   division: 'Winter Rec', coach: 'Coach', color: '#7C3AED',           lineupKey: 'fpyc-lineup-starters-hsgirls', password: 'hsgirlswin'  },
 
   // ── Winter 2026–27 · Select ────────────────────────────────────────────────
-  'sel-5b': { id: 'sel-5b', name: '5th Boys Select',  division: 'Winter Select', coach: 'Coach', color: '#0369A1', lineupKey: 'fpyc-lineup-starters-sel5b', password: 'sel5boys27'  },
+  'sel-5b': { id: 'sel-5b', name: '5th Boys Select A',  division: 'Winter Select', coach: 'Coach', color: '#0369A1', lineupKey: 'fpyc-lineup-starters-sel5b', password: 'sel5boys27'  },
   'sel-5g': { id: 'sel-5g', name: '5th Girls Select', division: 'Winter Select', coach: 'Coach', color: '#E11D48', lineupKey: 'fpyc-lineup-starters-sel5g', password: 'sel5girls27' },
-  'sel-6b': { id: 'sel-6b', name: '6th Boys Select',  division: 'Winter Select', coach: 'Coach', color: '#047857', lineupKey: 'fpyc-lineup-starters-sel6b', password: 'sel6boys27'  },
+  'sel-6b': { id: 'sel-6b', name: '6th Boys Select A',  division: 'Winter Select', coach: 'Coach', color: '#047857', lineupKey: 'fpyc-lineup-starters-sel6b', password: 'sel6boys27'  },
   'sel-6g': { id: 'sel-6g', name: '6th Girls Select', division: 'Winter Select', coach: 'Coach', color: '#A21CAF', lineupKey: 'fpyc-lineup-starters-sel6g', password: 'sel6girls27' },
-  'sel-7b': { id: 'sel-7b', name: '7th Boys Select',  division: 'Winter Select', coach: 'Coach', color: '#B45309', lineupKey: 'fpyc-lineup-starters-sel7b', password: 'sel7boys27'  },
+  'sel-7b': { id: 'sel-7b', name: '7th Boys Select A',  division: 'Winter Select', coach: 'Coach', color: '#B45309', lineupKey: 'fpyc-lineup-starters-sel7b', password: 'sel7boys27'  },
   'sel-7g': { id: 'sel-7g', name: '7th Girls Select', division: 'Winter Select', coach: 'Coach', color: '#BE123C', lineupKey: 'fpyc-lineup-starters-sel7g', password: 'sel7girls27' },
-  'sel-8b': { id: 'sel-8b', name: '8th Boys Select',  division: 'Winter Select', coach: 'Coach', color: '#1E40AF', lineupKey: 'fpyc-lineup-starters-sel8b', password: 'sel8boys27'  },
+  'sel-8b': { id: 'sel-8b', name: '8th Boys Select A',  division: 'Winter Select', coach: 'Coach', color: '#1E40AF', lineupKey: 'fpyc-lineup-starters-sel8b', password: 'sel8boys27'  },
   'sel-8g': { id: 'sel-8g', name: '8th Girls Select', division: 'Winter Select', coach: 'Coach', color: '#86198F', lineupKey: 'fpyc-lineup-starters-sel8g', password: 'sel8girls27' },
 
   // Second boys teams, added once tryouts settled on numbers
-  'sel-5b2': { id: 'sel-5b2', name: '5th Boys Select 2', division: 'Winter Select', coach: 'Coach', color: '#155E75', lineupKey: 'fpyc-lineup-starters-sel5b2', password: 'sel5boys27b'  },
-  'sel-6b2': { id: 'sel-6b2', name: '6th Boys Select 2', division: 'Winter Select', coach: 'Coach', color: '#065F46', lineupKey: 'fpyc-lineup-starters-sel6b2', password: 'sel6boys27b'  },
-  'sel-7b2': { id: 'sel-7b2', name: '7th Boys Select 2', division: 'Winter Select', coach: 'Coach', color: '#92400E', lineupKey: 'fpyc-lineup-starters-sel7b2', password: 'sel7boys27b'  },
-  'sel-8b2': { id: 'sel-8b2', name: '8th Boys Select 2', division: 'Winter Select', coach: 'Coach', color: '#1E3A8A', lineupKey: 'fpyc-lineup-starters-sel8b2', password: 'sel8boys27b'  },
-  'sel-6b3': { id: 'sel-6b3', name: '6th Boys Select 3', division: 'Winter Select', coach: 'Coach', color: '#374151', lineupKey: 'fpyc-lineup-starters-sel6b3', password: 'sel6boys27c'  },
+  'sel-5b2': { id: 'sel-5b2', name: '5th Boys Select B', division: 'Winter Select', coach: 'Coach', color: '#155E75', lineupKey: 'fpyc-lineup-starters-sel5b2', password: 'sel5boys27b'  },
+  'sel-6b2': { id: 'sel-6b2', name: '6th Boys Select B', division: 'Winter Select', coach: 'Coach', color: '#065F46', lineupKey: 'fpyc-lineup-starters-sel6b2', password: 'sel6boys27b'  },
+  'sel-7b2': { id: 'sel-7b2', name: '7th Boys Select B', division: 'Winter Select', coach: 'Coach', color: '#92400E', lineupKey: 'fpyc-lineup-starters-sel7b2', password: 'sel7boys27b'  },
+  'sel-8b2': { id: 'sel-8b2', name: '8th Boys Select B', division: 'Winter Select', coach: 'Coach', color: '#1E3A8A', lineupKey: 'fpyc-lineup-starters-sel8b2', password: 'sel8boys27b'  },
+  'sel-6b3': { id: 'sel-6b3', name: '6th Boys Select C', division: 'Winter Select', coach: 'Coach', color: '#374151', lineupKey: 'fpyc-lineup-starters-sel6b3', password: 'sel6boys27c'  },
 
   // ── Fall Skills Clinic ────────────────────────────────────────────────────
   'fc-beg': { id: 'fc-beg', name: 'Training - Beginner',     division: 'Fall Skills Clinic', coach: 'Coach', color: '#0D9488', lineupKey: 'fpyc-lineup-starters-fcbeg', password: 'fcbeginner27' },
