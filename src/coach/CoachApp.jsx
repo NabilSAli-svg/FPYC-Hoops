@@ -36,6 +36,7 @@ const TEAMS = {
   'sel-6b2': { id: 'sel-6b2', name: '6th Boys Select 2', division: 'Winter Select', coach: 'Coach', color: '#065F46', lineupKey: 'fpyc-lineup-starters-sel6b2', password: 'sel6boys27b'  },
   'sel-7b2': { id: 'sel-7b2', name: '7th Boys Select 2', division: 'Winter Select', coach: 'Coach', color: '#92400E', lineupKey: 'fpyc-lineup-starters-sel7b2', password: 'sel7boys27b'  },
   'sel-8b2': { id: 'sel-8b2', name: '8th Boys Select 2', division: 'Winter Select', coach: 'Coach', color: '#1E3A8A', lineupKey: 'fpyc-lineup-starters-sel8b2', password: 'sel8boys27b'  },
+  'sel-6b3': { id: 'sel-6b3', name: '6th Boys Select 3', division: 'Winter Select', coach: 'Coach', color: '#374151', lineupKey: 'fpyc-lineup-starters-sel6b3', password: 'sel6boys27c'  },
 
   // ── Fall Skills Clinic ────────────────────────────────────────────────────
   'fc-beg': { id: 'fc-beg', name: 'Training - Beginner',     division: 'Fall Skills Clinic', coach: 'Coach', color: '#0D9488', lineupKey: 'fpyc-lineup-starters-fcbeg', password: 'fcbeginner27' },
