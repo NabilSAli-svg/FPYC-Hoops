@@ -15,6 +15,34 @@ const BG_COLORS = {
 
 const EMPTY_FORM = { name: '', role: '', program: 'Recreation', team: '', email: '', phone: '' };
 
+// Group staff rows by person (email, falling back to id for rows with no
+// email) -- the same person often has one row per team/role (e.g. a Select
+// coach who also trains), which otherwise reads as duplicates on this page.
+function groupByPerson(staff) {
+  const people = [];
+  const seen = new Map();
+  for (const s of staff) {
+    const key = s.email ? s.email.toLowerCase() : `__noemail__${s.id}`;
+    if (seen.has(key)) {
+      const existing = seen.get(key);
+      existing.ids.push(s.id);
+      const already = existing.assignments.some(a => a.role === s.role && a.program === s.program && a.team === s.team);
+      if (!already) existing.assignments.push({ role: s.role, program: s.program, team: s.team });
+      if (!existing.programs.includes(s.program)) existing.programs.push(s.program);
+    } else {
+      const entry = {
+        key, ids: [s.id], name: s.name, email: s.email || '', phone: s.phone,
+        assignments: [{ role: s.role, program: s.program, team: s.team }],
+        programs: s.program ? [s.program] : [],
+        bgCheckStatus: s.bgCheckStatus, bgCheckDate: s.bgCheckDate,
+      };
+      seen.set(key, entry);
+      people.push(entry);
+    }
+  }
+  return people;
+}
+
 export default function StaffView() {
   const [staff, setStaff] = useStaff();
 
@@ -32,33 +60,39 @@ export default function StaffView() {
   const [activeProgram, setActiveProgram] = useState('All');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
-  const [editingId, setEditingId] = useState(null);
+  const [editingPerson, setEditingPerson] = useState(null);
   const [toast, setToast] = useState('');
-  const [bgBusyId, setBgBusyId] = useState(null);
+  const [bgBusyKey, setBgBusyKey] = useState(null);
 
   function showToast(msg) {
     setToast(msg);
     setTimeout(() => setToast(''), 3000);
   }
 
-  const filtered = activeProgram === 'All' ? staff : staff.filter(s => s.program === activeProgram);
+  const people = groupByPerson(staff);
+  const filtered = activeProgram === 'All' ? people : people.filter(p => p.programs.includes(activeProgram));
 
   function openAdd() {
     setForm(EMPTY_FORM);
-    setEditingId(null);
+    setEditingPerson(null);
     setShowForm(true);
   }
 
   function openEdit(person) {
-    setForm({ name: person.name, role: person.role, program: person.program, team: person.team, email: person.email, phone: person.phone });
-    setEditingId(person.id);
+    const first = person.assignments[0];
+    setForm({ name: person.name, role: first.role, program: first.program, team: first.team, email: person.email, phone: person.phone });
+    setEditingPerson(person);
     setShowForm(true);
   }
 
   function saveForm() {
     if (!form.name.trim()) return;
-    if (editingId) {
-      setStaff(prev => prev.map(s => s.id === editingId ? { ...s, ...form } : s));
+    if (editingPerson) {
+      // Contact info (name/email/phone) applies to every row for this
+      // person; role/program/team stay as each row's own assignment.
+      setStaff(prev => prev.map(s => editingPerson.ids.includes(s.id)
+        ? { ...s, name: form.name, email: form.email, phone: form.phone }
+        : s));
       showToast('Staff member updated');
     } else {
       const id = 'st' + Date.now();
@@ -68,24 +102,25 @@ export default function StaffView() {
     setShowForm(false);
   }
 
-  function removeStaff(id) {
-    setStaff(prev => prev.filter(s => s.id !== id));
-    showToast('Staff member removed');
+  function removePerson(person) {
+    setStaff(prev => prev.filter(s => !person.ids.includes(s.id)));
+    showToast(`${person.name} removed`);
   }
 
   async function runBackgroundCheck(person) {
-    setBgBusyId(person.id);
+    setBgBusyKey(person.key);
     try {
       const { data, error } = await supabase.functions.invoke('send-background-check', {
         body: { name: person.name, email: person.email },
       });
       if (error || !data?.success) throw error || new Error('Background check request failed');
-      setStaff(prev => prev.map(s => s.id === person.id ? { ...s, bgCheckStatus: 'Pending', bgCheckDate: new Date().toISOString().slice(0, 10) } : s));
+      const today = new Date().toISOString().slice(0, 10);
+      setStaff(prev => prev.map(s => person.ids.includes(s.id) ? { ...s, bgCheckStatus: 'Pending', bgCheckDate: today } : s));
       showToast(`Background check requested for ${person.name}`);
     } catch (err) {
       showToast(`Could not start background check: ${err.message || err}`);
     } finally {
-      setBgBusyId(null);
+      setBgBusyKey(null);
     }
   }
 
@@ -121,22 +156,31 @@ export default function StaffView() {
 
       {showForm && (
         <Card>
-          <Eyebrow>{editingId ? 'Edit staff member' : 'Add staff member'}</Eyebrow>
+          <Eyebrow>{editingPerson ? 'Edit staff member' : 'Add staff member'}</Eyebrow>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginTop: 12 }}>
             <Field label="Name"><input style={inputStyle} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></Field>
-            <Field label="Role"><input style={inputStyle} value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="Coach, Scorekeeper, etc." /></Field>
-            <Field label="Program">
-              <select style={inputStyle} value={form.program} onChange={e => setForm({ ...form, program: e.target.value })}>
-                {PROGRAMS.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
-            </Field>
-            <Field label="Team"><input style={inputStyle} value={form.team} onChange={e => setForm({ ...form, team: e.target.value })} placeholder="Unassigned" /></Field>
+            {!editingPerson && (
+              <>
+                <Field label="Role"><input style={inputStyle} value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="Coach, Scorekeeper, etc." /></Field>
+                <Field label="Program">
+                  <select style={inputStyle} value={form.program} onChange={e => setForm({ ...form, program: e.target.value })}>
+                    {PROGRAMS.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                </Field>
+                <Field label="Team"><input style={inputStyle} value={form.team} onChange={e => setForm({ ...form, team: e.target.value })} placeholder="Unassigned" /></Field>
+              </>
+            )}
             <Field label="Email"><input style={inputStyle} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></Field>
             <Field label="Phone"><input style={inputStyle} value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></Field>
           </div>
+          {editingPerson && editingPerson.assignments.length > 1 && (
+            <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 10 }}>
+              Name/email/phone apply to all of {editingPerson.name}'s roles. To change a specific role or team, remove and re-add that assignment.
+            </div>
+          )}
           <div style={{ display: 'flex', gap: 8, marginTop: 16, justifyContent: 'flex-end' }}>
             <Button kind="quiet" onClick={() => setShowForm(false)}>Cancel</Button>
-            <Button kind="gold" onClick={saveForm}>{editingId ? 'Save changes' : 'Add staff member'}</Button>
+            <Button kind="gold" onClick={saveForm}>{editingPerson ? 'Save changes' : 'Add staff member'}</Button>
           </div>
         </Card>
       )}
@@ -148,22 +192,26 @@ export default function StaffView() {
         {filtered.map((person, i) => {
           const colors = BG_COLORS[person.bgCheckStatus] || BG_COLORS['Not Started'];
           return (
-            <div key={person.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 18px', borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none', flexWrap: 'wrap' }}>
+            <div key={person.key} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 18px', borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none', flexWrap: 'wrap' }}>
               <Avatar name={person.name} size={36} color="var(--court-navy)" />
               <div style={{ flex: '1 1 220px', minWidth: 0 }}>
                 <div style={{ fontWeight: 700, fontSize: 14 }}>{person.name}</div>
-                <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 2 }}>{person.role} · {person.program} · {person.team || 'Unassigned'}</div>
-                <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 2 }}>{person.email} · {person.phone}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 4 }}>
+                  {person.assignments.map((a, ai) => (
+                    <Pill key={ai} kind="neutral">{a.role} · {a.program}{a.team ? ` · ${a.team}` : ''}</Pill>
+                  ))}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 4 }}>{person.email} · {person.phone}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ background: colors.bg, color: colors.fg, fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '4px 10px' }}>
                   Background check: {person.bgCheckStatus}{person.bgCheckDate ? ` (${person.bgCheckDate})` : ''}
                 </span>
-                <Button kind="quiet" size="sm" icon="shield-check" disabled={bgBusyId === person.id} onClick={() => runBackgroundCheck(person)}>
-                  {bgBusyId === person.id ? 'Requesting…' : 'Run check'}
+                <Button kind="quiet" size="sm" icon="shield-check" disabled={bgBusyKey === person.key} onClick={() => runBackgroundCheck(person)}>
+                  {bgBusyKey === person.key ? 'Requesting…' : 'Run check'}
                 </Button>
                 <Button kind="quiet" size="sm" icon="edit-2" onClick={() => openEdit(person)} />
-                <Button kind="quiet" size="sm" icon="trash-2" onClick={() => removeStaff(person.id)} />
+                <Button kind="quiet" size="sm" icon="trash-2" onClick={() => removePerson(person)} />
               </div>
             </div>
           );
