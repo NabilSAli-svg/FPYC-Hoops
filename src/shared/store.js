@@ -50,7 +50,7 @@ export const TEAMS_INFO = {
 
   // ── Winter 2026–27 · Select ────────────────────────────────────────────────
   // Each grade may field a second team — add a "… 2" entry once tryouts settle.
-  '5th Boys Select A':  { id: 'sel-5b', name: '5th Boys Select A',  division: SELECT_DIVISION, coach: 'Aidris Daud',      coachEmail: 'aidris@keydmv.com',            coachPhone: '703-447-1184', color: '#0369A1', sport: 'basketball' },
+  '5th Boys Select A':  { id: 'sel-5b', name: '5th Boys Select A',  division: SELECT_DIVISION, coach: 'Aidris Daud & Mike Hartwich', coachEmail: 'aidris@keydmv.com',            coachPhone: '703-447-1184', color: '#0369A1', sport: 'basketball' },
   '5th Girls Select': { id: 'sel-5g', name: '5th Girls Select', division: SELECT_DIVISION, coach: 'Fazle Taher',      coachEmail: 'coachftaher@gmail.com',        coachPhone: '703-835-1552', color: '#E11D48', sport: 'basketball' },
   '6th Boys Select A':  { id: 'sel-6b', name: '6th Boys Select A',  division: SELECT_DIVISION, coach: 'Thomas Schneider', coachEmail: 'schnet@gmail.com',             coachPhone: '603-809-2483', color: '#047857', sport: 'basketball' },
   '6th Girls Select': { id: 'sel-6g', name: '6th Girls Select', division: SELECT_DIVISION, coach: 'Michael Do',       coachEmail: 'michaeldo82@gmail.com',        coachPhone: '571-328-8126', color: '#A21CAF', sport: 'basketball' },
@@ -60,7 +60,7 @@ export const TEAMS_INFO = {
   '8th Girls Select': { id: 'sel-8g', name: '8th Girls Select', division: SELECT_DIVISION, coach: 'Brett Schmitz',    coachEmail: 'brettschmitz@yahoo.com',       coachPhone: '',             color: '#86198F', sport: 'basketball' },
 
   // Second boys teams, added once tryouts settled on numbers
-  '5th Boys Select B': { id: 'sel-5b2', name: '5th Boys Select B', division: SELECT_DIVISION, coach: 'Mike Hartwich',    coachEmail: 'gatrheel@gmail.com',    coachPhone: '', color: '#155E75', sport: 'basketball' },
+  '5th Boys Select B': { id: 'sel-5b2', name: '5th Boys Select B', division: SELECT_DIVISION, coach: 'Nabil Ali',    coachEmail: 'syednabilali@gmail.com',    coachPhone: '703-994-2211', color: '#155E75', sport: 'basketball' },
   '6th Boys Select B': { id: 'sel-6b2', name: '6th Boys Select B', division: SELECT_DIVISION, coach: 'Shaun Ali',        coachEmail: 'shaunali34@gmail.com',  coachPhone: '703-989-0847', color: '#065F46', sport: 'basketball' },
   '7th Boys Select B': { id: 'sel-7b2', name: '7th Boys Select B', division: SELECT_DIVISION, coach: 'Tom Schneider',    coachEmail: 'schnet@gmail.com',      coachPhone: '603-809-2483', color: '#92400E', sport: 'basketball' },
   '8th Boys Select B': { id: 'sel-8b2', name: '8th Boys Select B', division: SELECT_DIVISION, coach: 'Keun Yoo',         coachEmail: 'keunyoo29@gmail.com',   coachPhone: '702-887-3034', color: '#1E3A8A', sport: 'basketball' },
@@ -1279,7 +1279,8 @@ export const INITIAL_STAFF = [
   { id: 'sel_c8b', name: "Mike Lee",         role: "Head Coach", program: 'Select', team: "8th Boys Select A",  email: "michael.lee24@gmail.com",     phone: "703-965-8104", bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'sel_c8g', name: "Brett Schmitz",    role: "Head Coach", program: 'Select', team: "8th Girls Select", email: "brettschmitz@yahoo.com",      phone: "",              bgCheckStatus: "Not Started", bgCheckDate: null },
   // Second boys teams, added once tryouts settled on numbers
-  { id: 'sel_c5b2', name: "Mike Hartwich",   role: "Head Coach", program: 'Select', team: "5th Boys Select B", email: "gatrheel@gmail.com", phone: "",             bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'sel_c5b2', name: "Mike Hartwich",   role: "Assistant Coach", program: 'Select', team: "5th Boys Select A", email: "gatrheel@gmail.com", phone: "",             bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'sel_c5b3', name: "Nabil Ali",       role: "Head Coach", program: 'Select', team: "5th Boys Select B", email: "syednabilali@gmail.com", phone: "703-994-2211", bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'sel_c6b2', name: "Shaun Ali",       role: "Head Coach", program: 'Select', team: "6th Boys Select B", email: "shaunali34@gmail.com", phone: "703-989-0847", bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'sel_c7b2', name: "Tom Schneider",   role: "Head Coach", program: 'Select', team: "7th Boys Select B", email: "schnet@gmail.com",    phone: "603-809-2483", bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'sel_c6b3', name: "Matthew Dennis",  role: "Head Coach", program: 'Select', team: "6th Boys Select C", email: "matthewsdennis@gmail.com", phone: "", bgCheckStatus: "Not Started", bgCheckDate: null },
