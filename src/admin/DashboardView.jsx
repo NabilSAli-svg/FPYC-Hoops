@@ -52,8 +52,12 @@ function DashboardContent({ team, players, games, onGo }) {
   const wins = finalGames.filter(g => g.us > g.them).length;
   const ppg  = finalGames.length ? (finalGames.reduce((s, g) => s + g.us, 0) / finalGames.length).toFixed(1) : '—';
 
-  // Admin announcements (all-families or no target)
-  const leagueAnnouncements = announcements.filter(a => a.target === 'All families').slice(0, 3);
+  // Admin announcements (all-families), most recent first
+  const leagueAnnouncements = announcements
+    .filter(a => a.target === 'All families')
+    .slice()
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+    .slice(0, 3);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -185,7 +189,7 @@ function DashboardContent({ team, players, games, onGo }) {
 
       {/* League announcements */}
       <Card style={{ gridColumn: '1 / -1' }}>
-        <SectionHeader title="Admin announcements" link={`${announcements.length} posted`} />
+        <SectionHeader title="Admin announcements" link={`${announcements.length} posted`} onLink={() => onGo?.('announcements')} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginTop: 8 }}>
           {leagueAnnouncements.length > 0 ? leagueAnnouncements.map(a => (
             <Announce
@@ -197,7 +201,7 @@ function DashboardContent({ team, players, games, onGo }) {
             />
           )) : (
             <div style={{ padding: '16px 0', fontSize: 13, color: 'var(--fg-muted)', fontStyle: 'italic' }}>
-              No commissioner announcements yet.
+              No admin announcements yet.
             </div>
           )}
         </div>
