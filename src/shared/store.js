@@ -1268,6 +1268,8 @@ export const INITIAL_STAFF = [
   { id: 'tr8', name: "Hafsa Ali",            role: "Trainer",   program: 'Training', team: '', email: "",                        phone: "",               bgCheckStatus: "Not Started", bgCheckDate: null },
   // Board / Operations
   { id: 'op1', name: "Rubaat Ali",           role: "Operations Director", program: 'Operations', team: '', email: "rubaat.i@gmail.com", phone: "", bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'op2', name: "George Ragan",         role: "Select Director",    program: 'Operations', team: '', email: "fpycselect@gmail.com", phone: "", bgCheckStatus: "Not Started", bgCheckDate: null },
+  { id: 'op3', name: "Russell Finelson",     role: "Ref Director",       program: 'Operations', team: '', email: "fpycreferee@gmail.com", phone: "", bgCheckStatus: "Not Started", bgCheckDate: null },
 ];
 
 export function useStaff() {
