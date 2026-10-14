@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocalStorage } from './useLocalStorage.js';
 import { useSupabaseTable, useSupabaseAssignments } from './useSupabaseTable.js';
 import { supabase } from './supabase.js';
@@ -1430,6 +1430,59 @@ export function useVolunteerSignups() {
 
 export function useBlackoutDates() {
   return useSupabaseTable('blackout_dates', []);
+}
+
+// Player evaluations (house league / rec), scoped by sport. Stored as one row
+// per player with skills as jsonb, so coaches' entries sync across devices
+// instead of living only in that browser's localStorage.
+export function useEvaluations(sport) {
+  const [rows, setRows] = useSupabaseTable('evaluations', []);
+  const scoped = rows.filter(r => r.sport === sport);
+
+  const evals = Object.fromEntries(scoped.map(r => [r.player_id, r.skills || {}]));
+  const notes = Object.fromEntries(scoped.map(r => [r.player_id, r.notes || '']));
+
+  const setEvals = useCallback(updaterOrValue => {
+    setRows(prev => {
+      const prevEvals = Object.fromEntries(
+        prev.filter(r => r.sport === sport).map(r => [r.player_id, r.skills || {}])
+      );
+      const nextEvals = typeof updaterOrValue === 'function' ? updaterOrValue(prevEvals) : updaterOrValue;
+      const others = prev.filter(r => r.sport !== sport);
+      const scopedRows = prev.filter(r => r.sport === sport);
+      const byPlayer = new Map(scopedRows.map(r => [r.player_id, r]));
+      const nextScoped = Object.entries(nextEvals).map(([playerId, skills]) => ({
+        id: `${sport}_${playerId}`,
+        player_id: playerId,
+        sport,
+        skills,
+        notes: byPlayer.get(playerId)?.notes || '',
+      }));
+      return [...others, ...nextScoped];
+    });
+  }, [sport, setRows]);
+
+  const setNotes = useCallback(updaterOrValue => {
+    setRows(prev => {
+      const prevNotes = Object.fromEntries(
+        prev.filter(r => r.sport === sport).map(r => [r.player_id, r.notes || ''])
+      );
+      const nextNotes = typeof updaterOrValue === 'function' ? updaterOrValue(prevNotes) : updaterOrValue;
+      const others = prev.filter(r => r.sport !== sport);
+      const scopedRows = prev.filter(r => r.sport === sport);
+      const byPlayer = new Map(scopedRows.map(r => [r.player_id, r]));
+      const nextScoped = Object.entries(nextNotes).map(([playerId, noteText]) => ({
+        id: `${sport}_${playerId}`,
+        player_id: playerId,
+        sport,
+        skills: byPlayer.get(playerId)?.skills || {},
+        notes: noteText,
+      }));
+      return [...others, ...nextScoped];
+    });
+  }, [sport, setRows]);
+
+  return [evals, setEvals, notes, setNotes];
 }
 
 // ─── Draft Board ──────────────────────────────────────────────────────────────

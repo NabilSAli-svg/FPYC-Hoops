@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useLocalStorage } from '../shared/useLocalStorage.js';
+import { useEvaluations } from '../shared/store.js';
+import { useIsMobile } from '../shared/useIsMobile.js';
 import { Card, Button, Icon, Display, Eyebrow, Jersey } from '../shared/index.js';
 import { csvDownload } from '../shared/csvDownload.js';
 
@@ -24,31 +25,6 @@ const SKILLS_SOCCER = [
   { id: 'coachability', label: 'Coachability',   icon: 'heart'     },
   { id: 'teamwork',     label: 'Teamwork',       icon: 'users'     },
 ];
-
-const EVAL_SEED = {
-  p1:  { shooting: 5, defense: 4, dribbling: 4, passing: 5, rebounding: 3, effort: 5, coachability: 5, teamwork: 5 },
-  p2:  { shooting: 4, defense: 5, dribbling: 5, passing: 5, rebounding: 3, effort: 5, coachability: 5, teamwork: 5 },
-  p3:  { shooting: 4, defense: 4, dribbling: 3, passing: 3, rebounding: 5, effort: 4, coachability: 4, teamwork: 4 },
-  p4:  { shooting: 3, defense: 3, dribbling: 3, passing: 4, rebounding: 4, effort: 5, coachability: 5, teamwork: 5 },
-  p5:  { shooting: 3, defense: 4, dribbling: 2, passing: 3, rebounding: 5, effort: 4, coachability: 4, teamwork: 4 },
-  p6:  { shooting: 4, defense: 3, dribbling: 4, passing: 4, rebounding: 3, effort: 3, coachability: 3, teamwork: 4 },
-  p7:  { shooting: 4, defense: 4, dribbling: 4, passing: 4, rebounding: 3, effort: 4, coachability: 5, teamwork: 5 },
-  p8:  { shooting: 3, defense: 4, dribbling: 3, passing: 3, rebounding: 4, effort: 5, coachability: 5, teamwork: 5 },
-  p9:  { shooting: 2, defense: 3, dribbling: 2, passing: 3, rebounding: 3, effort: 3, coachability: 4, teamwork: 4 },
-  p10: { shooting: 3, defense: 3, dribbling: 4, passing: 3, rebounding: 3, effort: 4, coachability: 4, teamwork: 4 },
-  p11: { shooting: 3, defense: 4, dribbling: 3, passing: 3, rebounding: 5, effort: 4, coachability: 4, teamwork: 3 },
-};
-
-function initEvals(players, SKILLS) {
-  const map = {};
-  players.forEach(p => {
-    const seed = EVAL_SEED[p.id];
-    map[p.id] = seed
-      ? { ...seed }
-      : Object.fromEntries(SKILLS.map(s => [s.id, 3]));
-  });
-  return map;
-}
 
 function exportEvalsCSV(players, evals, notes, SKILLS) {
   const headers = ['Name', '#', 'Grade', 'Position', 'Overall', ...SKILLS.map(s => s.label), 'Notes'];
@@ -116,13 +92,15 @@ function RadarChart({ evals, teamAvg, size = 220, SKILLS }) {
 }
 
 export default function EvaluationsView({ players, sport = 'basketball' }) {
+  const isMobile = useIsMobile();
   const SKILLS = sport === 'soccer' ? SKILLS_SOCCER : SKILLS_BASKETBALL;
   const [selected, setSelected] = useState(players[0]?.id);
-  const [evals, setEvals] = useLocalStorage(`fpyc-evals-${sport}`, () => initEvals(players, SKILLS));
-  const [savedEvals, setSavedEvals] = useState(evals);
-  const [notes, setNotes] = useLocalStorage('fpyc-notes', {});
-  const [savedNotes, setSavedNotes] = useState(notes);
+  const [evals, setEvals, notes, setNotes] = useEvaluations(sport);
   const [justSaved, setJustSaved] = useState(false);
+  // Ratings/notes sync to Supabase as soon as they change — "Save" here is
+  // just a UX confirmation, tracked per player id rather than diffed
+  // against a baseline snapshot (which would race the async initial load).
+  const [dirtyIds, setDirtyIds] = useState(() => new Set());
 
   const active = players.filter(p => p.status !== 'inactive');
   const sortedPlayers = [...active].sort((a, b) => parseFloat(avg(evals, b.id)) - parseFloat(avg(evals, a.id)));
@@ -136,17 +114,21 @@ export default function EvaluationsView({ players, sport = 'basketball' }) {
   const player = players.find(p => p.id === selected);
   const playerEvals = evals[selected] || {};
 
-  const isDirty = selected && (
-    JSON.stringify(evals[selected]) !== JSON.stringify(savedEvals[selected]) ||
-    (notes[selected] || '') !== (savedNotes[selected] || '')
-  );
+  const isDirty = selected && dirtyIds.has(selected);
 
-  const setRating = (skill, val) =>
+  const markDirty = id => setDirtyIds(prev => new Set(prev).add(id));
+
+  const setRating = (skill, val) => {
     setEvals(prev => ({ ...prev, [selected]: { ...prev[selected], [skill]: val } }));
+    markDirty(selected);
+  };
 
   const handleSave = () => {
-    setSavedEvals(prev => ({ ...prev, [selected]: { ...evals[selected] } }));
-    setSavedNotes(prev => ({ ...prev, [selected]: notes[selected] || '' }));
+    setDirtyIds(prev => {
+      const next = new Set(prev);
+      next.delete(selected);
+      return next;
+    });
     setJustSaved(true);
     setTimeout(() => setJustSaved(false), 2000);
   };
@@ -156,9 +138,9 @@ export default function EvaluationsView({ players, sport = 'basketball' }) {
   const gradeColor = overall >= 4.5 ? 'var(--varsity-gold)' : overall >= 3.5 ? 'var(--status-win)' : overall >= 2.5 ? 'var(--status-warning)' : 'var(--foul-red)';
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 20 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '260px 1fr', gap: 20 }}>
       {/* Player list */}
-      <Card padding={0} style={{ height: 'fit-content' }}>
+      <Card padding={0} style={{ height: isMobile ? undefined : 'fit-content', maxHeight: isMobile ? 280 : undefined, overflowY: isMobile ? 'auto' : undefined }}>
         <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Display size={18}>Players</Display>
           <Button kind="ghost" size="sm" icon="download" onClick={() => exportEvalsCSV(active, evals, notes, SKILLS)}>Export</Button>
@@ -167,8 +149,7 @@ export default function EvaluationsView({ players, sport = 'basketball' }) {
           {sortedPlayers.map((p, i) => {
             const a = avg(evals, p.id);
             const isActive = selected === p.id;
-            const dirty = JSON.stringify(evals[p.id]) !== JSON.stringify(savedEvals[p.id]) ||
-              (notes[p.id] || '') !== (savedNotes[p.id] || '');
+            const dirty = dirtyIds.has(p.id);
             const ratingColor = parseFloat(a) >= 4 ? 'var(--status-win)' : parseFloat(a) >= 3 ? 'var(--fg)' : 'var(--foul-red)';
             return (
               <button key={p.id} onClick={() => setSelected(p.id)} style={{
@@ -200,34 +181,34 @@ export default function EvaluationsView({ players, sport = 'basketball' }) {
           {/* Header card */}
           <Card>
             <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-              <Jersey number={player.number} size={52} />
+              <Jersey number={player.number} size={isMobile ? 40 : 52} />
               <div style={{ flex: 1 }}>
-                <Display size={28}>{player.name}</Display>
+                <Display size={isMobile ? 22 : 28}>{player.name}</Display>
                 <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>{player.grade} · {player.position} · {player.school}</div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 52, lineHeight: 1, color: gradeColor }}>{avg(evals, selected)}</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 36 : 52, lineHeight: 1, color: gradeColor }}>{avg(evals, selected)}</div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: gradeColor, letterSpacing: '0.10em', textTransform: 'uppercase' }}>{grade}</div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, width: isMobile ? '100%' : undefined }}>
                 {isDirty && !justSaved && (
                   <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--basketball-orange)' }}>Unsaved changes</span>
                 )}
                 {justSaved && (
                   <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--status-win)' }}>Saved!</span>
                 )}
-                <Button kind="gold" icon={justSaved ? 'check' : 'save'} onClick={handleSave}>
+                <Button kind="gold" icon={justSaved ? 'check' : 'save'} onClick={handleSave} style={isMobile ? { width: '100%' } : undefined}>
                   {justSaved ? 'Saved' : 'Save evaluation'}
                 </Button>
               </div>
             </div>
           </Card>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr auto', gap: 16 }}>
             {/* Skills */}
             <Card>
               <Display size={20} style={{ marginBottom: 20 }}>Skill ratings</Display>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 20 }}>
                 {SKILLS.map(skill => {
                   const val = playerEvals[skill.id] || 0;
                   return (
@@ -242,7 +223,7 @@ export default function EvaluationsView({ players, sport = 'basketball' }) {
                       <div style={{ display: 'flex', gap: 5 }}>
                         {[1, 2, 3, 4, 5].map(n => (
                           <button key={n} onClick={() => setRating(skill.id, n)} style={{
-                            flex: 1, height: 32, borderRadius: 6, border: 'none', cursor: 'pointer',
+                            flex: 1, height: isMobile ? 40 : 32, borderRadius: 6, border: 'none', cursor: 'pointer',
                             background: n <= val ? 'var(--varsity-gold)' : 'var(--bone)',
                             transition: 'all 120ms', position: 'relative',
                           }}>
@@ -257,10 +238,10 @@ export default function EvaluationsView({ players, sport = 'basketball' }) {
             </Card>
 
             {/* Radar + notes */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: 260 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: isMobile ? '100%' : 260 }}>
               <Card style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                 <Eyebrow>Skill profile</Eyebrow>
-                <RadarChart evals={playerEvals} teamAvg={teamAvgEvals} size={220} SKILLS={SKILLS} />
+                <RadarChart evals={playerEvals} teamAvg={teamAvgEvals} size={isMobile ? 260 : 220} SKILLS={SKILLS} />
                 <div style={{ display: 'flex', gap: 14, fontSize: 10, color: 'var(--fg-muted)' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                     <span style={{ width: 12, height: 3, background: 'var(--varsity-gold)', borderRadius: 2, display: 'inline-block' }} /> Player
@@ -274,7 +255,10 @@ export default function EvaluationsView({ players, sport = 'basketball' }) {
                 <Display size={16} style={{ marginBottom: 10 }}>Coach notes</Display>
                 <textarea
                   value={notes[selected] || ''}
-                  onChange={e => setNotes(prev => ({ ...prev, [selected]: e.target.value }))}
+                  onChange={e => {
+                    setNotes(prev => ({ ...prev, [selected]: e.target.value }));
+                    markDirty(selected);
+                  }}
                   placeholder="Development focus, attitude, areas to watch…"
                   style={{ width: '100%', minHeight: 88, padding: '10px', borderRadius: 8, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--fg)', resize: 'vertical', outline: 'none', background: 'var(--bone)', boxSizing: 'border-box', lineHeight: 1.5 }}
                 />
