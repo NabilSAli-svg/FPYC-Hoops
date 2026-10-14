@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Card, Button, Icon, Display, Jersey } from '../shared/index.js';
-import { usePractices, useGames, useAttendance } from '../shared/store.js';
+import { useAttendance } from '../shared/store.js';
 import { csvDownload } from '../shared/csvDownload.js';
 
 const STATUS = {
@@ -12,18 +12,35 @@ const STATUS = {
 
 const CYCLE = ['present', 'absent', 'excused', 'none'];
 
+const MONTH_INDEX = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+
+// The season runs Sep (year Y) through ~Jun (year Y+1) -- Jul/Aug/Sep/Oct/Nov/Dec
+// belong to the season's start year, Jan-Jun belong to the year after, so
+// sessions sort in real chronological order instead of by month number alone.
+function seasonSortKey(monthAbbr, day) {
+  const mo = MONTH_INDEX[monthAbbr];
+  if (mo == null) return Infinity;
+  const yearOffset = mo >= 6 ? 0 : 1; // Jul-Dec this season year, Jan-Jun next
+  return yearOffset * 400 + mo * 31 + (day || 0);
+}
+
 function deriveSessions(games, practices) {
   const gameSessions = games
     .filter(g => g.status === 'final')
-    .map(g => ({ id: g.id, type: 'game', label: `${g.month} ${g.date}`, day: g.weekday, location: g.location }));
+    .map(g => ({ id: g.id, type: 'game', label: `${g.month} ${g.date}`, day: g.weekday, location: g.location, sortKey: seasonSortKey(g.month, g.date) }));
   const practiceSessions = practices
-    .map(p => ({
-      id: p.id, type: 'practice',
-      label: (p.date || '').split(', ')[1] || p.date,
-      day: p.date.split(',')[0].trim(),
-      location: p.gym,
-    }));
-  return [...gameSessions, ...practiceSessions];
+    .map(p => {
+      const datePart = (p.date || '').split(', ')[1] || p.date || '';
+      const [monthAbbr, dayStr] = datePart.split(' ');
+      return {
+        id: p.id, type: 'practice',
+        label: datePart,
+        day: (p.date || '').split(',')[0].trim(),
+        location: p.gym,
+        sortKey: seasonSortKey(monthAbbr, parseInt(dayStr, 10)),
+      };
+    });
+  return [...gameSessions, ...practiceSessions].sort((a, b) => a.sortKey - b.sortKey);
 }
 
 function hasConsecutiveAbsences(pid, sessions, attendance, n = 2) {
@@ -45,9 +62,7 @@ function exportAttendanceCSV(players, sessions, attendance) {
   csvDownload('fpyc-attendance.csv', [headers, ...rows]);
 }
 
-export default function AttendanceView({ players }) {
-  const [games]     = useGames();
-  const [practices] = usePractices();
+export default function AttendanceView({ players, games = [], practices = [] }) {
   const [filter, setFilter] = useState('all');
 
   const allSessions = deriveSessions(games, practices);

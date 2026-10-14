@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useGames, usePlayers, TEAM_INFO, TEAMS_INFO, SPORTS, activeTeamNames } from '../shared/store.js';
+import { useGames, usePlayers, usePractices, TEAM_INFO, TEAMS_INFO, SPORTS, activeTeamNames } from '../shared/store.js';
 import { canUseConsole, canView, canManageOps, visibleTeams, roleLabel, signupTabs } from '../shared/roles.js';
 import { supabase } from '../shared/supabase.js';
 import Sidebar from './Sidebar.jsx';
@@ -72,6 +72,7 @@ export default function AdminApp() {
   const [selectedTeamName, setSelectedTeamName] = useState(TEAM_INFO.name);
   const [players, setPlayers] = usePlayers();
   const [games, setGames] = useGames();
+  const [practices] = usePractices();
 
   // Coaches are locked to their own team — sync sport/team selection once known.
   useEffect(() => {
@@ -92,6 +93,7 @@ export default function AdminApp() {
 
   const teamPlayers = players.filter(p => p.team === selectedTeamName);
   const teamGames   = games.filter(g => !g.team || g.team === selectedTeamName);
+  const teamPractices = practices.filter(p => p.team === selectedTeamName);
   const activeTeam  = TEAMS_INFO[selectedTeamName] || TEAMS_INFO[TEAM_INFO.name];
 
   const saveScore = (id, result) =>
@@ -231,7 +233,7 @@ export default function AdminApp() {
           {view === 'roster'      && <RosterView team={TEAM} players={teamPlayers} setPlayers={setPlayers} sport={sport} />}
           {view === 'schedule'    && <ScheduleView games={teamGames} onScoreSave={saveScore} onGameUpdate={updateGame} onGameAdd={addGame} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} sport={sport} />}
           {view === 'lineup'      && <LineupView players={teamPlayers.filter(p => p.status === 'active')} games={teamGames} sport={sport} />}
-          {view === 'attendance'  && <AttendanceView players={teamPlayers} />}
+          {view === 'attendance'  && <AttendanceView players={teamPlayers} games={teamGames} practices={teamPractices} />}
           {view === 'messages'       && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} teamName={selectedTeamName} />}
           {view === 'announcements'  && <AnnouncementsView players={players} />}
           {view === 'evaluations' && <EvaluationsView players={teamPlayers.filter(p => p.status !== 'inactive')} sport={sport} />}
