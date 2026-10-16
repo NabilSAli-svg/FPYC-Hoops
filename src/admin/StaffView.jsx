@@ -15,6 +15,37 @@ const BG_COLORS = {
 
 const EMPTY_FORM = { name: '', role: '', program: 'Recreation', team: '', email: '', phone: '' };
 
+const AGE_GROUP_ORDER = ['K-3', '2/3', '3/4', '4/5', '5th', '6th', '7th', '8th', 'HS', 'Unassigned'];
+
+// Team names already lead with the grade/age band (e.g. "5th Boys Select A",
+// "3/4 Boys", "K-3 3v3") -- strip the Select/Boys/Girls/3v3 suffixes to get
+// a grouping key shared by both the boys and girls teams for that grade.
+function ageGroupOf(team) {
+  if (!team || team === 'Unassigned') return 'Unassigned';
+  return team
+    .replace(/ Select( [A-C])?$/, '')
+    .replace(/ (Boys|Girls)$/, '')
+    .replace(/ 3v3$/, '')
+    .trim() || 'Unassigned';
+}
+
+function groupByAgeGroup(people, program) {
+  const groups = new Map();
+  for (const person of people) {
+    const a = person.assignments.find(x => x.program === program) || person.assignments[0];
+    const key = ageGroupOf(a?.team);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(person);
+  }
+  return [...groups.entries()].sort(([a], [b]) => {
+    const ia = AGE_GROUP_ORDER.indexOf(a), ib = AGE_GROUP_ORDER.indexOf(b);
+    if (ia === -1 && ib === -1) return a.localeCompare(b);
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+}
+
 // Group staff rows by person (email, falling back to id for rows with no
 // email) -- the same person often has one row per team/role (e.g. a Select
 // coach who also trains), which otherwise reads as duplicates on this page.
@@ -71,6 +102,7 @@ export default function StaffView() {
 
   const people = groupByPerson(staff);
   const filtered = activeProgram === 'All' ? people : people.filter(p => p.programs.includes(activeProgram));
+  const groupedProgram = (activeProgram === 'Select' || activeProgram === 'Recreation') ? activeProgram : null;
 
   function openAdd() {
     setForm(EMPTY_FORM);
@@ -185,40 +217,58 @@ export default function StaffView() {
         </Card>
       )}
 
-      <Card padding={0}>
-        {filtered.length === 0 && (
+      {filtered.length === 0 && (
+        <Card padding={0}>
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--fg-muted)', fontSize: 13 }}>No staff or volunteers in this program yet.</div>
-        )}
-        {filtered.map((person, i) => {
-          const colors = BG_COLORS[person.bgCheckStatus] || BG_COLORS['Not Started'];
-          return (
-            <div key={person.key} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 18px', borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none', flexWrap: 'wrap' }}>
-              <Avatar name={person.name} size={36} color="var(--court-navy)" />
-              <div style={{ flex: '1 1 220px', minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>{person.name}</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 4 }}>
-                  {person.assignments.map((a, ai) => (
-                    <Pill key={ai} kind="neutral">{a.role} · {a.program}{a.team ? ` · ${a.team}` : ''}</Pill>
-                  ))}
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 4 }}>{person.email} · {person.phone}</div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ background: colors.bg, color: colors.fg, fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '4px 10px' }}>
-                  Background check: {person.bgCheckStatus}{person.bgCheckDate ? ` (${person.bgCheckDate})` : ''}
-                </span>
-                <Button kind="quiet" size="sm" icon="shield-check" disabled={bgBusyKey === person.key} onClick={() => runBackgroundCheck(person)}>
-                  {bgBusyKey === person.key ? 'Requesting…' : 'Run check'}
-                </Button>
-                <Button kind="quiet" size="sm" icon="edit-2" onClick={() => openEdit(person)} />
-                <Button kind="quiet" size="sm" icon="trash-2" onClick={() => removePerson(person)} />
-              </div>
-            </div>
-          );
-        })}
-      </Card>
+        </Card>
+      )}
+
+      {filtered.length > 0 && (groupedProgram
+        ? groupByAgeGroup(filtered, groupedProgram).map(([ageGroup, groupPeople]) => (
+          <div key={ageGroup}>
+            <Eyebrow>{ageGroup}</Eyebrow>
+            <Card padding={0} style={{ marginTop: 8 }}>
+              <PersonRows people={groupPeople} bgBusyKey={bgBusyKey} runBackgroundCheck={runBackgroundCheck} openEdit={openEdit} removePerson={removePerson} />
+            </Card>
+          </div>
+        ))
+        : (
+          <Card padding={0}>
+            <PersonRows people={filtered} bgBusyKey={bgBusyKey} runBackgroundCheck={runBackgroundCheck} openEdit={openEdit} removePerson={removePerson} />
+          </Card>
+        ))}
     </div>
   );
+}
+
+function PersonRows({ people, bgBusyKey, runBackgroundCheck, openEdit, removePerson }) {
+  return people.map((person, i) => {
+    const colors = BG_COLORS[person.bgCheckStatus] || BG_COLORS['Not Started'];
+    return (
+      <div key={person.key} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 18px', borderBottom: i < people.length - 1 ? '1px solid var(--border)' : 'none', flexWrap: 'wrap' }}>
+        <Avatar name={person.name} size={36} color="var(--court-navy)" />
+        <div style={{ flex: '1 1 220px', minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: 14 }}>{person.name}</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 4 }}>
+            {person.assignments.map((a, ai) => (
+              <Pill key={ai} kind="neutral">{a.role} · {a.program}{a.team ? ` · ${a.team}` : ''}</Pill>
+            ))}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 4 }}>{person.email} · {person.phone}</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ background: colors.bg, color: colors.fg, fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '4px 10px' }}>
+            Background check: {person.bgCheckStatus}{person.bgCheckDate ? ` (${person.bgCheckDate})` : ''}
+          </span>
+          <Button kind="quiet" size="sm" icon="shield-check" disabled={bgBusyKey === person.key} onClick={() => runBackgroundCheck(person)}>
+            {bgBusyKey === person.key ? 'Requesting…' : 'Run check'}
+          </Button>
+          <Button kind="quiet" size="sm" icon="edit-2" onClick={() => openEdit(person)} />
+          <Button kind="quiet" size="sm" icon="trash-2" onClick={() => removePerson(person)} />
+        </div>
+      </div>
+    );
+  });
 }
 
 function Field({ label, children }) {
