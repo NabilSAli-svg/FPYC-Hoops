@@ -77,7 +77,9 @@ function Gate({ title, subtitle, allow, signedInAs }) {
     e.preventDefault();
     if (!email.trim()) { setError('Enter your email address.'); return; }
     setLoading(true); setError('');
-    const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim());
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
     setLoading(false);
     if (err) { setError(err.message); return; }
     setNotice('Password reset email sent — check your inbox.');
