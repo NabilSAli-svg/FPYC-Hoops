@@ -48,10 +48,12 @@ export default function RequireRole({ allow = [], title = 'FPYC', subtitle, chil
 }
 
 function Gate({ title, subtitle, allow, signedInAs }) {
+  const [mode, setMode]         = useState('signin'); // 'signin' | 'reset'
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
+  const [notice, setNotice]     = useState('');
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -69,6 +71,19 @@ function Gate({ title, subtitle, allow, signedInAs }) {
       setError('This account does not have access to ' + title + '.');
     }
     // On success the onAuthStateChange listener re-renders with the new role.
+  }
+
+  async function handleReset(e) {
+    e.preventDefault();
+    if (!email.trim()) { setError('Enter your email address.'); return; }
+    setLoading(true); setError('');
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (err) { setError(err.message); return; }
+    setNotice('Password reset email sent — check your inbox.');
+    setMode('signin');
   }
 
   const allowed = allow.map(roleLabel).join(', ');
@@ -94,19 +109,30 @@ function Gate({ title, subtitle, allow, signedInAs }) {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
+          {notice && (
+            <div style={{ fontSize: 13, color: '#059669', fontWeight: 600, marginBottom: 13 }}>{notice}</div>
+          )}
+
+          <form onSubmit={mode === 'reset' ? handleReset : handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
             <div>
               <label style={lbl}>Email</label>
               <input type="email" value={email} autoComplete="email"
                 onChange={e => { setEmail(e.target.value); setError(''); }}
                 placeholder="you@example.com" style={inp} />
             </div>
-            <div>
-              <label style={lbl}>Password</label>
-              <input type="password" value={password} autoComplete="current-password"
-                onChange={e => { setPassword(e.target.value); setError(''); }}
-                placeholder="••••••••" style={inp} />
-            </div>
+            {mode !== 'reset' && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <label style={lbl}>Password</label>
+                  <button type="button" onClick={() => { setMode('reset'); setError(''); setNotice(''); }} style={linkBtnQuiet}>
+                    Forgot password?
+                  </button>
+                </div>
+                <input type="password" value={password} autoComplete="current-password"
+                  onChange={e => { setPassword(e.target.value); setError(''); }}
+                  placeholder="••••••••" style={inp} />
+              </div>
+            )}
             {error && <div style={{ fontSize: 13, color: '#DC2626', fontWeight: 600 }}>{error}</div>}
             <button type="submit" disabled={loading} style={{
               marginTop: 2, padding: '12px', borderRadius: 8, border: 'none',
@@ -115,9 +141,14 @@ function Gate({ title, subtitle, allow, signedInAs }) {
               cursor: loading ? 'not-allowed' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             }}>
-              <Icon name="log-in" size={15} color="#fff" />
-              {loading ? 'Signing in…' : 'Sign in'}
+              <Icon name={mode === 'reset' ? 'mail' : 'log-in'} size={15} color="#fff" />
+              {loading ? (mode === 'reset' ? 'Sending…' : 'Signing in…') : (mode === 'reset' ? 'Send reset link' : 'Sign in')}
             </button>
+            {mode === 'reset' && (
+              <button type="button" onClick={() => { setMode('signin'); setError(''); setNotice(''); }} style={linkBtnQuiet}>
+                ← Back to sign in
+              </button>
+            )}
           </form>
         </div>
 
@@ -144,4 +175,9 @@ const linkBtn = {
   display: 'block', marginTop: 6, background: 'none', border: 'none', padding: 0,
   color: '#B91C1C', fontWeight: 700, fontSize: 13, cursor: 'pointer',
   fontFamily: 'var(--font-body)', textDecoration: 'underline',
+};
+const linkBtnQuiet = {
+  background: 'none', border: 'none', padding: 0,
+  color: 'var(--court-navy)', fontWeight: 600, fontSize: 11.5, cursor: 'pointer',
+  fontFamily: 'var(--font-body)', textAlign: 'left',
 };
