@@ -257,7 +257,7 @@ export default function AdminApp() {
 }
 
 function AdminLogin({ onSuccess }) {
-  const [mode, setMode]         = useState('signin'); // 'signin' | 'signup'
+  const [mode, setMode]         = useState('signin'); // 'signin' | 'signup' | 'reset'
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
@@ -267,6 +267,17 @@ function AdminLogin({ onSuccess }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true); setError(''); setInfo('');
+
+    if (mode === 'reset') {
+      const { error: resetErr } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      setLoading(false);
+      if (resetErr) { setError(resetErr.message); return; }
+      setInfo('Password reset email sent — check your inbox.');
+      setMode('signin');
+      return;
+    }
 
     if (mode === 'signup') {
       const { error: signUpErr } = await supabase.auth.signUp({ email: email.trim(), password });
@@ -310,16 +321,34 @@ function AdminLogin({ onSuccess }) {
           )}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div><label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="coach@fpyc.org" style={inp} /></div>
-            <div><label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" style={inp} /></div>
+            {mode !== 'reset' && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Password</label>
+                  {mode === 'signin' && (
+                    <button type="button" onClick={() => { setMode('reset'); setError(''); setInfo(''); }} style={{ border: 'none', background: 'none', color: 'var(--court-navy)', fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 11.5 }}>
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" style={inp} />
+              </div>
+            )}
             <button type="submit" disabled={loading} style={{ padding: '12px', borderRadius: 10, border: 'none', background: loading ? '#9CA3AF' : 'var(--court-navy)', color: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 15, cursor: loading ? 'not-allowed' : 'pointer', marginTop: 4 }}>
-              {loading ? (mode === 'signup' ? 'Creating account…' : 'Signing in…') : (mode === 'signup' ? 'Create account' : 'Sign in')}
+              {loading
+                ? (mode === 'signup' ? 'Creating account…' : mode === 'reset' ? 'Sending…' : 'Signing in…')
+                : (mode === 'signup' ? 'Create account' : mode === 'reset' ? 'Send reset link' : 'Sign in')}
             </button>
           </form>
           <div style={{ textAlign: 'center', marginTop: 16, fontSize: 13 }}>
-            {mode === 'signin' ? (
+            {mode === 'signin' && (
               <span style={{ color: '#6B7280' }}>New admin? <button type="button" onClick={() => { setMode('signup'); setError(''); setInfo(''); }} style={{ border: 'none', background: 'none', color: 'var(--court-navy)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: 13 }}>Create an account</button></span>
-            ) : (
+            )}
+            {mode === 'signup' && (
               <span style={{ color: '#6B7280' }}>Already have an account? <button type="button" onClick={() => { setMode('signin'); setError(''); setInfo(''); }} style={{ border: 'none', background: 'none', color: 'var(--court-navy)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: 13 }}>Sign in</button></span>
+            )}
+            {mode === 'reset' && (
+              <button type="button" onClick={() => { setMode('signin'); setError(''); setInfo(''); }} style={{ border: 'none', background: 'none', color: 'var(--court-navy)', fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: 13 }}>← Back to sign in</button>
             )}
           </div>
         </div>
