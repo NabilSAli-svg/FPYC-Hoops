@@ -150,7 +150,7 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
     return e;
   }
 
-  function handleSave() {
+  async function handleSave() {
     const e = validate();
     if (Object.keys(e).length > 0) { setErrors(e); return; }
 
@@ -171,20 +171,25 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
       team: form.team,
     };
 
-    if (modal.mode === 'add') {
-      setPlayers(ps => [...ps, updated]);
-      showToast(`${updated.name} added to roster`);
-    } else {
-      setPlayers(ps => ps.map(p => p.id === updated.id ? updated : p));
-      showToast(`${updated.name} updated`);
+    const isAdd = modal.mode === 'add';
+    const result = await setPlayers(ps => isAdd ? [...ps, updated] : ps.map(p => p.id === updated.id ? updated : p));
+    if (result?.error) {
+      showToast(`Could not save ${updated.name}: ${result.error.message}`);
+      return;
     }
+    showToast(isAdd ? `${updated.name} added to roster` : `${updated.name} updated`);
     closeModal();
   }
 
-  function handleRemove() {
+  async function handleRemove() {
     if (!confirmRemove) { setConfirmRemove(true); return; }
-    setPlayers(ps => ps.filter(p => p.id !== modal.player.id));
-    showToast(`${modal.player.name} removed from roster`);
+    const name = modal.player.name;
+    const result = await setPlayers(ps => ps.filter(p => p.id !== modal.player.id));
+    if (result?.error) {
+      showToast(`Could not remove ${name}: ${result.error.message}`);
+      return;
+    }
+    showToast(`${name} removed from roster`);
     closeModal();
   }
 

@@ -81,14 +81,27 @@ export function useSupabaseTable(tableName, initial = []) {
       return !prev || JSON.stringify(prev) !== JSON.stringify(r);
     });
 
+    // Surfaced to the caller so a failed write (e.g. an RLS rejection) can be
+    // shown to the user instead of silently reverting on the next reload —
+    // the optimistic update above makes it look like it worked either way.
+    let writeError = null;
+
     if (toDelete.length > 0) {
       const { error } = await supabase.from(tableName).delete().in('id', toDelete);
-      if (error) console.error(`[supabase] delete ${tableName}:`, error.message);
+      if (error) { console.error(`[supabase] delete ${tableName}:`, error.message); writeError = error; }
     }
     if (toUpsert.length > 0) {
       const { error } = await supabase.from(tableName).upsert(toUpsert);
-      if (error) console.error(`[supabase] upsert ${tableName}:`, error.message);
+      if (error) { console.error(`[supabase] upsert ${tableName}:`, error.message); writeError = error; }
     }
+
+    if (writeError) {
+      // Roll back the optimistic update so the UI doesn't claim a save that
+      // didn't happen.
+      setDataLocal(current);
+    }
+
+    return { error: writeError };
   }, [tableName]);
 
   return [data, setData];
