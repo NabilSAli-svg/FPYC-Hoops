@@ -17,6 +17,23 @@ const NOTIF_COLORS = {
   success: { color: 'var(--status-win)',     bg: 'rgba(31,138,91,0.08)' },
 };
 
+// supabase-js's FunctionsHttpError.message is just "Edge Function returned a
+// non-2xx status code" -- the real reason the function sent back (missing
+// API key, a rejected send, etc.) is JSON on error.context, the raw
+// Response. Without this, every edge function failure looks identical and
+// useless in the toast.
+async function describeEdgeFunctionError(error) {
+  if (!error) return null;
+  try {
+    if (error.context && typeof error.context.json === 'function') {
+      const body = await error.context.json();
+      const detail = body?.error;
+      if (detail) return typeof detail === 'string' ? detail : (detail.message || JSON.stringify(detail));
+    }
+  } catch { /* fall through to the generic message below */ }
+  return error.message;
+}
+
 export default function MessagesView({ autoCompose = false, onAutoComposeUsed, teamName }) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -57,7 +74,7 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed, t
       }
 
       if (result.error || result.data?.error) {
-        const detail = result.error?.message || JSON.stringify(result.data?.error);
+        const detail = await describeEdgeFunctionError(result.error) || JSON.stringify(result.data?.error);
         setSentToast(`Failed to send: ${detail}`);
       } else {
         setMessages(ms => [{
