@@ -38,7 +38,6 @@ export default function WebsiteApp() {
         <WhyFPYC />
         <SeasonCalendar />
         <HowToRegister />
-        <Schedule />
         <RefSignup />
         <FaqContact />
         {/*
@@ -54,6 +53,11 @@ export default function WebsiteApp() {
           a real next session to promote:
             <SkillsClinic />    Fall session ended Oct 26; no Spring/Summer dates yet
             <SelectOpenGyms />  tryouts concluded, Select teams are formed
+
+          Hidden — no real public schedule content for this: <Schedule />
+          pulls from useGames(), which only holds old archived Summer 3v3
+          games, so it rendered stale/irrelevant "upcoming" games. Families
+          see the real Winter schedule in the Family Portal instead.
         */}
       </main>
       <Footer />
