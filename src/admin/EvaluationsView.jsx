@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useEvaluations } from '../shared/store.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 import { Card, Button, Icon, Display, Eyebrow, Jersey } from '../shared/index.js';
@@ -97,6 +97,17 @@ export default function EvaluationsView({ players, sport = 'basketball' }) {
   const [selected, setSelected] = useState(players[0]?.id);
   const [evals, setEvals, notes, setNotes] = useEvaluations(sport);
   const [justSaved, setJustSaved] = useState(false);
+
+  // `players` often arrives from Supabase after the first render, so the
+  // useState initializer above can miss it -- nothing is ever selected and
+  // the whole eval panel stays blank even though the roster list is full.
+  // Keep `selected` pointed at a real player as the roster loads or changes.
+  useEffect(() => {
+    if (players.length === 0) return;
+    if (!selected || !players.some(p => p.id === selected)) {
+      setSelected(players[0].id);
+    }
+  }, [players, selected]);
   // Ratings/notes sync to Supabase as soon as they change — "Save" here is
   // just a UX confirmation, tracked per player id rather than diffed
   // against a baseline snapshot (which would race the async initial load).
