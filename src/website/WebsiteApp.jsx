@@ -34,8 +34,6 @@ export default function WebsiteApp() {
       <main id="top" style={{ scrollBehavior: 'smooth' }}>
         <Hero onRegister={() => scrollTo('register')} />
         <Announcements />
-        <SkillsClinic />
-        <SelectOpenGyms />
         <Programs />
         <WhyFPYC />
         <SeasonCalendar />
@@ -51,6 +49,11 @@ export default function WebsiteApp() {
             <SeasonRecap />    fictional team records and league totals
             <Testimonials />   invented quotes and people
             <News />           invented articles
+
+          Hidden because the season has moved past them — re-add once there's
+          a real next session to promote:
+            <SkillsClinic />    Fall session ended Oct 26; no Spring/Summer dates yet
+            <SelectOpenGyms />  tryouts concluded, Select teams are formed
         */}
       </main>
       <Footer />

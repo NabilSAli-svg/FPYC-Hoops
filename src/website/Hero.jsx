@@ -75,14 +75,14 @@ export default function Hero({ onRegister }) {
         <div style={{ background: '#fff', color: 'var(--fg)', borderRadius: 14, padding: 28, boxShadow: '0 24px 60px rgba(0,0,0,0.30)', position: 'relative' }}>
           <div style={{ position: 'absolute', top: -1, left: 24, right: 24, height: 4, background: 'var(--varsity-gold)', borderRadius: '0 0 4px 4px' }} />
           <div style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--basketball-orange)' }}>
-            Now enrolling
+            Winter 2026–27
           </div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, textTransform: 'uppercase', lineHeight: 1, margin: '8px 0 14px', color: 'var(--court-navy)' }}>
-            Fall Skills Clinic
+            Season underway
           </div>
           <div style={{ fontSize: 14, color: 'var(--fg-soft)', lineHeight: 1.55, marginBottom: 18 }}>
-            6 sessions · Sept 14 – Oct 27<br />
-            Beginner, Intermediate &amp; Advanced groups
+            Rec house league evaluations Nov 14<br />
+            Select teams are practicing now
           </div>
           <div style={{ background: 'var(--bone)', border: '1px solid var(--border)', borderRadius: 8, padding: 14, marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
