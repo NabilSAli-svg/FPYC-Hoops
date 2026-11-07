@@ -3,22 +3,10 @@ import { REGISTER_URL } from '../shared/store.js';
 
 const EVENTS = [
   {
-    date: 'Sept 14',
-    title: 'Fall Skills Clinic begins',
-    desc: 'Providence ES · Mondays through Sep 21, then Tuesdays · Beginner 6–7, Intermediate 7–8, Advanced 8–9',
-    category: 'play',
-  },
-  {
-    date: 'Fall',
-    title: 'Walk-in registration',
-    desc: 'Saturdays 10am–12pm · FPYC Clubhouse, 10701 West Dr · dates posted at fpycsports.com',
-    category: 'reg',
-  },
-  {
-    date: 'Oct 27',
-    title: 'Fall Skills Clinic ends',
-    desc: 'Six sessions complete · no clinic Oct 12/13',
-    category: 'play',
+    date: 'Nov 14',
+    title: 'House League evaluations',
+    desc: 'Rec players 3rd grade and up — scores feed the draft that follows',
+    category: 'team',
   },
   {
     date: 'Nov 15',
@@ -27,27 +15,27 @@ const EVENTS = [
     category: 'warn',
   },
   {
-    date: 'Mid Nov',
-    title: 'Team placements',
-    desc: 'League office assigns players to balanced rosters',
+    date: 'After evals',
+    title: 'Rec draft',
+    desc: 'Evaluated players are drafted onto balanced Rec teams by age group',
     category: 'team',
   },
   {
-    date: 'Late Nov',
-    title: 'Coach contact',
-    desc: 'Your coach reaches out with practice details',
-    category: 'team',
-  },
-  {
-    date: 'Early Dec',
-    title: 'Winter practices begin',
-    desc: 'Weekday practices at local Fairfax County school gyms',
+    date: 'Dec 5',
+    title: 'Select weekend play begins',
+    desc: 'Daniels Run, Providence, KJMS & Fairfax HS, weekends through mid-March',
     category: 'play',
   },
   {
-    date: 'Dec',
-    title: 'Season opener',
-    desc: 'First games of the 2026–27 Rec and Select seasons',
+    date: 'Dec 19–Jan 3',
+    title: 'Winter break',
+    desc: 'No practices or games — facilities closed for the holidays',
+    category: 'warn',
+  },
+  {
+    date: 'Through Mar',
+    title: 'Rec & Select seasons',
+    desc: 'Weekday Rec practices and games · Select weekday practices plus weekend play',
     category: 'play',
   },
   {
@@ -59,7 +47,6 @@ const EVENTS = [
 ];
 
 const CAT = {
-  reg:   { color: 'var(--court-navy)',        bg: 'rgba(10,31,61,0.08)',      label: 'Registration' },
   warn:  { color: 'var(--foul-red)',           bg: 'rgba(200,16,46,0.08)',     label: 'Deadline'     },
   team:  { color: 'var(--basketball-orange)', bg: 'rgba(232,119,34,0.10)',    label: 'Team'         },
   play:  { color: '#059669',                  bg: 'rgba(5,150,105,0.08)',     label: 'Games'        },
