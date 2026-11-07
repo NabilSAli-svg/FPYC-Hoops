@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
-import { usePlayers, buildSnakeOrder, TEAMS_INFO, activeTeamNames } from '../shared/store.js';
-import { useLocalStorage } from '../shared/useLocalStorage.js';
+import { usePlayers, useDrafts, useEvaluations, buildSnakeOrder, TEAMS_INFO, activeTeamNames } from '../shared/store.js';
 
 const TEAM_COLORS = ['#0A1F3D','#C8102E','#1F8A5B','#E87722','#7C3AED','#0F766E','#B45309','#1D4ED8'];
 
@@ -111,9 +110,10 @@ function StatusPill({ status }) {
 
 // ── New Draft Form ─────────────────────────────────────────────────────────────
 
-function NewDraftForm({ onSave, onCancel, initial }) {
+function NewDraftForm({ onSave, onCancel, initial, allowedDivisions }) {
+  const divisionOptions = allowedDivisions && allowedDivisions.length > 0 ? allowedDivisions : DRAFTABLE_TEAMS;
   const [name, setName] = useState(initial?.name || '');
-  const [division, setDivision] = useState(initial?.division || '');
+  const [division, setDivision] = useState(initial?.division || (divisionOptions.length === 1 ? divisionOptions[0] : ''));
   const [season, setSeason] = useState(initial?.season || '2026-27');
   const [format, setFormat] = useState(initial?.format || 'snake');
   const [rounds, setRounds] = useState(initial?.rounds || 4);
@@ -170,8 +170,10 @@ function NewDraftForm({ onSave, onCancel, initial }) {
         <div>
           <label style={lbl}>Division (filter players)</label>
           <select style={inp} value={division} onChange={e => setDivision(e.target.value)}>
-            <option value="">All divisions</option>
-            {DRAFTABLE_TEAMS.map(name => <option key={name} value={name}>{name}</option>)}
+            {/* An unfiltered pool spans every program (Select included), so only
+                offer it when the caller isn't scoped to specific divisions. */}
+            {!allowedDivisions && <option value="">All divisions</option>}
+            {divisionOptions.map(name => <option key={name} value={name}>{name}</option>)}
           </select>
         </div>
         <div>
@@ -734,24 +736,26 @@ function CompletedView({ draft, setDrafts, players, evals, setPlayers }) {
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export default function DraftBoardView() {
-  const [drafts, setDrafts] = useLocalStorage('fpyc-drafts', []);
+export default function DraftBoardView({ sport = 'basketball', allowedDivisions } = {}) {
+  const [drafts, setDrafts] = useDrafts();
   const [players, setPlayers] = usePlayers();
-  const [evals] = useLocalStorage('fpyc-evals', {});
+  const [evals] = useEvaluations(sport);
   const [activeDraftId, setActiveDraftId] = useState(null);
   const [showNewForm, setShowNewForm] = useState(false);
 
   const activeDraft = drafts.find(d => d.id === activeDraftId);
 
-  function createDraft(draft) {
-    setDrafts(prev => [...prev, draft]);
+  async function createDraft(draft) {
+    const result = await setDrafts(prev => [...prev, draft]);
+    if (result?.error) { alert(`Could not save the draft: ${result.error.message}`); return; }
     setActiveDraftId(draft.id);
     setShowNewForm(false);
   }
 
-  function deleteDraft(id) {
+  async function deleteDraft(id) {
     if (!confirm('Delete this draft?')) return;
-    setDrafts(prev => prev.filter(d => d.id !== id));
+    const result = await setDrafts(prev => prev.filter(d => d.id !== id));
+    if (result?.error) { alert(`Could not delete the draft: ${result.error.message}`); return; }
     if (activeDraftId === id) setActiveDraftId(null);
   }
 
@@ -763,7 +767,7 @@ export default function DraftBoardView() {
           {!showNewForm && <Button onClick={() => setShowNewForm(true)}>+ New Draft</Button>}
         </div>
 
-        {showNewForm && <NewDraftForm onSave={createDraft} onCancel={() => setShowNewForm(false)} />}
+        {showNewForm && <NewDraftForm onSave={createDraft} onCancel={() => setShowNewForm(false)} allowedDivisions={allowedDivisions} />}
 
         {drafts.length === 0 && !showNewForm && (
           <Card padding={40} style={{ textAlign: 'center' }}>
@@ -808,6 +812,7 @@ export default function DraftBoardView() {
             setDrafts(prev => prev.map(d => d.id !== activeDraft.id ? d : { ...updated, id: activeDraft.id }));
           }}
           onCancel={null}
+          allowedDivisions={allowedDivisions}
         />
       )}
 
