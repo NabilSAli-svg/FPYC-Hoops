@@ -9,7 +9,7 @@ const EVENTS = [
     category: 'team',
   },
   {
-    date: 'Nov 15',
+    date: 'Nov 23',
     title: 'Late fees begin',
     desc: '$45 surcharge added · register before this date',
     category: 'warn',
@@ -19,6 +19,12 @@ const EVENTS = [
     title: 'Rec draft',
     desc: 'Evaluated players are drafted onto balanced Rec teams by age group',
     category: 'team',
+  },
+  {
+    date: 'Dec 1',
+    title: 'Registration closes',
+    desc: 'Last day to register for the 2026–27 Winter season',
+    category: 'warn',
   },
   {
     date: 'Dec 5',
@@ -132,7 +138,7 @@ export default function SeasonCalendar() {
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
             <span style={{ fontSize: 14, color: 'var(--fg)', fontWeight: 500 }}>
-              <strong>Walk-in registration</strong> · Saturdays 10am–12pm at the FPYC Clubhouse, 10701 West Dr, Fairfax VA 22030
+              <strong>Registration closes Dec 1</strong> · Late fees apply starting Nov 23
             </span>
           </div>
           <a href={REGISTER_URL} target="_blank" rel="noreferrer" style={{

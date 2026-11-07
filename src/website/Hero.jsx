@@ -89,7 +89,7 @@ export default function Hero({ onRegister }) {
               <Icon name="alert-triangle" size={14} color="var(--status-warning)" />
               <span style={{ fontWeight: 700, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--court-navy)' }}>Late fees</span>
             </div>
-            <div style={{ fontSize: 13, color: 'var(--fg-soft)' }}>Winter Rec &amp; Select late fees begin Nov 15.</div>
+            <div style={{ fontSize: 13, color: 'var(--fg-soft)' }}>Late fees begin Nov 23 · registration closes Dec 1.</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13, marginBottom: 20 }}>
             <CheckLine text="Scholarships available — apply during registration" />

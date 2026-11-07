@@ -67,9 +67,7 @@ export default function Footer() {
         <FooterCol title="Play" items={[
           { label: 'Rec League',      href: '/#programs' },
           { label: 'Select',          href: '/#programs' },
-          { label: 'Skills Clinic',   href: '/#clinic' },
-          { label: 'Select open gyms',href: '/#open-gyms' },
-          { label: 'Schedules',       href: '/#schedule' },
+          { label: 'Schedules',       href: '/family' },
           { label: 'Live scoreboard', href: '/scoreboard' },
         ]} />
         <FooterCol title="Help" items={[
