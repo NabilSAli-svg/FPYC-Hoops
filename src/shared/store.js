@@ -1847,7 +1847,7 @@ const INITIAL_GYM_PERMITS = [
     start_date: '2026-12-05',
     end_date: '2027-03-20',
     sport: 'basketball',
-    notes: 'Preview — Select weekend space, confirm with City of Fairfax by 11/9',
+    notes: 'Select weekend space · Sat 12/12 starts at 1:00 PM instead of 8:00 AM',
   },
   {
     id: 'gp-winter26-kjms2-sat',
@@ -1860,7 +1860,7 @@ const INITIAL_GYM_PERMITS = [
     start_date: '2026-12-05',
     end_date: '2027-03-20',
     sport: 'basketball',
-    notes: 'Preview — Select weekend space, confirm with City of Fairfax by 11/9',
+    notes: 'Select weekend space · Sat 12/12 starts at 1:00 PM instead of 8:00 AM',
   },
   {
     id: 'gp-winter26-kjms1-sun',
