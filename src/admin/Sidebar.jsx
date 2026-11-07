@@ -141,6 +141,17 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
         ))}
       </nav>
 
+      {/* Support */}
+      <a href="mailto:fpychoopssupport@gmail.com" style={{
+        margin: '0 8px 6px', padding: '9px 12px', borderRadius: 6,
+        display: 'flex', alignItems: 'center', gap: 12,
+        color: 'rgba(255,255,255,0.6)', textDecoration: 'none',
+        fontFamily: 'var(--font-body)', fontWeight: 500, fontSize: 13,
+      }}>
+        <Icon name="life-buoy" size={16} />
+        <span>Support</span>
+      </a>
+
       {/* Coach footer */}
       <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 10 }}>
         <Avatar name={displayName} size={32} color="var(--varsity-gold)" />
