@@ -108,6 +108,72 @@ export function useSupabaseTable(tableName, initial = []) {
 }
 
 /**
+ * Drop-in replacement for useLocalStorage for an array of arbitrarily-shaped
+ * objects (each with an `id`), stored one per row as a jsonb blob rather than
+ * mapped to real columns -- for data too free-form to model relationally,
+ * like draft board sessions. Same [value, setValue] interface as
+ * useLocalStorage/useSupabaseTable, including the optimistic-update-with-
+ * rollback-on-error behavior.
+ */
+export function useSupabaseJsonList(tableName, initial = []) {
+  const [items, setItemsLocal] = useState(initial);
+  const itemsRef = useRef(items);
+  useEffect(() => { itemsRef.current = items; }, [items]);
+
+  useEffect(() => {
+    supabase
+      .from(tableName)
+      .select('id, data')
+      .then(({ data: rows, error }) => {
+        if (error) { console.error(`[supabase] fetch ${tableName}:`, error.message); return; }
+        if (rows) setItemsLocal(rows.map(r => r.data));
+      });
+
+    const channel = supabase
+      .channel(`rt-${tableName}-${Math.random().toString(36).slice(2)}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: tableName },
+        ({ eventType, new: newRow, old: oldRow }) => {
+          setItemsLocal(prev => {
+            if (eventType === 'INSERT') return [...prev, newRow.data];
+            if (eventType === 'UPDATE') return prev.map(it => it.id === newRow.id ? newRow.data : it);
+            if (eventType === 'DELETE') return prev.filter(it => it.id !== oldRow.id);
+            return prev;
+          });
+        })
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [tableName]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const setItems = useCallback(async (updaterOrValue) => {
+    const current = itemsRef.current;
+    const next = typeof updaterOrValue === 'function' ? updaterOrValue(current) : updaterOrValue;
+
+    setItemsLocal(next);
+
+    const prevIds = new Set(current.map(it => it.id));
+    const nextIds = new Set(next.map(it => it.id));
+    const toDelete = current.filter(it => !nextIds.has(it.id)).map(it => it.id);
+    const toUpsert = next.map(it => ({ id: it.id, data: it }));
+
+    let writeError = null;
+    if (toDelete.length > 0) {
+      const { error } = await supabase.from(tableName).delete().in('id', toDelete);
+      if (error) { console.error(`[supabase] delete ${tableName}:`, error.message); writeError = error; }
+    }
+    if (toUpsert.length > 0) {
+      const { error } = await supabase.from(tableName).upsert(toUpsert);
+      if (error) { console.error(`[supabase] upsert ${tableName}:`, error.message); writeError = error; }
+    }
+
+    if (writeError) setItemsLocal(current);
+    return { error: writeError };
+  }, [tableName]);
+
+  return [items, setItems];
+}
+
+/**
  * For official_assignments which are stored as rows keyed by game_id
  * but consumed as a plain object { [gameId]: { refs, status } }.
  */

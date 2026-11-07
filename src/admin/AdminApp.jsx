@@ -84,6 +84,12 @@ export default function AdminApp() {
 
   const sportTeams = TEAM_NAMES_BY_SPORT[sport] || [];
   const ALL_TEAM_NAMES = role ? visibleTeams(role, TEAMS_INFO, scopes, sportTeams) : [];
+  // Admin's unrestricted -- they get the "All divisions" option in Draft Board.
+  // Everyone else is limited to the draftable teams they can actually see,
+  // so a League Director can't pull players from outside their own age group.
+  const draftableDivisions = role === 'admin'
+    ? undefined
+    : ALL_TEAM_NAMES.filter(name => !TEAMS_INFO[name]?.noDraft);
 
   function handleSportChange(newSport) {
     if (role === 'coach') return;
@@ -239,7 +245,7 @@ export default function AdminApp() {
           {view === 'evaluations' && <EvaluationsView players={teamPlayers.filter(p => p.status !== 'inactive')} sport={sport} />}
           {view === 'staff'       && <StaffView />}
           {view === 'playoffs'    && <PlayoffsView />}
-          {view === 'draftboard'  && <DraftBoardView />}
+          {view === 'draftboard'  && <DraftBoardView sport={sport} allowedDivisions={draftableDivisions} />}
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} sport={sport} />}
           {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} sport={sport} />}
           {view === 'scheduler'   && <MasterSchedulerView role={role} coachTeam={coachTeam} />}

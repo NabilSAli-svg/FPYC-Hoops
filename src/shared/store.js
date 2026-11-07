@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocalStorage } from './useLocalStorage.js';
-import { useSupabaseTable, useSupabaseAssignments } from './useSupabaseTable.js';
+import { useSupabaseTable, useSupabaseAssignments, useSupabaseJsonList } from './useSupabaseTable.js';
 import { supabase } from './supabase.js';
 
 export const TEAM_INFO = {
@@ -1971,6 +1971,13 @@ export function useEvaluations(sport) {
   }, [sport, setRows]);
 
   return [evals, setEvals, notes, setNotes];
+}
+
+// Draft board sessions -- stored one per row as a jsonb blob (teams, roster,
+// pick log, etc. don't map cleanly to columns) so they sync across devices
+// and League Directors instead of living in one browser's localStorage.
+export function useDrafts() {
+  return useSupabaseJsonList('drafts', []);
 }
 
 // ─── Draft Board ──────────────────────────────────────────────────────────────
