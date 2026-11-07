@@ -317,6 +317,9 @@ export default function FamilyApp() {
                 )}
               </button>
             )}
+            <a href="mailto:fpychoopssupport@gmail.com" title="Email support" style={{ all: 'unset', cursor: 'pointer' }}>
+              <Icon name="life-buoy" size={16} color="rgba(255,255,255,0.5)" />
+            </a>
             <button onClick={handleSignOut} style={{ all: 'unset', cursor: 'pointer' }}>
               <Icon name="log-out" size={16} color="rgba(255,255,255,0.5)" />
             </button>

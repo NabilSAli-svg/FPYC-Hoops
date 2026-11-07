@@ -262,6 +262,17 @@ export default function CoachApp() {
               <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{team.coach}</div>
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{team.division}</div>
             </div>
+            <a
+              href="mailto:fpychoopssupport@gmail.com"
+              title="Email support"
+              style={{
+                background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.18)',
+                borderRadius: 7, padding: '5px 8px', cursor: 'pointer',
+                display: 'flex', alignItems: 'center',
+              }}
+            >
+              <Icon name="life-buoy" size={14} color="rgba(255,255,255,0.75)" />
+            </a>
             <button
               onClick={() => setShowChangePassword(true)}
               title="Change password"

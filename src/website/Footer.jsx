@@ -78,6 +78,7 @@ export default function Footer() {
           { label: 'FAQs',           href: '/#contact' },
           { label: 'Volunteer',      href: '/#volunteer' },
           { label: 'Become a referee', href: '/#referee' },
+          { label: 'Support',        href: 'mailto:fpychoopssupport@gmail.com' },
         ]} />
         <FooterCol title="Account" items={[
           { label: 'Family portal',  href: '/family' },
