@@ -14,6 +14,6 @@ export default function Jersey({ number, size = 36 }) {
       fontVariantNumeric: 'tabular-nums',
       lineHeight: 1,
       flexShrink: 0,
-    }}>{String(number).padStart(2, '0')}</div>
+    }}>{number != null ? String(number).padStart(2, '0') : '—'}</div>
   );
 }
