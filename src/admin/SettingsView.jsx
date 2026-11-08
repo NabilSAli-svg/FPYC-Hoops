@@ -236,10 +236,13 @@ function TeamsTab() {
 
 const ALL_TEAM_OPTIONS = Object.keys(TEAMS_INFO).filter(t => !TEAMS_INFO[t].archived);
 
+const PROGRAM_ORDER = ['Recreation', 'Select', 'Training', 'Operations'];
+
 function CoachesTab() {
   const [staff] = useStaff();
   const [profiles, setProfiles] = useState({});
   const [busyEmail, setBusyEmail] = useState(null);
+  const [activeProgram, setActiveProgram] = useState('All');
 
   useEffect(() => {
     supabase.from('profiles').select('id,email,role,team').then(({ data, error }) => {
@@ -252,19 +255,19 @@ function CoachesTab() {
 
   // Group staff by email; coaches with no email get a unique key per id.
   // A person can belong to more than one program (e.g. a Select coach who
-  // also trains) -- track every program they appear under, not just the
-  // first, so they show up in each relevant section instead of only one.
+  // also trains) -- every program and role/team they appear under is kept
+  // on their one entry, instead of duplicating them into a row per program.
   const people = [];
   const seen = new Map();
   for (const s of staff) {
     const key = s.email ? s.email.toLowerCase() : `__noemail__${s.id}`;
     if (seen.has(key)) {
       const existing = seen.get(key);
-      if (!existing.roles.includes(s.role)) existing.roles.push(s.role);
-      if (s.team && !existing.teams.includes(s.team)) existing.teams.push(s.team);
+      const already = existing.assignments.some(a => a.role === s.role && a.team === s.team);
+      if (!already) existing.assignments.push({ role: s.role, team: s.team });
       if (s.program && !existing.programs.includes(s.program)) existing.programs.push(s.program);
     } else {
-      const entry = { id: s.id, name: s.name, email: s.email || '', phone: s.phone, roles: [s.role], teams: s.team ? [s.team] : [], programs: s.program ? [s.program] : [] };
+      const entry = { id: s.id, name: s.name, email: s.email || '', phone: s.phone, assignments: [{ role: s.role, team: s.team }], programs: s.program ? [s.program] : [] };
       seen.set(key, entry);
       people.push(entry);
     }
@@ -296,118 +299,128 @@ function CoachesTab() {
     }
   }
 
-  const PROGRAM_ORDER = ['Recreation', 'Select', 'Training', 'Operations'];
-  const grouped = PROGRAM_ORDER.map(prog => ({
-    label: prog,
-    rows: people.filter(p => p.programs.includes(prog)),
-  })).filter(g => g.rows.length > 0);
+  const rows = activeProgram === 'All' ? people : people.filter(p => p.programs.includes(activeProgram));
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div>
         <Display size={22}>Coaches & staff</Display>
         <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>
-          Manage coach app access and team assignments. Coaches log in at /admin with their email and password.
+          Manage app access and team assignments. Coaches log in at /admin with their email and password.
         </div>
       </div>
 
-      {grouped.map(group => (
-        <div key={group.label}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', marginBottom: 8 }}>{group.label}</div>
-          <Card padding={0}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: `220px 1fr 180px 120px 80px`,
-              padding: '10px 18px',
-              background: 'var(--bone)',
-              borderBottom: '1px solid var(--border)',
-              fontSize: 10, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700, gap: 8,
-            }}>
-              <div>Name</div>
-              <div>Role & teams</div>
-              <div>Assigned team</div>
-              <div>Account</div>
-              <div style={{ textAlign: 'center' }}>Admin</div>
-            </div>
+      {/* Program filter — narrows the list without duplicating anyone into it */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {['All', ...PROGRAM_ORDER].map(p => (
+          <button key={p} onClick={() => setActiveProgram(p)} style={{
+            padding: '6px 14px', borderRadius: 999, border: '1px solid var(--border)', cursor: 'pointer',
+            background: activeProgram === p ? 'var(--court-navy)' : '#fff',
+            color: activeProgram === p ? '#fff' : 'var(--fg)',
+            fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13,
+          }}>
+            {p} {p === 'All' ? `(${people.length})` : `(${people.filter(x => x.programs.includes(p)).length})`}
+          </button>
+        ))}
+      </div>
 
-            {group.rows.map((person, i) => {
-              const key = person.email ? person.email.toLowerCase() : `__noemail__${person.id}`;
-              const profile = person.email ? profiles[person.email.toLowerCase()] : null;
-              const isAdmin = profile?.role === 'admin';
-              const isCoach = profile?.role === 'coach';
-              const hasAccess = isAdmin || isCoach;
-              return (
-                <div key={key} style={{
-                  display: 'grid',
-                  gridTemplateColumns: `220px 1fr 180px 120px 80px`,
-                  padding: '14px 18px',
-                  borderBottom: i < group.rows.length - 1 ? '1px solid var(--border)' : 'none',
-                  alignItems: 'center', gap: 8,
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Avatar name={person.name} size={32} />
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 13 }}>{person.name}</div>
-                      <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{person.email || <span style={{ fontStyle: 'italic' }}>no email</span>}</div>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {person.roles.map(r => <Pill key={r} kind="neutral">{r}</Pill>)}
-                    {person.teams.map(t => <Pill key={t} kind="navy">{t}</Pill>)}
-                  </div>
-
-                  {/* Team assignment dropdown — only applies to the Coach role, which
-                      reads its team straight off profiles.team. Other scoped roles
-                      (League Director, Parent, etc.) get their team(s)/age group from
-                      user_scopes instead, which has no UI here yet -- set via SQL. */}
-                  <div>
-                    {profile && isCoach ? (
-                      <select
-                        value={profile.team || ''}
-                        onChange={e => setCoachTeam(person.email, e.target.value)}
-                        style={{ fontSize: 12, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--fg)', width: '100%' }}
-                      >
-                        <option value="">— unassigned —</option>
-                        {ALL_TEAM_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
-                      </select>
-                    ) : profile && isAdmin ? (
-                      <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>All teams</span>
-                    ) : profile ? (
-                      <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>Set via database</span>
-                    ) : (
-                      <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>—</span>
-                    )}
-                  </div>
-
-                  <div>
-                    {profile
-                      ? <Pill kind={isAdmin ? 'gold' : hasAccess ? 'navy' : 'neutral'}>{roleLabelOf(profile.role)}</Pill>
-                      : <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>{person.email ? 'No account' : 'Needs email'}</span>}
-                  </div>
-
-                  <div>
-                    {profile ? (
-                      <select
-                        value={profile.role || ''}
-                        onChange={e => setCoachRole(person.email, e.target.value)}
-                        disabled={busyEmail === key}
-                        style={{ fontSize: 12, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--fg)', width: '100%' }}
-                      >
-                        {Object.values(ROLES).map(r => (
-                          <option key={r.id} value={r.id}>{r.label}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <span style={{ fontSize: 12, color: 'var(--fg-muted)' }} title={person.email ? 'No account yet — they must sign up first' : 'Add an email address to enable login'}>—</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </Card>
+      <Card padding={0}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: `240px 1fr 170px 170px`,
+          padding: '10px 18px',
+          background: 'var(--bone)',
+          borderBottom: '1px solid var(--border)',
+          fontSize: 10, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700, gap: 8,
+        }}>
+          <div>Name</div>
+          <div>Roles &amp; teams</div>
+          <div>Assigned team</div>
+          <div>Access</div>
         </div>
-      ))}
+
+        {rows.length === 0 && (
+          <div style={{ padding: 24, textAlign: 'center', color: 'var(--fg-muted)', fontSize: 13 }}>No one in this program yet.</div>
+        )}
+
+        {rows.map((person, i) => {
+          const key = person.email ? person.email.toLowerCase() : `__noemail__${person.id}`;
+          const profile = person.email ? profiles[person.email.toLowerCase()] : null;
+          const isAdmin = profile?.role === 'admin';
+          const isCoach = profile?.role === 'coach';
+          const hasAccess = isAdmin || isCoach;
+          // Scoped roles (League Director, etc.) get their team/age group from
+          // user_scopes, which has no admin UI yet -- show what they're
+          // assigned to in the staff directory instead of a dead dropdown.
+          const scopedTeam = !isAdmin && !isCoach ? person.assignments.find(a => a.team)?.team : null;
+          return (
+            <div key={key} style={{
+              display: 'grid',
+              gridTemplateColumns: `240px 1fr 170px 170px`,
+              padding: '14px 18px',
+              borderBottom: i < rows.length - 1 ? '1px solid var(--border)' : 'none',
+              alignItems: 'center', gap: 8,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Avatar name={person.name} size={32} />
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 13 }}>{person.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--fg-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{person.email || <span style={{ fontStyle: 'italic' }}>no email</span>}</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {person.assignments.map((a, ai) => (
+                  <Pill key={ai} kind="neutral">{a.role}{a.team ? ` · ${a.team}` : ''}</Pill>
+                ))}
+              </div>
+
+              <div>
+                {profile && isCoach ? (
+                  <select
+                    value={profile.team || ''}
+                    onChange={e => setCoachTeam(person.email, e.target.value)}
+                    style={{ fontSize: 12, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--fg)', width: '100%' }}
+                  >
+                    <option value="">— unassigned —</option>
+                    {ALL_TEAM_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                ) : profile && isAdmin ? (
+                  <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>All teams</span>
+                ) : scopedTeam ? (
+                  <span style={{ fontSize: 12, color: 'var(--fg-muted)', fontStyle: 'italic' }}>{scopedTeam} (scoped)</span>
+                ) : (
+                  <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>—</span>
+                )}
+              </div>
+
+              <div>
+                {profile ? (
+                  <select
+                    value={profile.role || ''}
+                    onChange={e => setCoachRole(person.email, e.target.value)}
+                    disabled={busyEmail === key}
+                    style={{
+                      fontSize: 12, padding: '4px 8px', borderRadius: 6, width: '100%', fontWeight: 700,
+                      border: `1px solid ${isAdmin ? '#E8B322' : hasAccess ? 'var(--court-navy)' : 'var(--border)'}`,
+                      background: isAdmin ? '#FFF9E8' : hasAccess ? 'rgba(10,31,61,0.06)' : 'var(--surface)',
+                      color: isAdmin ? '#916B00' : hasAccess ? 'var(--court-navy)' : 'var(--fg)',
+                    }}
+                  >
+                    {Object.values(ROLES).map(r => (
+                      <option key={r.id} value={r.id}>{r.label}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <span style={{ fontSize: 12, color: 'var(--fg-muted)' }} title={person.email ? 'No account yet — they must sign up first' : 'Add an email address to enable login'}>
+                    {person.email ? 'No account' : 'Needs email'}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </Card>
     </div>
   );
 }
