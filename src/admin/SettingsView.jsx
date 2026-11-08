@@ -263,11 +263,11 @@ function CoachesTab() {
     const key = s.email ? s.email.toLowerCase() : `__noemail__${s.id}`;
     if (seen.has(key)) {
       const existing = seen.get(key);
-      const already = existing.assignments.some(a => a.role === s.role && a.team === s.team);
-      if (!already) existing.assignments.push({ role: s.role, team: s.team });
+      const already = existing.assignments.some(a => a.role === s.role && a.team === s.team && a.program === s.program);
+      if (!already) existing.assignments.push({ role: s.role, team: s.team, program: s.program });
       if (s.program && !existing.programs.includes(s.program)) existing.programs.push(s.program);
     } else {
-      const entry = { id: s.id, name: s.name, email: s.email || '', phone: s.phone, assignments: [{ role: s.role, team: s.team }], programs: s.program ? [s.program] : [] };
+      const entry = { id: s.id, name: s.name, email: s.email || '', phone: s.phone, assignments: [{ role: s.role, team: s.team, program: s.program }], programs: s.program ? [s.program] : [] };
       seen.set(key, entry);
       people.push(entry);
     }
@@ -349,10 +349,17 @@ function CoachesTab() {
           const isAdmin = profile?.role === 'admin';
           const isCoach = profile?.role === 'coach';
           const hasAccess = isAdmin || isCoach;
+          // When a program filter is active, only show that program's
+          // badges/team on this row -- otherwise a person in multiple
+          // programs still shows every tag regardless of which one you
+          // filtered to.
+          const visibleAssignments = activeProgram === 'All'
+            ? person.assignments
+            : person.assignments.filter(a => a.program === activeProgram);
           // Scoped roles (League Director, etc.) get their team/age group from
           // user_scopes, which has no admin UI yet -- show what they're
           // assigned to in the staff directory instead of a dead dropdown.
-          const scopedTeam = !isAdmin && !isCoach ? person.assignments.find(a => a.team)?.team : null;
+          const scopedTeam = !isAdmin && !isCoach ? visibleAssignments.find(a => a.team)?.team : null;
           return (
             <div key={key} style={{
               display: 'grid',
@@ -370,7 +377,7 @@ function CoachesTab() {
               </div>
 
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {person.assignments.map((a, ai) => (
+                {visibleAssignments.map((a, ai) => (
                   <Pill key={ai} kind="neutral">{a.role}{a.team ? ` · ${a.team}` : ''}</Pill>
                 ))}
               </div>
