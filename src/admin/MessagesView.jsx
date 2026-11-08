@@ -49,6 +49,15 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed, t
   const [selected, setSelected] = useState(null);
   const [showCompose, setShowCompose] = useState(autoCompose);
   const [composeChannel, setComposeChannel] = useState('email');
+
+  // The top-bar "Compose"/"Quick note" buttons live in AdminApp and flip
+  // `autoCompose` via a prop -- but this component is usually already
+  // mounted when that happens, so the useState initializer above only ever
+  // saw the stale value from first mount. Without this, clicking Compose
+  // while already on the Messages page did nothing.
+  useEffect(() => {
+    if (autoCompose) setShowCompose(true);
+  }, [autoCompose]);
   const [sentToast, setSentToast] = useState('');
   const [sending, setSending] = useState(false);
 
