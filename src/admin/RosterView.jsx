@@ -3,6 +3,7 @@ import { Card, Pill, Button, Icon, Jersey, EmptyState, Skeleton } from '../share
 import { csvDownload } from '../shared/csvDownload.js';
 import { printRoster } from '../shared/printSheet.js';
 import { TEAM_INFO, TEAMS_INFO, REC_DIVISION, SELECT_DIVISION, activeTeamNames, activeTeamsByDivision } from '../shared/store.js';
+import { useIsMobile } from '../shared/useIsMobile.js';
 
 const GRADES    = ['K', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th'];
 const POSITIONS_BY_SPORT = {
@@ -49,6 +50,7 @@ function exportRosterCSV(players) {
 }
 
 export default function RosterView({ team, players, setPlayers, sport = 'basketball' }) {
+  const isMobile = useIsMobile();
   const POSITIONS = POSITIONS_BY_SPORT[sport] || POSITIONS_BY_SPORT.basketball;
   const numberLabel = sport === 'soccer' ? 'Number' : 'Jersey #';
   const [loading, setLoading] = useState(true);
@@ -241,6 +243,43 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
       </div>
 
       {/* Table */}
+      {filtered.length === 0 ? (
+        <Card padding={0}>
+          <EmptyState icon="users" title="No players"
+            message={search ? `No players match "${search}".` : filter === 'all' ? 'Add your first player to get started.' : `No ${filter} players.`}
+            onAction={openAdd} actionLabel="Add player" />
+        </Card>
+      ) : isMobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {filtered.map(p => (
+            <Card key={p.id} padding={16}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Jersey number={p.number} size={36} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
+                  <div style={{ fontSize: 12, color: 'var(--fg-muted)', marginTop: 2 }}>{p.grade} · {p.position}{p.team && p.team !== 'Unassigned' ? ` · ${p.team}` : ''}</div>
+                </div>
+                <button onClick={() => openEdit(p)} style={{ all: 'unset', cursor: 'pointer', padding: 8, color: 'var(--fg-muted)' }}>
+                  <Icon name="edit-2" size={16} color="currentColor" />
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 12, fontSize: 13, color: 'var(--fg-soft)' }}>
+                {p.school && <span>{p.school}</span>}
+                {p.guardian && <span>{p.guardian}{p.phone ? ` · ${p.phone}` : ''}</span>}
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 12 }}>
+                <button onClick={() => cycleStatus(p)} title="Tap to cycle status" style={{ all: 'unset', cursor: 'pointer' }}>
+                  <Pill kind={p.status === 'active' ? 'navy' : p.status === 'pending' ? 'warn' : 'neutral'}>{p.status}</Pill>
+                </button>
+                {p.waiver
+                  ? <span style={{ color: 'var(--status-win)', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700 }}><Icon name="check-circle-2" size={13} />Waiver on file</span>
+                  : <span style={{ color: 'var(--foul-red)', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700 }}><Icon name="alert-circle" size={13} />Waiver missing</span>
+                }
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
       <Card padding={0}>
         <div style={{ overflowX: 'auto' }}>
         <div style={{
@@ -260,12 +299,6 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
           <SortHeader label="Status" sortKey="status" current={sortKey} dir={sortDir} onClick={toggleSort} />
           <div />
         </div>
-
-        {filtered.length === 0 && (
-          <EmptyState icon="users" title="No players"
-            message={search ? `No players match "${search}".` : filter === 'all' ? 'Add your first player to get started.' : `No ${filter} players.`}
-            onAction={openAdd} actionLabel="Add player" />
-        )}
 
         {filtered.map((p, i) => (
           <div key={p.id} style={{
@@ -316,6 +349,7 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
         ))}
         </div>
       </Card>
+      )}
 
       {/* Add / Edit Modal */}
       {modal && (
@@ -332,7 +366,7 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
             </div>
 
             {/* Form */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
               <F label="First name" required error={errors.firstName}>
                 <input value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="First name" style={inputStyle(errors.firstName)} />
               </F>
@@ -393,7 +427,7 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
                 <Icon name="arrow-right-left" size={14} color="var(--basketball-orange)" />
                 <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--basketball-orange)' }}>Team Assignment</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: 14 }}>
                 <F label="Program">
                   <select value={form.program} onChange={e => {
                     const prog = e.target.value;
