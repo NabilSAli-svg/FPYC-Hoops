@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Card, Button, Icon, Display } from '../shared/index.js';
 import { TEAMS_INFO, useDiscountCodes, applyDiscount, useFeeSettings, DEFAULT_FEE_SETTINGS } from '../shared/store.js';
+import { useIsMobile } from '../shared/useIsMobile.js';
 
 const STATUSES = [
   { id: 'paid',        label: 'Paid',        color: '#22C55E' },
@@ -175,6 +176,7 @@ function DiscountCell({ player, codes, feeSettings, onApply, onRemove }) {
 }
 
 export default function PaymentsView({ players, setPlayers }) {
+  const isMobile = useIsMobile();
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterTeam, setFilterTeam] = useState('all');
   const [search, setSearch] = useState('');
@@ -306,6 +308,57 @@ export default function PaymentsView({ players, setPlayers }) {
       </div>
 
       {/* Table */}
+      {isMobile ? (
+        filtered.length === 0 ? (
+          <Card padding={24}>
+            <div style={{ textAlign: 'center', color: 'var(--fg-muted)', fontSize: 13 }}>No players match your filters.</div>
+          </Card>
+        ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {filtered.map(p => {
+            const owed = p.amountOwed || 0;
+            const paid = p.amountPaid || 0;
+            const balance = owed - paid;
+            const status = p.paymentStatus || 'unpaid';
+            const teamColor = TEAMS_INFO[p.team]?.color || 'var(--court-navy)';
+            return (
+              <Card key={p.id} padding={16}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.guardian}</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: teamColor, marginTop: 2 }}>{p.team || '—'}</div>
+                  </div>
+                  <StatusPill status={status} onChange={v => updatePayment(p.id, 'paymentStatus', v)} />
+                </div>
+                <div style={{ display: 'flex', gap: 20, marginTop: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--fg-muted)', marginBottom: 2 }}>Owed</div>
+                    <AmountCell value={owed} onChange={v => updatePayment(p.id, 'amountOwed', v)} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--fg-muted)', marginBottom: 2 }}>Paid</div>
+                    <AmountCell value={paid} onChange={v => updatePayment(p.id, 'amountPaid', v)} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--fg-muted)', marginBottom: 2 }}>Balance</div>
+                    <span style={{ fontWeight: 700, fontSize: 13, color: balance <= 0 ? '#22C55E' : '#EF4444' }}>
+                      {balance <= 0 ? '✓' : `$${balance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  <DiscountCell player={p} codes={discountCodes} feeSettings={feeSettings} onApply={applyCode} onRemove={removeCode} />
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  <NotesCell value={p.paymentNotes} onChange={v => updatePayment(p.id, 'paymentNotes', v)} />
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+        )
+      ) : (
       <Card padding={0}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
@@ -375,6 +428,7 @@ export default function PaymentsView({ players, setPlayers }) {
           <span style={{ fontSize: 11, fontStyle: 'italic' }}>Click any amount or note to edit · Click status pill to change</span>
         </div>
       </Card>
+      )}
     </div>
   );
 }
