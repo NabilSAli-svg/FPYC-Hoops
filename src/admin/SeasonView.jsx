@@ -87,8 +87,8 @@ export default function SeasonView({ games = [], team = 'Fairfax Hawks', divisio
           color: '#fff',
           padding: '20px 28px',
           display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
-          gap: 0,
+          gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+          gap: '16px 0',
           backgroundImage: 'radial-gradient(circle at 90% 20%, rgba(255,199,44,0.12), transparent 45%)',
         }}>
           <div style={{ borderRight: '1px solid rgba(255,255,255,0.10)', paddingRight: 24 }}>

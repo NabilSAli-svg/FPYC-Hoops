@@ -324,7 +324,8 @@ function CoachesTab() {
         ))}
       </div>
 
-      <Card padding={0}>
+      <Card padding={0} style={{ overflowX: 'auto' }}>
+        <div style={{ minWidth: 640 }}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: `240px 1fr 170px 170px`,
@@ -427,6 +428,7 @@ function CoachesTab() {
             </div>
           );
         })}
+        </div>
       </Card>
     </div>
   );

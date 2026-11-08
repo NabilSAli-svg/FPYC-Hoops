@@ -240,8 +240,8 @@ function ComposeModal({ channel, players, staff, teamName, sending, onClose, onS
   const [body, setBody] = useState('');
   const [recipients, setRecipients] = useState([]);
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-      <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: 560, boxShadow: 'var(--shadow-3)' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 16, boxSizing: 'border-box' }}>
+      <div style={{ background: '#fff', borderRadius: 14, padding: 28, width: '100%', maxWidth: 560, boxShadow: 'var(--shadow-3)', maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Icon name={isEmail ? 'mail' : 'message-circle'} size={20} color={isEmail ? 'var(--court-navy)' : 'var(--basketball-orange)'} />
