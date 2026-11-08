@@ -288,11 +288,11 @@ function CoachesTab() {
     const key = email.toLowerCase();
     const profile = profiles[key];
     if (!profile) return;
-    const { error } = await supabase.from('profiles').update({ team, role: 'coach' }).eq('id', profile.id);
+    const { error } = await supabase.from('profiles').update({ team }).eq('id', profile.id);
     if (error) {
       console.error('[supabase] update profile team:', error.message);
     } else {
-      setProfiles(p => ({ ...p, [key]: { ...profile, team, role: 'coach' } }));
+      setProfiles(p => ({ ...p, [key]: { ...profile, team } }));
     }
   }
 
@@ -357,9 +357,12 @@ function CoachesTab() {
                     {person.teams.map(t => <Pill key={t} kind="navy">{t}</Pill>)}
                   </div>
 
-                  {/* Team assignment dropdown — only meaningful if they have/will have coach access */}
+                  {/* Team assignment dropdown — only applies to the Coach role, which
+                      reads its team straight off profiles.team. Other scoped roles
+                      (League Director, Parent, etc.) get their team(s)/age group from
+                      user_scopes instead, which has no UI here yet -- set via SQL. */}
                   <div>
-                    {profile && !isAdmin ? (
+                    {profile && isCoach ? (
                       <select
                         value={profile.team || ''}
                         onChange={e => setCoachTeam(person.email, e.target.value)}
@@ -370,6 +373,8 @@ function CoachesTab() {
                       </select>
                     ) : profile && isAdmin ? (
                       <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>All teams</span>
+                    ) : profile ? (
+                      <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>Set via database</span>
                     ) : (
                       <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>—</span>
                     )}
