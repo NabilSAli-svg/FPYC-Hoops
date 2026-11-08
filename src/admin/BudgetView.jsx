@@ -276,7 +276,8 @@ function InvoicesTab({ expenses }) {
         {sorted.length === 0 ? (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--fg-muted)', fontSize: 13 }}>No invoices recorded yet.</div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse' }}>
             <thead><tr>
               <th style={th}>Date</th>
               <th style={th}>Vendor</th>
@@ -305,6 +306,7 @@ function InvoicesTab({ expenses }) {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </Card>
     </div>
@@ -392,7 +394,8 @@ export default function BudgetView() {
                 Projected players:&nbsp;<EditCell value={budget.projectedPlayers} onSave={updateProjectedPlayers} treasurerStyle plain />
               </div>
             </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', minWidth: 620, borderCollapse: 'collapse' }}>
               <thead><tr>
                 <th style={th}>Fee Type</th>
                 <th style={{ ...th, background: '#EFF6FF' }}>🔵 Projected #</th>
@@ -427,13 +430,15 @@ export default function BudgetView() {
                 })}
               </tbody>
             </table>
+            </div>
           </Card>
 
           <Card padding={0}>
             <div style={{ padding: '14px 18px 10px', borderBottom: '1px solid var(--border)' }}>
               <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--court-navy)' }}>Revenue Summary</div>
             </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', minWidth: 620, borderCollapse: 'collapse' }}>
               <thead><tr>
                 <th style={th}>Account</th>
                 <th style={th}>Line Item</th>
@@ -476,13 +481,15 @@ export default function BudgetView() {
                 </tr>
               </tbody>
             </table>
+            </div>
           </Card>
         </div>
       )}
 
       {tab === 'expenses' && (
         <Card padding={0}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse' }}>
             <thead><tr>
               <th style={th}>Account</th>
               <th style={th}>Line Item</th>
@@ -537,6 +544,7 @@ export default function BudgetView() {
               </tr>
             </tfoot>
           </table>
+          </div>
         </Card>
       )}
 

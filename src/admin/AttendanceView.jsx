@@ -142,7 +142,7 @@ export default function AttendanceView({ players, games = [], practices = [] }) 
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
           <thead>
             <tr style={{ background: 'var(--bone)' }}>
-              <th style={{ padding: '12px 18px', textAlign: 'left', fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700, borderBottom: '1px solid var(--border)', minWidth: 200 }}>
+              <th style={{ padding: '12px 18px', textAlign: 'left', fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700, borderBottom: '1px solid var(--border)', minWidth: 200, position: 'sticky', left: 0, background: 'var(--bone)', zIndex: 2 }}>
                 Player
               </th>
               {sessions.map(s => (
@@ -167,7 +167,7 @@ export default function AttendanceView({ players, games = [], practices = [] }) 
               const flaggedPlayer = flagged.includes(p);
               return (
                 <tr key={p.id} style={{ borderBottom: i < players.length - 1 ? '1px solid var(--border)' : 'none', background: flaggedPlayer ? 'rgba(200,16,46,0.02)' : 'transparent' }}>
-                  <td style={{ padding: '10px 18px' }}>
+                  <td style={{ padding: '10px 18px', position: 'sticky', left: 0, background: '#fff', zIndex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <Jersey number={p.number} size={28} />
                       <div>
@@ -204,7 +204,7 @@ export default function AttendanceView({ players, games = [], practices = [] }) 
           </tbody>
           <tfoot>
             <tr style={{ background: 'var(--bone)', borderTop: '2px solid var(--border)' }}>
-              <td style={{ padding: '10px 18px', fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Session total</td>
+              <td style={{ padding: '10px 18px', fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', position: 'sticky', left: 0, background: 'var(--bone)', zIndex: 1 }}>Session total</td>
               {sessions.map(s => (
                 <td key={s.id} style={{ textAlign: 'center', borderLeft: '1px solid var(--border)', padding: 8 }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--status-win)' }}>{countForSession(s.id, 'present')}P</div>

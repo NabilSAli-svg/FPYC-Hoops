@@ -117,7 +117,8 @@ function SizedCategory({ cat, data, onChange }) {
           <div style={{ fontSize: 11, color: 'var(--fg-muted)', marginTop: 1 }}>{totalOwned} total · {totalOut} checked out · {totalOwned - totalOut} available</div>
         </div>
       </div>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', minWidth: 500, borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ background: 'var(--bone)' }}>
             <th style={{ padding: '8px 18px', textAlign: 'left', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--fg-muted)', borderBottom: '1px solid var(--border)' }}>Size</th>
@@ -146,6 +147,7 @@ function SizedCategory({ cat, data, onChange }) {
           })}
         </tbody>
       </table>
+      </div>
     </Card>
   );
 }
@@ -215,7 +217,8 @@ function TrainingCategory({ cat, data, onChange }) {
         </div>
       </div>
       {items.length > 0 && (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: 'var(--bone)' }}>
               <th style={{ padding: '8px 18px', textAlign: 'left', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--fg-muted)', borderBottom: '1px solid var(--border)' }}>Item</th>
@@ -247,6 +250,7 @@ function TrainingCategory({ cat, data, onChange }) {
             ))}
           </tbody>
         </table>
+        </div>
       )}
       <div style={{ padding: '12px 18px', display: 'flex', gap: 8 }}>
         <input
