@@ -331,18 +331,31 @@ function RecipientField({ channel, players, staff, teamName, onChange }) {
   const groups = [
     { id: 'team',   label: `Entire team (${teamPlayers.length})`,        players: teamPlayers },
     { id: 'active', label: `Active players only (${activePlayers.length})`, players: activePlayers },
+    { id: 'none',   label: 'No team recipients',                         players: [] },
   ];
 
   const [selectedId, setSelectedId] = useState('team');
   const [includeStaff, setIncludeStaff] = useState(false);
+  const [extra, setExtra] = useState([]);
+  const [extraInput, setExtraInput] = useState('');
+
+  function addExtra() {
+    const val = extraInput.trim();
+    if (!val) return;
+    setExtra(prev => prev.includes(val) ? prev : [...prev, val]);
+    setExtraInput('');
+  }
+  function removeExtra(val) {
+    setExtra(prev => prev.filter(v => v !== val));
+  }
 
   useEffect(() => {
     const group = groups.find(g => g.id === selectedId) || groups[0];
     const playerEmails = group.players.map(valueOfPlayer).filter(Boolean);
     const staffEmails = includeStaff ? teamStaff.map(valueOfStaff).filter(Boolean) : [];
-    onChange([...new Set([...playerEmails, ...staffEmails])]);
+    onChange([...new Set([...playerEmails, ...staffEmails, ...extra])]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId, players, staff, channel, includeStaff]);
+  }, [selectedId, players, staff, channel, includeStaff, extra]);
 
   const group = groups.find(g => g.id === selectedId) || groups[0];
   const missing = group.players.filter(p => !valueOfPlayer(p)).length;
@@ -377,6 +390,40 @@ function RecipientField({ channel, players, staff, teamName, onChange }) {
           {staffMissing > 0 && <div>⚠ {staffMissing} staff member{staffMissing === 1 ? '' : 's'} missing a {channel === 'email' ? 'staff email' : 'phone number'}.</div>}
         </div>
       )}
+
+      {/* One-off recipients not on this team's roster — e.g. a single new
+          coach who hasn't logged in yet. */}
+      <div style={{ marginTop: 10 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          Add someone else
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <input
+            value={extraInput}
+            onChange={e => setExtraInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addExtra(); } }}
+            placeholder={channel === 'email' ? 'name@example.com' : '(703) 555-0100'}
+            style={{ flex: 1, padding: '7px 10px', borderRadius: 6, border: '1px solid var(--border)', fontFamily: 'var(--font-body)', fontSize: 13, outline: 'none' }}
+          />
+          <Button kind="ghost" size="sm" onClick={addExtra}>Add</Button>
+        </div>
+        {extra.length > 0 && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+            {extra.map(val => (
+              <span key={val} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px',
+                borderRadius: 999, background: 'var(--bone)', border: '1px solid var(--border)',
+                fontSize: 12, fontFamily: 'var(--font-body)',
+              }}>
+                {val}
+                <button onClick={() => removeExtra(val)} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0, display: 'flex', color: 'var(--fg-muted)' }}>
+                  <Icon name="x" size={12} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
