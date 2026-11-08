@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
 import { usePlayers, useDrafts, useEvaluations, buildSnakeOrder, TEAMS_INFO, activeTeamNames } from '../shared/store.js';
+import { useIsMobile } from '../shared/useIsMobile.js';
 
 const TEAM_COLORS = ['#0A1F3D','#C8102E','#1F8A5B','#E87722','#7C3AED','#0F766E','#B45309','#1D4ED8'];
 
@@ -111,6 +112,7 @@ function StatusPill({ status }) {
 // ── New Draft Form ─────────────────────────────────────────────────────────────
 
 function NewDraftForm({ onSave, onCancel, initial, allowedDivisions }) {
+  const isMobile = useIsMobile();
   const divisionOptions = allowedDivisions && allowedDivisions.length > 0 ? allowedDivisions : DRAFTABLE_TEAMS;
   const [name, setName] = useState(initial?.name || '');
   const [division, setDivision] = useState(initial?.division || (divisionOptions.length === 1 ? divisionOptions[0] : ''));
@@ -159,10 +161,10 @@ function NewDraftForm({ onSave, onCancel, initial, allowedDivisions }) {
   const lbl = { fontSize: 12, fontWeight: 700, color: 'var(--fg-muted)', marginBottom: 4, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' };
 
   return (
-    <Card padding={24} style={{ maxWidth: 660 }}>
+    <Card padding={isMobile ? 16 : 24} style={{ maxWidth: 660 }}>
       <Display size={20} style={{ marginBottom: 20 }}>New Draft Session</Display>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14, marginBottom: 14 }}>
         <div>
           <label style={lbl}>Name *</label>
           <input style={inp} value={name} onChange={e => setName(e.target.value)} placeholder="Boys 4th-5th Rec Winter 2026" />
@@ -221,10 +223,10 @@ function NewDraftForm({ onSave, onCancel, initial, allowedDivisions }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
         {teams.map((t, i) => (
-          <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
             <div style={{ width: 24, height: 24, borderRadius: '50%', background: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontSize: 11, color: '#fff', flexShrink: 0 }}>{i + 1}</div>
-            <input style={{ ...inp, flex: 1 }} value={t.name} onChange={e => updateTeam(t.id, 'name', e.target.value)} placeholder="Team name" />
-            <input style={{ ...inp, flex: 1 }} value={t.coach} onChange={e => updateTeam(t.id, 'coach', e.target.value)} placeholder="Coach" />
+            <input style={{ ...inp, flex: isMobile ? '1 1 100%' : 1 }} value={t.name} onChange={e => updateTeam(t.id, 'name', e.target.value)} placeholder="Team name" />
+            <input style={{ ...inp, flex: isMobile ? '1 1 100%' : 1 }} value={t.coach} onChange={e => updateTeam(t.id, 'coach', e.target.value)} placeholder="Coach" />
             <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
               {TEAM_COLORS.map(c => (
                 <ColorSwatch key={c} color={c} selected={t.color === c} onClick={() => updateTeam(t.id, 'color', c)} />
@@ -250,6 +252,7 @@ function NewDraftForm({ onSave, onCancel, initial, allowedDivisions }) {
 // ── Open View ─────────────────────────────────────────────────────────────────
 
 function OpenView({ draft, setDrafts, players, evals }) {
+  const isMobile = useIsMobile();
   const [sortBy, setSortBy] = useState('skill');
   const fullPool = useMemo(() => buildDraftPool(players, evals, draft.division), [players, evals, draft.division]);
   const noShows = useMemo(() => fullPool.filter(p => !p.evaluated), [fullPool]);
@@ -305,7 +308,7 @@ function OpenView({ draft, setDrafts, players, evals }) {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: 14 }}>
         <Card padding={16}>
           <Eyebrow style={{ marginBottom: 10 }}>Pool stats</Eyebrow>
           <Row label="Eligible for draft" value={pool.length} />
@@ -341,9 +344,9 @@ function OpenView({ draft, setDrafts, players, evals }) {
           <Display size={15}>Player pool — {pool.length} players</Display>
           <SortTabs value={sortBy} onChange={setSortBy} options={[{value:'skill',label:'Skill'},{value:'name',label:'Name'},{value:'grade',label:'Grade'}]} />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', maxHeight: 400, overflowY: 'auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', maxHeight: 400, overflowY: 'auto' }}>
           {pool.map((p, i) => (
-            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderBottom: '1px solid var(--border)', borderRight: (i + 1) % 3 !== 0 ? '1px solid var(--border)' : 'none' }}>
+            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderBottom: '1px solid var(--border)', borderRight: !isMobile && (i + 1) % 3 !== 0 ? '1px solid var(--border)' : 'none' }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</div>
                 <div style={{ fontSize: 11, color: 'var(--fg-muted)' }}>{p.grade} · {p.position}</div>
@@ -360,6 +363,7 @@ function OpenView({ draft, setDrafts, players, evals }) {
 // ── Live View ─────────────────────────────────────────────────────────────────
 
 function LiveView({ draft, setDrafts, players, evals }) {
+  const isMobile = useIsMobile();
   const [sortBy, setSortBy] = useState('skill');
   const [search, setSearch] = useState('');
   const [logOpen, setLogOpen] = useState(true);
@@ -432,7 +436,7 @@ function LiveView({ draft, setDrafts, players, evals }) {
     setBalancedPreview(null);
   }
 
-  const cols = teams.length <= 3 ? teams.length : teams.length <= 6 ? 3 : 4;
+  const cols = isMobile ? 1 : teams.length <= 3 ? teams.length : teams.length <= 6 ? 3 : 4;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -484,7 +488,7 @@ function LiveView({ draft, setDrafts, players, evals }) {
         </Card>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '320px 1fr', gap: 14 }}>
         <Card padding={0}>
           <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
             <input
@@ -573,7 +577,7 @@ function LiveView({ draft, setDrafts, players, evals }) {
               {draft.log.map((entry, i) => {
                 const team = teams.find(t => t.id === entry.teamId);
                 return (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)', width: '50%', boxSizing: 'border-box' }}>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderBottom: '1px solid var(--border)', borderRight: isMobile ? 'none' : '1px solid var(--border)', width: isMobile ? '100%' : '50%', boxSizing: 'border-box' }}>
                     <span style={{ fontSize: 11, color: 'var(--fg-muted)', minWidth: 22 }}>#{entry.pick}</span>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: team?.color }} />
                     <span style={{ fontSize: 12, fontWeight: 700, color: team?.color, minWidth: 52 }}>{team?.name}</span>
@@ -592,6 +596,7 @@ function LiveView({ draft, setDrafts, players, evals }) {
 // ── Completed View ────────────────────────────────────────────────────────────
 
 function CompletedView({ draft, setDrafts, players, evals, setPlayers }) {
+  const isMobile = useIsMobile();
   const fullPool = useMemo(() => buildDraftPool(players, evals, draft.division), [players, evals, draft.division]);
   const pool = useMemo(() => applyNoShowPolicy(fullPool, draft.noShowPolicy), [fullPool, draft.noShowPolicy]);
   const poolMap = useMemo(() => Object.fromEntries(fullPool.map(p => [p.id, p])), [fullPool]);
@@ -645,7 +650,7 @@ function CompletedView({ draft, setDrafts, players, evals, setPlayers }) {
             <Button size="sm" onClick={distributeNoShows}>{noShowsDistributed ? 'Re-randomize' : 'Randomize now'}</Button>
           </div>
           {noShowsDistributed && (
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(draft.teams.length, 4)}, 1fr)`, gap: 8, marginTop: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : `repeat(${Math.min(draft.teams.length, 4)}, 1fr)`, gap: 8, marginTop: 12 }}>
               {draft.teams.map(team => {
                 const pids = draft.noShowRoster?.[team.id] || [];
                 return (
@@ -685,7 +690,7 @@ function CompletedView({ draft, setDrafts, players, evals, setPlayers }) {
         </div>
       </Card>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 14 }}>
         {draft.teams.map(team => {
           const pids = draft.roster[team.id] || [];
           const teamPlayers = pids.map(id => poolMap[id]).filter(Boolean);
@@ -779,8 +784,8 @@ export default function DraftBoardView({ sport = 'basketball', allowedDivisions 
         )}
 
         {drafts.map(d => (
-          <div key={d.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', border: '1px solid var(--border)', borderRadius: 10, background: '#fff' }}>
-            <div style={{ flex: 1 }}>
+          <div key={d.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', border: '1px solid var(--border)', borderRadius: 10, background: '#fff', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 160px' }}>
               <div style={{ fontWeight: 800, fontSize: 16 }}>{d.name}</div>
               <div style={{ fontSize: 12, color: 'var(--fg-muted)' }}>{d.season} · {d.format} · {d.teams.length} teams · {d.rounds} rounds</div>
             </div>
