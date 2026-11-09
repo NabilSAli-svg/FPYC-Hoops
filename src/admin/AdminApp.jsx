@@ -84,6 +84,19 @@ export default function AdminApp() {
 
   const sportTeams = TEAM_NAMES_BY_SPORT[sport] || [];
   const ALL_TEAM_NAMES = role ? visibleTeams(role, TEAMS_INFO, scopes, sportTeams) : [];
+
+  // selectedTeamName starts out hardcoded to TEAM_INFO.name ('5/6 Boys') --
+  // correct for anyone else, so a scoped role (League Director, Select
+  // Director, etc.) doesn't land on a team they can't actually see just
+  // because it happened to match the app's default. Coaches are already
+  // handled above; admins keep the default since they can see everything.
+  useEffect(() => {
+    if (!role || role === 'admin' || role === 'coach') return;
+    if (ALL_TEAM_NAMES.length > 0 && !ALL_TEAM_NAMES.includes(selectedTeamName)) {
+      setSelectedTeamName(ALL_TEAM_NAMES[0]);
+    }
+  }); // runs every render -- cheap no-op once selectedTeamName is valid, and
+      // ALL_TEAM_NAMES is a fresh array each render so it can't be a dep.
   // Admin's unrestricted -- they get the "All divisions" option in Draft Board.
   // Everyone else is limited to the draftable teams they can actually see,
   // so a League Director can't pull players from outside their own age group.
