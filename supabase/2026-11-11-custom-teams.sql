@@ -3,8 +3,11 @@
 -- in the hardcoded TEAMS_INFO list. `age_group` is the scope key
 -- (user_scopes.scope_value, e.g. '5/6 Girls') a director must hold to
 -- manage a given team -- same has_scope() check used elsewhere.
+--
+-- Named `custom_teams`, not `teams` -- this project already has an
+-- unrelated `teams` table with a different schema.
 
-create table if not exists public.teams (
+create table if not exists public.custom_teams (
   id text primary key,
   name text not null unique,
   division text not null,
@@ -18,13 +21,13 @@ create table if not exists public.teams (
   created_at timestamptz not null default now()
 );
 
-alter table public.teams enable row level security;
+alter table public.custom_teams enable row level security;
 
-drop policy if exists "teams_read_staff" on public.teams;
-drop policy if exists "teams_write_scoped" on public.teams;
+drop policy if exists "custom_teams_read_staff" on public.custom_teams;
+drop policy if exists "custom_teams_write_scoped" on public.custom_teams;
 
-create policy "teams_read_staff" on public.teams for select using (public.is_staff());
+create policy "custom_teams_read_staff" on public.custom_teams for select using (public.is_staff());
 
-create policy "teams_write_scoped" on public.teams for all
+create policy "custom_teams_write_scoped" on public.custom_teams for all
   using (public.is_admin() or public.has_scope('team', age_group) or public.has_scope('age_group', age_group))
   with check (public.is_admin() or public.has_scope('team', age_group) or public.has_scope('age_group', age_group));
