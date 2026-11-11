@@ -30,8 +30,9 @@ const NOTIF_GROUPS = [
   },
 ];
 
-export default function SettingsView({ profile, role }) {
+export default function SettingsView({ profile, role, scopes, teamsInfo, customTeams, setCustomTeams }) {
   const [tab, setTab] = useState('team');
+  const info = teamsInfo || TEAMS_INFO;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -60,8 +61,8 @@ export default function SettingsView({ profile, role }) {
       </div>
 
       {tab === 'team'    && <TeamInfoTab />}
-      {tab === 'teams'   && <TeamsTab />}
-      {tab === 'coaches' && <CoachesTab />}
+      {tab === 'teams'   && <TeamsTab teamsInfo={info} role={role} scopes={scopes} customTeams={customTeams} setCustomTeams={setCustomTeams} />}
+      {tab === 'coaches' && <CoachesTab teamsInfo={info} />}
       {tab === 'notifs'  && <NotificationsTab />}
       {tab === 'fees'    && <FeesTab />}
       {tab === 'account' && <AccountTab profile={profile} role={role} />}
@@ -192,20 +193,81 @@ function TeamInfoTab() {
   );
 }
 
-function TeamsTab() {
-  const [players] = usePlayers();
+const NEW_TEAM_COLORS = ['#0A1F3D', '#C8102E', '#1F8A5B', '#E87722', '#7C3AED', '#0F766E', '#B45309', '#1D4ED8'];
 
-  const teams = Object.values(TEAMS_INFO).map(t => ({
+function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTeams }) {
+  const [players] = usePlayers();
+  const info = teamsInfo || TEAMS_INFO;
+  const [showNew, setShowNew] = useState(false);
+  const [name, setName] = useState('');
+  const [division, setDivision] = useState('');
+
+  // A League Director can only create teams in their own age group --
+  // the same scope_value their user_scopes row already grants them.
+  const myAgeGroup = scopes.find(s => s.scope_type === 'team' || s.scope_type === 'age_group')?.scope_value || '';
+  const canCreate = role === 'admin' || (role === 'league_director' && myAgeGroup);
+  const divisionOptions = [...new Set(Object.values(info).map(t => t.division).filter(Boolean))];
+
+  const teams = Object.values(info).filter(t => !t.archived).map(t => ({
     ...t,
     players: players.filter(p => p.team === t.name).length,
   }));
 
+  async function handleCreate(e) {
+    e.preventDefault();
+    const trimmed = name.trim();
+    if (!trimmed || !division || info[trimmed]) return;
+    const row = {
+      id: 'team-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7),
+      name: trimmed,
+      division,
+      sport: 'basketball',
+      color: NEW_TEAM_COLORS[customTeams.length % NEW_TEAM_COLORS.length],
+      age_group: role === 'admin' ? division : myAgeGroup,
+      coach: 'Coach',
+      no_draft: false,
+      archived: false,
+    };
+    const { error } = await setCustomTeams(prev => [...prev, row]);
+    if (!error) { setName(''); setDivision(''); setShowNew(false); }
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div>
-        <Display size={22}>All teams</Display>
-        <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>{teams.length} teams across the program</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div>
+          <Display size={22}>All teams</Display>
+          <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>{teams.length} teams across the program</div>
+        </div>
+        {canCreate && !showNew && (
+          <Button kind="gold" icon="plus" onClick={() => { setShowNew(true); setDivision(role === 'admin' ? '' : myAgeGroup); }}>New team</Button>
+        )}
       </div>
+
+      {showNew && (
+        <Card style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Display size={18}>Create a team</Display>
+          <form onSubmit={handleCreate} style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-end' }}>
+            <div style={{ flex: '1 1 200px' }}>
+              <label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Team name</label>
+              <input value={name} onChange={e => setName(e.target.value)} placeholder="5/6 Girls B" style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', borderRadius: 8, border: '1.5px solid var(--border)', fontSize: 14, marginTop: 4 }} />
+            </div>
+            <div style={{ flex: '1 1 160px' }}>
+              <label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Division</label>
+              {role === 'admin' ? (
+                <input value={division} onChange={e => setDivision(e.target.value)} list="division-options" style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', borderRadius: 8, border: '1.5px solid var(--border)', fontSize: 14, marginTop: 4 }} />
+              ) : (
+                <div style={{ padding: '8px 12px', borderRadius: 8, border: '1.5px solid var(--border)', fontSize: 14, marginTop: 4, color: 'var(--fg-muted)' }}>{myAgeGroup}</div>
+              )}
+              <datalist id="division-options">
+                {divisionOptions.map(d => <option key={d} value={d} />)}
+              </datalist>
+            </div>
+            <Button kind="primary" type="submit">Create</Button>
+            <Button kind="ghost" type="button" onClick={() => setShowNew(false)}>Cancel</Button>
+          </form>
+        </Card>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
         {teams.map(team => (
@@ -234,11 +296,11 @@ function TeamsTab() {
   );
 }
 
-const ALL_TEAM_OPTIONS = Object.keys(TEAMS_INFO).filter(t => !TEAMS_INFO[t].archived);
-
 const PROGRAM_ORDER = ['Recreation', 'Select', 'Training', 'Operations'];
 
-function CoachesTab() {
+function CoachesTab({ teamsInfo }) {
+  const info = teamsInfo || TEAMS_INFO;
+  const allTeamOptions = Object.keys(info).filter(t => !info[t].archived);
   const [staff] = useStaff();
   const [profiles, setProfiles] = useState({});
   const [busyEmail, setBusyEmail] = useState(null);
@@ -391,7 +453,7 @@ function CoachesTab() {
                     style={{ fontSize: 12, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--fg)', width: '100%' }}
                   >
                     <option value="">— unassigned —</option>
-                    {ALL_TEAM_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
+                    {allTeamOptions.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 ) : profile && isAdmin ? (
                   <span style={{ fontSize: 12, color: 'var(--fg-muted)' }}>All teams</span>

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useGames, usePlayers, usePractices, TEAM_INFO, TEAMS_INFO, SPORTS, activeTeamNames } from '../shared/store.js';
+import { useState, useEffect, useMemo } from 'react';
+import { useGames, usePlayers, usePractices, TEAM_INFO, SPORTS, activeTeamNamesFrom, useCustomTeams, mergeTeamsInfo } from '../shared/store.js';
 import { canUseConsole, canView, canManageOps, visibleTeams, roleLabel, signupTabs } from '../shared/roles.js';
 import { supabase } from '../shared/supabase.js';
 import Sidebar from './Sidebar.jsx';
@@ -27,11 +27,6 @@ import OfficialsView from './OfficialsView.jsx';
 import SignupsView from './SignupsView.jsx';
 import { Button, Icon } from '../shared/index.js';
 import ErrorBoundary from '../shared/ErrorBoundary.jsx';
-
-const TEAM_NAMES_BY_SPORT = SPORTS.reduce((acc, s) => {
-  acc[s.id] = activeTeamNames(s.id);
-  return acc;
-}, {});
 
 // The team selector only makes sense on per-team pages — Dashboard through
 // Stats in the sidebar. League-wide views (Scheduler, Budget, Settings, etc.)
@@ -73,17 +68,19 @@ export default function AdminApp() {
   const [players, setPlayers] = usePlayers();
   const [games, setGames] = useGames();
   const [practices] = usePractices();
+  const [customTeams, setCustomTeams] = useCustomTeams();
+  const teamsInfo = useMemo(() => mergeTeamsInfo(customTeams), [customTeams]);
 
   // Coaches are locked to their own team — sync sport/team selection once known.
   useEffect(() => {
     if (role !== 'coach' || !coachTeam) return;
-    const ti = TEAMS_INFO[coachTeam];
+    const ti = teamsInfo[coachTeam];
     if (ti?.sport && ti.sport !== sport) setSport(ti.sport);
     if (selectedTeamName !== coachTeam) setSelectedTeamName(coachTeam);
   }, [role, coachTeam]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const sportTeams = TEAM_NAMES_BY_SPORT[sport] || [];
-  const ALL_TEAM_NAMES = role ? visibleTeams(role, TEAMS_INFO, scopes, sportTeams) : [];
+  const sportTeams = activeTeamNamesFrom(teamsInfo, sport);
+  const ALL_TEAM_NAMES = role ? visibleTeams(role, teamsInfo, scopes, sportTeams) : [];
 
   // selectedTeamName starts out hardcoded to TEAM_INFO.name ('5/6 Boys') --
   // correct for anyone else, so a scoped role (League Director, Select
@@ -102,18 +99,18 @@ export default function AdminApp() {
   // so a League Director can't pull players from outside their own age group.
   const draftableDivisions = role === 'admin'
     ? undefined
-    : ALL_TEAM_NAMES.filter(name => !TEAMS_INFO[name]?.noDraft);
+    : ALL_TEAM_NAMES.filter(name => !teamsInfo[name]?.noDraft);
 
   function handleSportChange(newSport) {
     if (role === 'coach') return;
     setSport(newSport);
-    setSelectedTeamName(TEAM_NAMES_BY_SPORT[newSport]?.[0] || '');
+    setSelectedTeamName(activeTeamNamesFrom(teamsInfo, newSport)[0] || '');
   }
 
   const teamPlayers = players.filter(p => p.team === selectedTeamName);
   const teamGames   = games.filter(g => !g.team || g.team === selectedTeamName);
   const teamPractices = practices.filter(p => p.team === selectedTeamName);
-  const activeTeam  = TEAMS_INFO[selectedTeamName] || TEAMS_INFO[TEAM_INFO.name];
+  const activeTeam  = teamsInfo[selectedTeamName] || teamsInfo[TEAM_INFO.name];
 
   const saveScore = (id, result) =>
     setGames(gs => gs.map(g => g.id === id ? { ...g, ...result, status: 'final' } : g));
@@ -224,7 +221,7 @@ export default function AdminApp() {
             >
               {Object.entries(
                 ALL_TEAM_NAMES.reduce((acc, name) => {
-                  const div = TEAMS_INFO[name]?.division || 'Other';
+                  const div = teamsInfo[name]?.division || 'Other';
                   (acc[div] ??= []).push(name);
                   return acc;
                 }, {})
@@ -258,7 +255,7 @@ export default function AdminApp() {
           {view === 'evaluations' && <EvaluationsView players={teamPlayers.filter(p => p.status !== 'inactive')} sport={sport} />}
           {view === 'staff'       && <StaffView />}
           {view === 'playoffs'    && <PlayoffsView />}
-          {view === 'draftboard'  && <DraftBoardView sport={sport} allowedDivisions={draftableDivisions} />}
+          {view === 'draftboard'  && <DraftBoardView sport={sport} allowedDivisions={draftableDivisions} customTeams={customTeams} />}
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} sport={sport} />}
           {view === 'season'      && <SeasonView games={teamGames} team={activeTeam.name} division={activeTeam.division} sport={sport} />}
           {view === 'scheduler'   && <MasterSchedulerView role={role} coachTeam={coachTeam} />}
@@ -267,7 +264,7 @@ export default function AdminApp() {
           {view === 'payments'    && canManageOps(role) && <PaymentsView players={players} setPlayers={setPlayers} />}
           {view === 'officials'   && canView(role, 'officials') && <OfficialsView />}
           {view === 'signups'     && canView(role, 'signups')   && <SignupsView tabs={signupTabs(role)} />}
-          {view === 'settings'    && <SettingsView profile={profile} role={role} />}
+          {view === 'settings'    && <SettingsView profile={profile} role={role} scopes={scopes} teamsInfo={teamsInfo} customTeams={customTeams} setCustomTeams={setCustomTeams} />}
           </ErrorBoundary>
         </div>
       </div>
