@@ -1,12 +1,9 @@
 import { useState, useMemo } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill } from '../shared/index.js';
-import { usePlayers, useDrafts, useEvaluations, buildSnakeOrder, TEAMS_INFO, activeTeamNames } from '../shared/store.js';
+import { usePlayers, useDrafts, useEvaluations, buildSnakeOrder, TEAMS_INFO, activeTeamNamesFrom, useCustomTeams, mergeTeamsInfo } from '../shared/store.js';
 import { useIsMobile } from '../shared/useIsMobile.js';
 
 const TEAM_COLORS = ['#0A1F3D','#C8102E','#1F8A5B','#E87722','#7C3AED','#0F766E','#B45309','#1D4ED8'];
-
-// Age groups eligible for a draft — K-3 forms teams by skill/age instead.
-const DRAFTABLE_TEAMS = activeTeamNames('basketball').filter(name => !TEAMS_INFO[name].noDraft);
 
 function uid() { return 'draft-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7); }
 
@@ -111,9 +108,9 @@ function StatusPill({ status }) {
 
 // ── New Draft Form ─────────────────────────────────────────────────────────────
 
-function NewDraftForm({ onSave, onCancel, initial, allowedDivisions }) {
+function NewDraftForm({ onSave, onCancel, initial, allowedDivisions, draftableTeams }) {
   const isMobile = useIsMobile();
-  const divisionOptions = allowedDivisions && allowedDivisions.length > 0 ? allowedDivisions : DRAFTABLE_TEAMS;
+  const divisionOptions = allowedDivisions && allowedDivisions.length > 0 ? allowedDivisions : draftableTeams;
   const [name, setName] = useState(initial?.name || '');
   const [division, setDivision] = useState(initial?.division || (divisionOptions.length === 1 ? divisionOptions[0] : ''));
   const [season, setSeason] = useState(initial?.season || '2026-27');
@@ -741,12 +738,14 @@ function CompletedView({ draft, setDrafts, players, evals, setPlayers }) {
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export default function DraftBoardView({ sport = 'basketball', allowedDivisions } = {}) {
+export default function DraftBoardView({ sport = 'basketball', allowedDivisions, customTeams } = {}) {
   const [drafts, setDrafts] = useDrafts();
   const [players, setPlayers] = usePlayers();
   const [evals] = useEvaluations(sport);
   const [activeDraftId, setActiveDraftId] = useState(null);
   const [showNewForm, setShowNewForm] = useState(false);
+  const teamsInfo = mergeTeamsInfo(customTeams);
+  const draftableTeams = activeTeamNamesFrom(teamsInfo, 'basketball').filter(name => !teamsInfo[name].noDraft);
 
   const activeDraft = drafts.find(d => d.id === activeDraftId);
 
@@ -772,7 +771,7 @@ export default function DraftBoardView({ sport = 'basketball', allowedDivisions 
           {!showNewForm && <Button onClick={() => setShowNewForm(true)}>+ New Draft</Button>}
         </div>
 
-        {showNewForm && <NewDraftForm onSave={createDraft} onCancel={() => setShowNewForm(false)} allowedDivisions={allowedDivisions} />}
+        {showNewForm && <NewDraftForm onSave={createDraft} onCancel={() => setShowNewForm(false)} allowedDivisions={allowedDivisions} draftableTeams={draftableTeams} />}
 
         {drafts.length === 0 && !showNewForm && (
           <Card padding={40} style={{ textAlign: 'center' }}>

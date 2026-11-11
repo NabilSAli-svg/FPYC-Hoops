@@ -119,9 +119,39 @@ export const TEAMS_INFO = {
 
 // Team names for a sport, excluding archived (past-season) teams.
 export function activeTeamNames(sport = 'basketball') {
-  return Object.keys(TEAMS_INFO).filter(
-    name => (TEAMS_INFO[name].sport || 'basketball') === sport && !TEAMS_INFO[name].archived
+  return activeTeamNamesFrom(TEAMS_INFO, sport);
+}
+
+// Same as activeTeamNames, but against a merged teams map (static + director-
+// created teams from the `teams` table) rather than the hardcoded one.
+export function activeTeamNamesFrom(teamsInfo, sport = 'basketball') {
+  return Object.keys(teamsInfo).filter(
+    name => (teamsInfo[name].sport || 'basketball') === sport && !teamsInfo[name].archived
   );
+}
+
+// Teams League Directors (or admins) created for their own age group, synced
+// live from Supabase. Returns [rows, setRows] -- same shape as any other
+// useSupabaseTable-backed list.
+export function useCustomTeams() {
+  return useSupabaseTable('teams', []);
+}
+
+// Merge the static TEAMS_INFO map with director-created teams into one
+// lookup keyed by team name, shaped like a TEAMS_INFO entry. A static entry
+// always wins on a name clash.
+export function mergeTeamsInfo(customTeams) {
+  if (!customTeams || customTeams.length === 0) return TEAMS_INFO;
+  const extra = {};
+  for (const t of customTeams) {
+    if (TEAMS_INFO[t.name]) continue;
+    extra[t.name] = {
+      id: t.id, name: t.name, division: t.division, sport: t.sport || 'basketball',
+      color: t.color || 'var(--court-navy)', coach: t.coach || 'Coach',
+      noDraft: t.no_draft, archived: t.archived, ageGroup: t.age_group, custom: true,
+    };
+  }
+  return { ...TEAMS_INFO, ...extra };
 }
 
 // Active team names grouped by division, e.g. { 'Winter Rec': [...], 'Winter Select': [...] }.
@@ -874,6 +904,43 @@ export const INITIAL_PLAYERS = [
   { id: 'tsp95', number: null, name: 'Sebastian Hanna', grade: '7th Grade', school: 'KJMS', guardian: 'hannatom15@gmail.com', phone: '(703) 268-8735', position: '', status: 'active', waiver: true, program: 'Travel Select', division: 'Travel Select · 8th Grade Boys', team: 'Keun B8-2' },
   { id: 'tsp96', number: null, name: 'London Yoo', grade: '7th Grade', school: 'Katherine Johnson', guardian: 'keunyoo29@gmail.com', phone: '(702) 887-3034', position: '', status: 'active', waiver: true, program: 'Travel Select', division: 'Travel Select · 8th Grade Boys', team: 'Keun B8-2' },
   { id: 'tsp97', number: null, name: 'Noah Clay', grade: '8th Grade', school: 'Frost', guardian: 'curtisclay@gmail.com', phone: '(312)451-4795', position: '', status: 'active', waiver: true, program: 'Travel Select', division: 'Travel Select · 8th Grade Boys', team: 'Keun B8-2' },
+
+  // ── Added from the 2026-11-11 Ottosport registration export (deltas only) ──
+  { id: 'p616', number: null, name: "Luka Schuckman-Brixius", grade: "Pre-K", school: "Daniels Run Elementary", guardian: "MaryKathleen Schuckman", phone: "(703)980-3994", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p617', number: null, name: "Fredy Henriquez", grade: "Pre-K", school: "Eagle view elm", guardian: "Bridget Coral", phone: "7037895441", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p618', number: null, name: "Maeve Andersen", grade: "1st Grade", school: "Daniels Run Elementary", guardian: "Kate Williamson", phone: "(484) 888-0444", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p619', number: null, name: "Emma Rivera", grade: "1st Grade", school: "Providence ES", guardian: "Guillermo Rivera", phone: "(703) 296-1607", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p620', number: null, name: "Shaan Kirpalani", grade: "3rd Grade", school: "Daniels Run", guardian: "Gowri Kirpalani", phone: "(571) 723-1552", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p621', number: null, name: "Jacob Lee", grade: "Kindergarten", school: "Fairfax Villa Elementary", guardian: "Bobby Lee", phone: "(443) 610-9521", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p622', number: null, name: "Lukas Flores", grade: "Pre-K", school: "Woodson high school", guardian: "Edgar Flores", phone: "(571) 232-1926", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p623', number: null, name: "Emilio Peralta", grade: "Pre-K", school: "Fairfax Villa", guardian: "German Peralta", phone: "(703)577-6485", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p624', number: null, name: "Brayden Freitas", grade: "Pre-K", school: "Fairview Elementary", guardian: "Ashley Freitas", phone: "(916) 626-7232", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p625', number: null, name: "Abigail Anderson", grade: "2nd Grade", school: "Eagle View", guardian: "Timothy Anderson", phone: "(915) 474-8825", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "3/4 Girls" },
+  { id: 'p626', number: null, name: "Maggie Schneider", grade: "4th Grade", school: "Waples Mill", guardian: "Thomas Schneider", phone: "(603) 809-2483", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "3/4 Girls" },
+  { id: 'p627', number: null, name: "Nora White", grade: "2nd Grade", school: "Daniels Run Elementary", guardian: "Brianna White", phone: "(740) 709-9351", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "3/4 Girls" },
+  { id: 'p628', number: null, name: "Claire Rozzelle", grade: "", school: "", guardian: "Linda Rozzelle", phone: "(703)609-3474", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "3/4 Girls" },
+  { id: 'p629', number: null, name: "Morgan Mazer", grade: "2nd Grade", school: "Fairfax Villa ES", guardian: "Kimberly Mazer", phone: "(808) 321-7025", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "3/4 Girls" },
+  { id: 'p630', number: null, name: "Sam Habibi", grade: "5th Grade", school: "Providence Elementary", guardian: "Sarah Habibi", phone: "(703) 725-4314", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p631', number: null, name: "Noah Pierce", grade: "6th Grade", school: "ROBINSON SECONDARY", guardian: "Layne Bouchard", phone: "(703) 932-9298", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p632', number: null, name: "Andrew Kennedy", grade: "5th Grade", school: "KJMS", guardian: "John Kennedy", phone: "(202) 445-1111", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p633', number: null, name: "Armaan Kirpalani", grade: "6th Grade", school: "Daniels run", guardian: "Gowri Kirpalani", phone: "(571) 723-1552", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p634', number: null, name: "Jack Cressman", grade: "6th Grade", school: "Mosaic", guardian: "John Cressman", phone: "(703) 585-9411", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p635', number: null, name: "Giacomo Carabelli", grade: "6th Grade", school: "Daniels Run", guardian: "Maria Carabelli", phone: "(703)338-1707", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p636', number: null, name: "Colin Shepelev", grade: "6th Grade", school: "Daniels Run Elementary School", guardian: "Phimolwan Shepelev", phone: "(703) 973-6176", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p637', number: null, name: "Alex Shepelev", grade: "5th Grade", school: "Daniels Run Elementary School", guardian: "Phimolwan Shepelev", phone: "(703) 973-6176", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p638', number: null, name: "Kayla Carbins", grade: "5th Grade", school: "Woodson", guardian: "Amy Carbins", phone: "(503) 781-7809", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "5/6 Girls" },
+  { id: 'p639', number: null, name: "Aydan Lloyd", grade: "7th Grade", school: "KJMS", guardian: "Kimberly Lloyd", phone: "(703) 650-8058", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "7/8 Boys" },
+  { id: 'p640', number: null, name: "Mason Greenzweig", grade: "7th Grade", school: "Katherine Johnson Middle School", guardian: "Jamie Greenzweig", phone: "(571) 585-9196", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "7/8 Boys" },
+  { id: 'p641', number: null, name: "Junseok Jung", grade: "8th Grade", school: "Providence es", guardian: "Young Been Jung", phone: "2025685914", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "7/8 Boys" },
+  { id: 'p642', number: null, name: "Gabriel Yanes Perez", grade: "7th Grade", school: "Katherine Johnson MS", guardian: "Karina Perez", phone: "(571)484-2826", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "7/8 Boys" },
+  { id: 'p643', number: null, name: "McKinely Smith", grade: "7th Grade", school: "Daniels Run", guardian: "Lori Smith", phone: "(571) 245-9591", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "7/8 Girls" },
+  { id: 'p644', number: null, name: "Katherine Emerick", grade: "7th Grade", school: "Flint Hill Private", guardian: "kelly emerick", phone: "(703) 731-3792", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "7/8 Girls" },
+  { id: 'p645', number: null, name: "Juliet Tetreault", grade: "", school: "", guardian: "Laura Tetreault", phone: "(703) 244-1780", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "7/8 Girls" },
+  { id: 'p646', number: null, name: "Dylan Kashyap", grade: "9th Grade", school: "Eagleview ES", guardian: "Pallavi Kashyap", phone: "(571) 228-4233", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "HS Boys" },
+  { id: 'p647', number: null, name: "Shea Donovan", grade: "10th Grade", school: "Fairfax High School", guardian: "Edwin Donovan", phone: "(703) 434-0822", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "HS Boys" },
+  { id: 'p648', number: null, name: "Calvin Williams", grade: "9th Grade", school: "Little Run", guardian: "Caroline Williams", phone: "(760) 518-1770", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "HS Boys" },
+  { id: 'p649', number: null, name: "Marko Ilijoski", grade: "9th Grade", school: "Daniels run", guardian: "Tamara Ilijoski", phone: "(703) 589-7766", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "HS Boys" },
+  { id: 'p650', number: null, name: "Noah Maxwell", grade: "10th Grade", school: "Fairfax High School", guardian: "Megan Maxwell", phone: "(325) 232-2310", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "HS Boys" },
 ];
 
 export const INITIAL_GAMES = [
