@@ -46,12 +46,21 @@ export default function AdminApp() {
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { setAuthReady(true); return; }
-      const { data: profile } = await supabase.from('profiles').select('id, role, team, first_name, parent_name, email, phone').eq('id', session.user.id).single();
+
+      // Fetched separately from the full profile row below -- a column or
+      // RLS error on that wider select must never block role/scopes from
+      // loading, since those are what let a non-coach role in at all.
+      const { data: rows, error: profileErr } = await supabase
+        .from('profiles').select('id, role, team, first_name, parent_name, email, phone').eq('id', session.user.id);
+      if (profileErr) console.error('[supabase] fetch profile:', profileErr.message);
+      const profile = rows?.[0] || null;
+
       if (profile && canUseConsole(profile.role)) {
         setRole(profile.role);
         setProfile(profile);
-        const { data: rows } = await supabase.from('user_scopes').select('scope_type, scope_value').eq('user_id', session.user.id);
-        setScopes(rows || []);
+        const { data: scopeRows, error: scopeErr } = await supabase.from('user_scopes').select('scope_type, scope_value').eq('user_id', session.user.id);
+        if (scopeErr) console.error('[supabase] fetch user_scopes:', scopeErr.message);
+        setScopes(scopeRows || []);
         if (profile.role === 'coach' && profile.team) setCoachTeam(profile.team);
       }
       setAuthReady(true);
