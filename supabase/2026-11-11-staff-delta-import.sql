@@ -1,0 +1,16 @@
+-- New Winter Rec coaching staff from the latest Ottosport team-staff export
+-- (dii_Team_Staff_Data-6.xls) not yet in staff. 11 new rows. Note: all 71
+-- rows in that export show registration status PENDING REVIEW, not
+-- approved -- double-check background checks before relying on these.
+
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst57', 'Jay Zimmer', 'Coach', 'Recreation', '5/6 Girls', 'jay.w.zimmer@gmail.com', '(703) 963-4979', 'Not Started', null) on conflict (id) do nothing;
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst58', 'Matt Habibi', 'Assistant Coach', 'Recreation', '5/6 Boys', 'warden26@yahoo.com', '(571) 215-6232', 'Not Started', null) on conflict (id) do nothing;
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst59', 'Deborah Anderson', 'Coach', 'Recreation', '3/4 Girls', 'tdjanderson@gmail.com', '(209)404-6285', 'Not Started', null) on conflict (id) do nothing;
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst60', 'Bobby Lee', 'Coach', 'Recreation', 'K-3 3v3', 'bobbylee810@gmail.com', '(443) 610-9521', 'Not Started', null) on conflict (id) do nothing;
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst61', 'Amy Spradlin', 'Assistant Coach', 'Recreation', '5/6 Girls', 'amy.spradlin@gmail.com', '(703)283-6113', 'Not Started', null) on conflict (id) do nothing;
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst62', 'John Cressman', 'Coach', 'Recreation', '5/6 Boys', 'jcressma@gmu.edu', '(703) 585-9411', 'Not Started', null) on conflict (id) do nothing;
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst63', 'Bryson Smith', 'Coach', 'Recreation', '7/8 Girls', 'brysonsmith@vaumc.org', '(571)245-9627', 'Not Started', null) on conflict (id) do nothing;
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst64', 'Adam Parker', 'Coach', 'Recreation', '5/6 Boys', 'threekaps@gmail.com', '(703) 209-7636', 'Not Started', null) on conflict (id) do nothing;
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst65', 'Ashley Freitas', 'Scorekeeper', 'Recreation', 'K-3 3v3', 'ashleymba2010@gmail.com', '(916) 626-7232', 'Not Started', null) on conflict (id) do nothing;
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst66', 'Eric Lipp', 'Coach', 'Recreation', '5/6 Girls', 'wvlippo@gmail.com', '(703)470-3518', 'Not Started', null) on conflict (id) do nothing;
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst67', 'Tyler Maxwell', 'Assistant Coach', 'Recreation', 'HS Boys', 'tylerdmaxwell529@gmail.com', '(907) 227-1114', 'Not Started', null) on conflict (id) do nothing;

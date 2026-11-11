@@ -1718,6 +1718,20 @@ export const INITIAL_STAFF = [
   { id: 'rst54', name: "Jeremy Burkhart", role: "Coach", program: 'Recreation', team: "K-3 3v3", email: "jeremy.d.burkhart@gmail.com", phone: "(740) 360-3776", bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'rst55', name: "Alex Valvis", role: "Assistant Coach", program: 'Recreation', team: "K-3 3v3", email: "alex.valvis@gmail.com", phone: "(973) 968-1900", bgCheckStatus: "Not Started", bgCheckDate: null },
   { id: 'rst56', name: "Marcus Habibi", role: "Scorekeeper", program: 'Recreation', team: "Unassigned", email: "mhabibi@gwu.edu", phone: "(571) 215-6232", bgCheckStatus: "Not Started", bgCheckDate: null },
+
+  // ── Added from the 2026-11-11 Ottosport team staff export (deltas only;
+  // these registrations show PENDING REVIEW there, so double-check bg checks) ──
+  { id: 'rst57', name: "Jay Zimmer", role: "Coach", program: 'Recreation', team: "5/6 Girls", email: "jay.w.zimmer@gmail.com", phone: "(703) 963-4979", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst58', name: "Matt Habibi", role: "Assistant Coach", program: 'Recreation', team: "5/6 Boys", email: "warden26@yahoo.com", phone: "(571) 215-6232", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst59', name: "Deborah Anderson", role: "Coach", program: 'Recreation', team: "3/4 Girls", email: "tdjanderson@gmail.com", phone: "(209)404-6285", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst60', name: "Bobby Lee", role: "Coach", program: 'Recreation', team: "K-3 3v3", email: "bobbylee810@gmail.com", phone: "(443) 610-9521", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst61', name: "Amy Spradlin", role: "Assistant Coach", program: 'Recreation', team: "5/6 Girls", email: "amy.spradlin@gmail.com", phone: "(703)283-6113", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst62', name: "John Cressman", role: "Coach", program: 'Recreation', team: "5/6 Boys", email: "jcressma@gmu.edu", phone: "(703) 585-9411", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst63', name: "Bryson Smith", role: "Coach", program: 'Recreation', team: "7/8 Girls", email: "brysonsmith@vaumc.org", phone: "(571)245-9627", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst64', name: "Adam Parker", role: "Coach", program: 'Recreation', team: "5/6 Boys", email: "threekaps@gmail.com", phone: "(703) 209-7636", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst65', name: "Ashley Freitas", role: "Scorekeeper", program: 'Recreation', team: "K-3 3v3", email: "ashleymba2010@gmail.com", phone: "(916) 626-7232", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst66', name: "Eric Lipp", role: "Coach", program: 'Recreation', team: "5/6 Girls", email: "wvlippo@gmail.com", phone: "(703)470-3518", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst67', name: "Tyler Maxwell", role: "Assistant Coach", program: 'Recreation', team: "HS Boys", email: "tylerdmaxwell529@gmail.com", phone: "(907) 227-1114", bgCheckStatus: 'Not Started', bgCheckDate: null },
 ];
 
 export function useStaff() {
