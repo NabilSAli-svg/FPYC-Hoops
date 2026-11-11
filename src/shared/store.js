@@ -134,7 +134,7 @@ export function activeTeamNamesFrom(teamsInfo, sport = 'basketball') {
 // live from Supabase. Returns [rows, setRows] -- same shape as any other
 // useSupabaseTable-backed list.
 export function useCustomTeams() {
-  return useSupabaseTable('teams', []);
+  return useSupabaseTable('custom_teams', []);
 }
 
 // Merge the static TEAMS_INFO map with director-created teams into one
