@@ -215,11 +215,14 @@ function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTea
   // A League Director can only create teams in their own age group --
   // the same scope_value their user_scopes row already grants them.
   const myAgeGroup = scopes.find(s => s.scope_type === 'team' || s.scope_type === 'age_group')?.scope_value || '';
+  const myPool = info[myAgeGroup]; // the house league itself, e.g. '5/6 Girls'
   const canCreate = role === 'admin' || (role === 'league_director' && myAgeGroup);
   const divisionOptions = [...new Set(Object.values(info).map(t => t.division).filter(Boolean))];
 
+  // House leagues (pool: true) aren't teams -- they're the unassigned player
+  // pool a draft splits into real teams -- so they never show up here.
   const teams = Object.values(info)
-    .filter(t => !t.archived)
+    .filter(t => !t.archived && !t.pool)
     .filter(t => !allowedTeams || allowedTeams.includes(t.name))
     .map(t => ({
       ...t,
@@ -229,14 +232,19 @@ function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTea
   async function handleCreate(e) {
     e.preventDefault();
     const trimmed = name.trim();
-    if (!trimmed || !division || info[trimmed]) return;
+    if (!trimmed || info[trimmed]) return;
+    // A director's new team belongs to their league's real division (e.g.
+    // "Winter Rec"), not the age group itself -- the age group is only the
+    // RLS scope key (age_group) that lets them manage it.
+    const teamDivision = role === 'admin' ? division : (myPool?.division || REC_DIVISION);
+    if (!teamDivision) return;
     const row = {
       id: 'team-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7),
       name: trimmed,
-      division,
+      division: teamDivision,
       sport: 'basketball',
       color: NEW_TEAM_COLORS[customTeams.length % NEW_TEAM_COLORS.length],
-      age_group: role === 'admin' ? division : myAgeGroup,
+      age_group: role === 'admin' ? teamDivision : myAgeGroup,
       coach: 'Coach',
       no_draft: false,
       archived: false,
@@ -268,7 +276,7 @@ function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTea
               <input value={name} onChange={e => setName(e.target.value)} placeholder="5/6 Girls B" style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', borderRadius: 8, border: '1.5px solid var(--border)', fontSize: 14, marginTop: 4 }} />
             </div>
             <div style={{ flex: '1 1 160px' }}>
-              <label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Division</label>
+              <label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>{role === 'admin' ? 'Division' : 'Age group'}</label>
               {role === 'admin' ? (
                 <input value={division} onChange={e => setDivision(e.target.value)} list="division-options" style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', borderRadius: 8, border: '1.5px solid var(--border)', fontSize: 14, marginTop: 4 }} />
               ) : (
@@ -315,7 +323,9 @@ const PROGRAM_ORDER = ['Recreation', 'Select', 'Training', 'Operations'];
 
 function CoachesTab({ teamsInfo }) {
   const info = teamsInfo || TEAMS_INFO;
-  const allTeamOptions = Object.keys(info).filter(t => !info[t].archived);
+  // A coach gets assigned to a real, drafted team, not the house-league pool
+  // itself -- same pool: true teams hidden from the Teams list.
+  const allTeamOptions = Object.keys(info).filter(t => !info[t].archived && !info[t].pool);
   const [staff] = useStaff();
   const [profiles, setProfiles] = useState({});
   const [busyEmail, setBusyEmail] = useState(null);

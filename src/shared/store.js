@@ -38,15 +38,20 @@ export const CLINIC_DIVISION = 'Fall Skills Clinic';
 export const TEAMS_INFO = {
   // ── Winter 2026–27 · Rec ───────────────────────────────────────────────────
   // K-3 is formed by skill/age — no draft.
+  // The rest are house leagues, not teams themselves -- players land here
+  // unassigned at registration, then a draft splits each into real teams
+  // (created in Settings > My Teams and assigned a coach there). `pool: true`
+  // keeps them out of any "teams" list while still letting the dashboard,
+  // roster, and draft board use them as the player pool/division to draft.
   'K-3 3v3':    { id: 'k3-3v3', name: 'K-3 3v3',    division: REC_DIVISION, coach: 'Coach', color: '#0891B2', sport: 'basketball', noDraft: true },
-  '3/4 Boys':   { id: '34boys', name: '3/4 Boys',   division: REC_DIVISION, coach: 'Coach', color: 'var(--court-navy)', sport: 'basketball' },
-  '3/4 Girls':  { id: '34girls',name: '3/4 Girls',  division: REC_DIVISION, coach: 'Coach', color: '#BE185D', sport: 'basketball' },
-  '5/6 Boys':   { id: '56boys', name: '5/6 Boys',   division: REC_DIVISION, coach: 'Coach', color: '#1D4ED8', sport: 'basketball' },
-  '5/6 Girls':  { id: '56girls',name: '5/6 Girls',  division: REC_DIVISION, coach: 'Coach', color: '#DB2777', sport: 'basketball' },
-  '7/8 Boys':   { id: '78boys', name: '7/8 Boys',   division: REC_DIVISION, coach: 'Coach', color: '#C8102E', sport: 'basketball' },
-  '7/8 Girls':  { id: '78girls',name: '7/8 Girls',  division: REC_DIVISION, coach: 'Coach', color: '#9333EA', sport: 'basketball' },
-  'HS Boys':    { id: 'hsboys', name: 'HS Boys',    division: REC_DIVISION, coach: 'Coach', color: '#111827', sport: 'basketball' },
-  'HS Girls':   { id: 'hsgirls',name: 'HS Girls',   division: REC_DIVISION, coach: 'Coach', color: '#7C3AED', sport: 'basketball' },
+  '3/4 Boys':   { id: '34boys', name: '3/4 Boys',   division: REC_DIVISION, coach: 'Coach', color: 'var(--court-navy)', sport: 'basketball', pool: true },
+  '3/4 Girls':  { id: '34girls',name: '3/4 Girls',  division: REC_DIVISION, coach: 'Coach', color: '#BE185D', sport: 'basketball', pool: true },
+  '5/6 Boys':   { id: '56boys', name: '5/6 Boys',   division: REC_DIVISION, coach: 'Coach', color: '#1D4ED8', sport: 'basketball', pool: true },
+  '5/6 Girls':  { id: '56girls',name: '5/6 Girls',  division: REC_DIVISION, coach: 'Coach', color: '#DB2777', sport: 'basketball', pool: true },
+  '7/8 Boys':   { id: '78boys', name: '7/8 Boys',   division: REC_DIVISION, coach: 'Coach', color: '#C8102E', sport: 'basketball', pool: true },
+  '7/8 Girls':  { id: '78girls',name: '7/8 Girls',  division: REC_DIVISION, coach: 'Coach', color: '#9333EA', sport: 'basketball', pool: true },
+  'HS Boys':    { id: 'hsboys', name: 'HS Boys',    division: REC_DIVISION, coach: 'Coach', color: '#111827', sport: 'basketball', pool: true },
+  'HS Girls':   { id: 'hsgirls',name: 'HS Girls',   division: REC_DIVISION, coach: 'Coach', color: '#7C3AED', sport: 'basketball', pool: true },
 
   // ── Winter 2026–27 · Select ────────────────────────────────────────────────
   // Each grade may field a second team — add a "… 2" entry once tryouts settle.
