@@ -76,7 +76,11 @@ function groupByPerson(staff) {
 
 export default function StaffView({ role, allowedTeams } = {}) {
   const [staff, setStaff] = useStaff();
-  const canEdit = !allowedTeams; // admin only -- a scoped role (League Director) gets read-only
+  // Admins manage everyone; a scoped role (League Director) manages only
+  // the staff on their own age group's teams -- staff's RLS enforces the
+  // same scope server-side, so this isn't just a client-side gate.
+  const canEdit = role === 'admin' || role === 'league_director';
+  const scopedOnly = !!allowedTeams;
 
   // Seed any INITIAL_STAFF entries missing from Supabase (e.g. Select/Training coaches added after initial launch)
   useEffect(() => {
@@ -108,7 +112,7 @@ export default function StaffView({ role, allowedTeams } = {}) {
   const groupedProgram = (activeProgram === 'Select' || activeProgram === 'Recreation') ? activeProgram : null;
 
   function openAdd() {
-    setForm(EMPTY_FORM);
+    setForm(scopedOnly ? { ...EMPTY_FORM, team: allowedTeams[0] || '' } : EMPTY_FORM);
     setEditingPerson(null);
     setShowForm(true);
   }
@@ -165,7 +169,7 @@ export default function StaffView({ role, allowedTeams } = {}) {
         <div>
           <Display size={22}>Staff & Volunteers</Display>
           <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>
-            {canEdit ? 'Coaches, board members & volunteers across all leagues.' : 'Coaches & volunteers for your age group.'}
+            {scopedOnly ? 'Coaches & volunteers for your age group.' : 'Coaches, board members & volunteers across all leagues.'}
           </div>
         </div>
         {canEdit && <Button kind="gold" icon="plus" onClick={openAdd}>Add staff</Button>}
@@ -204,7 +208,15 @@ export default function StaffView({ role, allowedTeams } = {}) {
                     {PROGRAMS.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </Field>
-                <Field label="Team"><input style={inputStyle} value={form.team} onChange={e => setForm({ ...form, team: e.target.value })} placeholder="Unassigned" /></Field>
+                <Field label="Team">
+                  {scopedOnly ? (
+                    <select style={inputStyle} value={form.team} onChange={e => setForm({ ...form, team: e.target.value })}>
+                      {allowedTeams.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  ) : (
+                    <input style={inputStyle} value={form.team} onChange={e => setForm({ ...form, team: e.target.value })} placeholder="Unassigned" />
+                  )}
+                </Field>
               </>
             )}
             <Field label="Email"><input style={inputStyle} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></Field>
