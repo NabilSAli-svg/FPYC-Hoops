@@ -74,8 +74,13 @@ function groupByPerson(staff) {
   return people;
 }
 
-export default function StaffView() {
+export default function StaffView({ role, allowedTeams } = {}) {
   const [staff, setStaff] = useStaff();
+  // Admins manage everyone; a scoped role (League Director) manages only
+  // the staff on their own age group's teams -- staff's RLS enforces the
+  // same scope server-side, so this isn't just a client-side gate.
+  const canEdit = role === 'admin' || role === 'league_director';
+  const scopedOnly = !!allowedTeams;
 
   // Seed any INITIAL_STAFF entries missing from Supabase (e.g. Select/Training coaches added after initial launch)
   useEffect(() => {
@@ -93,19 +98,20 @@ export default function StaffView() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingPerson, setEditingPerson] = useState(null);
   const [toast, setToast] = useState('');
-  const [bgBusyKey, setBgBusyKey] = useState(null);
 
   function showToast(msg) {
     setToast(msg);
     setTimeout(() => setToast(''), 3000);
   }
 
-  const people = groupByPerson(staff);
+  const people = allowedTeams
+    ? groupByPerson(staff).filter(p => p.assignments.some(a => allowedTeams.includes(a.team)))
+    : groupByPerson(staff);
   const filtered = activeProgram === 'All' ? people : people.filter(p => p.programs.includes(activeProgram));
   const groupedProgram = (activeProgram === 'Select' || activeProgram === 'Recreation') ? activeProgram : null;
 
   function openAdd() {
-    setForm(EMPTY_FORM);
+    setForm(scopedOnly ? { ...EMPTY_FORM, team: allowedTeams[0] || '' } : EMPTY_FORM);
     setEditingPerson(null);
     setShowForm(true);
   }
@@ -139,31 +145,16 @@ export default function StaffView() {
     showToast(`${person.name} removed`);
   }
 
-  async function runBackgroundCheck(person) {
-    setBgBusyKey(person.key);
-    try {
-      const { data, error } = await supabase.functions.invoke('send-background-check', {
-        body: { name: person.name, email: person.email },
-      });
-      if (error || !data?.success) throw error || new Error('Background check request failed');
-      const today = new Date().toISOString().slice(0, 10);
-      setStaff(prev => prev.map(s => person.ids.includes(s.id) ? { ...s, bgCheckStatus: 'Pending', bgCheckDate: today } : s));
-      showToast(`Background check requested for ${person.name}`);
-    } catch (err) {
-      showToast(`Could not start background check: ${err.message || err}`);
-    } finally {
-      setBgBusyKey(null);
-    }
-  }
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <Display size={22}>Staff & Volunteers</Display>
-          <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>Coaches, board members & volunteers across all leagues.</div>
+          <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>
+            {scopedOnly ? 'Coaches & volunteers for your age group.' : 'Coaches, board members & volunteers across all leagues.'}
+          </div>
         </div>
-        <Button kind="gold" icon="plus" onClick={openAdd}>Add staff</Button>
+        {canEdit && <Button kind="gold" icon="plus" onClick={openAdd}>Add staff</Button>}
       </div>
 
       {toast && (
@@ -186,7 +177,7 @@ export default function StaffView() {
         ))}
       </div>
 
-      {showForm && (
+      {showForm && canEdit && (
         <Card>
           <Eyebrow>{editingPerson ? 'Edit staff member' : 'Add staff member'}</Eyebrow>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginTop: 12 }}>
@@ -199,7 +190,15 @@ export default function StaffView() {
                     {PROGRAMS.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </Field>
-                <Field label="Team"><input style={inputStyle} value={form.team} onChange={e => setForm({ ...form, team: e.target.value })} placeholder="Unassigned" /></Field>
+                <Field label="Team">
+                  {scopedOnly ? (
+                    <select style={inputStyle} value={form.team} onChange={e => setForm({ ...form, team: e.target.value })}>
+                      {allowedTeams.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  ) : (
+                    <input style={inputStyle} value={form.team} onChange={e => setForm({ ...form, team: e.target.value })} placeholder="Unassigned" />
+                  )}
+                </Field>
               </>
             )}
             <Field label="Email"><input style={inputStyle} value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></Field>
@@ -228,20 +227,20 @@ export default function StaffView() {
           <div key={ageGroup}>
             <Eyebrow>{ageGroup}</Eyebrow>
             <Card padding={0} style={{ marginTop: 8 }}>
-              <PersonRows people={groupPeople} bgBusyKey={bgBusyKey} runBackgroundCheck={runBackgroundCheck} openEdit={openEdit} removePerson={removePerson} />
+              <PersonRows people={groupPeople} openEdit={openEdit} removePerson={removePerson} canEdit={canEdit} />
             </Card>
           </div>
         ))
         : (
           <Card padding={0}>
-            <PersonRows people={filtered} bgBusyKey={bgBusyKey} runBackgroundCheck={runBackgroundCheck} openEdit={openEdit} removePerson={removePerson} />
+            <PersonRows people={filtered} openEdit={openEdit} removePerson={removePerson} canEdit={canEdit} />
           </Card>
         ))}
     </div>
   );
 }
 
-function PersonRows({ people, bgBusyKey, runBackgroundCheck, openEdit, removePerson }) {
+function PersonRows({ people, openEdit, removePerson, canEdit }) {
   return people.map((person, i) => {
     const colors = BG_COLORS[person.bgCheckStatus] || BG_COLORS['Not Started'];
     return (
@@ -260,11 +259,8 @@ function PersonRows({ people, bgBusyKey, runBackgroundCheck, openEdit, removePer
           <span style={{ background: colors.bg, color: colors.fg, fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '4px 10px' }}>
             Background check: {person.bgCheckStatus}{person.bgCheckDate ? ` (${person.bgCheckDate})` : ''}
           </span>
-          <Button kind="quiet" size="sm" icon="shield-check" disabled={bgBusyKey === person.key} onClick={() => runBackgroundCheck(person)}>
-            {bgBusyKey === person.key ? 'Requesting…' : 'Run check'}
-          </Button>
-          <Button kind="quiet" size="sm" icon="edit-2" onClick={() => openEdit(person)} />
-          <Button kind="quiet" size="sm" icon="trash-2" onClick={() => removePerson(person)} />
+          {canEdit && <Button kind="quiet" size="sm" icon="edit-2" onClick={() => openEdit(person)} />}
+          {canEdit && <Button kind="quiet" size="sm" icon="trash-2" onClick={() => removePerson(person)} />}
         </div>
       </div>
     );
