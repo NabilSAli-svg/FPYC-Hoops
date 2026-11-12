@@ -273,7 +273,7 @@ export default function AdminApp() {
           {view === 'payments'    && canManageOps(role) && <PaymentsView players={players} setPlayers={setPlayers} />}
           {view === 'officials'   && canView(role, 'officials') && <OfficialsView />}
           {view === 'signups'     && canView(role, 'signups')   && <SignupsView tabs={signupTabs(role)} />}
-          {view === 'settings'    && <SettingsView profile={profile} role={role} scopes={scopes} teamsInfo={teamsInfo} customTeams={customTeams} setCustomTeams={setCustomTeams} />}
+          {view === 'settings'    && <SettingsView profile={profile} role={role} scopes={scopes} teamsInfo={teamsInfo} customTeams={customTeams} setCustomTeams={setCustomTeams} allowedTeams={role === 'admin' ? null : ALL_TEAM_NAMES} />}
           </ErrorBoundary>
         </div>
       </div>
