@@ -383,7 +383,7 @@ export const INITIAL_PLAYERS = [
   { id: 'p323', number: null, name: "Owen Riley", grade: "5th", school: "Providence", guardian: "Taylor Riley", phone: "(563) 564-9379", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: '5/6 Boys' },
   { id: 'p324', number: null, name: "James Van De Ven", grade: "2nd", school: "Homeschool", guardian: "Susan Van De Ven", phone: "(765)617-7893", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: 'K-3 3v3' },
   { id: 'p325', number: null, name: "Alex Handy", grade: "8th", school: "Frost", guardian: "Lori Wang", phone: "(201) 320-3625", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: '7/8 Boys' },
-  { id: 'p326', number: null, name: "Robert Tilman", grade: "2nd", school: "Daniels Run", guardian: "Laura Tilman", phone: "(703) 967-0405", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: 'K-3 3v3' },
+  { id: 'p326', number: null, name: "Robert Tilman", grade: "2nd", school: "Daniels Run", guardian: "Laura Tilman", phone: "(703) 967-0405", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: '3/4 Boys' },
   { id: 'p327', number: null, name: "Lorenz Ringo", grade: "8th", school: "Katherine johnson", guardian: "Brett Ringo", phone: "(860) 593-9902", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: '7/8 Boys' },
   { id: 'p328', number: null, name: "Armond Ringo", grade: "8th", school: "Katherine Johnson", guardian: "Brett Ringo", phone: "(860) 593-9902", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: '7/8 Boys' },
   { id: 'p329', number: null, name: "Claire Brown", grade: "6th", school: "Daniels run", guardian: "Sherry Brown", phone: "(571) 426-5175", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: '5/6 Girls' },
@@ -941,6 +941,20 @@ export const INITIAL_PLAYERS = [
   { id: 'p648', number: null, name: "Calvin Williams", grade: "9th Grade", school: "Little Run", guardian: "Caroline Williams", phone: "(760) 518-1770", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "HS Boys" },
   { id: 'p649', number: null, name: "Marko Ilijoski", grade: "9th Grade", school: "Daniels run", guardian: "Tamara Ilijoski", phone: "(703) 589-7766", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "HS Boys" },
   { id: 'p650', number: null, name: "Noah Maxwell", grade: "10th Grade", school: "Fairfax High School", guardian: "Megan Maxwell", phone: "(325) 232-2310", position: '', status: 'active', waiver: true, program: "Recreation", division: REC_DIVISION, team: "HS Boys" },
+
+  // ── Added from the 2026-11-12 Ottosport registration export (deltas only) ──
+  { id: 'p651', number: null, name: "Dimitrios Maroulis", grade: "1st Grade", school: "Rolling valley", guardian: "Nicolette Maroulis", phone: "(571) 705-9928", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p652', number: null, name: "Zeke Szymanski", grade: "Kindergarten", school: "Wakefield Chappel", guardian: "Elly Szymanski", phone: "", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p653', number: null, name: "Alan N. Veliz", grade: "4th Grade", school: "Fairfax villa elementary School", guardian: "Alan Veliz", phone: "2403838624", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "3/4 Boys" },
+  { id: 'p654', number: null, name: "Zayne Khayata", grade: "6th Grade", school: "Eagle view", guardian: "Issam Khayata", phone: "(617) 600-4668", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p655', number: null, name: "Kian Shirazi", grade: "5th Grade", school: "Oakton Elementary School", guardian: "Ehsan Shirazi", phone: "(410) 300-0877", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p656', number: null, name: "David (Euimin) Lee", grade: "5th Grade", school: "Oakton Elementary School", guardian: "Juyoung Lee", phone: "(571)396-2432", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p657', number: null, name: "Owen McLenahan", grade: "6th Grade", school: "Oakton ES", guardian: "Mike McLenahan", phone: "(703) 303-9848", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p658', number: null, name: "Aniela Radwanski", grade: "6th Grade", school: "Daniels Run", guardian: "Dave Radwanski", phone: "(571) 338-0385", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "5/6 Girls" },
+  { id: 'p659', number: null, name: "Alexandra Maroulis", grade: "7th Grade", school: "Rolling valley", guardian: "Nicolette Maroulis", phone: "(571) 705-9928", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "7/8 Girls" },
+  { id: 'p660', number: null, name: "Efstathia Maroulis", grade: "7th Grade", school: "Rolling valley", guardian: "Nicolette Maroulis", phone: "(571) 705-9928", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "7/8 Girls" },
+  { id: 'p661', number: null, name: "Callum DiTeresi", grade: "9th Grade", school: "Fairfax", guardian: "DiTeresi family", phone: "(773) 750-0767", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
+  { id: 'p662', number: null, name: "Logan Gulino", grade: "9th Grade", school: "Laurel Ridge ES", guardian: "Crystal Gulino", phone: "(703) 407-1472", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
 ];
 
 export const INITIAL_GAMES = [
@@ -1732,6 +1746,10 @@ export const INITIAL_STAFF = [
   { id: 'rst65', name: "Ashley Freitas", role: "Scorekeeper", program: 'Recreation', team: "K-3 3v3", email: "ashleymba2010@gmail.com", phone: "(916) 626-7232", bgCheckStatus: 'Not Started', bgCheckDate: null },
   { id: 'rst66', name: "Eric Lipp", role: "Coach", program: 'Recreation', team: "5/6 Girls", email: "wvlippo@gmail.com", phone: "(703)470-3518", bgCheckStatus: 'Not Started', bgCheckDate: null },
   { id: 'rst67', name: "Tyler Maxwell", role: "Assistant Coach", program: 'Recreation', team: "HS Boys", email: "tylerdmaxwell529@gmail.com", phone: "(907) 227-1114", bgCheckStatus: 'Not Started', bgCheckDate: null },
+
+  // ── Added from the 2026-11-12 Ottosport team staff export (deltas only) ──
+  { id: 'rst68', name: "Ehsan Shirazi", role: "Coach", program: 'Recreation', team: "5/6 Boys", email: "ehsan1shirazi@gmail.com", phone: "(410) 300-0877", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst69', name: "Mike McLenahan", role: "Coach", program: 'Recreation', team: "5/6 Boys", email: "mmclenahan@hotmail.com", phone: "(703) 303-9848", bgCheckStatus: 'Not Started', bgCheckDate: null },
 ];
 
 export function useStaff() {
