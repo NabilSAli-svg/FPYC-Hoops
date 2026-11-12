@@ -98,7 +98,6 @@ export default function StaffView({ role, allowedTeams } = {}) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingPerson, setEditingPerson] = useState(null);
   const [toast, setToast] = useState('');
-  const [bgBusyKey, setBgBusyKey] = useState(null);
 
   function showToast(msg) {
     setToast(msg);
@@ -144,23 +143,6 @@ export default function StaffView({ role, allowedTeams } = {}) {
   function removePerson(person) {
     setStaff(prev => prev.filter(s => !person.ids.includes(s.id)));
     showToast(`${person.name} removed`);
-  }
-
-  async function runBackgroundCheck(person) {
-    setBgBusyKey(person.key);
-    try {
-      const { data, error } = await supabase.functions.invoke('send-background-check', {
-        body: { name: person.name, email: person.email },
-      });
-      if (error || !data?.success) throw error || new Error('Background check request failed');
-      const today = new Date().toISOString().slice(0, 10);
-      setStaff(prev => prev.map(s => person.ids.includes(s.id) ? { ...s, bgCheckStatus: 'Pending', bgCheckDate: today } : s));
-      showToast(`Background check requested for ${person.name}`);
-    } catch (err) {
-      showToast(`Could not start background check: ${err.message || err}`);
-    } finally {
-      setBgBusyKey(null);
-    }
   }
 
   return (
@@ -245,20 +227,20 @@ export default function StaffView({ role, allowedTeams } = {}) {
           <div key={ageGroup}>
             <Eyebrow>{ageGroup}</Eyebrow>
             <Card padding={0} style={{ marginTop: 8 }}>
-              <PersonRows people={groupPeople} bgBusyKey={bgBusyKey} runBackgroundCheck={runBackgroundCheck} openEdit={openEdit} removePerson={removePerson} canEdit={canEdit} />
+              <PersonRows people={groupPeople} openEdit={openEdit} removePerson={removePerson} canEdit={canEdit} />
             </Card>
           </div>
         ))
         : (
           <Card padding={0}>
-            <PersonRows people={filtered} bgBusyKey={bgBusyKey} runBackgroundCheck={runBackgroundCheck} openEdit={openEdit} removePerson={removePerson} canEdit={canEdit} />
+            <PersonRows people={filtered} openEdit={openEdit} removePerson={removePerson} canEdit={canEdit} />
           </Card>
         ))}
     </div>
   );
 }
 
-function PersonRows({ people, bgBusyKey, runBackgroundCheck, openEdit, removePerson, canEdit }) {
+function PersonRows({ people, openEdit, removePerson, canEdit }) {
   return people.map((person, i) => {
     const colors = BG_COLORS[person.bgCheckStatus] || BG_COLORS['Not Started'];
     return (
@@ -277,11 +259,6 @@ function PersonRows({ people, bgBusyKey, runBackgroundCheck, openEdit, removePer
           <span style={{ background: colors.bg, color: colors.fg, fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '4px 10px' }}>
             Background check: {person.bgCheckStatus}{person.bgCheckDate ? ` (${person.bgCheckDate})` : ''}
           </span>
-          {canEdit && (
-            <Button kind="quiet" size="sm" icon="shield-check" disabled={bgBusyKey === person.key} onClick={() => runBackgroundCheck(person)}>
-              {bgBusyKey === person.key ? 'Requesting…' : 'Run check'}
-            </Button>
-          )}
           {canEdit && <Button kind="quiet" size="sm" icon="edit-2" onClick={() => openEdit(person)} />}
           {canEdit && <Button kind="quiet" size="sm" icon="trash-2" onClick={() => removePerson(person)} />}
         </div>
