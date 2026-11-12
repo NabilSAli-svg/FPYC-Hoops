@@ -30,22 +30,30 @@ const NOTIF_GROUPS = [
   },
 ];
 
+const SETTINGS_TABS = [
+  { id: 'team',    label: 'Team Info',   icon: 'shield' },
+  { id: 'teams',   label: 'All Teams',   icon: 'layers' },
+  { id: 'coaches', label: 'Coaches & Permissions', icon: 'key' },
+  { id: 'notifs',  label: 'Notifications', icon: 'bell' },
+  { id: 'fees',    label: 'Fees',         icon: 'dollar-sign' },
+  { id: 'account', label: 'Account',     icon: 'user' },
+];
+
+// A League Director only manages their own age group's teams/coaches and
+// their own account -- the rest (team-wide info, notifications, fees)
+// is admin-only.
+const LEAGUE_DIRECTOR_TABS = new Set(['teams', 'coaches', 'account']);
+
 export default function SettingsView({ profile, role, scopes, teamsInfo, customTeams, setCustomTeams }) {
-  const [tab, setTab] = useState('team');
+  const tabs = role === 'admin' ? SETTINGS_TABS : SETTINGS_TABS.filter(t => LEAGUE_DIRECTOR_TABS.has(t.id));
+  const [tab, setTab] = useState(role === 'admin' ? 'team' : 'teams');
   const info = teamsInfo || TEAMS_INFO;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Tab nav */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
-        {[
-          { id: 'team',    label: 'Team Info',   icon: 'shield' },
-          { id: 'teams',   label: 'All Teams',   icon: 'layers' },
-          { id: 'coaches', label: 'Coaches & Permissions', icon: 'key' },
-          { id: 'notifs',  label: 'Notifications', icon: 'bell' },
-          { id: 'fees',    label: 'Fees',         icon: 'dollar-sign' },
-          { id: 'account', label: 'Account',     icon: 'user' },
-        ].map(t => (
+        {tabs.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             padding: '12px 20px', border: 'none', background: 'transparent', cursor: 'pointer',
             borderBottom: `2px solid ${tab === t.id ? 'var(--varsity-gold)' : 'transparent'}`,
