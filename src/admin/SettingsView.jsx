@@ -44,8 +44,10 @@ const SETTINGS_TABS = [
 // is admin-only.
 const LEAGUE_DIRECTOR_TABS = new Set(['teams', 'coaches', 'account']);
 
-export default function SettingsView({ profile, role, scopes, teamsInfo, customTeams, setCustomTeams }) {
-  const tabs = role === 'admin' ? SETTINGS_TABS : SETTINGS_TABS.filter(t => LEAGUE_DIRECTOR_TABS.has(t.id));
+export default function SettingsView({ profile, role, scopes, teamsInfo, customTeams, setCustomTeams, allowedTeams }) {
+  const tabs = role === 'admin'
+    ? SETTINGS_TABS
+    : SETTINGS_TABS.filter(t => LEAGUE_DIRECTOR_TABS.has(t.id)).map(t => t.id === 'teams' ? { ...t, label: 'My Teams' } : t);
   const [tab, setTab] = useState(role === 'admin' ? 'team' : 'teams');
   const info = teamsInfo || TEAMS_INFO;
 
@@ -69,7 +71,7 @@ export default function SettingsView({ profile, role, scopes, teamsInfo, customT
       </div>
 
       {tab === 'team'    && <TeamInfoTab />}
-      {tab === 'teams'   && <TeamsTab teamsInfo={info} role={role} scopes={scopes} customTeams={customTeams} setCustomTeams={setCustomTeams} />}
+      {tab === 'teams'   && <TeamsTab teamsInfo={info} role={role} scopes={scopes} customTeams={customTeams} setCustomTeams={setCustomTeams} allowedTeams={allowedTeams} />}
       {tab === 'coaches' && <CoachesTab teamsInfo={info} />}
       {tab === 'notifs'  && <NotificationsTab />}
       {tab === 'fees'    && <FeesTab />}
@@ -203,7 +205,7 @@ function TeamInfoTab() {
 
 const NEW_TEAM_COLORS = ['#0A1F3D', '#C8102E', '#1F8A5B', '#E87722', '#7C3AED', '#0F766E', '#B45309', '#1D4ED8'];
 
-function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTeams }) {
+function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTeams, allowedTeams }) {
   const [players] = usePlayers();
   const info = teamsInfo || TEAMS_INFO;
   const [showNew, setShowNew] = useState(false);
@@ -216,10 +218,13 @@ function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTea
   const canCreate = role === 'admin' || (role === 'league_director' && myAgeGroup);
   const divisionOptions = [...new Set(Object.values(info).map(t => t.division).filter(Boolean))];
 
-  const teams = Object.values(info).filter(t => !t.archived).map(t => ({
-    ...t,
-    players: players.filter(p => p.team === t.name).length,
-  }));
+  const teams = Object.values(info)
+    .filter(t => !t.archived)
+    .filter(t => !allowedTeams || allowedTeams.includes(t.name))
+    .map(t => ({
+      ...t,
+      players: players.filter(p => p.team === t.name).length,
+    }));
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -244,8 +249,10 @@ function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTea
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <Display size={22}>All teams</Display>
-          <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>{teams.length} teams across the program</div>
+          <Display size={22}>{allowedTeams ? 'My teams' : 'All teams'}</Display>
+          <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>
+            {allowedTeams ? `${teams.length} team${teams.length === 1 ? '' : 's'} in your age group` : `${teams.length} teams across the program`}
+          </div>
         </div>
         {canCreate && !showNew && (
           <Button kind="gold" icon="plus" onClick={() => { setShowNew(true); setDivision(role === 'admin' ? '' : myAgeGroup); }}>New team</Button>
