@@ -69,7 +69,7 @@ export const ROLES = {
     id: 'league_director',
     label: 'League Director',
     blurb: 'One age group, assigned per user.',
-    views: ['dashboard', 'roster', 'schedule', 'lineup', 'attendance', 'messages', 'stats', 'evaluations', 'draftboard'],
+    views: ['dashboard', 'roster', 'schedule', 'lineup', 'attendance', 'messages', 'stats', 'evaluations', 'draftboard', 'staff'],
     canEdit: true,
     teamScope: 'scoped',
   },

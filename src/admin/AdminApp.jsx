@@ -262,7 +262,7 @@ export default function AdminApp() {
           {view === 'messages'       && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} teamName={selectedTeamName} />}
           {view === 'announcements'  && <AnnouncementsView players={players} />}
           {view === 'evaluations' && <EvaluationsView players={teamPlayers.filter(p => p.status !== 'inactive')} sport={sport} />}
-          {view === 'staff'       && <StaffView />}
+          {view === 'staff'       && <StaffView role={role} allowedTeams={role === 'admin' ? null : ALL_TEAM_NAMES} />}
           {view === 'playoffs'    && <PlayoffsView />}
           {view === 'draftboard'  && <DraftBoardView sport={sport} allowedDivisions={draftableDivisions} customTeams={customTeams} />}
           {view === 'stats'       && <StatsView teamFilter={selectedTeamName} sport={sport} />}

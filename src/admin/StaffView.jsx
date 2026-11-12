@@ -74,8 +74,9 @@ function groupByPerson(staff) {
   return people;
 }
 
-export default function StaffView() {
+export default function StaffView({ role, allowedTeams } = {}) {
   const [staff, setStaff] = useStaff();
+  const canEdit = !allowedTeams; // admin only -- a scoped role (League Director) gets read-only
 
   // Seed any INITIAL_STAFF entries missing from Supabase (e.g. Select/Training coaches added after initial launch)
   useEffect(() => {
@@ -100,7 +101,9 @@ export default function StaffView() {
     setTimeout(() => setToast(''), 3000);
   }
 
-  const people = groupByPerson(staff);
+  const people = allowedTeams
+    ? groupByPerson(staff).filter(p => p.assignments.some(a => allowedTeams.includes(a.team)))
+    : groupByPerson(staff);
   const filtered = activeProgram === 'All' ? people : people.filter(p => p.programs.includes(activeProgram));
   const groupedProgram = (activeProgram === 'Select' || activeProgram === 'Recreation') ? activeProgram : null;
 
@@ -161,9 +164,11 @@ export default function StaffView() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <Display size={22}>Staff & Volunteers</Display>
-          <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>Coaches, board members & volunteers across all leagues.</div>
+          <div style={{ fontSize: 13, color: 'var(--fg-muted)', marginTop: 4 }}>
+            {canEdit ? 'Coaches, board members & volunteers across all leagues.' : 'Coaches & volunteers for your age group.'}
+          </div>
         </div>
-        <Button kind="gold" icon="plus" onClick={openAdd}>Add staff</Button>
+        {canEdit && <Button kind="gold" icon="plus" onClick={openAdd}>Add staff</Button>}
       </div>
 
       {toast && (
@@ -186,7 +191,7 @@ export default function StaffView() {
         ))}
       </div>
 
-      {showForm && (
+      {showForm && canEdit && (
         <Card>
           <Eyebrow>{editingPerson ? 'Edit staff member' : 'Add staff member'}</Eyebrow>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginTop: 12 }}>
@@ -228,20 +233,20 @@ export default function StaffView() {
           <div key={ageGroup}>
             <Eyebrow>{ageGroup}</Eyebrow>
             <Card padding={0} style={{ marginTop: 8 }}>
-              <PersonRows people={groupPeople} bgBusyKey={bgBusyKey} runBackgroundCheck={runBackgroundCheck} openEdit={openEdit} removePerson={removePerson} />
+              <PersonRows people={groupPeople} bgBusyKey={bgBusyKey} runBackgroundCheck={runBackgroundCheck} openEdit={openEdit} removePerson={removePerson} canEdit={canEdit} />
             </Card>
           </div>
         ))
         : (
           <Card padding={0}>
-            <PersonRows people={filtered} bgBusyKey={bgBusyKey} runBackgroundCheck={runBackgroundCheck} openEdit={openEdit} removePerson={removePerson} />
+            <PersonRows people={filtered} bgBusyKey={bgBusyKey} runBackgroundCheck={runBackgroundCheck} openEdit={openEdit} removePerson={removePerson} canEdit={canEdit} />
           </Card>
         ))}
     </div>
   );
 }
 
-function PersonRows({ people, bgBusyKey, runBackgroundCheck, openEdit, removePerson }) {
+function PersonRows({ people, bgBusyKey, runBackgroundCheck, openEdit, removePerson, canEdit }) {
   return people.map((person, i) => {
     const colors = BG_COLORS[person.bgCheckStatus] || BG_COLORS['Not Started'];
     return (
@@ -260,11 +265,13 @@ function PersonRows({ people, bgBusyKey, runBackgroundCheck, openEdit, removePer
           <span style={{ background: colors.bg, color: colors.fg, fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '4px 10px' }}>
             Background check: {person.bgCheckStatus}{person.bgCheckDate ? ` (${person.bgCheckDate})` : ''}
           </span>
-          <Button kind="quiet" size="sm" icon="shield-check" disabled={bgBusyKey === person.key} onClick={() => runBackgroundCheck(person)}>
-            {bgBusyKey === person.key ? 'Requesting…' : 'Run check'}
-          </Button>
-          <Button kind="quiet" size="sm" icon="edit-2" onClick={() => openEdit(person)} />
-          <Button kind="quiet" size="sm" icon="trash-2" onClick={() => removePerson(person)} />
+          {canEdit && (
+            <Button kind="quiet" size="sm" icon="shield-check" disabled={bgBusyKey === person.key} onClick={() => runBackgroundCheck(person)}>
+              {bgBusyKey === person.key ? 'Requesting…' : 'Run check'}
+            </Button>
+          )}
+          {canEdit && <Button kind="quiet" size="sm" icon="edit-2" onClick={() => openEdit(person)} />}
+          {canEdit && <Button kind="quiet" size="sm" icon="trash-2" onClick={() => removePerson(person)} />}
         </div>
       </div>
     );
