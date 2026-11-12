@@ -34,7 +34,7 @@ async function describeEdgeFunctionError(error) {
   return error.message;
 }
 
-export default function MessagesView({ autoCompose = false, onAutoComposeUsed, teamName }) {
+export default function MessagesView({ autoCompose = false, onAutoComposeUsed, teamName, allowedTeams }) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 700);
@@ -45,7 +45,11 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed, t
   const [players] = usePlayers();
   const [staff] = useStaff();
   const [tab, setTab] = useState('inbox');
-  const sorted = [...messages].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+  // A League Director (or any scoped role) only sees messages sent about
+  // one of their own teams -- a message with no target (a general,
+  // league-wide note) still shows to everyone.
+  const visible = allowedTeams ? messages.filter(m => !m.target || allowedTeams.includes(m.target)) : messages;
+  const sorted = [...visible].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
   const [selected, setSelected] = useState(null);
   const [showCompose, setShowCompose] = useState(autoCompose);
   const [composeChannel, setComposeChannel] = useState('email');
@@ -91,7 +95,7 @@ export default function MessagesView({ autoCompose = false, onAutoComposeUsed, t
           from: TEAM_INFO.coach,
           time: 'Just now',
           unread: true,
-          target: TEAM_INFO.name,
+          target: teamName || TEAM_INFO.name,
           subject: subject || '(No subject)',
           body: body || '',
         }, ...ms]);
