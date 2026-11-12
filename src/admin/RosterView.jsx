@@ -40,11 +40,11 @@ function emptyForm(sport) {
 }
 
 function exportRosterCSV(players) {
-  const headers = ['#', 'Name', 'Grade', 'School', 'Position', 'Guardian', 'Phone', 'Status', 'Waiver', 'Program', 'Division', 'Team'];
+  const headers = ['#', 'Name', 'Grade', 'School', 'Position', 'Guardian', 'Phone', 'Status', 'Program', 'Division', 'Team'];
   const rows = players.map(p => [
     p.number, p.name, p.grade, p.school || '', p.position,
     p.guardian || '', p.phone || '', p.status,
-    p.waiver ? 'Yes' : 'No', p.program || '', p.division || '', p.team || '',
+    p.program || '', p.division || '', p.team || '',
   ]);
   csvDownload('fpyc-roster.csv', [headers, ...rows]);
 }
@@ -271,10 +271,6 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
                 <button onClick={() => cycleStatus(p)} title="Tap to cycle status" style={{ all: 'unset', cursor: 'pointer' }}>
                   <Pill kind={p.status === 'active' ? 'navy' : p.status === 'pending' ? 'warn' : 'neutral'}>{p.status}</Pill>
                 </button>
-                {p.waiver
-                  ? <span style={{ color: 'var(--status-win)', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700 }}><Icon name="check-circle-2" size={13} />Waiver on file</span>
-                  : <span style={{ color: 'var(--foul-red)', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700 }}><Icon name="alert-circle" size={13} />Waiver missing</span>
-                }
               </div>
             </Card>
           ))}
@@ -284,7 +280,7 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
         <div style={{ overflowX: 'auto' }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.7fr auto',
+          gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.7fr auto',
           minWidth: 680,
           padding: '12px 18px',
           background: 'var(--bone)', borderBottom: '1px solid var(--border)',
@@ -295,7 +291,6 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
           <SortHeader label="Grade" sortKey="grade" current={sortKey} dir={sortDir} onClick={toggleSort} />
           <SortHeader label="School" sortKey="school" current={sortKey} dir={sortDir} onClick={toggleSort} />
           <SortHeader label="Guardian" sortKey="guardian" current={sortKey} dir={sortDir} onClick={toggleSort} />
-          <div>Waiver</div>
           <SortHeader label="Status" sortKey="status" current={sortKey} dir={sortDir} onClick={toggleSort} />
           <div />
         </div>
@@ -303,7 +298,7 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
         {filtered.map((p, i) => (
           <div key={p.id} style={{
             display: 'grid',
-            gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.7fr auto',
+            gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.7fr auto',
             padding: '12px 18px', alignItems: 'center', gap: 4,
             borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
             transition: 'background 120ms',
@@ -321,12 +316,6 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
             <div style={{ fontSize: 13, color: 'var(--fg-soft)' }}>
               <div>{p.guardian || '—'}</div>
               {p.phone && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-muted)' }}>{p.phone}</div>}
-            </div>
-            <div>
-              {p.waiver
-                ? <span style={{ color: 'var(--status-win)', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700 }}><Icon name="check-circle-2" size={14} />On file</span>
-                : <span style={{ color: 'var(--foul-red)', display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700 }}><Icon name="alert-circle" size={14} />Missing</span>
-              }
             </div>
             {/* Clickable status pill cycles through statuses */}
             <button onClick={() => cycleStatus(p)} title="Click to cycle status" style={{ all: 'unset', cursor: 'pointer' }}>
@@ -405,19 +394,6 @@ export default function RosterView({ team, players, setPlayers, sport = 'basketb
                 <select value={form.status} onChange={e => set('status', e.target.value)} style={inputStyle()}>
                   {STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
                 </select>
-              </F>
-              <F label="Waiver">
-                <button onClick={() => set('waiver', !form.waiver)} style={{
-                  width: '100%', padding: '9px 14px', borderRadius: 7, cursor: 'pointer',
-                  border: `1.5px solid ${form.waiver ? 'var(--status-win)' : 'var(--border)'}`,
-                  background: form.waiver ? 'rgba(31,138,91,0.06)' : '#fff',
-                  fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 13,
-                  color: form.waiver ? 'var(--status-win)' : 'var(--fg-muted)',
-                  display: 'flex', alignItems: 'center', gap: 8, transition: 'all 160ms',
-                }}>
-                  <Icon name={form.waiver ? 'check-circle-2' : 'circle'} size={15} color={form.waiver ? 'var(--status-win)' : 'var(--fg-muted)'} />
-                  {form.waiver ? 'Waiver on file' : 'Waiver missing'}
-                </button>
               </F>
             </div>
 
@@ -557,16 +533,16 @@ function RosterSkeleton({ players, filter, setFilter }) {
       </div>
       <Card padding={0}>
         <div style={{
-          display: 'grid', gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.7fr auto',
+          display: 'grid', gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.7fr auto',
           padding: '12px 18px', background: 'var(--bone)', borderBottom: '1px solid var(--border)',
           fontSize: 11, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'var(--fg-muted)', fontWeight: 700,
         }}>
           <div>#</div><div>Player</div><div>Grade</div><div>School</div>
-          <div>Guardian</div><div>Waiver</div><div>Status</div><div />
+          <div>Guardian</div><div>Status</div><div />
         </div>
         {[0,1,2,3,4,5,6,7].map(i => (
           <div key={i} style={{
-            display: 'grid', gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.6fr 0.7fr auto',
+            display: 'grid', gridTemplateColumns: '60px 1.2fr 0.7fr 0.7fr 1fr 0.7fr auto',
             padding: '13px 18px', alignItems: 'center', borderBottom: '1px solid var(--border)', gap: 4,
           }}>
             <Skeleton width={28} height={28} style={{ borderRadius: 4, margin: '0 auto' }} />
@@ -575,7 +551,6 @@ function RosterSkeleton({ players, filter, setFilter }) {
             <Skeleton width="70%" height={13} />
             <Skeleton width="80%" height={13} />
             <Skeleton width={52} height={20} style={{ borderRadius: 999 }} />
-            <Skeleton width={60} height={20} style={{ borderRadius: 999 }} />
             <Skeleton width={24} height={24} style={{ borderRadius: 4, marginLeft: 'auto' }} />
           </div>
         ))}
