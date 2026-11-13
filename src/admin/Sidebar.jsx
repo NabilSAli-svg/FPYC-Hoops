@@ -51,6 +51,8 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
     transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
     boxShadow: sidebarOpen ? '4px 0 24px rgba(0,0,0,0.35)' : 'none',
     transition: 'transform 240ms cubic-bezier(0.2,0.8,0.2,1)',
+    overflowY: 'auto',
+    WebkitOverflowScrolling: 'touch',
   } : {
     width: 248,
     background: 'var(--court-navy)',
