@@ -328,6 +328,7 @@ function CoachesTab({ teamsInfo }) {
   const allTeamOptions = Object.keys(info).filter(t => !info[t].archived && !info[t].pool);
   const [staff] = useStaff();
   const [profiles, setProfiles] = useState({});
+  const [scopesByUserId, setScopesByUserId] = useState({});
   const [busyEmail, setBusyEmail] = useState(null);
   const [activeProgram, setActiveProgram] = useState('All');
 
@@ -337,6 +338,15 @@ function CoachesTab({ teamsInfo }) {
       const map = {};
       (data || []).forEach(p => { map[(p.email || '').toLowerCase()] = p; });
       setProfiles(map);
+    });
+    // Real scope grants for a scoped role (League Director, etc.) -- a
+    // person can hold more than one, unlike the single team/age group a
+    // coach's profile.team carries.
+    supabase.from('user_scopes').select('user_id,scope_type,scope_value').then(({ data, error }) => {
+      if (error) { console.error('[supabase] fetch user_scopes:', error.message); return; }
+      const map = {};
+      (data || []).forEach(s => { (map[s.user_id] ??= []).push(s); });
+      setScopesByUserId(map);
     });
   }, []);
 
@@ -444,10 +454,11 @@ function CoachesTab({ teamsInfo }) {
           const visibleAssignments = activeProgram === 'All'
             ? person.assignments
             : person.assignments.filter(a => a.program === activeProgram);
-          // Scoped roles (League Director, etc.) get their team/age group from
-          // user_scopes, which has no admin UI yet -- show what they're
-          // assigned to in the staff directory instead of a dead dropdown.
-          const scopedTeam = !isAdmin && !isCoach ? visibleAssignments.find(a => a.team)?.team : null;
+          // Scoped roles (League Director, etc.) can hold more than one
+          // scope -- show every real user_scopes grant, not just a guess
+          // from their staff-directory assignments.
+          const realScopes = !isAdmin && !isCoach && profile ? (scopesByUserId[profile.id] || []) : [];
+          const scopedTeam = realScopes.length > 0 ? realScopes.map(s => s.scope_value).join(', ') : null;
           return (
             <div key={key} style={{
               display: 'grid',
