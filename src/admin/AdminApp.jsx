@@ -43,26 +43,35 @@ export default function AdminApp() {
   const [profile, setProfile] = useState(null);
   const [scopes, setScopes] = useState([]);
 
+  // Loads role/profile/scopes for a signed-in user -- shared by the mount
+  // effect below and AdminLogin's onSuccess, since a fresh sign-in inside
+  // an already-mounted AdminApp never re-runs a `[]`-dep effect. Without
+  // this, logging in (as opposed to reloading into an existing session)
+  // left scopes stuck at [] until the next full page reload.
+  async function loadRoleAndScopes(userId) {
+    // Fetched separately from the full profile row below -- a column or
+    // RLS error on that wider select must never block role/scopes from
+    // loading, since those are what let a non-coach role in at all.
+    const { data: rows, error: profileErr } = await supabase
+      .from('profiles').select('id, role, team, first_name, parent_name, email, phone').eq('id', userId);
+    if (profileErr) console.error('[supabase] fetch profile:', profileErr.message);
+    const profile = rows?.[0] || null;
+
+    if (profile && canUseConsole(profile.role)) {
+      setRole(profile.role);
+      setProfile(profile);
+      const { data: scopeRows, error: scopeErr } = await supabase.from('user_scopes').select('scope_type, scope_value').eq('user_id', userId);
+      if (scopeErr) console.error('[supabase] fetch user_scopes:', scopeErr.message);
+      setScopes(scopeRows || []);
+      if (profile.role === 'coach' && profile.team) setCoachTeam(profile.team);
+    }
+    return profile;
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { setAuthReady(true); return; }
-
-      // Fetched separately from the full profile row below -- a column or
-      // RLS error on that wider select must never block role/scopes from
-      // loading, since those are what let a non-coach role in at all.
-      const { data: rows, error: profileErr } = await supabase
-        .from('profiles').select('id, role, team, first_name, parent_name, email, phone').eq('id', session.user.id);
-      if (profileErr) console.error('[supabase] fetch profile:', profileErr.message);
-      const profile = rows?.[0] || null;
-
-      if (profile && canUseConsole(profile.role)) {
-        setRole(profile.role);
-        setProfile(profile);
-        const { data: scopeRows, error: scopeErr } = await supabase.from('user_scopes').select('scope_type, scope_value').eq('user_id', session.user.id);
-        if (scopeErr) console.error('[supabase] fetch user_scopes:', scopeErr.message);
-        setScopes(scopeRows || []);
-        if (profile.role === 'coach' && profile.team) setCoachTeam(profile.team);
-      }
+      await loadRoleAndScopes(session.user.id);
       setAuthReady(true);
     });
   }, []);
@@ -187,7 +196,7 @@ export default function AdminApp() {
     </div>
   );
 
-  if (!role) return <AdminLogin onSuccess={r => setRole(r)} />;
+  if (!role) return <AdminLogin onSuccess={loadRoleAndScopes} />;
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bone)' }}>
@@ -317,11 +326,9 @@ function AdminLogin({ onSuccess }) {
     if (authErr) { setLoading(false); setError(authErr.message); return; }
 
     const { data: { user } } = await supabase.auth.getUser();
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    const profile = await onSuccess(user.id);
     setLoading(false);
-    if (profile && canUseConsole(profile.role)) {
-      onSuccess(profile.role);
-    } else {
+    if (!(profile && canUseConsole(profile.role))) {
       setError('Your account does not have console access. Contact an admin.');
       await supabase.auth.signOut();
     }
