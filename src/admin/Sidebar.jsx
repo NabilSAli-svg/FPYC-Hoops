@@ -1,6 +1,12 @@
 import { Icon, Avatar, Jersey } from '../shared/index.js';
 import { SPORTS, ACTIVE_SPORTS } from '../shared/store.js';
 import { canView, canManageOps, roleLabel } from '../shared/roles.js';
+import { supabase } from '../shared/supabase.js';
+
+async function handleLogOut() {
+  await supabase.auth.signOut();
+  window.location.reload();
+}
 
 const NAV_ITEMS = [
   { id: 'dashboard',     icon: 'layout-dashboard', label: 'Dashboard' },
@@ -161,7 +167,11 @@ export default function Sidebar({ active, onNav, team, sport, onSportChange, isM
           <div style={{ fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>{displayRole}</div>
         </div>
-        <Icon name="log-out" size={16} color="rgba(255,255,255,0.5)" />
+        <button onClick={handleLogOut} title="Log out" style={{
+          all: 'unset', cursor: 'pointer', padding: 6, borderRadius: 6, display: 'flex',
+        }}>
+          <Icon name="log-out" size={16} color="rgba(255,255,255,0.5)" />
+        </button>
       </div>
       </aside>
     </>
