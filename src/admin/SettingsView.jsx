@@ -211,6 +211,7 @@ function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTea
   const [showNew, setShowNew] = useState(false);
   const [name, setName] = useState('');
   const [division, setDivision] = useState('');
+  const [createError, setCreateError] = useState('');
 
   // A League Director can only create teams in their own age group --
   // the same scope_value their user_scopes row already grants them.
@@ -231,13 +232,15 @@ function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTea
 
   async function handleCreate(e) {
     e.preventDefault();
+    setCreateError('');
     const trimmed = name.trim();
-    if (!trimmed || info[trimmed]) return;
+    if (!trimmed) { setCreateError('Team name is required.'); return; }
+    if (info[trimmed]) { setCreateError(`A team named "${trimmed}" already exists.`); return; }
     // A director's new team belongs to their league's real division (e.g.
     // "Winter Rec"), not the age group itself -- the age group is only the
     // RLS scope key (age_group) that lets them manage it.
     const teamDivision = role === 'admin' ? division : (myPool?.division || REC_DIVISION);
-    if (!teamDivision) return;
+    if (!teamDivision) { setCreateError('No division set -- enter one.'); return; }
     const row = {
       id: 'team-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7),
       name: trimmed,
@@ -250,7 +253,11 @@ function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTea
       archived: false,
     };
     const { error } = await setCustomTeams(prev => [...prev, row]);
-    if (!error) { setName(''); setDivision(''); setShowNew(false); }
+    if (!error) {
+      setName(''); setDivision(''); setShowNew(false);
+    } else {
+      setCreateError(`Could not create team: ${error.message}`);
+    }
   }
 
   return (
@@ -270,6 +277,9 @@ function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTea
       {showNew && (
         <Card style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Display size={18}>Create a team</Display>
+          {createError && (
+            <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#DC2626' }}>{createError}</div>
+          )}
           <form onSubmit={handleCreate} style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'flex-end' }}>
             <div style={{ flex: '1 1 200px' }}>
               <label style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Team name</label>
