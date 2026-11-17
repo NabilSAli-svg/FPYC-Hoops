@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Button, Icon, Display, Eyebrow, Pill, Avatar } from '../shared/index.js';
-import { TEAM_INFO, TEAMS_INFO, useStaff, usePlayers, useFeeSettings, DEFAULT_FEE_SETTINGS, useDiscountCodes, DEFAULT_DISCOUNT_CODES, applyDiscount } from '../shared/store.js';
+import { TEAM_INFO, TEAMS_INFO, ACTIVE_SPORTS, useStaff, usePlayers, useFeeSettings, DEFAULT_FEE_SETTINGS, useDiscountCodes, DEFAULT_DISCOUNT_CODES, applyDiscount } from '../shared/store.js';
 import { supabase } from '../shared/supabase.js';
 import { ROLES, roleLabel as roleLabelOf } from '../shared/roles.js';
 
@@ -218,12 +218,17 @@ function TeamsTab({ teamsInfo, role, scopes = [], customTeams = [], setCustomTea
   const myAgeGroup = scopes.find(s => s.scope_type === 'team' || s.scope_type === 'age_group')?.scope_value || '';
   const myPool = info[myAgeGroup]; // the house league itself, e.g. '5/6 Girls'
   const canCreate = role === 'admin' || (role === 'league_director' && myAgeGroup);
-  const divisionOptions = [...new Set(Object.values(info).map(t => t.division).filter(Boolean))];
+  const activeSportIds = new Set(ACTIVE_SPORTS.map(s => s.id));
+  const divisionOptions = [...new Set(
+    Object.values(info).filter(t => activeSportIds.has(t.sport || 'basketball')).map(t => t.division).filter(Boolean)
+  )];
 
   // House leagues (pool: true) aren't teams -- they're the unassigned player
-  // pool a draft splits into real teams -- so they never show up here.
+  // pool a draft splits into real teams -- so they never show up here. Teams
+  // for a disabled sport (e.g. football, soccer are currently off) stay out
+  // of this list too -- real teams, just not running right now.
   const teams = Object.values(info)
-    .filter(t => !t.archived && !t.pool)
+    .filter(t => !t.archived && !t.pool && activeSportIds.has(t.sport || 'basketball'))
     .filter(t => !allowedTeams || allowedTeams.includes(t.name))
     .map(t => ({
       ...t,
