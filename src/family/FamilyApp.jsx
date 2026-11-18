@@ -138,9 +138,10 @@ export default function FamilyApp() {
     if (profile.player_id && !ids.includes(profile.player_id)) ids.push(profile.player_id);
 
     // Nothing linked yet — auto-match this account's email against guardians.
+    // `guardian` is the parent's name, not their email -- that lives in `email`.
     if (ids.length === 0) {
       const { data: matches } = await supabase
-        .from('players').select('*').ilike('guardian', authUser.email);
+        .from('players').select('*').ilike('email', authUser.email);
       if (matches && matches.length > 0) {
         // Link every match, so siblings come through together.
         await supabase.from('user_scopes').upsert(
