@@ -265,7 +265,7 @@ export default function AdminApp() {
           <ErrorBoundary resetKey={view + selectedTeamName}>
           {view === 'dashboard'   && <DashboardView team={TEAM} players={teamPlayers} games={teamGames} onGo={handleGo} />}
           {view === 'roster'      && <RosterView team={TEAM} players={teamPlayers} setPlayers={setPlayers} sport={sport} />}
-          {view === 'schedule'    && <ScheduleView games={teamGames} onScoreSave={saveScore} onGameUpdate={updateGame} onGameAdd={addGame} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} sport={sport} />}
+          {view === 'schedule'    && <ScheduleView games={teamGames} onScoreSave={saveScore} onGameUpdate={updateGame} onGameAdd={addGame} onGo={handleGo} initialTab={scheduleInitialTab} openNewGame={openNewGame} onNewGameClose={() => setOpenNewGame(false)} sport={sport} team={selectedTeamName} />}
           {view === 'lineup'      && <LineupView players={teamPlayers.filter(p => p.status === 'active')} games={teamGames} sport={sport} />}
           {view === 'attendance'  && <AttendanceView players={teamPlayers} games={teamGames} practices={teamPractices} />}
           {view === 'messages'       && <MessagesView autoCompose={messagesAutoCompose} onAutoComposeUsed={() => setMessagesAutoCompose(false)} teamName={selectedTeamName} allowedTeams={role === 'admin' ? null : ALL_TEAM_NAMES} />}

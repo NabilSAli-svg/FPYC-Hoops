@@ -12,11 +12,14 @@ const PRACTICE_TYPE_COLOR = {
   Conditioning: { bg: 'rgba(232,119,34,0.12)',     text: 'var(--basketball-orange)' },
 };
 
-export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameAdd, onGo, initialTab = 'games', openNewGame = false, onNewGameClose, sport = 'basketball' }) {
+export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameAdd, onGo, initialTab = 'games', openNewGame = false, onNewGameClose, sport = 'basketball', team }) {
   const isSoccer = sport === 'soccer';
   const QUARTERS = isSoccer ? QUARTERS_SOCCER : QUARTERS_BASKETBALL;
   const POINT_VALUES = isSoccer ? [1] : [1, 2, 3];
-  const [practices, setPractices] = usePractices();
+  const [allPractices, setPractices] = usePractices();
+  // practices has no per-team scoping elsewhere -- filter to the active
+  // team here, same as `games` is already filtered before it gets to us.
+  const practices = team ? allPractices.filter(p => p.team === team) : allPractices;
   const [players] = usePlayers();
   const [rsvps] = useRsvps();
   const [loading, setLoading] = useState(true);
@@ -346,6 +349,7 @@ export default function ScheduleView({ games, onScoreSave, onGameUpdate, onGameA
                 type: newPractice.type,
                 rsvp: 0,
                 notes: newPractice.notes,
+                team,
               }]);
               setNewPractice({ date: '', time: '', gym: '', type: 'Regular', notes: '' });
               setShowNewPractice(false);
