@@ -336,10 +336,23 @@ function RecipientField({ channel, players, staff, teamName, onChange }) {
   const activePlayers = teamPlayers.filter(p => p.status === 'active');
   const teamStaff = (staff || []).filter(s => s.team === team);
 
-  const playerField = channel === 'email' ? 'guardian' : 'phone';
+  // `guardian` is the parent's name, not their email -- real guardian
+  // emails live in a separate `email` column. A bad/missing value here
+  // must never reach the send call, since one invalid address fails the
+  // whole batch send.
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const PHONE_RE = /\d{7,}/;
+  const playerField = channel === 'email' ? 'email' : 'phone';
   const staffField = channel === 'email' ? 'email' : 'phone';
-  const valueOfPlayer = p => (p[playerField] || '').trim();
-  const valueOfStaff = s => (s[staffField] || '').trim();
+  const isValid = (val, re) => re.test(val);
+  const valueOfPlayer = p => {
+    const val = (p[playerField] || '').trim();
+    return isValid(val, channel === 'email' ? EMAIL_RE : PHONE_RE) ? val : '';
+  };
+  const valueOfStaff = s => {
+    const val = (s[staffField] || '').trim();
+    return isValid(val, channel === 'email' ? EMAIL_RE : PHONE_RE) ? val : '';
+  };
 
   const groups = [
     { id: 'team',   label: `Entire team (${teamPlayers.length})`,        players: teamPlayers },
