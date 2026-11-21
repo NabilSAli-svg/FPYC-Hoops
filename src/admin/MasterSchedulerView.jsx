@@ -60,6 +60,16 @@ function isAllClosed(blackoutMap, iso) {
 }
 function formatMonth(d){ return `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`; }
 
+// '17:30' -> '5:30 PM'
+function formatTime12h(t) {
+  if (!t) return '';
+  const [hStr, m] = t.split(':');
+  const h = parseInt(hStr, 10);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return `${h12}:${m} ${ampm}`;
+}
+
 function parseGameDate(g) {
   if (!g.month || !g.date) return null;
   const mo = MONTH_MAP[g.month];
@@ -813,17 +823,30 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor, games = [
     return set;
   }, [games, practices]);
 
-  function isPermitted(gymName, date) {
+  // Every permit row covering this gym on this date -- a gym can have more
+  // than one (e.g. a weekday-evening permit and a separate Saturday one),
+  // and callers need the actual time windows, not just a yes/no.
+  function permittedWindows(gymName, date) {
     const iso = isoDate(date);
-    if (isFacilityClosed(blackoutMap, iso, gymName)) return false;
+    if (isFacilityClosed(blackoutMap, iso, gymName)) return [];
     const perms = permitsByGym[gymName] || [];
     const dayName = WEEK_DAYS[date.getDay()];
-    return perms.some(p =>
+    return perms.filter(p =>
       p.season === season &&
       (p.days || []).includes(dayName) &&
       (!p.start_date || iso >= p.start_date) &&
       (!p.end_date   || iso <= p.end_date)
     );
+  }
+
+  function isPermitted(gymName, date) {
+    return permittedWindows(gymName, date).length > 0;
+  }
+
+  function windowsLabel(gymName, date) {
+    return permittedWindows(gymName, date)
+      .map(p => `${formatTime12h(p.start_time)}–${formatTime12h(p.end_time)}`)
+      .join(', ');
   }
 
   function isBooked(gymName, date) {
@@ -918,7 +941,7 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor, games = [
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
             {cells.map((day, idx) => {
               if (!day) {
-                return <div key={`pad-${idx}`} style={{ background: 'transparent', minHeight: 80 }} />;
+                return <div key={`pad-${idx}`} style={{ background: 'transparent', minHeight: 100 }} />;
               }
               const cellDate = new Date(year, month, day);
               const iso      = isoDate(cellDate);
@@ -934,7 +957,7 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor, games = [
                   border: `1.5px solid ${isToday ? seasonColor : isBlackout ? '#C8102E' : 'var(--border)'}`,
                   borderRadius: 8,
                   padding: '6px 6px 5px',
-                  minHeight: 80,
+                  minHeight: 100,
                   background: isBlackout
                     ? 'rgba(200,16,46,0.07)'
                     : isToday ? 'rgba(255,199,44,0.10)' : '#fff',
@@ -952,34 +975,35 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor, games = [
                     {isBlackout && <span style={{ fontSize: 11, color: '#C8102E', fontWeight: 700 }}>✕</span>}
                   </div>
 
-                  {/* Gym chips: open / booked / no permit */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                  {/* Gym chips: open / booked / no permit -- each shows its
+                      actual permitted time window, not just a yes/no */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     {permittedGyms.map(g => (
-                      <span key={g} title={`${g} — permitted & open`} style={{
+                      <div key={g} title={`${g} — permitted & open`} style={{
                         fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-body)',
                         padding: '1px 5px', borderRadius: 4,
                         background: 'rgba(31,138,91,0.18)', color: '#1F8A5B',
                         border: '1px solid rgba(31,138,91,0.35)',
-                        whiteSpace: 'nowrap',
-                      }}>{gymAbbr(g)}</span>
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>{gymAbbr(g)} {windowsLabel(g, cellDate)}</div>
                     ))}
                     {bookedGyms.map(g => (
-                      <span key={g} title={`${g} — permitted but already scheduled`} style={{
+                      <div key={g} title={`${g} — permitted but already scheduled`} style={{
                         fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-body)',
                         padding: '1px 5px', borderRadius: 4,
                         background: 'rgba(255,199,44,0.25)', color: '#C97B00',
                         border: '1px solid rgba(201,123,0,0.45)',
-                        whiteSpace: 'nowrap',
-                      }}>{gymAbbr(g)} ●</span>
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>{gymAbbr(g)} {windowsLabel(g, cellDate)} ●</div>
                     ))}
                     {!isBlackout && unpermittedGyms.map(g => (
-                      <span key={g} title={`${g} — no permit`} style={{
+                      <div key={g} title={`${g} — no permit`} style={{
                         fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-body)',
                         padding: '1px 5px', borderRadius: 4,
                         background: 'rgba(180,180,180,0.18)', color: '#999',
                         border: '1px solid rgba(180,180,180,0.35)',
                         whiteSpace: 'nowrap',
-                      }}>{gymAbbr(g)}</span>
+                      }}>{gymAbbr(g)}</div>
                     ))}
                   </div>
                 </div>
