@@ -2009,8 +2009,7 @@ const INITIAL_GYM_PERMITS = [
     notes: 'KJMSGymFPYCM-FFall2026 (Johnson MS Gym #2) — no Mon Sep 21 · Wednesdays Sep 16-Nov 18 held for volleyball',
   },
 
-  // ── Winter 2026-27 · Select weekend space (preview, City of Fairfax) ───────
-  // Not finalized — confirm before 11/9 or FPYC is charged for unused time.
+  // ── Winter 2026-27 · Select weekend space (confirmed, City of Fairfax) ─────
   {
     id: 'gp-winter26-daniels-sat',
     gym_name: 'Daniels Run ES',
@@ -2022,7 +2021,7 @@ const INITIAL_GYM_PERMITS = [
     start_date: '2026-12-05',
     end_date: '2027-03-20',
     sport: 'basketball',
-    notes: 'Preview — Select weekend space, confirm with City of Fairfax by 11/9',
+    notes: 'Confirmed — Select weekend space',
   },
   {
     id: 'gp-winter26-daniels-sun',
@@ -2035,7 +2034,7 @@ const INITIAL_GYM_PERMITS = [
     start_date: '2026-12-06',
     end_date: '2027-03-21',
     sport: 'basketball',
-    notes: 'Preview — Select weekend space, confirm with City of Fairfax by 11/9',
+    notes: 'Confirmed — Select weekend space',
   },
   {
     id: 'gp-winter26-prov-sat',
@@ -2048,7 +2047,7 @@ const INITIAL_GYM_PERMITS = [
     start_date: '2026-12-05',
     end_date: '2027-03-20',
     sport: 'basketball',
-    notes: 'Preview — Select weekend space, confirm with City of Fairfax by 11/9 · no Sundays',
+    notes: 'Confirmed — Select weekend space, no Sundays',
   },
   {
     id: 'gp-winter26-kjms1-sat',
@@ -2087,7 +2086,7 @@ const INITIAL_GYM_PERMITS = [
     start_date: '2026-12-06',
     end_date: '2027-03-21',
     sport: 'basketball',
-    notes: 'Preview — Select weekend space, confirm with City of Fairfax by 11/9',
+    notes: 'Confirmed — Select weekend space',
   },
   {
     id: 'gp-winter26-kjms2-sun',
@@ -2100,7 +2099,7 @@ const INITIAL_GYM_PERMITS = [
     start_date: '2026-12-06',
     end_date: '2027-03-21',
     sport: 'basketball',
-    notes: 'Preview — Select weekend space, confirm with City of Fairfax by 11/9',
+    notes: 'Confirmed — Select weekend space',
   },
   {
     id: 'gp-winter26-fhs-sun',
@@ -2113,7 +2112,7 @@ const INITIAL_GYM_PERMITS = [
     start_date: '2026-12-06',
     end_date: '2027-03-14',
     sport: 'basketball',
-    notes: 'Preview — Select weekend space (FHS Main Gym), confirm with City of Fairfax by 11/9',
+    notes: 'Confirmed — Select weekend space (FHS Main Gym)',
   },
 
   // ── Fairfax County Permit #190342 (confirmed) — Winter Gym, Nov 2026–Mar 2027 ──
