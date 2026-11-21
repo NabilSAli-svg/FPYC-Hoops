@@ -1,0 +1,17 @@
+-- Deltas from the 2026-11-21 Ottosport exports (dii_Players_Data-21.xls,
+-- dii_Team_Staff_Data-10.xls) vs. the previous import. 7 new players and
+-- 2 new coaching staff. "Schneider, Jr. , Jason" showed as both a drop and
+-- a re-add from K-3 3v3 -- that's the same Jason Schneider Jr. we already
+-- have (p710), just tripped up again by the export's broken comma-name
+-- format for his suffix. Not a real change, so no update needed for him.
+
+insert into public.players (id, number, name, grade, school, guardian, phone, email, position, status, waiver, program, division, team) values ('p737', null, 'Maxwell George', 'Kindergarten', 'Providence', 'Amanda Mulhern', '(703) 346-1418', 'amanda.mulhern@gmail.com', '', 'active', true, 'Recreation', 'Winter Rec', 'K-3 3v3') on conflict (id) do nothing;
+insert into public.players (id, number, name, grade, school, guardian, phone, email, position, status, waiver, program, division, team) values ('p738', null, 'Benedict Manurung', 'Kindergarten', 'Providence', 'Melisa Indra', '(703)203-1613', 'binsarmelisa6@gmail.com', '', 'active', true, 'Recreation', 'Winter Rec', 'K-3 3v3') on conflict (id) do nothing;
+insert into public.players (id, number, name, grade, school, guardian, phone, email, position, status, waiver, program, division, team) values ('p739', null, 'Osman Schwarz', '4th Grade', 'Eagle View Elementary School', 'Peter Schwarz', '(212) 203-3624', 'jpschwarz00@gmail.com', '', 'active', true, 'Recreation', 'Winter Rec', '3/4 Boys') on conflict (id) do nothing;
+insert into public.players (id, number, name, grade, school, guardian, phone, email, position, status, waiver, program, division, team) values ('p740', null, 'Zhifan Wang', '4th Grade', 'OES', 'Zeming Wang', '(571) 265-5594', 'teswzm@gmail.com', '', 'active', true, 'Recreation', 'Winter Rec', '3/4 Girls') on conflict (id) do nothing;
+insert into public.players (id, number, name, grade, school, guardian, phone, email, position, status, waiver, program, division, team) values ('p741', null, 'Zhicheng Wang', '6th Grade', 'OES', 'Zeming Wang', '(571) 265-5594', 'teswzm@gmail.com', '', 'active', true, 'Recreation', 'Winter Rec', '5/6 Boys') on conflict (id) do nothing;
+insert into public.players (id, number, name, grade, school, guardian, phone, email, position, status, waiver, program, division, team) values ('p742', null, 'Bryce Hanlon', '9th Grade', 'Willow Springs Elementary', 'Gayle Hanlon', '(202) 441-4892', 'gayle.hanlon@gmail.com', '', 'active', true, 'Recreation', 'Winter Rec', 'HS Boys') on conflict (id) do nothing;
+insert into public.players (id, number, name, grade, school, guardian, phone, email, position, status, waiver, program, division, team) values ('p743', null, 'Sawyer White', '11th Grade', 'Eagle View', 'Debby White', '(571) 641-0197', 'debbystokeswhite@gmail.com', '', 'active', true, 'Recreation', 'Winter Rec', 'HS Boys') on conflict (id) do nothing;
+
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst85', 'James Greenzweig', 'Coach', 'Recreation', '7/8 Boys', 'jimg@bowa.com', '703-928-1486', 'Not Started', null) on conflict (id) do nothing;
+insert into public.staff (id, name, role, program, team, email, phone, "bgCheckStatus", "bgCheckDate") values ('rst86', 'Peter Schwarz', 'Assistant Coach', 'Recreation', '3/4 Boys', 'jpschwarz00@gmail.com', '(212) 203-3624', 'Not Started', null) on conflict (id) do nothing;
