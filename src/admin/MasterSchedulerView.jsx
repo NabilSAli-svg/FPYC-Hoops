@@ -153,11 +153,15 @@ export default function MasterSchedulerView({ role, coachTeam }) {
   // into typo'd or one-off location names.
   const permitGyms = useMemo(() => [...new Set(permits.map(p => p.gym_name).filter(Boolean))].sort(), [permits]);
 
+  // Not filtered by the season tab -- every permit already carries its own
+  // start_date/end_date, so gating on `season` too just hides a permit
+  // whenever the calendar is scrolled past the selected tab's own months
+  // (e.g. a Dec permit tagged 'winter' vanishing while still on 'fall').
   function isDayPermitted(gymName, date) {
     const perms = permitsByGym[gymName] || [];
     const dayName = WEEK_DAYS[date.getDay()];
     return perms.some(p =>
-      p.season === season && (p.days || []).includes(dayName) &&
+      (p.days || []).includes(dayName) &&
       (!p.start_date || isoDate(date) >= p.start_date) &&
       (!p.end_date   || isoDate(date) <= p.end_date)
     );
@@ -825,14 +829,16 @@ function GymAvailabilityTab({ permits, blackouts, season, seasonColor, games = [
 
   // Every permit row covering this gym on this date -- a gym can have more
   // than one (e.g. a weekday-evening permit and a separate Saturday one),
-  // and callers need the actual time windows, not just a yes/no.
+  // and callers need the actual time windows, not just a yes/no. Not
+  // filtered by the season tab -- every permit already carries its own
+  // start_date/end_date, so gating on `season` too just hides a permit
+  // whenever the calendar is scrolled past the selected tab's own months.
   function permittedWindows(gymName, date) {
     const iso = isoDate(date);
     if (isFacilityClosed(blackoutMap, iso, gymName)) return [];
     const perms = permitsByGym[gymName] || [];
     const dayName = WEEK_DAYS[date.getDay()];
     return perms.filter(p =>
-      p.season === season &&
       (p.days || []).includes(dayName) &&
       (!p.start_date || iso >= p.start_date) &&
       (!p.end_date   || iso <= p.end_date)
