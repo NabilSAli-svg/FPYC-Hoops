@@ -1038,6 +1038,15 @@ export const INITIAL_PLAYERS = [
   { id: 'p734', number: null, name: "John Mark", grade: "12th Grade", school: "Fairfax High School", guardian: "Brian Mark", phone: "(703)945-0621", email: "brian.l.mark@gmail.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
   { id: 'p735', number: null, name: "Rowan Maltese", grade: "9th Grade", school: "Willow Springs", guardian: "Jamie Maltese", phone: "(908) 938-2178", email: "jamiemaltese@yahoo.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
   { id: 'p736', number: null, name: "Bailey Maltese", grade: "9th Grade", school: "Willow Springs", guardian: "Jamie Maltese", phone: "(908) 938-2178", email: "jamiemaltese@yahoo.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
+
+  // ── Added from the 2026-11-21 Ottosport registration export (deltas only) ──
+  { id: 'p737', number: null, name: "Maxwell George", grade: "Kindergarten", school: "Providence", guardian: "Amanda Mulhern", phone: "(703) 346-1418", email: "amanda.mulhern@gmail.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p738', number: null, name: "Benedict Manurung", grade: "Kindergarten", school: "Providence", guardian: "Melisa Indra", phone: "(703)203-1613", email: "binsarmelisa6@gmail.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p739', number: null, name: "Osman Schwarz", grade: "4th Grade", school: "Eagle View Elementary School", guardian: "Peter Schwarz", phone: "(212) 203-3624", email: "jpschwarz00@gmail.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "3/4 Boys" },
+  { id: 'p740', number: null, name: "Zhifan Wang", grade: "4th Grade", school: "OES", guardian: "Zeming Wang", phone: "(571) 265-5594", email: "teswzm@gmail.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "3/4 Girls" },
+  { id: 'p741', number: null, name: "Zhicheng Wang", grade: "6th Grade", school: "OES", guardian: "Zeming Wang", phone: "(571) 265-5594", email: "teswzm@gmail.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "5/6 Boys" },
+  { id: 'p742', number: null, name: "Bryce Hanlon", grade: "9th Grade", school: "Willow Springs Elementary", guardian: "Gayle Hanlon", phone: "(202) 441-4892", email: "gayle.hanlon@gmail.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
+  { id: 'p743', number: null, name: "Sawyer White", grade: "11th Grade", school: "Eagle View", guardian: "Debby White", phone: "(571) 641-0197", email: "debbystokeswhite@gmail.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
 ];
 
 export const INITIAL_GAMES = [
@@ -1852,6 +1861,10 @@ export const INITIAL_STAFF = [
   { id: 'rst82', name: "Mike Seaton", role: "Assistant Coach", program: 'Recreation', team: "5/6 Girls", email: "mike.w.seaton@gmail.com", phone: "(240) 381-4210", bgCheckStatus: 'Not Started', bgCheckDate: null },
   { id: 'rst83', name: "Mohit Chandarana", role: "Scorekeeper", program: 'Recreation', team: "HS Boys", email: "cmohit@yahoo.com", phone: "(703) 870-6875", bgCheckStatus: 'Not Started', bgCheckDate: null },
   { id: 'rst84', name: "Alex Valvis", role: "Coach", program: 'Recreation', team: "3/4 Boys", email: "alex.valvis@gmail.com", phone: "(973) 968-1900", bgCheckStatus: 'Not Started', bgCheckDate: null },
+
+  // ── Added from the 2026-11-21 Ottosport team staff export (deltas only) ──
+  { id: 'rst85', name: "James Greenzweig", role: "Coach", program: 'Recreation', team: "7/8 Boys", email: "jimg@bowa.com", phone: "703-928-1486", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst86', name: "Peter Schwarz", role: "Assistant Coach", program: 'Recreation', team: "3/4 Boys", email: "jpschwarz00@gmail.com", phone: "(212) 203-3624", bgCheckStatus: 'Not Started', bgCheckDate: null },
 ];
 
 export function useStaff() {
