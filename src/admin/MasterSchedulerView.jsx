@@ -213,9 +213,13 @@ export default function MasterSchedulerView({ role, coachTeam }) {
     setModal({ mode: 'edit', event });
   }
 
-  async function handleSaveEvent(ev) {
+  async function handleSaveEvent(rawEv) {
+    // _kind/_sport are UI-only bookkeeping (re-derived from the row's own
+    // team whenever it's read back) — not real columns, so they can't be
+    // written to the games/practices tables.
+    const { _kind, _sport, ...ev } = rawEv;
     let result;
-    if (ev._kind === 'game') {
+    if (_kind === 'game') {
       result = await setGames(gs => modal.mode === 'edit' ? gs.map(g => g.id === ev.id ? ev : g) : [...gs, ev]);
     } else {
       result = await setPractices(ps => modal.mode === 'edit' ? ps.map(p => p.id === ev.id ? ev : p) : [...ps, ev]);
