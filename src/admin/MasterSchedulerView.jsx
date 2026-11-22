@@ -237,12 +237,20 @@ export default function MasterSchedulerView({ role, coachTeam }) {
   // whenever the calendar is scrolled past the selected tab's own months
   // (e.g. a Dec permit tagged 'winter' vanishing while still on 'fall').
   function isDayPermitted(gymName, date) {
+    return permittedWindows(gymName, date).length > 0;
+  }
+
+  // Every permit row actually covering this gym on this date — used both for
+  // the yes/no permitted check above and, in the New Event form, for which
+  // facilities can be picked at all and what times are allowed within them.
+  function permittedWindows(gymName, date) {
     const perms = permitsByGym[gymName] || [];
     const dayName = WEEK_DAYS[date.getDay()];
-    return perms.some(p =>
+    const iso = isoDate(date);
+    return perms.filter(p =>
       (p.days || []).includes(dayName) &&
-      (!p.start_date || isoDate(date) >= p.start_date) &&
-      (!p.end_date   || isoDate(date) <= p.end_date)
+      (!p.start_date || iso >= p.start_date) &&
+      (!p.end_date   || iso <= p.end_date)
     );
   }
 
@@ -363,6 +371,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
           teamsByDivision={isCoach && coachTeam ? null : allTeams}
           teamsInfo={teamsInfo}
           facilities={permitGyms}
+          permittedWindows={permittedWindows}
           seasonColor={activeSeason.color}
         />
       )}
@@ -434,25 +443,31 @@ function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, bl
                   const events = [...(eventsByDateFacility[`${iso}||${fac}`] || [])].sort(
                     (a, b) => startMinutes(a.time) - startMinutes(b.time)
                   );
+                  // Can't add a NEW event on a day/gym the permits don't actually
+                  // cover, or on a closed day — existing events in such a cell
+                  // (grandfathered, or the permit changed after the fact) can
+                  // still be opened and edited via their own chip's click.
+                  const canCreateHere = permitted && !isBlackout;
                   return (
                     <td
                       key={iso}
-                      onClick={() => !isBlackout && onCellClick(d, fac)}
+                      onClick={() => canCreateHere && onCellClick(d, fac)}
+                      title={canCreateHere ? undefined : isBlackout ? 'Closed this day' : 'No permit covers this gym on this day'}
                       style={{
-                        ...tdStyle, verticalAlign: 'top', cursor: isBlackout ? 'not-allowed' : 'pointer',
+                        ...tdStyle, verticalAlign: 'top', cursor: canCreateHere ? 'pointer' : 'not-allowed',
                         background: isBlackout
                           ? 'repeating-linear-gradient(45deg,rgba(200,16,46,0.04),rgba(200,16,46,0.04) 4px,transparent 4px,transparent 12px)'
                           : permitted ? 'rgba(31,138,91,0.20)' : 'transparent',
                         borderLeft: permitted ? '3px solid rgba(31,138,91,0.6)' : undefined,
                         transition: 'background 100ms',
                       }}
-                      onMouseEnter={e => { if (!isBlackout) e.currentTarget.style.background = permitted ? 'rgba(31,138,91,0.30)' : 'rgba(255,199,44,0.08)'; }}
+                      onMouseEnter={e => { if (canCreateHere) e.currentTarget.style.background = 'rgba(31,138,91,0.30)'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = isBlackout ? 'repeating-linear-gradient(45deg,rgba(200,16,46,0.04),rgba(200,16,46,0.04) 4px,transparent 4px,transparent 12px)' : permitted ? 'rgba(31,138,91,0.20)' : 'transparent'; }}
                     >
                       {events.map((ev, i) => (
                         <EventChip key={ev.id || i} event={ev} onClick={e => { e.stopPropagation(); onEventClick(ev); }} />
                       ))}
-                      {!isBlackout && (
+                      {canCreateHere && (
                         <div style={{ textAlign: 'center', paddingTop: events.length ? 4 : 10, opacity: 0.25, pointerEvents: 'none' }}>
                           <Icon name="plus" size={12} color="var(--fg-muted)" />
                         </div>
@@ -500,7 +515,7 @@ function LegendItem({ color, border, label }) {
 
 const PRACTICE_TYPES = ['Regular', 'Player Development', 'Scrimmage', 'Walk-through', 'Conditioning', 'Skills Clinic', 'Open Gym', 'Tryout'];
 
-function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, teamsByDivision, teamsInfo, facilities, seasonColor }) {
+function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, teamsByDivision, teamsInfo, facilities, permittedWindows, seasonColor }) {
   const isEdit = modal.mode === 'edit';
   const ev = modal.event || {};
 
@@ -550,7 +565,20 @@ function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, teamsByDiv
     }
   }
 
-  const canSave = team && dateVal && startTime && endTime && location;
+  // Only gated on create -- an existing (edit) event may predate the permit
+  // that covered it, or the permit may have since changed, and editing it
+  // shouldn't be blocked by that.
+  const dateObj = dateVal ? new Date(dateVal + 'T12:00:00') : null;
+  const windowsForDate = dateObj ? permittedWindows(location, dateObj) : [];
+  const facilitiesForDate = dateObj
+    ? facilities.filter(f => permittedWindows(f, dateObj).length > 0)
+    : facilities;
+  const inPermittedWindow = !startTime || !endTime || windowsForDate.some(
+    w => (!w.start_time || startTime >= w.start_time) && (!w.end_time || endTime <= w.end_time)
+  );
+  const permitOk = isEdit || (windowsForDate.length > 0 && inPermittedWindow);
+
+  const canSave = team && dateVal && startTime && endTime && location && permitOk;
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }} onClick={onClose}>
@@ -606,18 +634,34 @@ function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, teamsByDiv
           {/* Date + Time */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
             <MField label="Date"><input type="date" value={dateVal} onChange={e => setDateVal(e.target.value)} style={inputStyle} /></MField>
-            <MField label="Start time"><input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} style={inputStyle} /></MField>
-            <MField label="End time"><input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} style={inputStyle} /></MField>
+            <MField label="Start time">
+              <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)}
+                min={windowsForDate[0]?.start_time} max={windowsForDate[0]?.end_time} style={inputStyle} />
+            </MField>
+            <MField label="End time">
+              <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)}
+                min={windowsForDate[0]?.start_time} max={windowsForDate[0]?.end_time} style={inputStyle} />
+            </MField>
           </div>
 
-          {/* Location — restricted to gyms with an actual permit */}
+          {/* Location — restricted, on create, to gyms actually permitted on the chosen date */}
           <MField label="Facility / Location">
             <select value={location} onChange={e => setLocation(e.target.value)} style={inputStyle}>
               <option value="">Select facility…</option>
-              {facilities.map(f => <option key={f} value={f}>{f}</option>)}
-              {location && !facilities.includes(location) && <option value={location}>{location} (no permit on file)</option>}
+              {(isEdit ? facilities : facilitiesForDate).map(f => <option key={f} value={f}>{f}</option>)}
+              {location && !(isEdit ? facilities : facilitiesForDate).includes(location) && (
+                <option value={location}>{location} (no permit {isEdit ? 'on file' : 'for this date'})</option>
+              )}
             </select>
           </MField>
+          {!isEdit && location && windowsForDate.length === 0 && (
+            <div style={{ fontSize: 12.5, color: 'var(--foul-red)' }}>No permit covers {location} on this date — pick a different facility or date.</div>
+          )}
+          {!isEdit && windowsForDate.length > 0 && !inPermittedWindow && (
+            <div style={{ fontSize: 12.5, color: 'var(--foul-red)' }}>
+              {location} is only permitted {formatTime12h(windowsForDate[0].start_time)}–{formatTime12h(windowsForDate[0].end_time)} that day.
+            </div>
+          )}
 
           {/* Game-only fields */}
           {kind === 'game' && (
