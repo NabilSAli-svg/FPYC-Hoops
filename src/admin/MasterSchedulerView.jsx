@@ -403,6 +403,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
           blackoutMap={blackoutMap}
           isDayPermitted={isDayPermitted}
           permittedWindows={permittedWindows}
+          teamsInfo={teamsInfo}
           prevWeek={() => setWeekStart(d => addDays(d, -7))}
           nextWeek={() => setWeekStart(d => addDays(d,  7))}
           goToday={() => setWeekStart(startOfWeek(new Date()))}
@@ -442,7 +443,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
 
 // ── Calendar tab ──────────────────────────────────────────────────────────────
 
-function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, blackoutMap, isDayPermitted, permittedWindows, prevWeek, nextWeek, goToday, seasonColor, onCellClick, onEventClick }) {
+function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, blackoutMap, isDayPermitted, permittedWindows, teamsInfo, prevWeek, nextWeek, goToday, seasonColor, onCellClick, onEventClick }) {
   const today = isoDate(new Date());
   return (
     <div>
@@ -526,7 +527,7 @@ function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, bl
                       onMouseLeave={e => { e.currentTarget.style.background = isBlackout ? 'repeating-linear-gradient(45deg,rgba(200,16,46,0.04),rgba(200,16,46,0.04) 4px,transparent 4px,transparent 12px)' : permitted ? 'rgba(31,138,91,0.09)' : 'transparent'; }}
                     >
                       {events.map((ev, i) => (
-                        <EventChip key={ev.id || i} event={ev} onClick={e => { e.stopPropagation(); onEventClick(ev); }} />
+                        <EventChip key={ev.id || i} event={ev} coach={teamsInfo[ev.team]?.coach} onClick={e => { e.stopPropagation(); onEventClick(ev); }} />
                       ))}
                       {permitted && (
                         <div style={{ fontSize: 10, color: '#1F8A5B', fontWeight: 600, textAlign: 'center', paddingTop: 2, pointerEvents: 'none' }}>
@@ -550,7 +551,7 @@ function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, bl
   );
 }
 
-function EventChip({ event, onClick }) {
+function EventChip({ event, coach, onClick }) {
   const isPractice = event._kind === 'practice';
   const c = SPORT_COLORS[event._sport] || SPORT_COLORS.basketball;
   return (
@@ -563,6 +564,11 @@ function EventChip({ event, onClick }) {
       <div style={{ fontWeight: 700, color: isPractice ? 'var(--court-navy)' : c.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
         {isPractice ? '🏋 ' : '🏆 '}{event.team || '—'}
       </div>
+      {coach && coach !== 'Coach' && (
+        <div style={{ color: 'var(--fg-muted)', fontSize: 9.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          Coach {coach}
+        </div>
+      )}
       <div style={{ color: 'var(--fg-muted)', fontSize: 10 }}>{event.time || ''}</div>
     </div>
   );
