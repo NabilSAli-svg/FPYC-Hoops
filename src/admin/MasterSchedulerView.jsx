@@ -442,12 +442,12 @@ function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, bl
                         ...tdStyle, verticalAlign: 'top', cursor: isBlackout ? 'not-allowed' : 'pointer',
                         background: isBlackout
                           ? 'repeating-linear-gradient(45deg,rgba(200,16,46,0.04),rgba(200,16,46,0.04) 4px,transparent 4px,transparent 12px)'
-                          : permitted ? 'rgba(31,138,91,0.06)' : 'transparent',
-                        borderLeft: permitted ? '2px solid rgba(31,138,91,0.3)' : undefined,
+                          : permitted ? 'rgba(31,138,91,0.20)' : 'transparent',
+                        borderLeft: permitted ? '3px solid rgba(31,138,91,0.6)' : undefined,
                         transition: 'background 100ms',
                       }}
-                      onMouseEnter={e => { if (!isBlackout) e.currentTarget.style.background = permitted ? 'rgba(31,138,91,0.12)' : 'rgba(255,199,44,0.08)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = isBlackout ? 'repeating-linear-gradient(45deg,rgba(200,16,46,0.04),rgba(200,16,46,0.04) 4px,transparent 4px,transparent 12px)' : permitted ? 'rgba(31,138,91,0.06)' : 'transparent'; }}
+                      onMouseEnter={e => { if (!isBlackout) e.currentTarget.style.background = permitted ? 'rgba(31,138,91,0.30)' : 'rgba(255,199,44,0.08)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = isBlackout ? 'repeating-linear-gradient(45deg,rgba(200,16,46,0.04),rgba(200,16,46,0.04) 4px,transparent 4px,transparent 12px)' : permitted ? 'rgba(31,138,91,0.20)' : 'transparent'; }}
                     >
                       {events.map((ev, i) => (
                         <EventChip key={ev.id || i} event={ev} onClick={e => { e.stopPropagation(); onEventClick(ev); }} />
