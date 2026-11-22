@@ -21,8 +21,13 @@ const ACTIVE_SPORT_IDS = new Set(ACTIVE_SPORTS.map(s => s.id));
 // teams dropped, and the age-group "pool" buckets excluded since those are a
 // division to draft from, not a team you'd schedule an event for.
 function pickableTeams(teamsInfo) {
+  // Pool buckets (e.g. "7/8 Girls" before its draft) are deliberately kept
+  // here, unlike in the Settings team list — practices/games get scheduled
+  // against the division itself until a draft splits it into real teams, so
+  // excluding them would make existing pre-draft events vanish from the
+  // calendar (their `team` is the pool name) and make new ones unschedulable.
   return Object.values(teamsInfo)
-    .filter(t => ACTIVE_SPORT_IDS.has(t.sport || 'basketball') && !t.archived && !t.pool)
+    .filter(t => ACTIVE_SPORT_IDS.has(t.sport || 'basketball') && !t.archived)
     .sort((a, b) => (a.division || '').localeCompare(b.division || '') || a.name.localeCompare(b.name));
 }
 
@@ -135,11 +140,27 @@ function parseTimeRange(timeStr) {
 // Minutes since midnight for the start of a "6:30 PM - 7:30 PM" string, so a
 // day's events can be listed earliest-first instead of insertion order.
 // Events with no parseable time sort last rather than first.
+// Real data has several time formats in the wild beyond the "6:30 PM -
+// 7:30 PM" one this modal writes: no space around the dash, no AM/PM on the
+// start half (it's meant to be read off the end, e.g. "6:00-7:30 PM"), a
+// single time with no range, and bare 24h "HH:MM" (gym-permit-style). Handles
+// all of them rather than just the one format this modal happens to produce.
 function startMinutes(timeStr) {
-  const start = parseTimeRange(timeStr)?.start;
-  if (!start) return Infinity;
-  const [h, m] = start.split(':').map(Number);
-  return h * 60 + m;
+  if (!timeStr) return Infinity;
+  let first = timeStr.split(/\s*-\s*/)[0].trim();
+  if (!/am|pm/i.test(first)) {
+    const meridiem = timeStr.match(/am|pm/i);
+    if (meridiem) first += ` ${meridiem[0]}`;
+  }
+  let m = first.match(/^(\d{1,2}):(\d{2})\s*(am|pm)$/i);
+  if (m) {
+    let h = parseInt(m[1], 10) % 12;
+    if (m[3].toUpperCase() === 'PM') h += 12;
+    return h * 60 + parseInt(m[2], 10);
+  }
+  m = first.match(/^(\d{1,2}):(\d{2})$/);
+  if (m) return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  return Infinity;
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
