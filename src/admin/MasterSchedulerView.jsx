@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Card, Button, Icon, Display } from '../shared/index.js';
-import { useGames, usePractices, useGymPermits, useBlackoutDates, TEAMS_INFO } from '../shared/store.js';
+import { useGames, usePractices, useGymPermits, useBlackoutDates, useCustomTeams, mergeTeamsInfo, ACTIVE_SPORTS } from '../shared/store.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -14,7 +14,17 @@ const SEASONS = [
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const MONTH_MAP   = Object.fromEntries(MONTH_NAMES.map((m, i) => [m, i]));
 const WEEK_DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const ALL_TEAMS   = Object.keys(TEAMS_INFO);
+const ACTIVE_SPORT_IDS = new Set(ACTIVE_SPORTS.map(s => s.id));
+
+// Real, pickable teams: merged with League-Director-created teams, limited to
+// sports actually running (no dormant soccer/football), archived past-season
+// teams dropped, and the age-group "pool" buckets excluded since those are a
+// division to draft from, not a team you'd schedule an event for.
+function pickableTeams(teamsInfo) {
+  return Object.values(teamsInfo)
+    .filter(t => ACTIVE_SPORT_IDS.has(t.sport || 'basketball') && !t.archived && !t.pool)
+    .sort((a, b) => (a.division || '').localeCompare(b.division || '') || a.name.localeCompare(b.name));
+}
 
 const SPORT_COLORS = {
   basketball: { bg: 'rgba(234,88,12,0.13)', border: 'var(--basketball-orange)', text: 'var(--basketball-orange)' },
@@ -122,6 +132,15 @@ function parseTimeRange(timeStr) {
   const [startStr, endStr] = timeStr.split(/\s*-\s*/);
   return { start: to24h(startStr), end: to24h(endStr) };
 }
+// Minutes since midnight for the start of a "6:30 PM - 7:30 PM" string, so a
+// day's events can be listed earliest-first instead of insertion order.
+// Events with no parseable time sort last rather than first.
+function startMinutes(timeStr) {
+  const start = parseTimeRange(timeStr)?.start;
+  if (!start) return Infinity;
+  const [h, m] = start.split(':').map(Number);
+  return h * 60 + m;
+}
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -131,6 +150,9 @@ export default function MasterSchedulerView({ role, coachTeam }) {
   const [practices,setPractices]= usePractices();
   const [permits,  setPermits]  = useGymPermits();
   const [blackouts,setBlackouts]= useBlackoutDates();
+  const [customTeams] = useCustomTeams();
+  const teamsInfo = useMemo(() => mergeTeamsInfo(customTeams), [customTeams]);
+  const allTeams = useMemo(() => pickableTeams(teamsInfo), [teamsInfo]);
 
   const currentMonth = new Date().getMonth();
   const defaultSeason = SEASONS.find(s => s.months.includes(currentMonth)) || SEASONS[2];
@@ -143,7 +165,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
   const weekDays = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
 
   // Visible teams: coaches only see their own
-  const visibleTeams = isCoach && coachTeam ? [coachTeam] : ALL_TEAMS;
+  const visibleTeams = isCoach && coachTeam ? [coachTeam] : allTeams.map(t => t.name);
 
   // Basketball only — this view tracks gym permits, not soccer fields/parks etc.
   const basketballGames     = useMemo(() => games.filter(g => sportForTeam(g.team) === 'basketball'), [games]);
@@ -317,6 +339,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
           onSave={handleSaveEvent}
           onDelete={handleDeleteEvent}
           visibleTeams={visibleTeams}
+          teamsByDivision={isCoach && coachTeam ? null : allTeams}
           facilities={permitGyms}
           seasonColor={activeSeason.color}
         />
@@ -386,7 +409,9 @@ function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, bl
                   const iso = isoDate(d);
                   const permitted = isDayPermitted(fac, d);
                   const isBlackout = isFacilityClosed(blackoutMap, iso, fac);
-                  const events = eventsByDateFacility[`${iso}||${fac}`] || [];
+                  const events = [...(eventsByDateFacility[`${iso}||${fac}`] || [])].sort(
+                    (a, b) => startMinutes(a.time) - startMinutes(b.time)
+                  );
                   return (
                     <td
                       key={iso}
@@ -453,7 +478,7 @@ function LegendItem({ color, border, label }) {
 
 const PRACTICE_TYPES = ['Regular', 'Player Development', 'Scrimmage', 'Walk-through', 'Conditioning', 'Skills Clinic', 'Open Gym', 'Tryout'];
 
-function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, facilities, seasonColor }) {
+function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, teamsByDivision, facilities, seasonColor }) {
   const isEdit = modal.mode === 'edit';
   const ev = modal.event || {};
 
@@ -539,7 +564,20 @@ function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, facilities
           <MField label="Team">
             <select value={team} onChange={e => setTeam(e.target.value)} style={inputStyle}>
               <option value="">Select team…</option>
-              {visibleTeams.map(t => <option key={t} value={t}>{t}</option>)}
+              {teamsByDivision ? (
+                Object.entries(
+                  teamsByDivision.reduce((byDiv, t) => {
+                    (byDiv[t.division || 'Other'] = byDiv[t.division || 'Other'] || []).push(t);
+                    return byDiv;
+                  }, {})
+                ).map(([division, teams]) => (
+                  <optgroup key={division} label={division}>
+                    {teams.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
+                  </optgroup>
+                ))
+              ) : (
+                visibleTeams.map(t => <option key={t} value={t}>{t}</option>)
+              )}
             </select>
           </MField>
 
