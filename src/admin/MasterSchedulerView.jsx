@@ -70,21 +70,57 @@ function formatTime12h(t) {
   return `${h12}:${m} ${ampm}`;
 }
 
+// Stored dates carry no year (just "Tue, Jan 5"), so it has to be inferred.
+// Seasons span a calendar-year boundary (e.g. Winter runs Nov–Mar), so a
+// month that's much earlier than today's real month almost certainly
+// belongs to next year, not this one — otherwise every Jan/Feb/Mar event
+// created in Nov/Dec resolves to a year-old date and silently vanishes off
+// the calendar instead of showing up on its real week.
+function inferYear(month) {
+  const now = new Date();
+  return month < now.getMonth() - 6 ? now.getFullYear() + 1 : now.getFullYear();
+}
 function parseGameDate(g) {
   if (!g.month || !g.date) return null;
   const mo = MONTH_MAP[g.month];
-  return mo == null ? null : new Date(new Date().getFullYear(), mo, g.date);
+  return mo == null ? null : new Date(inferYear(mo), mo, g.date);
 }
 function parsePracticeDate(p) {
   if (!p.date) return null;
   const m = p.date.match(/\w{3},\s+(\w{3})\s+(\d+)/);
-  if (m) { const mo = MONTH_MAP[m[1]]; return mo == null ? null : new Date(new Date().getFullYear(), mo, parseInt(m[2])); }
+  if (m) { const mo = MONTH_MAP[m[1]]; return mo == null ? null : new Date(inferYear(mo), mo, parseInt(m[2])); }
   const d = new Date(p.date); return isNaN(d) ? null : d;
 }
 function sportForTeam(t) { return TEAMS_INFO[t]?.sport || 'basketball'; }
 
 function dayLabel(d) {
   return `${WEEK_DAYS[d.getDay()]}, ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
+}
+
+// 24h "HH:MM" (what <input type="time"> gives/wants) <-> the "6:30 PM - 7:30 PM"
+// display string already used throughout games/practices data.
+function to12h(hhmm) {
+  if (!hhmm) return '';
+  const [h, m] = hhmm.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
+function to24h(h12str) {
+  const m = h12str && h12str.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!m) return '';
+  let h = parseInt(m[1], 10) % 12;
+  if (m[3].toUpperCase() === 'PM') h += 12;
+  return `${String(h).padStart(2, '0')}:${m[2]}`;
+}
+function formatTimeRange(start, end) {
+  if (!start && !end) return '';
+  return `${to12h(start)} - ${to12h(end)}`;
+}
+function parseTimeRange(timeStr) {
+  if (!timeStr) return null;
+  const [startStr, endStr] = timeStr.split(/\s*-\s*/);
+  return { start: to24h(startStr), end: to24h(endStr) };
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -177,19 +213,16 @@ export default function MasterSchedulerView({ role, coachTeam }) {
     setModal({ mode: 'edit', event });
   }
 
-  function handleSaveEvent(ev) {
+  async function handleSaveEvent(ev) {
+    let result;
     if (ev._kind === 'game') {
-      if (modal.mode === 'edit') {
-        setGames(gs => gs.map(g => g.id === ev.id ? ev : g));
-      } else {
-        setGames(gs => [...gs, ev]);
-      }
+      result = await setGames(gs => modal.mode === 'edit' ? gs.map(g => g.id === ev.id ? ev : g) : [...gs, ev]);
     } else {
-      if (modal.mode === 'edit') {
-        setPractices(ps => ps.map(p => p.id === ev.id ? ev : p));
-      } else {
-        setPractices(ps => [...ps, ev]);
-      }
+      result = await setPractices(ps => modal.mode === 'edit' ? ps.map(p => p.id === ev.id ? ev : p) : [...ps, ev]);
+    }
+    if (result?.error) {
+      alert(`Couldn't save this event: ${result.error.message}`);
+      return; // leave the modal open so nothing looks saved when it wasn't
     }
     setModal(null);
   }
@@ -426,7 +459,9 @@ function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, facilities
   const [kind,     setKind]     = useState(isEdit ? ev._kind : 'practice');
   const [team,     setTeam]     = useState(isEdit ? ev.team  : visibleTeams[0] || '');
   const [dateVal,  setDateVal]  = useState(isEdit ? (ev._kind === 'game' ? `${new Date().getFullYear()}-${String(MONTH_MAP[ev.month]+1).padStart(2,'0')}-${String(ev.date).padStart(2,'0')}` : isoDate(parsePracticeDate(ev) || new Date())) : defaultDate);
-  const [time,     setTime]     = useState(isEdit ? (ev.time || '') : '');
+  const parsedTime = isEdit ? parseTimeRange(ev.time) : null;
+  const [startTime, setStartTime] = useState(parsedTime?.start || '');
+  const [endTime,   setEndTime]   = useState(parsedTime?.end   || '');
   const [location, setLocation] = useState(isEdit ? (ev.location || ev.gym || '') : defaultFac);
   const [opponent, setOpponent] = useState(isEdit ? (ev.opponent || '') : '');
   const [practiceType, setPracticeType] = useState(isEdit ? (ev.type || 'Regular') : 'Regular');
@@ -436,6 +471,7 @@ function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, facilities
 
   function buildEvent() {
     const d = new Date(dateVal + 'T12:00:00');
+    const time = formatTimeRange(startTime, endTime);
     if (kind === 'game') {
       return {
         id: ev.id || makeId(),
@@ -463,7 +499,7 @@ function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, facilities
     }
   }
 
-  const canSave = team && dateVal && time && location;
+  const canSave = team && dateVal && startTime && endTime && location;
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,31,61,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }} onClick={onClose}>
@@ -504,9 +540,10 @@ function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, facilities
           </MField>
 
           {/* Date + Time */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
             <MField label="Date"><input type="date" value={dateVal} onChange={e => setDateVal(e.target.value)} style={inputStyle} /></MField>
-            <MField label="Time (e.g. 6:30 PM)"><input value={time} onChange={e => setTime(e.target.value)} placeholder="6:30 PM – 7:30 PM" style={inputStyle} /></MField>
+            <MField label="Start time"><input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} style={inputStyle} /></MField>
+            <MField label="End time"><input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} style={inputStyle} /></MField>
           </div>
 
           {/* Location — restricted to gyms with an actual permit */}
