@@ -520,7 +520,7 @@ function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, bl
                         background: isBlackout
                           ? 'repeating-linear-gradient(45deg,rgba(200,16,46,0.04),rgba(200,16,46,0.04) 4px,transparent 4px,transparent 12px)'
                           : permitted ? 'rgba(31,138,91,0.09)' : 'transparent',
-                        borderLeft: permitted ? '3px solid rgba(31,138,91,0.5)' : undefined,
+                        borderLeft: permitted && !isBlackout ? '3px solid rgba(31,138,91,0.5)' : undefined,
                         transition: 'background 100ms',
                       }}
                       onMouseEnter={e => { if (canCreateHere) e.currentTarget.style.background = 'rgba(31,138,91,0.16)'; }}
@@ -529,7 +529,7 @@ function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, bl
                       {events.map((ev, i) => (
                         <EventChip key={ev.id || i} event={ev} coach={teamsInfo[ev.team]?.coach} onClick={e => { e.stopPropagation(); onEventClick(ev); }} />
                       ))}
-                      {permitted && (
+                      {permitted && !isBlackout && (
                         <div style={{ fontSize: 10, color: '#1F8A5B', fontWeight: 600, textAlign: 'center', paddingTop: 2, pointerEvents: 'none' }}>
                           {remainingWindowsLabel(permittedWindows(fac, d), events)}
                         </div>
