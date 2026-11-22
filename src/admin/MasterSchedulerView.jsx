@@ -342,6 +342,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
           eventsByDateFacility={eventsByDateFacility}
           blackoutMap={blackoutMap}
           isDayPermitted={isDayPermitted}
+          permittedWindows={permittedWindows}
           prevWeek={() => setWeekStart(d => addDays(d, -7))}
           nextWeek={() => setWeekStart(d => addDays(d,  7))}
           goToday={() => setWeekStart(startOfWeek(new Date()))}
@@ -381,7 +382,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
 
 // ── Calendar tab ──────────────────────────────────────────────────────────────
 
-function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, blackoutMap, isDayPermitted, prevWeek, nextWeek, goToday, seasonColor, onCellClick, onEventClick }) {
+function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, blackoutMap, isDayPermitted, permittedWindows, prevWeek, nextWeek, goToday, seasonColor, onCellClick, onEventClick }) {
   const today = isoDate(new Date());
   return (
     <div>
@@ -394,7 +395,7 @@ function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, bl
       </div>
 
       <div style={{ display: 'flex', gap: 16, marginBottom: 14, flexWrap: 'wrap' }}>
-        <LegendItem color="rgba(31,138,91,0.15)"  border="#1F8A5B"                  label="Permitted" />
+        <LegendItem color="rgba(31,138,91,0.09)"  border="#1F8A5B"                  label="Permitted" />
         <LegendItem color="rgba(200,16,46,0.08)"  border="#C8102E"                  label="School closed" />
         <LegendItem color="rgba(234,88,12,0.13)"  border="var(--basketball-orange)" label="Game" />
         <LegendItem color="rgba(10,31,61,0.07)"   border="var(--court-navy)"        label="Practice" />
@@ -457,16 +458,21 @@ function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, bl
                         ...tdStyle, verticalAlign: 'top', cursor: canCreateHere ? 'pointer' : 'not-allowed',
                         background: isBlackout
                           ? 'repeating-linear-gradient(45deg,rgba(200,16,46,0.04),rgba(200,16,46,0.04) 4px,transparent 4px,transparent 12px)'
-                          : permitted ? 'rgba(31,138,91,0.20)' : 'transparent',
-                        borderLeft: permitted ? '3px solid rgba(31,138,91,0.6)' : undefined,
+                          : permitted ? 'rgba(31,138,91,0.09)' : 'transparent',
+                        borderLeft: permitted ? '3px solid rgba(31,138,91,0.5)' : undefined,
                         transition: 'background 100ms',
                       }}
-                      onMouseEnter={e => { if (canCreateHere) e.currentTarget.style.background = 'rgba(31,138,91,0.30)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = isBlackout ? 'repeating-linear-gradient(45deg,rgba(200,16,46,0.04),rgba(200,16,46,0.04) 4px,transparent 4px,transparent 12px)' : permitted ? 'rgba(31,138,91,0.20)' : 'transparent'; }}
+                      onMouseEnter={e => { if (canCreateHere) e.currentTarget.style.background = 'rgba(31,138,91,0.16)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = isBlackout ? 'repeating-linear-gradient(45deg,rgba(200,16,46,0.04),rgba(200,16,46,0.04) 4px,transparent 4px,transparent 12px)' : permitted ? 'rgba(31,138,91,0.09)' : 'transparent'; }}
                     >
                       {events.map((ev, i) => (
                         <EventChip key={ev.id || i} event={ev} onClick={e => { e.stopPropagation(); onEventClick(ev); }} />
                       ))}
+                      {permitted && (
+                        <div style={{ fontSize: 10, color: '#1F8A5B', fontWeight: 600, textAlign: 'center', paddingTop: 2, pointerEvents: 'none' }}>
+                          {permittedWindows(fac, d).map(w => `${formatTime12h(w.start_time)}–${formatTime12h(w.end_time)}`).join(', ')}
+                        </div>
+                      )}
                       {canCreateHere && (
                         <div style={{ textAlign: 'center', paddingTop: events.length ? 4 : 10, opacity: 0.25, pointerEvents: 'none' }}>
                           <Icon name="plus" size={12} color="var(--fg-muted)" />
