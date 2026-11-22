@@ -101,7 +101,7 @@ function parsePracticeDate(p) {
   if (m) { const mo = MONTH_MAP[m[1]]; return mo == null ? null : new Date(inferYear(mo), mo, parseInt(m[2])); }
   const d = new Date(p.date); return isNaN(d) ? null : d;
 }
-function sportForTeam(t) { return TEAMS_INFO[t]?.sport || 'basketball'; }
+function sportForTeam(t, teamsInfo) { return teamsInfo[t]?.sport || 'basketball'; }
 
 function dayLabel(d) {
   return `${WEEK_DAYS[d.getDay()]}, ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
@@ -168,8 +168,8 @@ export default function MasterSchedulerView({ role, coachTeam }) {
   const visibleTeams = isCoach && coachTeam ? [coachTeam] : allTeams.map(t => t.name);
 
   // Basketball only — this view tracks gym permits, not soccer fields/parks etc.
-  const basketballGames     = useMemo(() => games.filter(g => sportForTeam(g.team) === 'basketball'), [games]);
-  const basketballPractices = useMemo(() => practices.filter(p => sportForTeam(p.team) === 'basketball'), [practices]);
+  const basketballGames     = useMemo(() => games.filter(g => sportForTeam(g.team, teamsInfo) === 'basketball'), [games, teamsInfo]);
+  const basketballPractices = useMemo(() => practices.filter(p => sportForTeam(p.team, teamsInfo) === 'basketball'), [practices, teamsInfo]);
 
   // All unique facilities
   const allFacilities = useMemo(() => {
@@ -340,6 +340,7 @@ export default function MasterSchedulerView({ role, coachTeam }) {
           onDelete={handleDeleteEvent}
           visibleTeams={visibleTeams}
           teamsByDivision={isCoach && coachTeam ? null : allTeams}
+          teamsInfo={teamsInfo}
           facilities={permitGyms}
           seasonColor={activeSeason.color}
         />
@@ -478,7 +479,7 @@ function LegendItem({ color, border, label }) {
 
 const PRACTICE_TYPES = ['Regular', 'Player Development', 'Scrimmage', 'Walk-through', 'Conditioning', 'Skills Clinic', 'Open Gym', 'Tryout'];
 
-function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, teamsByDivision, facilities, seasonColor }) {
+function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, teamsByDivision, teamsInfo, facilities, seasonColor }) {
   const isEdit = modal.mode === 'edit';
   const ev = modal.event || {};
 
@@ -513,7 +514,7 @@ function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, teamsByDiv
         note: notes,
         us: ev.us, them: ev.them, quarter: ev.quarter,
         score_pin: ev.score_pin,
-        _kind: 'game', _sport: sportForTeam(team),
+        _kind: 'game', _sport: sportForTeam(team, teamsInfo),
       };
     } else {
       return {
@@ -523,7 +524,7 @@ function EventModal({ modal, onClose, onSave, onDelete, visibleTeams, teamsByDiv
         type: practiceType,
         rsvp: ev.rsvp || 0,
         notes, team,
-        _kind: 'practice', _sport: sportForTeam(team),
+        _kind: 'practice', _sport: sportForTeam(team, teamsInfo),
       };
     }
   }
