@@ -163,6 +163,66 @@ function startMinutes(timeStr) {
   return Infinity;
 }
 
+// End-of-range counterpart to startMinutes() — same format quirks apply
+// (no space around the dash, no AM/PM on the first half, bare 24h "HH:MM").
+// A single time with no range (rare in current data) has no real end, so it
+// resolves to the same instant as its start rather than blocking anything.
+function endMinutes(timeStr) {
+  if (!timeStr) return -Infinity;
+  const parts = timeStr.split(/\s*-\s*/);
+  let last = (parts[1] ?? parts[0]).trim();
+  if (!/am|pm/i.test(last)) {
+    const meridiem = timeStr.match(/am|pm/i);
+    if (meridiem) last += ` ${meridiem[0]}`;
+  }
+  let m = last.match(/^(\d{1,2}):(\d{2})\s*(am|pm)$/i);
+  if (m) {
+    let h = parseInt(m[1], 10) % 12;
+    if (m[3].toUpperCase() === 'PM') h += 12;
+    return h * 60 + parseInt(m[2], 10);
+  }
+  m = last.match(/^(\d{1,2}):(\d{2})$/);
+  if (m) return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  return -Infinity;
+}
+function hhmmToMinutes(hhmm) {
+  if (!hhmm) return null;
+  const [h, m] = hhmm.split(':').map(Number);
+  return h * 60 + m;
+}
+function minutesToHHMM(mins) {
+  return `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
+}
+
+// A permit window minus whatever's already booked in it, as display text.
+// Full window when nothing's booked; the remaining open stretch(es)
+// otherwise; "Fully booked" if nothing's left.
+function remainingWindowsLabel(windows, events) {
+  if (events.length === 0) {
+    return windows.map(w => `${formatTime12h(w.start_time)}–${formatTime12h(w.end_time)}`).join(', ');
+  }
+  const booked = events
+    .map(e => [startMinutes(e.time), endMinutes(e.time)])
+    .filter(([s, e]) => Number.isFinite(s) && Number.isFinite(e) && e > s)
+    .sort((a, b) => a[0] - b[0]);
+  const free = [];
+  for (const w of windows) {
+    const wStart = hhmmToMinutes(w.start_time);
+    const wEnd = hhmmToMinutes(w.end_time);
+    if (wStart == null || wEnd == null) continue;
+    let cursor = wStart;
+    for (const [bs, be] of booked) {
+      const s = Math.max(bs, wStart), e = Math.min(be, wEnd);
+      if (s >= e) continue;
+      if (s > cursor) free.push([cursor, s]);
+      cursor = Math.max(cursor, e);
+    }
+    if (cursor < wEnd) free.push([cursor, wEnd]);
+  }
+  if (free.length === 0) return 'Fully booked';
+  return free.map(([s, e]) => `${formatTime12h(minutesToHHMM(s))}–${formatTime12h(minutesToHHMM(e))}`).join(', ');
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function MasterSchedulerView({ role, coachTeam }) {
@@ -470,7 +530,7 @@ function CalendarTab({ weekDays, weekLabel, facilities, eventsByDateFacility, bl
                       ))}
                       {permitted && (
                         <div style={{ fontSize: 10, color: '#1F8A5B', fontWeight: 600, textAlign: 'center', paddingTop: 2, pointerEvents: 'none' }}>
-                          {permittedWindows(fac, d).map(w => `${formatTime12h(w.start_time)}–${formatTime12h(w.end_time)}`).join(', ')}
+                          {remainingWindowsLabel(permittedWindows(fac, d), events)}
                         </div>
                       )}
                       {canCreateHere && (
