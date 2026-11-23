@@ -140,7 +140,14 @@ export function visibleTeams(role, teamsInfo, scopes = [], allTeamNames = []) {
   if (def.teamScope === 'scoped') {
     const teams = scopes.filter(s => s.scope_type === 'team').map(s => s.scope_value);
     const groups = scopes.filter(s => s.scope_type === 'age_group').map(s => s.scope_value);
-    const byGroup = allTeamNames.filter(n => groups.some(g => n.toLowerCase().includes(g.toLowerCase())));
+    // A custom team (e.g. "Parker/Habibi") is usually named after its coach,
+    // not its age group, so it won't contain the age-group text the way a
+    // pool bucket's own name does -- match it by its stored age_group
+    // instead, or it's invisible to the very director who created it.
+    const byGroup = allTeamNames.filter(n => groups.some(g =>
+      n.toLowerCase().includes(g.toLowerCase()) ||
+      (teamsInfo[n]?.ageGroup || '').toLowerCase() === g.toLowerCase()
+    ));
     return [...new Set([...teams, ...byGroup])].filter(n => allTeamNames.includes(n));
   }
   if (def.teamScope.startsWith('division:')) {
