@@ -140,11 +140,17 @@ export function visibleTeams(role, teamsInfo, scopes = [], allTeamNames = []) {
   if (def.teamScope === 'scoped') {
     const teams = scopes.filter(s => s.scope_type === 'team').map(s => s.scope_value);
     const groups = scopes.filter(s => s.scope_type === 'age_group').map(s => s.scope_value);
-    // A custom team (e.g. "Parker/Habibi") is usually named after its coach,
-    // not its age group, so it won't contain the age-group text the way a
-    // pool bucket's own name does -- match it by its stored age_group
-    // instead, or it's invisible to the very director who created it.
-    const byGroup = allTeamNames.filter(n => groups.some(g =>
+    // League Directors are actually granted via a 'team' scope row whose
+    // value is the pool bucket itself (e.g. '5/6 Boys'), not a distinct
+    // 'age_group' row -- so both need to count as "manages this whole age
+    // group" for matching a custom child team, not just literal 'age_group'
+    // scopes. And a custom team (e.g. "Parker/Habibi") is usually named
+    // after its coach, not its age group, so it won't contain the
+    // age-group text the way a pool bucket's own name does -- match it by
+    // its stored age_group instead, or it's invisible to the very director
+    // who created it.
+    const groupLike = [...groups, ...teams];
+    const byGroup = allTeamNames.filter(n => groupLike.some(g =>
       n.toLowerCase().includes(g.toLowerCase()) ||
       (teamsInfo[n]?.ageGroup || '').toLowerCase() === g.toLowerCase()
     ));
