@@ -1047,6 +1047,19 @@ export const INITIAL_PLAYERS = [
   { id: 'p741', number: null, name: "Zhicheng Wang", grade: "6th Grade", school: "OES", guardian: "Zeming Wang", phone: "(571) 265-5594", email: "teswzm@gmail.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "5/6 Boys" },
   { id: 'p742', number: null, name: "Bryce Hanlon", grade: "9th Grade", school: "Willow Springs Elementary", guardian: "Gayle Hanlon", phone: "(202) 441-4892", email: "gayle.hanlon@gmail.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
   { id: 'p743', number: null, name: "Sawyer White", grade: "11th Grade", school: "Eagle View", guardian: "Debby White", phone: "(571) 641-0197", email: "debbystokeswhite@gmail.com", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
+
+  // ── Added from the 2026-11-23 Ottosport exports (Players-23 / Staff-12 deltas) ──
+  { id: 'p744', number: null, name: "Elodie Geda", grade: "9th Grade", school: "Fairview Elmentary", guardian: "Rahel Yitna", phone: "(609) 385-6975", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Girls" },
+  { id: 'p745', number: null, name: "Denzen Proctor", grade: "9th Grade", school: "Mclean High School", guardian: "Minjmaa Lundaajantsan", phone: "(703) 485-6357", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
+  { id: 'p746', number: null, name: "Alejandro Garces", grade: "11th Grade", school: "Chantilly HS", guardian: "Wagner Garces", phone: "(703) 477-8729", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
+  { id: 'p747', number: null, name: "Josiah Wynder", grade: "10th Grade", school: "Oakton High", guardian: "Lauren Wynder", phone: "(757) 358-4575", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
+  { id: 'p748', number: null, name: "Remzi Sultan", grade: "9th Grade", school: "Fairfax Highschool", guardian: "Meriem Hassen", phone: "(703) 732-8006", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "HS Boys" },
+  { id: 'p749', number: null, name: "Henry Shoemaker", grade: "1st Grade", school: "Fairfax Villa", guardian: "Christopher Shoemaker", phone: "(703) 268-1836", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p750', number: null, name: "James Panagoulias-Ashcraft", grade: "1st Grade", school: "Louise Archer Elementary", guardian: "Mikaela Panagoulias", phone: "(703) 868-7070", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p751', number: null, name: "August Plourde", grade: "1st Grade", school: "Willow Springs", guardian: "Chris Plourde", phone: "(860) 628-1152", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p752', number: null, name: "Christian Mealey", grade: "Pre-K", school: "Bonnie Brae", guardian: "Michelle Mealey", phone: "(703) 945-9080", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p753', number: null, name: "Anne Mealey", grade: "Pre-K", school: "Bonnie Brae", guardian: "Michelle Mealey", phone: "(703) 945-9080", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "K-3 3v3" },
+  { id: 'p754', number: null, name: "Jonah Lisi", grade: "Kindergarten", school: "Fairfax Villa Elementary", guardian: "Julie Hetzler", phone: "(404) 579-0305", position: '', status: 'active', waiver: true, program: 'Recreation', division: REC_DIVISION, team: "K-3 3v3" },
 ];
 
 export const INITIAL_GAMES = [
@@ -1898,6 +1911,17 @@ export const INITIAL_STAFF = [
   // ── Added from the 2026-11-21 Ottosport team staff export (deltas only) ──
   { id: 'rst85', name: "James Greenzweig", role: "Coach", program: 'Recreation', team: "7/8 Boys", email: "jimg@bowa.com", phone: "703-928-1486", bgCheckStatus: 'Not Started', bgCheckDate: null },
   { id: 'rst86', name: "Peter Schwarz", role: "Assistant Coach", program: 'Recreation', team: "3/4 Boys", email: "jpschwarz00@gmail.com", phone: "(212) 203-3624", bgCheckStatus: 'Not Started', bgCheckDate: null },
+
+  // ── Added from the 2026-11-23 Ottosport team staff export (deltas only) ──
+  { id: 'rst87', name: "Charles Pritchard", role: "Coach", program: 'Recreation', team: "5/6 Boys", email: "charlesec@pm.me", phone: "(904) 238-7888", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst88', name: "Nader Komaily", role: "Coach", program: 'Recreation', team: "5/6 Boys", email: "nkomaily@yahoo.com", phone: "(703) 622-9127", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst89', name: "Mason Lee", role: "Coach", program: 'Recreation', team: "5/6 Boys", email: "masoncarterlee@gmail.com", phone: "(703) 388-8953", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst90', name: "Kyle Im", role: "Assistant Coach", program: 'Recreation', team: "5/6 Boys", email: "imkimfamily09@gmail.com", phone: "(571) 730-0585", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst91', name: "Nicolette Maroulis", role: "Team Manager", program: 'Recreation', team: "7/8 Girls", email: "mrs.maroulis26@gmail.com", phone: "(571) 705-9928", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst92', name: "Mauricio Arias", role: "Coach", program: 'Recreation', team: "7/8 Girls", email: "ariasmauricio91@gmail.com", phone: "(703) 336-2286", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst93', name: "David White", role: "Coach", program: 'Recreation', team: "HS Boys", email: "davidwhite@superiorpaving.net", phone: "(571) 641-0181", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst94', name: "Debby White", role: "Team Manager", program: 'Recreation', team: "HS Boys", email: "debbystokeswhite@gmail.com", phone: "(571) 641-0197", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst95', name: "Thomas Mealey", role: "Assistant Coach", program: 'Recreation', team: "K-3 3v3", email: "tcmealey@gmail.com", phone: "(612) 940-6090", bgCheckStatus: 'Not Started', bgCheckDate: null },
 ];
 
 export function useStaff() {
