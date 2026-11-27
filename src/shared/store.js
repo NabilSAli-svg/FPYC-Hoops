@@ -2088,6 +2088,36 @@ export const INITIAL_PRACTICES = [
   { id: 'sp_56b_068', date: 'Wed, Mar 3', time: '6:00-7:00 PM', gym: 'KJMS #1', type: 'Practice', rsvp: 0, notes: 'Coach Kyle Schreiber', team: '5/6 Boys' },
   { id: 'sp_56b_069', date: 'Wed, Mar 10', time: '6:00-7:00 PM', gym: 'KJMS #1', type: 'Practice', rsvp: 0, notes: 'Coach Kyle Schreiber', team: '5/6 Boys' },
   { id: 'sp_56b_070', date: 'Wed, Mar 17', time: '6:00-7:00 PM', gym: 'KJMS #1', type: 'Practice', rsvp: 0, notes: 'Coach Kyle Schreiber', team: '5/6 Boys' },
+  // HS Boys (Coach Luke Maison) -- Wed, KJMS #2.
+  { id: 'sp_hsb_001', date: 'Wed, Dec 2', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_002', date: 'Wed, Dec 9', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_003', date: 'Wed, Dec 16', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_004', date: 'Wed, Jan 6', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_005', date: 'Wed, Jan 13', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_006', date: 'Wed, Jan 20', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_007', date: 'Wed, Jan 27', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_008', date: 'Wed, Feb 3', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_009', date: 'Wed, Feb 10', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_010', date: 'Wed, Feb 17', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_011', date: 'Wed, Feb 24', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_012', date: 'Wed, Mar 3', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_013', date: 'Wed, Mar 10', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  { id: 'sp_hsb_014', date: 'Wed, Mar 17', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Luke Maison', team: 'HS Boys' },
+  // 7/8 Boys (Coach Kalyna Watts) -- Fri, Providence ES.
+  { id: 'sp_78b_001', date: 'Fri, Dec 4', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_002', date: 'Fri, Dec 11', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_003', date: 'Fri, Dec 18', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_004', date: 'Fri, Jan 8', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_005', date: 'Fri, Jan 15', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_006', date: 'Fri, Jan 22', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_007', date: 'Fri, Jan 29', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_008', date: 'Fri, Feb 5', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_009', date: 'Fri, Feb 12', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_010', date: 'Fri, Feb 19', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_011', date: 'Fri, Feb 26', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_012', date: 'Fri, Mar 5', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_013', date: 'Fri, Mar 12', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  { id: 'sp_78b_014', date: 'Fri, Mar 19', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
   // K-3 3v3 Group A (Coach Nabil Ali & Coach Shaun Ali) -- full gym, Thu Villa.
   // 3/4 Boys -- Coach Shaun Ali, Tue Eagle View.
   { id: 'sp_k3_001', date: 'Thu, Dec 3', time: '5:30-6:30 PM', gym: 'Fairfax Villa ES', type: 'Practice', rsvp: 0, notes: 'Group A -- Coach Nabil Ali & Coach Shaun Ali', team: 'K-3 3v3' },
@@ -2318,6 +2348,8 @@ export const INITIAL_STAFF = [
   { id: 'rst93', name: "David White", role: "Coach", program: 'Recreation', team: "HS Boys", email: "davidwhite@superiorpaving.net", phone: "(571) 641-0181", bgCheckStatus: 'Not Started', bgCheckDate: null },
   { id: 'rst94', name: "Debby White", role: "Team Manager", program: 'Recreation', team: "HS Boys", email: "debbystokeswhite@gmail.com", phone: "(571) 641-0197", bgCheckStatus: 'Not Started', bgCheckDate: null },
   { id: 'rst95', name: "Thomas Mealey", role: "Assistant Coach", program: 'Recreation', team: "K-3 3v3", email: "tcmealey@gmail.com", phone: "(612) 940-6090", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst96', name: "Luke Maison", role: "Coach", program: 'Recreation', team: "HS Boys", email: "lukejmaison@gmail.com", phone: "(703) 579-7220", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst97', name: "Kalyna Watts", role: "Coach", program: 'Recreation', team: "7/8 Boys", email: "kalynamalm@gmail.com", phone: "(703)944-4982", bgCheckStatus: 'Not Started', bgCheckDate: null },
 ];
 
 export function useStaff() {
