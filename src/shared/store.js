@@ -2148,6 +2148,21 @@ export const INITIAL_PRACTICES = [
   { id: 'sp_78b_012', date: 'Fri, Mar 5', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
   { id: 'sp_78b_013', date: 'Fri, Mar 12', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
   { id: 'sp_78b_014', date: 'Fri, Mar 19', time: '6:00-7:30 PM', gym: 'Providence ES', type: 'Practice', rsvp: 0, notes: 'Coach Kalyna Watts', team: '7/8 Boys' },
+  // 7/8 Boys (Coach Brian Cleary) -- Fri, Daniels Run ES.
+  { id: 'sp_78b_015', date: 'Fri, Dec 4', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_016', date: 'Fri, Dec 11', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_017', date: 'Fri, Dec 18', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_018', date: 'Fri, Jan 8', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_019', date: 'Fri, Jan 15', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_020', date: 'Fri, Jan 22', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_021', date: 'Fri, Jan 29', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_022', date: 'Fri, Feb 5', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_023', date: 'Fri, Feb 12', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_024', date: 'Fri, Feb 19', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_025', date: 'Fri, Feb 26', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_026', date: 'Fri, Mar 5', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_027', date: 'Fri, Mar 12', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  { id: 'sp_78b_028', date: 'Fri, Mar 19', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
   // K-3 3v3 Group A (Coach Nabil Ali & Coach Shaun Ali) -- full gym, Thu Villa.
   // 3/4 Boys -- Coach Shaun Ali, Tue Eagle View.
   { id: 'sp_k3_001', date: 'Thu, Dec 3', time: '5:30-6:30 PM', gym: 'Fairfax Villa ES', type: 'Practice', rsvp: 0, notes: 'Group A -- Coach Nabil Ali & Coach Shaun Ali', team: 'K-3 3v3' },
