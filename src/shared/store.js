@@ -2178,6 +2178,21 @@ export const INITIAL_PRACTICES = [
   { id: 'sp_78b_026', date: 'Fri, Mar 5', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
   { id: 'sp_78b_027', date: 'Fri, Mar 12', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
   { id: 'sp_78b_028', date: 'Fri, Mar 19', time: '7:30-9:00 PM', gym: 'Daniels Run ES', type: 'Practice', rsvp: 0, notes: 'Coach Brian Cleary', team: '7/8 Boys' },
+  // 7/8 Boys (Coach Ezra Wincele) -- Thu, KJMS #2.
+  { id: 'sp_78b_029', date: 'Thu, Dec 3', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_030', date: 'Thu, Dec 10', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_031', date: 'Thu, Dec 17', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_032', date: 'Thu, Jan 7', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_033', date: 'Thu, Jan 14', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_034', date: 'Thu, Jan 21', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_035', date: 'Thu, Jan 28', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_036', date: 'Thu, Feb 4', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_037', date: 'Thu, Feb 11', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_038', date: 'Thu, Feb 18', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_039', date: 'Thu, Feb 25', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_040', date: 'Thu, Mar 4', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_041', date: 'Thu, Mar 11', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
+  { id: 'sp_78b_042', date: 'Thu, Mar 18', time: '6:00-7:30 PM', gym: 'KJMS #2', type: 'Practice', rsvp: 0, notes: 'Coach Ezra Wincele', team: '7/8 Boys' },
   // K-3 3v3 Group A (Coach Nabil Ali & Coach Shaun Ali) -- full gym, Thu Villa.
   // 3/4 Boys -- Coach Shaun Ali, Tue Eagle View.
   { id: 'sp_k3_001', date: 'Thu, Dec 3', time: '5:30-6:30 PM', gym: 'Fairfax Villa ES', type: 'Practice', rsvp: 0, notes: 'Group A -- Coach Nabil Ali & Coach Shaun Ali', team: 'K-3 3v3' },
@@ -2412,6 +2427,7 @@ export const INITIAL_STAFF = [
   { id: 'rst97', name: "Kalyna Watts", role: "Coach", program: 'Recreation', team: "7/8 Boys", email: "kalynamalm@gmail.com", phone: "(703)944-4982", bgCheckStatus: 'Not Started', bgCheckDate: null },
   { id: 'rst98', name: "Dave Rieger", role: "Coach", program: 'Recreation', team: "HS Boys", email: "", phone: "", bgCheckStatus: 'Not Started', bgCheckDate: null },
   { id: 'rst99', name: "Tyler Maxwell", role: "Coach", program: 'Recreation', team: "HS Boys", email: "", phone: "", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst100', name: "Ezra Wincele", role: "Coach", program: 'Recreation', team: "7/8 Boys", email: "", phone: "", bgCheckStatus: 'Not Started', bgCheckDate: null },
 ];
 
 export function useStaff() {
