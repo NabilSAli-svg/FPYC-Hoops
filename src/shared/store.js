@@ -2133,6 +2133,21 @@ export const INITIAL_PRACTICES = [
   { id: 'sp_hsb_040', date: 'Wed, Mar 3', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Tyler Maxwell', team: 'HS Boys' },
   { id: 'sp_hsb_041', date: 'Wed, Mar 10', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Tyler Maxwell', team: 'HS Boys' },
   { id: 'sp_hsb_042', date: 'Wed, Mar 17', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Tyler Maxwell', team: 'HS Boys' },
+  // HS Boys (Coach Mo Arias) -- Wed, Eagle View ES (sharing court with Coach Maxwell).
+  { id: 'sp_hsb_057', date: 'Wed, Dec 2', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_058', date: 'Wed, Dec 9', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_059', date: 'Wed, Dec 16', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_060', date: 'Wed, Jan 6', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_061', date: 'Wed, Jan 13', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_062', date: 'Wed, Jan 20', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_063', date: 'Wed, Jan 27', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_064', date: 'Wed, Feb 3', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_065', date: 'Wed, Feb 10', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_066', date: 'Wed, Feb 17', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_067', date: 'Wed, Feb 24', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_068', date: 'Wed, Mar 3', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_069', date: 'Wed, Mar 10', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
+  { id: 'sp_hsb_070', date: 'Wed, Mar 17', time: '6:00-7:30 PM', gym: 'Eagle View ES', type: 'Practice', rsvp: 0, notes: 'Coach Mo Arias', team: 'HS Boys' },
   // HS Boys (Coach Tyler Maxwell) -- Sun, Fairfax HS.
   { id: 'sp_hsb_043', date: 'Sun, Dec 6', time: '12:00-1:30 PM', gym: 'Fairfax HS', type: 'Practice', rsvp: 0, notes: 'Coach Tyler Maxwell', team: 'HS Boys' },
   { id: 'sp_hsb_044', date: 'Sun, Dec 13', time: '12:00-1:30 PM', gym: 'Fairfax HS', type: 'Practice', rsvp: 0, notes: 'Coach Tyler Maxwell', team: 'HS Boys' },
@@ -2428,6 +2443,7 @@ export const INITIAL_STAFF = [
   { id: 'rst98', name: "Dave Rieger", role: "Coach", program: 'Recreation', team: "HS Boys", email: "", phone: "", bgCheckStatus: 'Not Started', bgCheckDate: null },
   { id: 'rst99', name: "Tyler Maxwell", role: "Coach", program: 'Recreation', team: "HS Boys", email: "", phone: "", bgCheckStatus: 'Not Started', bgCheckDate: null },
   { id: 'rst100', name: "Ezra Wincele", role: "Coach", program: 'Recreation', team: "7/8 Boys", email: "", phone: "", bgCheckStatus: 'Not Started', bgCheckDate: null },
+  { id: 'rst101', name: "Mauricio Arias", role: "Coach", program: 'Recreation', team: "HS Boys", email: "ariasmauricio91@gmail.com", phone: "(703) 336-2286", bgCheckStatus: 'Not Started', bgCheckDate: null },
 ];
 
 export function useStaff() {
